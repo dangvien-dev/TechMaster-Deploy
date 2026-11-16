@@ -151,11 +151,12 @@ $btnRefresh.Add_Click({ Update-MachineInfo })
 $tabs = New-Object System.Windows.Forms.TabControl
 $tabs.Location = New-Object System.Drawing.Point(12, 90); $tabs.Size = New-Object System.Drawing.Size(876, 470)
 $tabs.Font = $fBold
+$tabs.Padding = New-Object System.Drawing.Point(10, 4)
 $form.Controls.Add($tabs)
 
 function New-Tab([string]$title) {
     $t = New-Object System.Windows.Forms.TabPage
-    $t.Text = "  $title  "; $t.BackColor = [System.Drawing.Color]::White; $t.Font = $fBase
+    $t.Text = $title; $t.BackColor = [System.Drawing.Color]::White; $t.Font = $fBase
     $tabs.TabPages.Add($t)
     return $t
 }
@@ -707,6 +708,8 @@ Add-Card $t6 312 'Dọn Windows.old sau khi cài' `
     'Sau khi cài trực tiếp, mở Tệp tạm thời trong Cài đặt Windows để xóa bản cài trước. Xóa xong sẽ mất tùy chọn quay lại bản Windows cũ.' `
     'Dọn Windows.old' { Open-WindowsOldCleanup }
 
+. (Join-Path $PSScriptRoot 'BasicApps.ps1')
+
 # Thanh trạng thái
 $script:status = New-Object System.Windows.Forms.Label
 $status.Dock = [System.Windows.Forms.DockStyle]::Bottom
@@ -723,6 +726,8 @@ $form.ResumeLayout($true)
 $form.Add_Shown({ Update-LogoPreview; Update-MachineInfo; $form.Activate() })
 [void]$form.ShowDialog()
 $officeTimer.Dispose()
+$basicAppTimer.Dispose()
+if ($script:basicAppRun.Process) { $script:basicAppRun.Process.Dispose() }
 $mediaTimer.Dispose()
 if ($script:mediaDownload) {
     $script:mediaDownload.Client.CancelAsync()

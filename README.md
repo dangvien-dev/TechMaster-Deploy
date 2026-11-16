@@ -11,6 +11,8 @@ Bộ công cụ triển khai Windows và Office.
 | **Tải / cài Office** | Office Deployment Tool: tải bộ cài về kho (cài offline nhiều máy), cài từ kho, cài trực tiếp | `Office\`, kho ở `KhoOffice\` |
 | **Cài Windows** | Mở trang tải của Microsoft và chạy Windows Setup từ ISO đã tải | ISO do người dùng chọn |
 
+| **Cài ứng dụng** | Chọn và cài ứng dụng cơ bản qua WinGet | WinGet / App Installer |
+
 ## Cách dùng
 
 1. Chép cả thư mục `TechMaster-Deploy` ra USB, giữ nguyên cấu trúc thư mục con.
@@ -43,6 +45,12 @@ Bộ công cụ triển khai Windows và Office.
 - **Tải về kho** một lần (3–5 GB) → chép `KhoOffice\` ra USB / NAS → **Cài từ kho** trên các máy khác, không cần mạng.
 - Ô **Key** tuỳ chọn: có key thì ODT cài kèm key và tự kích hoạt; file cấu hình có key bị xoá sau khi chạy.
 - Tool **chỉ tải / cài**, không kích hoạt. Bản Volume (LTSC) cần key Volume / KMS của tổ chức; Microsoft 365 kích hoạt bằng tài khoản.
+
+## Cài ứng dụng cơ bản
+
+1. Mở tab **Cài ứng dụng**, chọn Chrome, 7-Zip, VLC, SumatraPDF hoặc Notepad++ rồi bấm **Cài ứng dụng đã chọn**.
+2. Giữ TechMaster mở trong lúc WinGet tải và cài lần lượt. Tiến trình đếm số ứng dụng đã xử lý. WinGet bỏ qua phiên bản đã cài và tab hiển thị kết quả cho từng ứng dụng.
+3. Bấm **Xem nhật ký** để xem thông báo WinGet. Nếu máy chưa có WinGet, bấm **Hướng dẫn WinGet** để cài hoặc cập nhật App Installer.
 
 ## Chi tiết từng bộ
 
