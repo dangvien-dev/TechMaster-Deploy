@@ -48,7 +48,7 @@ Bộ công cụ triển khai Windows và Office.
 
 ## Cài ứng dụng cơ bản
 
-1. Mở tab **Cài ứng dụng**, chọn Chrome, 7-Zip, VLC, SumatraPDF, Notepad++, Zalo, WinRAR hoặc EVKey rồi bấm **Cài ứng dụng đã chọn**.
+1. Mở tab **Cài ứng dụng**, chọn Chrome, 7-Zip, VLC, SumatraPDF, Foxit PDF Reader, ONLYOFFICE Desktop Editors, LibreOffice, Notepad++, Zalo, WinRAR hoặc EVKey rồi bấm **Cài ứng dụng đã chọn**.
 2. Giữ TechMaster mở trong lúc WinGet tải và cài lần lượt. Tiến trình đếm số ứng dụng đã xử lý. WinGet bỏ qua phiên bản đã cài và tab hiển thị kết quả cho từng ứng dụng.
 3. Bấm **Xem nhật ký** để xem thông báo WinGet. Nếu máy chưa có WinGet, bấm **Hướng dẫn WinGet** để cài hoặc cập nhật App Installer.
 

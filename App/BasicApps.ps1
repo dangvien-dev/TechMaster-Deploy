@@ -3,6 +3,9 @@
     @{ Name = '7-Zip'; Id = '7zip.7zip'; Description = 'Nén và giải nén' }
     @{ Name = 'VLC'; Id = 'VideoLAN.VLC'; Description = 'Phát video và nhạc' }
     @{ Name = 'SumatraPDF'; Id = 'SumatraPDF.SumatraPDF'; Description = 'Đọc PDF' }
+    @{ Name = 'Foxit PDF Reader'; Id = 'Foxit.FoxitReader'; Description = 'Đọc PDF' }
+    @{ Name = 'ONLYOFFICE Desktop Editors'; Id = 'ONLYOFFICE.DesktopEditors'; Description = 'Bộ ứng dụng văn phòng' }
+    @{ Name = 'LibreOffice'; Id = 'TheDocumentFoundation.LibreOffice'; Description = 'Bộ ứng dụng văn phòng' }
     @{ Name = 'Notepad++'; Id = 'Notepad++.Notepad++'; Description = 'Soạn thảo văn bản' }
     @{ Name = 'Zalo'; Id = 'VNGCorp.Zalo'; Description = 'Nhắn tin và gọi điện' }
     @{ Name = 'WinRAR'; Id = 'RARLab.WinRAR'; Description = 'Nén và giải nén' }
@@ -159,8 +162,8 @@ $lvBasicAppResults.View = 'Details'
 $lvBasicAppResults.BorderStyle = 'None'
 $lvBasicAppResults.BackColor = $resultsCard.SurfaceColor
 $lvBasicAppResults.FullRowSelect = $true
-[void]$lvBasicAppResults.Columns.Add('Ứng dụng', 174)
-[void]$lvBasicAppResults.Columns.Add('Trạng thái', 196)
+[void]$lvBasicAppResults.Columns.Add('Ứng dụng', 218)
+[void]$lvBasicAppResults.Columns.Add('Trạng thái', 152)
 $resultsCard.Controls.Add($lvBasicAppResults)
 $t7.Controls.Add($resultsCard)
 
