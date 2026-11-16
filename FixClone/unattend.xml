@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  unattend.xml cho sysprep /generalize /oobe - Windows 10/11 x64
+  CẦN SỬA TRƯỚC KHI DÙNG:
+    - User: admin, mật khẩu trống (2 chỗ <Password> phải giống nhau)
+    - Windows bản tiếng Việt: UILanguage/SystemLocale/UserLocale = vi-VN, bàn phím US (gõ tiếng Việt bằng EVKey)
+-->
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+
+  <!-- ===== GENERALIZE: chạy trên máy gốc lúc sysprep ===== -->
+  <settings pass="generalize">
+    <component name="Microsoft-Windows-PnpSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <!-- Gỡ driver gắn với phần cứng máy gốc, máy clone tự nhận driver mới -->
+      <PersistAllDeviceInstalls>false</PersistAllDeviceInstalls>
+    </component>
+    <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <!-- Không tiêu hao số lần rearm khi sysprep -->
+      <SkipRearm>1</SkipRearm>
+    </component>
+  </settings>
+
+  <!-- ===== SPECIALIZE: chạy trên máy clone lần boot đầu ===== -->
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <!-- Tên ngẫu nhiên tạm thời, script FixClone sẽ đổi sang PC-<serial> -->
+      <ComputerName>*</ComputerName>
+      <TimeZone>SE Asia Standard Time</TimeZone>
+    </component>
+  </settings>
+
+  <!-- ===== OOBE: bỏ qua toàn bộ màn hình thiết lập ===== -->
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <InputLocale>0409:00000409</InputLocale>
+      <SystemLocale>vi-VN</SystemLocale>
+      <UILanguage>vi-VN</UILanguage>
+      <UserLocale>vi-VN</UserLocale>
+    </component>
+
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <ProtectYourPC>3</ProtectYourPC>
+      </OOBE>
+
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Name>admin</Name>
+            <DisplayName>admin</DisplayName>
+            <Group>Administrators</Group>
+            <Password>
+              <Value></Value>
+              <PlainText>true</PlainText>
+            </Password>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+
+      <!-- Tự đăng nhập 1 lần để chạy FirstLogonCommands -->
+      <AutoLogon>
+        <Enabled>true</Enabled>
+        <Username>admin</Username>
+        <LogonCount>1</LogonCount>
+        <Password>
+          <Value></Value>
+          <PlainText>true</PlainText>
+        </Password>
+      </AutoLogon>
+
+      <FirstLogonCommands>
+        <!-- 1. Tắt AutoLogon + xoá mật khẩu lưu trong registry -->
+        <SynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <CommandLine>cmd /c reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 0 /f &amp; reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /f</CommandLine>
+          <Description>Disable AutoLogon</Description>
+        </SynchronousCommand>
+        <!-- 2. Xoá file unattend (chứa mật khẩu dạng plain text) -->
+        <SynchronousCommand wcm:action="add">
+          <Order>2</Order>
+          <CommandLine>cmd /c del /f /q "%WINDIR%\System32\Sysprep\unattend.xml"</CommandLine>
+          <Description>Remove unattend.xml</Description>
+        </SynchronousCommand>
+        <!-- 3. Chạy script xử lý trùng thông tin: đổi tên, MachineGuid, AnyDesk, TeamViewer... rồi restart -->
+        <SynchronousCommand wcm:action="add">
+          <Order>3</Order>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -File C:\FixClone\Fix-CloneDuplicate.ps1 -Auto</CommandLine>
+          <Description>Fix clone duplicates</Description>
+        </SynchronousCommand>
+      </FirstLogonCommands>
+    </component>
+  </settings>
+</unattend>

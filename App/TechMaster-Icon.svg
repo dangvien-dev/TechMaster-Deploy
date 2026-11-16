@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <!-- Nền -->
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+  <!-- Ổ đĩa phía sau (bản gốc) -->
+  <rect x="44" y="52" width="132" height="58" rx="14" fill="#ffffff" fill-opacity="0.45"/>
+  <!-- Mũi tên clone -->
+  <path d="M110 112 v26 h-14 l24 26 l24 -26 h-14 v-26 z" fill="#ffffff" fill-opacity="0.85"/>
+  <!-- Ổ đĩa phía trước (bản clone) -->
+  <rect x="44" y="160" width="132" height="58" rx="14" fill="#ffffff"/>
+  <circle cx="154" cy="189" r="9" fill="#2563EB"/>
+  <rect x="62" y="183" width="54" height="12" rx="6" fill="#93C5FD"/>
+  <!-- Huy hiệu check (đã kích hoạt) -->
+  <circle cx="190" cy="78" r="44" fill="#22C55E" stroke="#ffffff" stroke-width="10"/>
+  <path d="M168 79 l15 15 l28 -30" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,12 @@
+/TechMaster Deploy.exe
+/KhoOffice/
+/Office/ODT/
+/BienBan/BienBan/
+/BienBan/BienBan-Config.json
+/FixClone/Logs/
+/FixClone/Reinstall/*
+!/FixClone/Reinstall/_DOC-TRUOC.txt
+*.lnk
+desktop.ini
+*.log
+*.zip

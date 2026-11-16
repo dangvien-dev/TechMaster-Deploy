@@ -1,0 +1,4 @@
+Dat file cai phan mem vao day (vd: winrar-x64-xxx.exe).
+- .exe mac dinh chay voi /S (WinRAR dung duoc)
+- Can tham so khac: tao file cung ten duoi .args, vd setup.exe + setup.args
+- .msi tu chay msiexec /qn
