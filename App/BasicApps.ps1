@@ -4,6 +4,9 @@
     @{ Name = 'VLC'; Id = 'VideoLAN.VLC'; Description = 'Phát video và nhạc' }
     @{ Name = 'SumatraPDF'; Id = 'SumatraPDF.SumatraPDF'; Description = 'Đọc PDF' }
     @{ Name = 'Notepad++'; Id = 'Notepad++.Notepad++'; Description = 'Soạn thảo văn bản' }
+    @{ Name = 'Zalo'; Id = 'VNGCorp.Zalo'; Description = 'Nhắn tin và gọi điện' }
+    @{ Name = 'WinRAR'; Id = 'RARLab.WinRAR'; Description = 'Nén và giải nén' }
+    @{ Name = 'EVKey'; Id = 'lamquangminh.EVKey'; Description = 'Bộ gõ tiếng Việt (portable)' }
 )
 
 $script:basicAppRun = $null

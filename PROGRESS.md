@@ -9,7 +9,7 @@ Cập nhật ngày 16/11/2026.
 | Office | Mô phỏng tiến trình, kết quả thành công hoặc lỗi, nhật ký và việc chạy nền. | Tải bộ cài về kho rồi cài thử trên một máy. |
 | Cài Windows | Mô phỏng gắn và dùng lại ISO, xác minh chữ ký Microsoft và dọn ổ gắn khi lỗi. | Mở Windows Setup từ một ISO chính thức và kiểm tra các lựa chọn giữ dữ liệu. |
 | Tạo USB và dọn `Windows.old` | Mô phỏng tải Media Creation Tool, chặn chữ ký không hợp lệ và mở đúng trang Lưu trữ khi có `Windows.old`. | Tạo USB thử và kiểm tra có khởi động được. Kiểm tra mục xóa bản Windows trước trên máy vừa nâng cấp. |
-| Cài ứng dụng cơ bản | Dùng WinGet mô phỏng để kiểm tra Chrome, 7-Zip, VLC, SumatraPDF và Notepad++, gồm bỏ qua app đã có, báo lỗi từng app, yêu cầu khởi động lại và nhật ký. | Cài thử một app trên máy có WinGet, rồi chạy lại để xác nhận lượt sau được bỏ qua. |
+| Cài ứng dụng cơ bản | Dùng WinGet mô phỏng để kiểm tra Chrome, 7-Zip, VLC, SumatraPDF, Notepad++, Zalo, WinRAR và EVKey, gồm bỏ qua app đã có, báo lỗi từng app, yêu cầu khởi động lại và nhật ký. | Cài thử một app trên máy có WinGet, rồi chạy lại để xác nhận lượt sau được bỏ qua. |
 
 ## Build
 
