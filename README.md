@@ -24,13 +24,15 @@ Bộ công cụ triển khai Windows và Office.
 
 Từ **v1.1.1.0**, tab **Cập nhật → Kiểm tra cập nhật** lấy mã trực tiếp từ **dangvien-dev/TechMaster-Deploy**, nhánh **main**. Không cần GitHub Release, manifest phát hành trên repo khác hoặc tải / giải nén ZIP bằng tay.
 
-App kiểm tra commit mới, hiển thị phiên bản và nội dung thay đổi, chỉ lấy những tệp nguồn đã thay đổi, rồi sao lưu và hỏi xác nhận trước khi đóng / cập nhật / mở lại. Mỗi lần chỉ dùng tệp của cùng một commit; tệp tải về được đối chiếu Git blob và các bước thay tệp được kiểm tra SHA256. Launcher được biên dịch bằng .NET Framework sẵn có trên Windows, không thực thi script build tải từ repo.
+App kiểm tra commit mới, hiển thị phiên bản, chỉ lấy những tệp nguồn đã thay đổi, rồi sao lưu và hỏi xác nhận trước khi đóng / cập nhật / mở lại. Mỗi lần chỉ dùng tệp của cùng một commit; tệp tải về được đối chiếu Git blob và các bước thay tệp được kiểm tra SHA256. Từ v1.1.3.0, đường cập nhật công khai lấy trực tiếp từ Git / raw, tránh giới hạn API khi nhiều máy dùng chung mạng. Launcher được biên dịch bằng .NET Framework sẵn có trên Windows, không thực thi script build tải từ repo.
 
 Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiện phiên bản và các lựa chọn cập nhật / khôi phục. Cấu hình truy cập dành cho người quản lý được mô tả trong RELEASING.md.
 
 **Lịch sử cập nhật**, **Có gì mới?** và **Khôi phục bản trước** vẫn dùng được. Cấu hình biên bản, logo, biên bản đã xuất, kho Office, ODT, nhật ký và Reinstall được giữ nguyên. Sao lưu nằm ở `.updates`; đừng xoá nếu còn muốn quay lại. Tệp chương trình sửa riêng không bị tự ghi đè.
 
 **Bản cũ chưa hỗ trợ repo:** dùng công cụ `TechMaster Update.exe` mới để chọn thư mục app hiện tại và chọn **Yes** lấy trực tiếp từ repo. **No** cho phép chọn ZIP offline khi cần. Sau lần nâng cấp này chỉ dùng nút Kiểm tra cập nhật. Cập nhật ZIP vẫn có để chuyển bản offline.
+
+**Bản cũ lỗi HTTP 403 khi cập nhật:** đóng app, tải `App/Repair-Update.ps1` từ repo rồi chạy bằng PowerShell với `-Root` là thư mục TechMaster-Deploy hiện tại. Công cụ lấy updater mới riêng, giữ dữ liệu và hỏi xác nhận trước khi cài; xem [hướng dẫn sửa cập nhật](RELEASING.md#sửa-cập-nhật-trên-bản-cũ).
 
 Các thay đổi chỉ có trong workspace hoặc ZIP chưa tự xuất hiện trên GitHub. Người quản lý phải đẩy mã mới lên `main`; app không tự push hoặc thay đổi repo. Xem [RELEASING.md](RELEASING.md).
 

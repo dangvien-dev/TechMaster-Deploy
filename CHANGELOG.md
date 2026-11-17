@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 1.1.3.0 — 17/11/2026
+
+- Tải bản cập nhật công khai trực tiếp, tránh phụ thuộc giới hạn API khi nhiều máy dùng chung mạng.
+- Vẫn chỉ tải tệp thay đổi, kiểm tra nội dung, sao lưu và giữ cấu hình / dữ liệu.
+- Thêm công cụ sửa cập nhật một lần cho các bản cũ đang gặp lỗi kết nối.
+
 ## 1.1.2.0 — 17/11/2026
 
 - Sửa lỗi không đóng được app khi xác nhận cập nhật; chỉ thay tệp sau khi app đã thoát hẳn.

@@ -60,25 +60,25 @@ try {
     Expect-Failure { & $script:realGitHub 'https://other.example/token' } 'Endpoint repo'
 
     Make-Remote '1.2.0.0' ('b' * 40)
-    $state = Get-DeployOnlineRelease ('b' * 40)
+    $state = Get-DeployApiRelease ('b' * 40)
     Assert ($state.unchanged -and $script:requests.Count -eq 1) 'Same commit stops after one request without downloading files'
-    $state = Get-DeployOnlineRelease ('a' * 40)
+    $state = Get-DeployApiRelease ('a' * 40)
     Assert ($state.version -eq '1.2.0.0' -and $state.commit -ceq ('b' * 40)) 'Version, tree and blobs belong to a single resolved commit'
     Assert ('BienBan/Logo.svg' -notin $state.files.path -and 'BienBan/BienBan-Config.json' -notin $state.files.path -and 'Office/ODT/setup.exe' -notin $state.files.path) 'Repo credentials, personal configuration, logo and ODT are outside the download set'
     $script:tree.truncated = $true
-    Expect-Failure { Get-DeployOnlineRelease } 'chưa đầy đủ'
+    Expect-Failure { Get-DeployApiRelease } 'chưa đầy đủ'
     $script:tree.truncated = $false
     $versionEntry = @($script:tree.tree | Where-Object { $_.path -eq 'version.txt' })[0]
     $script:blobs[$versionEntry.sha].content = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('9.9.9.9'))
     Expect-Failure { Get-DeployRepositoryBlob $versionEntry } 'không khớp'
     Make-Remote '1.2.0.0' ('b' * 40)
     $script:tree.tree = @($script:tree.tree | Where-Object { $_.path -ne 'version.txt' })
-    Expect-Failure { Get-DeployOnlineRelease } 'version.txt'
+    Expect-Failure { Get-DeployApiRelease } 'version.txt'
     Make-Remote '1.2.0.0' ('b' * 40)
     (@($script:tree.tree | Where-Object { $_.path -eq 'App/Launcher.cs' }))[0].mode = '120000'
-    Expect-Failure { Get-DeployOnlineRelease } 'link'
+    Expect-Failure { Get-DeployApiRelease } 'link'
     Make-Remote '1.2.0.0' ('b' * 40)
-    $state = Get-DeployOnlineRelease
+    $state = Get-DeployApiRelease
     $root = Join-Path $temp 'installed'
     foreach ($f in $state.files) { Put (Join-Path $root $f.path) $script:text[$f.path] }
     Put (Join-Path $root 'version.txt') '1.1.0.0'
@@ -107,7 +107,7 @@ try {
     Assert ((Get-DeployVersion $root) -eq [version]'1.1.0.0' -and [IO.File]::ReadAllText((Join-Path $root 'App/TechMaster-Deploy.ps1')) -eq '# old app') 'Real rollback restores prior source and version'
 
     Make-Remote '1.1.0.0' ('c' * 40)
-    $sameVersionState = Get-DeployOnlineRelease
+    $sameVersionState = Get-DeployApiRelease
     $sameVersionPayload = Join-Path $temp 'same-version'
     $null = Save-DeployRepositoryPayload $sameVersionState $sameVersionPayload $root
     $samePlan = Get-DeployUpdatePlan $root $sameVersionPayload

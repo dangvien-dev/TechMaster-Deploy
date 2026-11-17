@@ -113,16 +113,125 @@ function Get-DeployGitBlobHash([byte[]]$bytes) {
     finally { $sha.Dispose() }
 }
 
+# Public downloads never load or send a saved API token. Both destinations are
+# fixed here, redirects are refused, and streaming reads enforce a size limit.
+function Read-DeployPublicBytes([ValidateSet('Refs', 'File')][string]$kind, [string]$commit = '', [string]$path = '', [long]$limit = 20MB) {
+    if ($limit -le 0 -or $limit -gt 20MB) { throw 'Giới hạn tải không hợp lệ.' }
+    if ($kind -eq 'Refs') {
+        $url = 'https://github.com/' + $script:DeployRepository + '.git/info/refs?service=git-upload-pack'
+    } else {
+        if ($commit -notmatch '^[0-9a-f]{40}$') { throw 'Mã phiên bản tải không hợp lệ.' }
+        if ($path -cne 'update-source.json') { Assert-DeployPath $path }
+        $escaped = @($path -split '/' | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/'
+        $url = 'https://raw.githubusercontent.com/' + $script:DeployRepository + '/' + $commit + '/' + $escaped
+    }
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $request = [Net.HttpWebRequest]::Create($url)
+    $request.Method = 'GET'; $request.UserAgent = 'TechMaster-Deploy-Updater'
+    $request.AllowAutoRedirect = $false; $request.Timeout = 60000; $request.ReadWriteTimeout = 30000
+    $request.Headers['Cache-Control'] = 'no-cache'
+    $response = $null; $stream = $null; $memory = New-Object IO.MemoryStream
+    try {
+        $response = $request.GetResponse()
+        if ([int]$response.StatusCode -ne 200 -or $response.ContentLength -gt $limit) { throw 'Phản hồi tải không hợp lệ hoặc quá lớn.' }
+        $stream = $response.GetResponseStream()
+        $buffer = New-Object byte[] 16384
+        while (($read = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+            if ($memory.Length + $read -gt $limit) { throw 'Dữ liệu tải vượt giới hạn.' }
+            $memory.Write($buffer, 0, $read)
+        }
+        return ,$memory.ToArray()
+    } catch {
+        throw 'Không tải được dữ liệu cập nhật. Kiểm tra kết nối Internet và thử lại sau.'
+    } finally {
+        if ($stream) { $stream.Dispose() }
+        if ($response) { $response.Dispose() }
+        $memory.Dispose()
+    }
+}
+
+function ConvertFrom-DeployGitRefs([byte[]]$bytes) {
+    # Git protocol v0 pkt-lines; do not infer a commit from an HTML error page.
+    $text = [Text.Encoding]::ASCII.GetString($bytes)
+    $position = 0; $head = ''; $service = $false
+    while ($position -lt $text.Length) {
+        if ($position + 4 -gt $text.Length) { throw 'Thông tin phiên bản bị cắt ngắn.' }
+        $prefix = $text.Substring($position, 4)
+        if ($prefix -notmatch '^[a-fA-F0-9]{4}$') { throw 'Thông tin phiên bản không hợp lệ.' }
+        $length = [Convert]::ToInt32($prefix, 16); $position += 4
+        if ($length -eq 0) { continue }
+        if ($length -lt 4 -or $position + $length - 4 -gt $text.Length) { throw 'Thông tin phiên bản bị cắt ngắn.' }
+        $line = $text.Substring($position, $length - 4); $position += $length - 4
+        if ($line -ceq "# service=git-upload-pack`n") { $service = $true; continue }
+        $line = ($line -split [char]0, 2)[0].TrimEnd([char]10)
+        if ($line -cmatch '^([0-9a-f]{40}) refs/heads/main$') {
+            if ($head) { throw 'Thông tin phiên bản bị trùng.' }
+            $head = $Matches[1]
+        }
+    }
+    if (-not $service -or -not $head) { throw 'Chưa đọc được phiên bản ứng dụng.' }
+    return $head
+}
+
+function Get-DeployPublicRelease([string]$commit, [byte[]]$indexBytes) {
+    if ($commit -notmatch '^[0-9a-f]{40}$') { throw 'Mã phiên bản tải không hợp lệ.' }
+    $index = [Text.Encoding]::UTF8.GetString($indexBytes).TrimStart([char]0xfeff) | ConvertFrom-Json -ErrorAction Stop
+    $version = $null
+    if ($index.schema -ne 1 -or $index.product -cne $script:DeployProduct -or $index.repository -cne $script:DeployRepository -or
+        $index.branch -cne $script:DeployBranch -or -not [version]::TryParse([string]$index.version, [ref]$version)) { throw 'Danh sách cập nhật không hợp lệ.' }
+    if (@($index.files).Count -lt 8 -or @($index.files).Count -gt 499) { throw 'Danh sách cập nhật không đầy đủ.' }
+    $seen = @{}; $files = @(); $total = [long]0
+    foreach ($f in $index.files) {
+        Assert-DeployPath $f.path
+        if ($f.path -ceq 'TechMaster Deploy.exe' -or $seen.ContainsKey($f.path) -or $f.sha -notmatch '^[0-9a-f]{40}$' -or
+            $null -eq $f.size -or [long]$f.size -lt 0 -or [long]$f.size -gt 20MB -or $f.mode -notin '100644', '100755') { throw 'Danh sách cập nhật có tệp không hợp lệ.' }
+        $total += [long]$f.size
+        if ($total -gt 100MB) { throw 'Dữ liệu cập nhật vượt giới hạn.' }
+        $seen[$f.path] = $true
+        $files += [pscustomobject]@{ path = [string]$f.path; sha = [string]$f.sha; size = [long]$f.size; mode = [string]$f.mode; publicCommit = $commit }
+    }
+    foreach ($required in 'version.txt', 'App/TechMaster-Deploy.ps1', 'App/Launcher.cs', 'App/Launcher.manifest', 'App/TechMaster.ico', 'App/Update.Core.ps1', 'App/Update-App.ps1', 'App/Update-UI.ps1') {
+        if (-not $seen.ContainsKey($required)) { throw "Danh sách cập nhật thiếu tệp: $required" }
+    }
+    $versionFile = @($files | Where-Object { $_.path -ceq 'version.txt' })[0]
+    [byte[]]$versionBytes = Get-DeployRepositoryBlob $versionFile
+    $actual = [Text.Encoding]::UTF8.GetString($versionBytes).TrimStart([char]0xfeff).Trim()
+    if ($actual -cne $version.ToString()) { throw 'Số phiên bản không khớp danh sách cập nhật.' }
+    return [pscustomobject]@{ unchanged = $false; version = $version.ToString(); commit = $commit; files = $files; versionBytes = $versionBytes; notes = '' }
+}
+
 function Get-DeployRepositoryBlob($file) {
     if ($file.sha -notmatch '^[0-9a-f]{40}$') { throw 'Git blob ID không hợp lệ.' }
-    $blob = Invoke-DeployGitHub ('git/blobs/' + $file.sha)
-    if ($blob.sha -cne $file.sha -or $blob.encoding -cne 'base64' -or $null -eq $blob.size -or [long]$blob.size -gt 20MB -or [long]$blob.size -lt 0) { throw 'GitHub trả blob không hợp lệ.' }
-    [byte[]]$bytes = [Convert]::FromBase64String([string]$blob.content)
-    if ($bytes.Length -ne [long]$blob.size -or (Get-DeployGitBlobHash $bytes) -cne $file.sha) { throw "Nội dung tệp không khớp Git blob: $($file.path)" }
+    if ($file.publicCommit) {
+        [byte[]]$bytes = Read-DeployPublicBytes -kind File -commit $file.publicCommit -path $file.path
+        $size = [long]$file.size
+    } else {
+        $blob = Invoke-DeployGitHub ('git/blobs/' + $file.sha)
+        if ($blob.sha -cne $file.sha -or $blob.encoding -cne 'base64' -or $null -eq $blob.size -or [long]$blob.size -gt 20MB -or [long]$blob.size -lt 0) { throw 'GitHub trả blob không hợp lệ.' }
+        [byte[]]$bytes = [Convert]::FromBase64String([string]$blob.content)
+        $size = [long]$blob.size
+    }
+    if ($bytes.Length -ne $size -or (Get-DeployGitBlobHash $bytes) -cne $file.sha) { throw "Nội dung tệp không khớp Git blob: $($file.path)" }
     return ,$bytes
 }
 
 function Get-DeployOnlineRelease([string]$knownCommit = '') {
+    # Public repo: resolve main via Git, then use only immutable raw URLs.
+    # Older/private repos can still use the authenticated API path.
+    $publicAvailable = $false
+    try {
+        [byte[]]$refs = Read-DeployPublicBytes -kind Refs -limit 2MB
+        $commit = ConvertFrom-DeployGitRefs $refs
+        if ($knownCommit -and $commit -ceq $knownCommit) { return [pscustomobject]@{ unchanged = $true; commit = $commit } }
+        [byte[]]$index = Read-DeployPublicBytes -kind File -commit $commit -path 'update-source.json' -limit 1MB
+        $publicAvailable = $true
+    } catch { Write-Verbose 'Đang thử kết nối cập nhật dự phòng.' }
+    # Validation errors must stop the update, never silently bypass validation.
+    if ($publicAvailable) { return Get-DeployPublicRelease $commit $index }
+    return Get-DeployApiRelease $knownCommit
+}
+
+function Get-DeployApiRelease([string]$knownCommit = '') {
     $commit = Invoke-DeployGitHub ('commits/' + $script:DeployBranch)
     if ($commit.sha -notmatch '^[0-9a-f]{40}$' -or $commit.commit.tree.sha -notmatch '^[0-9a-f]{40}$') { throw 'GitHub không trả commit / tree hợp lệ.' }
     if ($knownCommit -and $commit.sha -ceq $knownCommit) {
