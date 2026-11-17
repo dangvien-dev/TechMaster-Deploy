@@ -350,8 +350,8 @@
     {
       "path": "BienBan/LicenseConfirmation.Core.ps1",
       "mode": "100644",
-      "size": 9573,
-      "sha": "8f3ed3719592d87dcd5a469dd4d9f910662b9dc5"
+      "size": 9707,
+      "sha": "940ef19214f974dc74dd490b8c19e143824fb373"
     },
     {
       "path": "BienBan/Test-LicenseConfirmation.ps1",
