@@ -19,6 +19,13 @@ $window = Import-DeployWindow (Join-Path $PSScriptRoot 'UpdaterWindow.xml')
 $controls = @{}
 foreach ($name in 'CurrentVersion','Heading','Summary','Progress','Primary','Cancel','RootPicker','RootPath','BrowseRoot','HistoryGrid','AccessPanel','AccessToken','SaveAccess','RemoveAccess','ChoosePackage') { $controls[$name] = $window.FindName($name) }
 $script:session = @{ Root = $Root; Mode = $Mode; Package = $PackagePath; Work = ''; Job = $null; Release = $null; Backup = ''; State = 'Idle'; Operation = ''; CloseRequested = $false }
+function Publish-UpdateWindowState {
+    if(-not $CloseRequestPath){return}
+    try {
+        if([IO.Path]::GetFullPath($CloseRequestPath) -ne [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'close.request'))){return}
+        Write-DeployJson ([pscustomobject]@{state=$script:session.State;message=$controls.Summary.Text}) (Join-Path $PSScriptRoot 'window-state.json')
+    } catch {}
+}
 function Set-UpdateView([string]$state, [string]$message) {
     $script:session.State = $state
     $view = Get-DeployUpdateView $state
@@ -32,6 +39,7 @@ function Set-UpdateView([string]$state, [string]$message) {
     if ($state -eq 'Complete' -and $script:session.Root) { $controls.CurrentVersion.Text = 'Phiên bản đang dùng: ' + (Get-DeployVersion $script:session.Root) }
     if ($state -in 'Complete','Ready') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 100 }
     if ($state -in 'Error','Latest','Available','Idle') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 0 }
+    Publish-UpdateWindowState
 }
 function New-UpdateWork {
     $script:session.Work = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Update Downloads/' + [guid]::NewGuid().ToString('N'))
@@ -80,6 +88,7 @@ $timer = New-DeployTimer 150 {
         if (Test-Path -LiteralPath $progressFile) {
             $progress = [IO.File]::ReadAllText($progressFile) | ConvertFrom-Json
             $controls.Summary.Text = $progress.message
+            Publish-UpdateWindowState
             if ($progress.percent -ge 0) { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = $progress.percent }
         }
     } catch {}

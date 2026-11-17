@@ -19,6 +19,33 @@ foreach ($scale in 1.0,1.25,1.5) {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
+# Render actual focused buttons: the focus ring must not reflow or clip text.
+$preview=Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
+try {
+    $preview.Show()
+    $update=$preview.FindName('headerUpdate');$refresh=$preview.FindName('btnRefresh')
+    foreach($button in $refresh,$update){$button.ApplyTemplate()|Out-Null}
+    [void]$refresh.Focus();$preview.UpdateLayout()
+    $label=$update.Template.FindName('ButtonContent',$update)
+    $before=$label.TranslatePoint((New-Object Windows.Point(0,($label.ActualHeight/2))),$update).Y
+    [void]$update.Focus();$preview.UpdateLayout()
+    $focused=$label.TranslatePoint((New-Object Windows.Point(0,($label.ActualHeight/2))),$update).Y
+    $other=$refresh.Template.FindName('ButtonContent',$refresh)
+    $otherY=$other.TranslatePoint((New-Object Windows.Point(0,($other.ActualHeight/2))),$refresh).Y
+    Assert ($update.IsKeyboardFocused) 'Update button receives real keyboard focus'
+    Assert ([Math]::Abs($focused-$before) -le 1) 'Focus does not move Update text'
+    Assert ([Math]::Abs($focused-$update.ActualHeight/2) -le 1 -and [Math]::Abs($focused-$otherY) -le 1) 'Both header labels remain vertically centered'
+    Assert ($label.ActualHeight -le $update.ActualHeight-$update.Padding.Top-$update.Padding.Bottom) 'Update label fits inside fixed button height'
+    $preview.FindName('tabs').SelectedIndex=3;$preview.UpdateLayout()
+    $input=$preview.FindName('Company');$input.Text='Nội dung mẫu';$input.SelectAll()
+    Assert ($input.SelectedText -ceq 'Nội dung mẫu' -and $input.Parent.Clip -is [Windows.Media.RectangleGeometry]) 'Rounded input retains native text editing and receives a size-aware clip'
+    $preview.FindName('tabs').SelectedIndex=4;$preview.UpdateLayout()
+    $picker=$preview.FindName('cbProduct');[void]$picker.Items.Add('Office A');[void]$picker.Items.Add('Office B');$picker.SelectedIndex=1
+    $picker.IsDropDownOpen=$true;$preview.UpdateLayout()
+    Assert ($picker.SelectedItem -eq 'Office B' -and $picker.IsDropDownOpen) 'Rounded selector retains native selection and popup'
+    $picker.IsDropDownOpen=$false
+
+} finally {$preview.Close()}
 $selected = Get-OffSel
 Assert ($selected.Id -eq 'HomeBusiness2024Retail' -and $selected.Arch -eq '64' -and $selected.Langs.Count -eq 2) 'Office defaults preserved'
 $rb32.IsChecked = $true

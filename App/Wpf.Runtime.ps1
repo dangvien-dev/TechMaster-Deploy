@@ -18,6 +18,21 @@ function Import-DeployWindow([string]$path) {
     $window.MinWidth=[Math]::Min($window.MinWidth,[Math]::Max(320,$area.Width-30))
     $window.MaxWidth=[Math]::Min($window.MaxWidth,$area.Width-30)
     if(-not [double]::IsNaN($window.Width)){$window.Width=[Math]::Min($window.Width,$window.MaxWidth)}
+    # Clip only marked containers. Native input/grid/progress templates stay intact.
+    $pending=New-Object Collections.Queue
+    $pending.Enqueue($window)
+    while($pending.Count){
+        $element=$pending.Dequeue()
+        if($element -is [Windows.Controls.Border] -and $element.Tag -ceq 'RoundedClip'){
+            $element.Add_SizeChanged({param($sender,$event)
+                $radius=[Math]::Min($sender.CornerRadius.TopLeft,[Math]::Min($sender.ActualWidth,$sender.ActualHeight)/2)
+                $sender.Clip=[Windows.Media.RectangleGeometry]::new([Windows.Rect]::new(0,0,$sender.ActualWidth,$sender.ActualHeight),$radius,$radius)
+            })
+        }
+        foreach($child in [Windows.LogicalTreeHelper]::GetChildren($element)){
+            if($child -is [Windows.DependencyObject]){$pending.Enqueue($child)}
+        }
+    }
     return $window
 }
 

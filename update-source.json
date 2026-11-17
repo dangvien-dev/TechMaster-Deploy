@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.0.0",
+  "version": "2.1.1.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -62,8 +62,8 @@
     {
       "path": "App/DesktopIdentity.cs",
       "mode": "100644",
-      "size": 978,
-      "sha": "4ffeb219afb411914629fa9933e2a3b9bd876463"
+      "size": 1524,
+      "sha": "bb34f93c55a2f04be740191d3f4bc657db4e4642"
     },
     {
       "path": "App/DiagnosticsWindow.xml",
@@ -86,8 +86,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 20414,
-      "sha": "412be173d0effa9428bb31ed439a9ae63fa8dae4"
+      "size": 22438,
+      "sha": "d6d067549f069510d9261dfc2249397b5668197e"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -110,8 +110,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 15583,
-      "sha": "11d9fa6044fa7315344c776e7fd0cdc23aa2c243"
+      "size": 15570,
+      "sha": "326ea46137e42bfe50d83f192d734fe3fb345c73"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -146,8 +146,8 @@
     {
       "path": "App/Test-Update.ps1",
       "mode": "100644",
-      "size": 14609,
-      "sha": "306e35072b37f82982f094e0a2daf3469d9c0f58"
+      "size": 14697,
+      "sha": "9dd35b8a0446dba0e95a216c497c654db72e4b62"
     },
     {
       "path": "App/Test-UpdateEngine.ps1",
@@ -158,14 +158,14 @@
     {
       "path": "App/Test-UpdateHandshake.ps1",
       "mode": "100644",
-      "size": 6365,
-      "sha": "2184a84aeac7dfa0bc01c4620f92732a72e2e029"
+      "size": 6787,
+      "sha": "9fd7b9ab947ed07d962f2f6032b583f2d65b6b77"
     },
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 5926,
-      "sha": "b0a27b0a15841e24ed1be2ab327a0aa0724dbab3"
+      "size": 8073,
+      "sha": "84a15c4fdb3b66b27e45ea192d1fe74ecbad7ba3"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -176,26 +176,26 @@
     {
       "path": "App/Update-App.ps1",
       "mode": "100644",
-      "size": 9854,
-      "sha": "0a555f50d0ed980f3dbd15059d3d32401f19909a"
+      "size": 10308,
+      "sha": "5e2b73991dc38863274318a9a249d0c1cf436859"
     },
     {
       "path": "App/Update-UI.ps1",
       "mode": "100644",
-      "size": 3784,
-      "sha": "42078ed5ce2b523cdbd014c83a87d509b58a84f9"
+      "size": 4910,
+      "sha": "3d8cdb46c72103e8fcee202bab8a7a505db1d102"
     },
     {
       "path": "App/Update.Core.ps1",
       "mode": "100644",
-      "size": 35800,
-      "sha": "3600ba2a1ee64626c86f801ff492802a9ea0774b"
+      "size": 35887,
+      "sha": "56d19d6cad303df4e8c827a0c3a25bd272cf162d"
     },
     {
       "path": "App/Update.Engine.ps1",
       "mode": "100644",
-      "size": 9053,
-      "sha": "6a238a8dc61de8483ea8894cdb778dcfeb471c81"
+      "size": 9157,
+      "sha": "77e2c41435957118c5d8ee017dc5101addc9d8df"
     },
     {
       "path": "App/UpdaterWindow.xml",
@@ -206,8 +206,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 5939,
-      "sha": "fa2bb436c632fdfd0fbec5d9ec46429d900fb853"
+      "size": 6781,
+      "sha": "66582869898450e960533e6ac399bf09d6866e8c"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -230,8 +230,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 4438,
-      "sha": "6f4d0451e66956b52b1104003c934074584a58e1"
+      "size": 5304,
+      "sha": "1c279fa8c66f787b437fe662724af6de4385cc43"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -560,8 +560,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 14921,
-      "sha": "86e0f4ebd3b20a2f14c4b3fb22619a77d4fb25d4"
+      "size": 15274,
+      "sha": "7f62dead71dfbf841b520b05c89bf5a6e8bb6b81"
     },
     {
       "path": "RELEASING.md",
@@ -573,7 +573,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "9c1c5ffbd2db0e25e3dc28f5748ef280fb4f650c"
+      "sha": "0f090343a5946727e27af773e5af81e8281b8ef9"
     }
   ]
 }

@@ -2,7 +2,17 @@
 $script:updateProcess = $null; $script:updateCloseRequest = $null
 function Set-DeployUpdateBusy([bool]$busy) {
     $form.IsEnabled = $true
-    $tabs.IsEnabled = -not $busy; $header.IsEnabled = -not $busy; $Navigation.IsEnabled = -not $busy
+    $tabs.IsEnabled = -not $busy; $header.IsEnabled = $true; $btnRefresh.IsEnabled = -not $busy; $Navigation.IsEnabled = -not $busy
+}
+function Show-DeployUpdater {
+    if (-not $script:updateProcess) { return }
+    try {
+        $script:updateProcess.Refresh()
+        if ($script:updateProcess.HasExited) { Update-DeployUpdaterState; return }
+        $handle=$script:updateProcess.MainWindowHandle
+        if ($handle -ne [IntPtr]::Zero) { [void][TechMaster.DesktopIdentity]::ActivateWindow($handle) }
+        else { Set-Status 'Đang mở cập nhật. Bạn có thể bấm Cập nhật để gọi lại cửa sổ.' }
+    } catch { Set-Status 'Chưa gọi lại được cửa sổ cập nhật. Dùng Alt + Tab để kiểm tra.' }
 }
 function Update-DeployUpdaterState {
     if (-not $script:updateProcess) { return }
@@ -14,6 +24,15 @@ function Update-DeployUpdaterState {
         $form.Activate() | Out-Null; Set-Status 'Đã đóng cửa sổ cập nhật.'
         return
     }
+    if ($script:updateCloseRequest) {
+        $statePath=Join-Path (Split-Path -Parent $script:updateCloseRequest) 'window-state.json'
+        try {
+            if(Test-Path -LiteralPath $statePath){
+                $state=[IO.File]::ReadAllText($statePath)|ConvertFrom-Json
+                if($state.message){Set-Status ($state.message+' · Bấm Cập nhật để mở lại cửa sổ.')}
+            }
+        } catch {}
+    }
     if ($script:updateCloseRequest -and (Test-Path -LiteralPath $script:updateCloseRequest -PathType Leaf)) {
         try { $request = [IO.File]::ReadAllText($script:updateCloseRequest) } catch [IO.IOException] { return }
         if ($request -ceq 'close') { $updateTimer.Stop(); $script:updateClosing = $true; $form.Close() }
@@ -21,6 +40,7 @@ function Update-DeployUpdaterState {
 }
 $updateTimer = New-DeployTimer 300 { Update-DeployUpdaterState }
 function Start-DeployUpdater([string]$mode, [string]$zipPath = '') {
+    if($script:updateProcess){Show-DeployUpdater;return}
     if (($script:desktopProcess -and -not $script:desktopProcess.HasExited) -or $script:officeRun -or $script:basicAppRun -or $script:mediaDownload -or $script:uiWork -or $script:updateProcess) {
         Show-DeployMessage 'Chờ các thao tác đang chạy kết thúc rồi cập nhật.' 'Cập nhật'
         return

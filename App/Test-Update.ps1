@@ -161,6 +161,7 @@ try {
         $form = [pscustomobject]@{ IsEnabled = $true }
         $tabs = [pscustomobject]@{ IsEnabled = $true }
         $header = [pscustomobject]@{ IsEnabled = $true }
+        $btnRefresh = [pscustomobject]@{ IsEnabled = $true }
         $Navigation = [pscustomobject]@{ IsEnabled = $true }
         $updateTimer = [pscustomobject]@{ Active = $false }
         $updateTimer | Add-Member ScriptMethod Start { $this.Active = $true }
@@ -185,7 +186,7 @@ try {
         Assert ($decoded.Contains("-Root '" + $Root.Replace("'", "''") + "'") -and $decoded.Contains("-PackagePath '" + $chosenZip.Replace("'", "''") + "'")) 'GUI starter preserves Unicode, whitespace and apostrophes without command injection'
         $tokens = $null; $parseErrors = $null
         [void][Management.Automation.Language.Parser]::ParseInput($decoded, [ref]$tokens, [ref]$parseErrors)
-        Assert ($parseErrors.Count -eq 0 -and $form.IsEnabled -and -not $tabs.IsEnabled -and -not $header.IsEnabled -and $updateTimer.Active) 'Encoded updater command parses; controls are blocked while main window remains closable'
+        Assert ($parseErrors.Count -eq 0 -and $form.IsEnabled -and -not $tabs.IsEnabled -and $header.IsEnabled -and -not $btnRefresh.IsEnabled -and $updateTimer.Active) 'Encoded updater command parses; controls are blocked while main window remains closable'
         Assert ($decoded.Contains("-CloseRequestPath '" + $script:updateCloseRequest.Replace("'", "''") + "'")) 'Updater receives the unique per-run close request path'
     } finally { $env:LOCALAPPDATA = $savedLocalAppData; $env:SystemRoot = $savedSystemRoot }
 } finally { Remove-Item -LiteralPath $temp -Recurse -Force }

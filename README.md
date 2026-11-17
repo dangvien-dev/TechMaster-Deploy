@@ -36,7 +36,7 @@ Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiệ
 
 **Bản cũ lỗi HTTP 403 khi cập nhật:** đóng app, tải `App/Repair-Update.ps1` từ repo rồi chạy bằng PowerShell với `-Root` là thư mục TechMaster-Deploy hiện tại. Công cụ lấy updater mới riêng, giữ dữ liệu và hỏi xác nhận trước khi cài; xem [hướng dẫn sửa cập nhật](RELEASING.md#sửa-cập-nhật-trên-bản-cũ).
 
-**Nâng cấp bằng giao diện:** đóng app cũ, mở `TechMaster-Update.exe` trong Downloads của repo, chọn file `TechMaster Deploy.exe` đang dùng hoặc nhập thư mục app. Bấm **Tiếp tục → Tải bản cập nhật → Cài đặt và mở lại**. Có nút chọn ZIP nếu cần cập nhật offline. Từ bản 2.0 dùng nút cập nhật trong app; không nhập `y` hoặc `CAP NHAT` nữa.
+**Nâng cấp bằng giao diện:** đóng app cũ, mở `TechMaster-Update.exe` trong Downloads của repo, chọn file `TechMaster Deploy.exe` đang dùng hoặc nhập thư mục app. Bấm **Tiếp tục → Tải bản cập nhật → Cài đặt và mở lại**. Có nút chọn ZIP nếu cần cập nhật offline. Từ bản 2.0 dùng nút cập nhật trong app; không nhập `y` hoặc `CAP NHAT` nữa. Khi nâng cấp từ bản cũ, cửa sổ updater đang chạy vẫn mang giao diện cũ đến khi đóng; mở lại từ app mới để dùng giao diện / icon mới. Từ 2.1.1, nút Cập nhật trên đầu app gọi lại cửa sổ cập nhật nếu bị khuất hoặc thu nhỏ, và thanh trạng thái chính hiện tiến trình tải.
 
 **UltraViewer trùng ID:** vào **Sau khi clone → Reset ID UltraViewer** để sao lưu rồi reset hai trường UID / PreferID của bản **6.6.133** đã kiểm tra. Thao tác ngắt UltraViewer, nên chạy tại máy hoặc qua remote khác. Có nút kiểm tra và khôi phục. Khi tạo ảnh mới, bật tuỳ chọn chuẩn bị UltraViewer trong cửa sổ trước Sysprep; dịch vụ được giữ tắt trên ảnh gốc và bật lại sau clone để nhận ID riêng một lần. Chẩn đoán UltraViewer vẫn chỉ đọc.
 

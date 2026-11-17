@@ -283,6 +283,7 @@ function Save-DeployRepositoryPayload($release, [string]$payload, [string]$insta
     $total = [long]0
     $completedFiles = 0
     foreach ($f in $release.files) {
+        if ($Progress) { & $Progress $completedFiles @($release.files).Count $f.path }
         Assert-DeployPath $f.path
         if ($f.path -ceq 'TechMaster Deploy.exe') { throw 'Nguồn repo phải dùng Launcher.cs thay cho exe không kiểm soát.' }
         Assert-DeployRegularPath $installedRoot $f.path

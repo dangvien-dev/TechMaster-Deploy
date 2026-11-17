@@ -10,6 +10,17 @@ namespace TechMaster {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 Marshal.ThrowExceptionForHR(SetCurrentProcessExplicitAppUserModelID("TechMaster.Deploy"));
         }
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindowAsync(IntPtr window, int command);
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr window);
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr window);
+        public static bool ActivateWindow(IntPtr window) {
+            if (window == IntPtr.Zero) return false;
+            ShowWindowAsync(window, IsIconic(window) ? 9 : 5);
+            return SetForegroundWindow(window);
+        }
         public static string CurrentId() {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) return "";
             IntPtr value;

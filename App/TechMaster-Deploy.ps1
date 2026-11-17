@@ -67,7 +67,7 @@ function Status($id, $missing) {
 $Navigation.Add_SelectionChanged({ $tabs.SelectedIndex = $Navigation.SelectedIndex })
 $tabs.SelectedIndex = 0
 Bind-Click 'btnRefresh' { Update-MachineInfo }
-Bind-Click 'headerUpdate' { $Navigation.SelectedIndex = 7 }
+Bind-Click 'headerUpdate' { if($script:updateProcess){Show-DeployUpdater}else{$Navigation.SelectedIndex = 7} }
 Bind-Click 'btnSysprepCheck' { Start-Tool (Join-Path $DirClone 'Fix-SysprepErrors.bat') 'Kiểm tra lỗi Sysprep' }
 Bind-Click 'btnSysprep' { if (Confirm-Box "Chuẩn bị máy gốc và chạy Sysprep?`nCuối quy trình máy sẽ tự tắt; clone ổ trước khi bật lại." 'Sysprep') { Start-Tool (Join-Path $DirClone 'Run-Sysprep.bat') 'Chuẩn bị + Sysprep' } }
 Bind-Click 'btnReinstall' { Open-DeployFolder (Join-Path $DirClone 'Reinstall') }
@@ -217,9 +217,9 @@ Bind-Click 'btnBasicAppHelp' { Start-Process 'https://learn.microsoft.com/vi-vn/
 $form.Add_Closing({
     param($sender, $event)
     if ($script:updateClosing) { return }
-    if ($script:uiWork -or $script:officeRun -or $script:basicAppRun -or $script:mediaDownload -or $script:updateProcess) {
+    if ($script:uiWork -or $script:officeRun -or $script:basicAppRun -or $script:mediaDownload) {
         $event.Cancel = $true
-        Set-Status 'Chờ thao tác đang chạy hoàn tất hoặc đóng cửa sổ cập nhật trước khi thoát.'
+        Set-Status 'Chờ thao tác đang chạy hoàn tất trước khi thoát.'
     }
 })
 $form.Add_ContentRendered({ Update-LogoPreview; Update-MachineInfo })

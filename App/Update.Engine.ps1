@@ -57,8 +57,9 @@ function Invoke-DeployUpdateTask {
         'PrepareOnline' {
             Set-DeployTaskProgress $Work 'Đang tải và kiểm tra bản cập nhật…' 0
             $null = Save-DeployRepositoryPayload $Release $payload $Root -Progress {
-                param($done, $total)
-                Set-DeployTaskProgress $Work ("Đang kiểm tra tệp $done / $total…") ([int](90 * $done / [Math]::Max(1, $total)))
+                param($done, $total, $path)
+                $message=if($path){"Đang kiểm tra tệp $done / $total — $path"}else{"Đã kiểm tra $done / $total tệp…"}
+                Set-DeployTaskProgress $Work $message ([int](90 * $done / [Math]::Max(1, $total)))
             }
             $plan = Get-DeployUpdatePlan $Root $payload
             Set-DeployTaskProgress $Work 'Bản cập nhật đã sẵn sàng.' 100

@@ -28,6 +28,7 @@ try {
         $script:form | Add-Member ScriptMethod Activate { $this.Activated = $true }
         $script:tabs = [pscustomobject]@{ IsEnabled = $true }
         $script:header = [pscustomobject]@{ IsEnabled = $true }
+        $script:btnRefresh = [pscustomobject]@{ IsEnabled = $true }
         $script:Navigation = [pscustomobject]@{ IsEnabled = $true }
         $script:updateTimer = [pscustomobject]@{ Stopped = $false }
         $script:updateTimer | Add-Member ScriptMethod Stop { $this.Stopped = $true }
@@ -39,9 +40,12 @@ try {
     }
     Reset-Fixture
     Set-DeployUpdateBusy $true
-    Assert ($form.IsEnabled -and -not $tabs.IsEnabled -and -not $header.IsEnabled) 'Busy state leaves window enabled while blocking actions'
+    Assert ($form.IsEnabled -and -not $tabs.IsEnabled -and $header.IsEnabled -and -not $btnRefresh.IsEnabled) 'Busy state leaves window enabled while blocking actions'
     Update-DeployUpdaterState
     Assert (-not $form.Closed) 'No marker means app remains open during check, download and confirmation'
+    [IO.File]::WriteAllText((Join-Path $temp 'window-state.json'),'{"state":"Preparing","message":"Downloading file 4 / 95"}')
+    Update-DeployUpdaterState
+    Assert ($script:lastStatus -match 'Downloading file 4 / 95' -and -not $form.Closed) 'Main status reflects worker progress while keeping the update window accessible'
     [IO.File]::WriteAllText($script:updateCloseRequest, 'not-a-close-command')
     Update-DeployUpdaterState
     Assert (-not $form.Closed) 'Unrecognized marker cannot close app'
