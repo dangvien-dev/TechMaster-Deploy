@@ -14,6 +14,7 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'Info.UI.ps1')
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
+. (Join-Path $PSScriptRoot 'LicenseConfirmation.UI.ps1')
 . (Join-Path $PSScriptRoot 'Startup.UI.ps1')
 $form = Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
 $form.Width = [Math]::Max($form.MinWidth, [Math]::Min($form.Width, [Windows.SystemParameters]::WorkArea.Width - 30))
@@ -42,7 +43,7 @@ function Start-UiWork([string]$code, [object[]]$arguments, [scriptblock]$complet
     try {
         $script:uiWork = Start-DeployWork $code $arguments
         $script:uiWork.Complete = $completed
-        $btnRefresh.IsEnabled = $false; $btnExport.IsEnabled = $false
+        $btnRefresh.IsEnabled = $false; $btnExport.IsEnabled = $false; $btnConfirmRetail.IsEnabled=$false; $btnConfirmCompany.IsEnabled=$false
         $uiTimer.Start()
     } catch { Show-DeployMessage $_.Exception.Message 'TechMaster Deploy' 'Error' }
 }
@@ -52,7 +53,7 @@ $uiTimer = New-DeployTimer 200 {
     $uiTimer.Stop(); $script:uiWork = $null
     try { $result = @(Receive-DeployWork $job); & $job.Complete $result }
     catch { Set-Status 'Thao tác chưa hoàn tất.'; Show-DeployMessage $_.Exception.GetBaseException().Message 'TechMaster Deploy' 'Error' }
-    finally { $btnRefresh.IsEnabled = $true; $btnExport.IsEnabled = $true }
+    finally { $btnRefresh.IsEnabled = $true; $btnExport.IsEnabled = $true; $btnConfirmRetail.IsEnabled=$true; $btnConfirmCompany.IsEnabled=$true }
 }
 function Update-MachineInfo {
     Set-Status 'Đang đọc thông tin bản quyền…'
@@ -70,7 +71,7 @@ function Status($id, $missing) {
 }
 $Navigation.Add_SelectionChanged({ $tabs.SelectedIndex = $Navigation.SelectedIndex })
 $tabs.SelectedIndex = 0
-Bind-Click 'btnRefresh' { Update-MachineInfo }
+Bind-Click 'btnRefresh' { Update-MachineInfo; Request-DeployUpdateNotification }
 Bind-Click 'btnQuickGuide' { Show-DeployQuickGuide $Root $form }
 Bind-Click 'btnContact' { Show-DeployQuickGuide $Root $form -Section 'Liên hệ / góp ý' }
 Bind-Click 'headerUpdate' { if($script:updateProcess){Show-DeployUpdater}else{$Navigation.SelectedIndex = 7} }
@@ -170,7 +171,30 @@ $ErrorActionPreference = 'Stop'
         if ($files.Count) { Set-Status ('Đã xuất: ' + $files[-1]) } else { Set-Status 'Đã xuất biên bản; xem thư mục biên bản.' }
     }
 }
-Bind-Click 'btnOpenBB' { Open-DeployFolder (Join-Path $DirBB 'BienBan') }
+function Start-DeployConfirmation([string]$template) {
+    if($script:uiWork){Set-Status 'Chờ thao tác hiện tại hoàn tất.';return}
+    $cfg=[pscustomobject]@{Company=$Company.Text.Trim();Address=$Address.Text.Trim();Phone=$Phone.Text.Trim();Technician=$Technician.Text.Trim()}
+    if(-not $cfg.Company){Show-DeployMessage 'Nhập tên đơn vị cung cấp tại phần Thông tin biên bản.' 'Xác nhận bàn giao';return}
+    try{$cfg|ConvertTo-Json|Set-Content -LiteralPath $cfgFile -Encoding UTF8}catch{Show-DeployMessage $_.Exception.Message 'Lưu thông tin đơn vị' 'Error';return}
+    $logo=Get-ChildItem -LiteralPath $DirBB -File|Where-Object {$_.BaseName -eq 'Logo' -and $_.Extension -in '.svg','.png','.jpg','.jpeg'}|Select-Object -First 1
+    $cfg|Add-Member NoteProperty LogoPath $(if($logo){$logo.FullName}else{''})
+    $script:confirmationRequest=@{Template=$template;Supplier=$cfg;Customer=$tbCustomer.Text.Trim()}
+    Set-Status 'Đang đọc thông tin máy và phần mềm bàn giao…'
+    Start-UiWork @'
+param($core)
+. $core
+Get-DeployConfirmationSnapshot
+'@ @((Join-Path $DirBB 'LicenseConfirmation.Core.ps1')) {
+        param($result)
+        $request=$script:confirmationRequest
+        $dialog=New-DeployLicenseConfirmationWindow -Template $request.Template -Supplier $request.Supplier -CustomerName $request.Customer -Snapshot $result[-1] -OutputDirectory (Join-Path $DirBB 'BienBan') -Owner $form
+        [void]$dialog.ShowDialog()
+        if($dialog.Tag.Path){Set-Status ('Đã xuất: '+$dialog.Tag.Path)}else{Set-Status 'Đã đóng mẫu xác nhận bàn giao.'}
+    }
+}
+Bind-Click 'btnConfirmRetail' {Start-DeployConfirmation 'Retail'}
+Bind-Click 'btnConfirmCompany' {Start-DeployConfirmation 'Company'}
+Bind-Click 'btnOpenBB'  { Open-DeployFolder (Join-Path $DirBB 'BienBan') }
 foreach ($product in $offProducts) { [void]$cbProduct.Items.Add($product[1]) }
 $cbProduct.SelectedIndex = 0
 $languageChoices = @(); $excludeChoices = @()

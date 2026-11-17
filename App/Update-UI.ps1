@@ -21,6 +21,7 @@ function Update-DeployUpdaterState {
         if ($script:updateCloseRequest -and (Test-Path -LiteralPath $script:updateCloseRequest -PathType Leaf)) { Remove-Item -LiteralPath $script:updateCloseRequest -Force -ErrorAction SilentlyContinue }
         $script:updateCloseRequest = $null
         Set-DeployUpdateBusy $false
+        Request-DeployUpdateNotification
         $form.Activate() | Out-Null; Set-Status 'Đã đóng cửa sổ cập nhật.'
         return
     }

@@ -23,8 +23,17 @@ function Start-DeployUpdateProbe {
         $start.Arguments='-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
         $start.UseShellExecute=$false;$start.CreateNoWindow=$true
         $process=[Diagnostics.Process]::Start($start)
+        if(-not $script:updateBadgeAvailable){$headerUpdate.ToolTip='Đang kiểm tra bản cập nhật…'}
         $script:updateProbe=@{Process=$process;Directory=$dir;Path=$path;Started=[DateTime]::UtcNow}
-    }catch{if(Test-Path -LiteralPath $dir){Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue}}
+    }catch{Set-DeployUpdateNotificationFailure;if(Test-Path -LiteralPath $dir){Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue}}
+}
+function Set-DeployUpdateNotificationFailure {
+    $script:updateProbeNext=[DateTime]::UtcNow.AddMinutes(1)
+    if(-not $script:updateBadgeAvailable){$headerUpdate.ToolTip='Chưa kiểm tra được cập nhật. Sẽ thử lại sau 1 phút; bấm Làm mới để thử ngay.'}
+}
+function Request-DeployUpdateNotification {
+    $script:updateProbeNext=[DateTime]::UtcNow
+    $availabilityTimer.Start()
 }
 function Update-DeployUpdateNotification {
     $probe=$script:updateProbe
@@ -33,10 +42,11 @@ function Update-DeployUpdateNotification {
             try{
                 if(-not $script:updateProcess -and (Test-Path -LiteralPath $probe.Path)){
                     $result=Get-Content -LiteralPath $probe.Path -Raw -Encoding UTF8|ConvertFrom-Json
-                    if($result.Success -eq $true){Set-DeployUpdateAvailability ([bool]$result.Available) ([string]$result.Version)}
-                }
-            }catch{}finally{Stop-DeployUpdateProbe}
-        }elseif(([DateTime]::UtcNow-$probe.Started).TotalSeconds -gt 90){Stop-DeployUpdateProbe}
+                    if($result.Success -eq $true){Set-DeployUpdateAvailability ([bool]$result.Available) ([string]$result.Version);$script:updateProbeNext=[DateTime]::UtcNow.AddMinutes(30)}
+                    else{Set-DeployUpdateNotificationFailure}
+                }elseif(-not $script:updateProcess){Set-DeployUpdateNotificationFailure}
+            }catch{Set-DeployUpdateNotificationFailure}finally{Stop-DeployUpdateProbe}
+        }elseif(([DateTime]::UtcNow-$probe.Started).TotalSeconds -gt 90){Stop-DeployUpdateProbe;Set-DeployUpdateNotificationFailure}
         return
     }
     if(-not $script:updateProcess -and [DateTime]::UtcNow -ge $script:updateProbeNext){
@@ -45,4 +55,4 @@ function Update-DeployUpdateNotification {
     }
 }
 $availabilityTimer=New-DeployTimer 1000 {Update-DeployUpdateNotification}
-function Start-DeployUpdateNotifications {$script:updateProbeNext=[DateTime]::UtcNow.AddSeconds(3);$availabilityTimer.Start()}
+function Start-DeployUpdateNotifications {Request-DeployUpdateNotification}

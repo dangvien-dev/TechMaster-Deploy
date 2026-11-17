@@ -17,6 +17,7 @@ jobs:
           try {
             & App/Test-InfoEntryPoints.ps1
             & App/Test-Wpf.ps1
+            & App/Test-UpdateProbe.ps1
           }
           catch {
             $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)
@@ -50,6 +51,7 @@ jobs:
           & Office/Test-OfficeCleanup.ps1
           & Office/Test-OfficeTemporary.ps1
           & BienBan/Test-Report.ps1
+          & BienBan/Test-LicenseConfirmation.ps1
           & KichHoat/Test-QrLifecycle.ps1
           & KichHoat/Test-QrWindow.ps1
           & KichHoat/Test-CidPhone.ps1

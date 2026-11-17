@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.6.0",
+  "version": "2.1.7.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -114,16 +114,28 @@
       "sha": "eb72a12f188e71c5bfa7e08de2657fada23cfb8b"
     },
     {
+      "path": "App/LicenseConfirmation.UI.ps1",
+      "mode": "100644",
+      "size": 3442,
+      "sha": "81b7b48818147ce5f5658d5a01d07ac271fd2b62"
+    },
+    {
+      "path": "App/LicenseConfirmationWindow.xml",
+      "mode": "100644",
+      "size": 8202,
+      "sha": "9e60258bd3f63eda6f2e796f64a01e2274afb479"
+    },
+    {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 23543,
-      "sha": "a40b932e94f761eca7b40ca76c357c39125dc4e7"
+      "size": 24178,
+      "sha": "076627ef12222cfb5b2b9cbc543aaed1bcd52df1"
     },
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 6728,
-      "sha": "daf53d1513df630d77febb8ec89b7a9c523dc2a9"
+      "size": 7385,
+      "sha": "70e200b22207822c2b9472d469c0f2d8ff68b20b"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -158,8 +170,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 17124,
-      "sha": "038416b8485cd43569ea77d6105fe846980d96c5"
+      "size": 19114,
+      "sha": "4e076c35da86b84c82b3b77bfec76e4c434014d4"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -242,14 +254,20 @@
     {
       "path": "App/Test-UpdateNotification.ps1",
       "mode": "100644",
-      "size": 2848,
-      "sha": "5cbe8ec96f3767a9495985dd2398e908dde07490"
+      "size": 3848,
+      "sha": "c04e945c4fa85cb83f7f5c764fddd3bd09d00161"
+    },
+    {
+      "path": "App/Test-UpdateProbe.ps1",
+      "mode": "100644",
+      "size": 2231,
+      "sha": "c653707b698a8b885fcbe3a34214c539085071c9"
     },
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 15450,
-      "sha": "38c40bf1cc0004bca3f5ee19371282193931963c"
+      "size": 17311,
+      "sha": "68f5f8dad640c183e3de3124092c9c1fa7e60e72"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -272,8 +290,8 @@
     {
       "path": "App/Update-UI.ps1",
       "mode": "100644",
-      "size": 5078,
-      "sha": "f9359c53512c94fff2f88b456263be65638f9ec7"
+      "size": 5119,
+      "sha": "98b53778e24dd02c19e7dd4d0549932b2f73518d"
     },
     {
       "path": "App/Update.Core.ps1",
@@ -290,8 +308,8 @@
     {
       "path": "App/Update.Notification.Core.ps1",
       "mode": "100644",
-      "size": 872,
-      "sha": "afbf4f2573ff9933cca8f197c442a8be70507ad1"
+      "size": 2720,
+      "sha": "34cfd52c3aaf2b005c3e2834d19bbaeb7b044a6f"
     },
     {
       "path": "App/Update.Notification.ps1",
@@ -302,8 +320,8 @@
     {
       "path": "App/Update.Notifications.UI.ps1",
       "mode": "100644",
-      "size": 3198,
-      "sha": "51ef158d67e94357b3afbf4dd315fbfd94832f01"
+      "size": 3961,
+      "sha": "b7cfce51b0acda11156a691e9e7c7e7f2e9d4452"
     },
     {
       "path": "App/UpdaterWindow.xml",
@@ -330,6 +348,18 @@
       "sha": "04bbe31b7a3822aa204045f1ee1fae261ad7fc6b"
     },
     {
+      "path": "BienBan/LicenseConfirmation.Core.ps1",
+      "mode": "100644",
+      "size": 9573,
+      "sha": "8f3ed3719592d87dcd5a469dd4d9f910662b9dc5"
+    },
+    {
+      "path": "BienBan/Test-LicenseConfirmation.ps1",
+      "mode": "100644",
+      "size": 4933,
+      "sha": "0f9e0bd0e4a9226d8688812e3526112623105ea7"
+    },
+    {
       "path": "BienBan/Test-Report.ps1",
       "mode": "100644",
       "size": 5067,
@@ -338,8 +368,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 7982,
-      "sha": "f1f5dfd56ff4614f46ed240d913ae8201b69a1c8"
+      "size": 8802,
+      "sha": "ca8f25580e6eea7ed49889a662904ad3ee542d7a"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -699,7 +729,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "436e07b6ac797959b9c3bb13d995fd435305aa64"
+      "sha": "6b0869106915e55ed0c744e52bce1efd3f988c97"
     }
   ]
 }
