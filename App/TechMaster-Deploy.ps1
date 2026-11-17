@@ -73,8 +73,14 @@ Bind-Click 'btnSysprep' { if (Confirm-Box "Chuẩn bị máy gốc và chạy Sy
 Bind-Click 'btnReinstall' { Open-DeployFolder (Join-Path $DirClone 'Reinstall') }
 Bind-Click 'btnCloneHelp' { Start-Process notepad.exe ('"{0}"' -f (Join-Path $DirClone 'README.md')) }
 Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' }
-Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh dấu số' }
+Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
 Bind-Click 'btnKeyboard' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím / EVKey' }
+Bind-Click 'btnUltraReset' {
+    $script = Join-Path $DirClone 'UltraViewer-Reset.ps1'
+    $command = "& '{0}'" -f $script.Replace("'", "''")
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+    $script:desktopProcess = Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+$encoded) -WindowStyle Hidden -PassThru
+}
 Bind-Click 'btnUltraDiagnostic' {
     Set-Status 'Đang đọc cấu hình UltraViewer và card mạng…'
     Start-UiWork 'param($diagnostics) . $diagnostics; Format-UltraViewerDiagnostic (Get-UltraViewerDiagnostic)' @((Join-Path $DirClone 'UltraViewer.Diagnostics.ps1')) {

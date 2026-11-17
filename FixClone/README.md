@@ -21,11 +21,11 @@ Bộ công cụ triển khai Windows hàng loạt bằng clone ổ (disk to disk
 | `unattend.xml` | Sysprep | Bỏ qua OOBE, tạo user `admin`, tự chạy Fix-CloneDuplicate lần đăng nhập đầu |
 | `Fix-CloneDuplicate.bat` / `.ps1` | Máy clone | Đổi tên máy, reset ID trùng, cài lại phần mềm (tự chạy) |
 | `New-Unattend.ps1` | Máy gốc | Tạo cấu hình Sysprep theo vùng / ngôn ngữ hiện tại của máy gốc |
-| `Fix-DinhDang.bat` / `.ps1` | Máy clone | Chỉ đổi dấu thập phân `,` và dấu hàng nghìn `.` |
+| `Fix-DinhDang.bat` / `.ps1` | Máy clone | Ngày dd/MM/yyyy, dấu thập phân `,` và dấu hàng nghìn `.` |
 | `Fix-BanPhim.bat` / `.ps1` | Máy clone | Tuỳ chọn chỉ dùng bàn phím US với EVKey, có sao lưu và khôi phục |
 | `Reinstall\` | Máy clone | Bỏ file cài `.exe` / `.msi` vào đây để tự cài lại sau khi clone |
 
-Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
+Giữ nguyên cả thư mục TechMaster-Deploy, gồm App và Office. Run-Sysprep tự chép thành phần cần thiết vào C:\FixClone cho lần đăng nhập đầu.
 
 ---
 
@@ -40,7 +40,8 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
    - Copy script vào `C:\FixClone`, tạo `unattend.xml` trong thư mục Sysprep theo vùng / ngôn ngữ của máy gốc
    - Chạy `Prepare-Master.ps1` → xem kết quả, sửa các dòng `[!]` nếu có
    - Chạy `Fix-SysprepErrors.ps1 -PreCheck` → còn vấn đề thì **dừng**, không chạy sysprep
-   - Gõ `YES` → sysprep chạy → **máy tự tắt**
+   - Kiểm tra lựa chọn dọn key thử / chuẩn bị UltraViewer; đóng các ứng dụng Office
+   - Bấm **Chuẩn bị và tắt máy** → dọn key tạm đã nhận diện, giữ dịch vụ UltraViewer tắt → Sysprep → **máy tự tắt**
 4. **Không bật lại máy gốc.** Tháo ổ hoặc boot USB để clone ngay.
 
 ### Bước 2 – Clone ổ sang các máy
@@ -63,7 +64,7 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
 | 3 | EVKey tự chạy cho mọi user | `HKLM\...\Run`; nằm trong thư mục user thì chuyển sang `C:\Program Files\EVKey` |
 | 4 | Thiết lập Word | `Normal.dotm`, `Word.officeUI`, Word Options → Default profile |
 | 5 | Menu chuột phải kiểu Windows 10 | CLSID `{86ca1aa0-…}` cho user hiện tại + Default profile |
-| 6 | Dấu số | Chỉ đổi thập phân `,` và hàng nghìn `.`, giữ các thiết lập khác |
+| 6 | Ngày / dấu số | Ngày dd/MM/yyyy, thập phân `,`, hàng nghìn `.`; giữ vùng, ngôn ngữ và bàn phím |
 
 ## Fix-CloneDuplicate.ps1 – xử lý trên máy clone
 
@@ -78,7 +79,8 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
 | 7 | KMS rearm (chỉ khi có `-RearmKMS` và máy dùng KMS) |
 | 8 | Cài lại phần mềm trong `Reinstall\` |
 | 9 | Máy ASUS: bật lại service ASUS (quạt, cert, update) |
-| 10 | Dấu thập phân / hàng nghìn (gọi `Fix-DinhDang.ps1`) |
+| 10 | Ngày ngắn và dấu số (gọi `Fix-DinhDang.ps1`) |
+| 11 | Dọn key tạm và hoàn tất ID UltraViewer theo lựa chọn đã lưu trước tạo ảnh |
 | – | **Không** đổi Machine SID (sysprep đã làm) |
 
 Log lưu tại `C:\FixClone\Logs\<tên máy>_<thời gian>.log`.
@@ -112,8 +114,10 @@ Mỗi package được gỡ với **timeout 3 phút**. Quá thời gian thì res
 |---|---|
 | Decimal symbol (thập phân) | `,` |
 | Digit grouping symbol (hàng nghìn) | `.` |
+| Short date (ngày ngắn) | `dd/MM/yyyy` |
+| Date separator | `/` |
 
-Giữ nguyên ngày giờ, tiền tệ, list separator, đơn vị đo, vùng, ngôn ngữ và bàn phím. Không cần chọn Việt Nam trong Settings của Windows.
+Giữ nguyên ngày dài, giờ, tiền tệ, list separator, đơn vị đo, vùng, ngôn ngữ và bàn phím. Không cần chọn Việt Nam trong Settings của Windows.
 
 Máy clone tự áp dụng định dạng cho `admin` và cập nhật Default profile cho tài khoản được tạo sau đó. Với tài khoản đã có hồ sơ, mở script trong phiên của tài khoản đó. Để cập nhật Default profile bằng tay, mở PowerShell bằng quyền Administrator trong thư mục `FixClone` và chạy:
 `powershell -ExecutionPolicy Bypass -File Fix-DinhDang.ps1 -AllNewUsers`
@@ -135,9 +139,9 @@ Máy clone tự áp dụng định dạng cho `admin` và cập nhật Default p
 
 ## Bàn phím và định dạng số
 
-`Fix-DinhDang.ps1` chỉ ghi `sDecimal` và `sThousand`, không gọi Set-Culture hoặc thay LocaleName, không cài hay đổi bàn phím. Chế độ AllNewUsers cũng chỉ ghi hai giá trị này vào hồ sơ mặc định.
+`Fix-DinhDang.ps1` chỉ ghi `sDecimal`, `sThousand`, `sShortDate` và `sDate`, không gọi Set-Culture hoặc thay LocaleName, không cài hay đổi bàn phím. Chế độ AllNewUsers cũng chỉ ghi bốn giá trị này vào hồ sơ mặc định.
 
-Khi dùng EVKey, mở **Sau khi clone → Bàn phím / EVKey → 1** để chỉ giữ kiểu nhập US trong các ngôn ngữ hiện có. Công cụ hiển thị user sẽ thay đổi, hỏi xác nhận, lưu sao lưu rồi đọc lại để kiểm tra. Không gỡ gói ngôn ngữ, không đổi thứ tự ngôn ngữ hiển thị hoặc tắt EVKey. Nếu cần, chọn **2** để khôi phục. Đăng xuất / đăng nhập lại nếu Windows còn hiện danh sách cũ.
+Khi dùng EVKey, mở **Sau khi clone → Bàn phím / EVKey → Chỉ dùng US** để chỉ giữ kiểu nhập US trong các ngôn ngữ hiện có. Công cụ hiển thị user sẽ thay đổi, hỏi xác nhận, lưu sao lưu rồi đọc lại để kiểm tra. Không gỡ gói ngôn ngữ, không đổi thứ tự ngôn ngữ hiển thị hoặc tắt EVKey. Nếu cần, bấm **Khôi phục**. Đăng xuất / đăng nhập lại nếu Windows còn hiện danh sách cũ.
 
 Chạy dưới đúng user khách hàng; nếu app được nâng quyền bằng tài khoản khác, mở `Fix-BanPhim.bat` trực tiếp tại user khách hàng. Công cụ từ chối ghi khi tài khoản đang chạy không khớp desktop đăng nhập. Sao lưu nằm trong Local AppData của user đó, không đi kèm bộ cài.
 
@@ -145,6 +149,17 @@ Windows + Shift + S: khi hộp chọn hiện **Screen Snipping** và **Snipping 
 
 Trước Sysprep, cửa sổ này cũng kiểm tra shortcut Word / Excel ở Desktop cá nhân và Public Desktop theo đích thực tế. Nút **Sao lưu và dọn icon trùng** giữ một icon dùng chung, sao lưu rồi dọn các icon cùng đích; giữ shortcut có tham số riêng, tài liệu, Normal.dotm và Word Options. Chế độ chuẩn bị không tạo thêm icon Public khi nó sẽ trùng icon cá nhân chưa được dọn. Máy đã clone có thể mở lại từ **Sau khi clone → Kiểm tra Desktop và phím chụp**.
 
-## UltraViewer bị trùng ID
+## UltraViewer và Office trước khi tạo ảnh
 
-UltraViewer có cơ chế nhận diện riêng; các bước reset AnyDesk / TeamViewer không áp dụng cho UltraViewer. Trong WPF mở **Sau khi clone → Chẩn đoán UltraViewer** trên hai máy đang trùng ID, rồi sao chép kết quả để đối chiếu. Báo cáo gồm phiên bản, tiến trình, card mạng / MAC, NetworkAddress đặt thủ công và tên trường registry. Các trường định danh có tên rõ ràng được băm SHA256 để đối chiếu, không xuất giá trị gốc, mật khẩu hoặc token; không suy ra nguyên nhân chỉ từ hash trùng nếu chưa đối chiếu dữ liệu thực tế. Chưa tự xoá cấu hình hoặc dừng phiên hỗ trợ. Script FixClone ghi cảnh báo khi thấy UltraViewer đã cài.
+Bản 6.6.133 đã được thử trên hai máy clone: UID / PreferID trùng dù MAC, tên máy và MachineGuid khác. Người dùng xác nhận reset đúng hai trường này tạo ID mới, kết nối được và giữ ổn sau khởi động lại.
+
+Cửa sổ chuẩn bị Sysprep có hai tuỳ chọn mặc định bật:
+
+- **Office:** lưu và kiểm tra Normal.dotm, Word.officeUI, Word Options vào Default profile trước. Sau xác nhận cuối, chỉ dọn key có tên Office 2021/2024 Grace / Trial chưa kích hoạt. Giữ Retail kể cả chưa kích hoạt, Visio / Project, license đã kích hoạt và trường hợp không chắc chắn. Không gỡ Office hoặc xoá thiết lập ứng dụng. Nút **Xem / chọn key Office** cho phép chủ động chọn thêm; mặc định không tích key nào trong bảng.
+- **UltraViewer:** sao lưu UID / PreferID và trạng thái dịch vụ, dừng rồi để dịch vụ Disabled trên ảnh gốc. Không khởi động UltraViewer hoặc bật lại máy gốc sau khi chuẩn bị; nếu dịch vụ chạy lại, ảnh có thể mang ID mới được cấp trên máy gốc. Khi Sysprep lỗi, công cụ khôi phục hai trường và trạng thái dịch vụ từ sao lưu.
+
+Lần đăng nhập đầu sau clone kiểm tra lại key tạm, bỏ định danh mang từ ảnh rồi khôi phục kiểu khởi động dịch vụ. Nếu UltraViewer chưa cấp ID, kết quả là **đang chờ**, không báo thành công. Mở UltraViewer, đợi kết nối rồi vào **Reset ID UltraViewer → Kiểm tra ID mới**; thao tác kiểm tra không xoá lại ID. Marker hoàn tất ngăn reset lại mỗi lần chạy công cụ / khởi động. Muốn tạo ảnh mới từ máy đã clone, chạy lại toàn bộ bước chuẩn bị Sysprep.
+
+Máy clone cũ chưa qua bước chuẩn bị mới sẽ không tự reset UltraViewer hoặc tự xoá key. Dùng **Sau khi clone → Reset ID UltraViewer → Sao lưu và reset** trên từng máy; thao tác ngắt phiên UltraViewer nên phải chạy tại máy hoặc qua remote khác. Chỉ hỗ trợ tự động bản 6.6.133; giữ toàn bộ LastHR_*, MAC và MachineGuid trong thao tác UltraViewer. Công cụ xử lý trùng lặp Windows riêng vẫn có lựa chọn đổi MachineGuid như trước.
+
+Sao lưu UltraViewer ở `%ProgramData%\TechMaster Deploy\UltraViewer Backups`, chỉ Administrator / SYSTEM đọc. Có nút chọn identity.json để khôi phục; từ chối khôi phục định danh của máy gốc lên phần cứng máy clone khác. Marker ở `C:\FixClone\UltraViewer-Clone.json`, lựa chọn ở `C:\FixClone\CloneOptions.json`. Giữ các tệp này để kiểm tra / hoàn tác. Công cụ chẩn đoán chỉ đọc và vẫn dùng được.

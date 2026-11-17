@@ -1,103 +1,68 @@
-﻿<#
-.SYNOPSIS
-    Kiểm tra, gỡ Office 2021/2024 Click-to-Run và dọn key Office.
-    Không tự nhận diện hay xoá công cụ crack, tác vụ, dịch vụ hoặc token bản quyền.
-#>
-param(
-    [ValidateSet('Menu', 'Inspect', 'Keys', 'Remove')][string]$Mode = 'Menu',
-    [string]$LogPath = '',
-    [string]$ProgressPath = ''
-)
-$ErrorActionPreference = 'Stop'
-$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
-if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
-    . $consoleInit
-    Initialize-TechMasterConsole
-}
+﻿param([ValidateSet('Menu','Inspect','Keys','Remove')][string]$Mode='Menu',[string]$LogPath='',[string]$ProgressPath='',[switch]$ValidateOnly)
+$ErrorActionPreference='Stop'
+. (Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'Office-Cleanup.Core.ps1')
-$exitCode = 0
-$transcriptStarted = $false
-$officeMutex = $null
-$ownsMutex = $false
-try {
-    if (-not $LogPath) {
-        $dir = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy\Office Logs\Cleanup_' + [guid]::NewGuid().ToString('N'))
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        $LogPath = Join-Path $dir 'Cleanup.log'
-    }
-    Start-Transcript -LiteralPath $LogPath -ErrorAction Stop | Out-Null
-    $transcriptStarted = $true
-    Write-Host 'GỠ / DỌN OFFICE' -ForegroundColor Cyan
-    Write-Host '1. Kiểm tra Office và các key hiện có (chỉ đọc)'
-    Write-Host '2. Chọn từng key Office cần xoá (giữ key không chọn, gồm cả Retail)'
-    Write-Host '3. Gỡ bộ Office 2021/2024 Click-to-Run (có bước chọn key và kiểm tra key giữ lại)'
-    Write-Host '0. Thoát'
-    if ($Mode -eq 'Menu') {
-        switch (Read-Host 'Chọn 0 / 1 / 2 / 3') {
-            '1' { $Mode = 'Inspect' }
-            '2' { $Mode = 'Keys' }
-            '3' { $Mode = 'Remove' }
-            default { Write-Host 'Đã huỷ.'; return }
-        }
-    }
-    $inventory = Get-OfficeCleanupInventory
-    Write-Host ("`nClick-to-Run: " + ($inventory.Products -join ', '))
-    Write-Host 'Key Office đang cài (chỉ 5 ký tự cuối):'
-    $inventory.Keys | Select-Object Name, PartialProductKey, LicenseStatus | Format-Table -AutoSize | Out-Host
-    Write-Host 'KMS có thể là bản quyền hợp lệ của tổ chức; không thể kết luận active lậu chỉ từ trạng thái này.'
-    Write-Host 'Công cụ không xoá tài liệu, key Windows, kho token, tài khoản M365 hay công cụ kích hoạt bên ngoài.'
-    if ($Mode -eq 'Inspect') { return }
-    $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrators')
-    if (-not $admin) { throw 'Hãy mở TechMaster Deploy bằng quyền Administrator.' }
-    $plan = Get-OfficeCleanupPlan $inventory $Mode
-    if ($Mode -eq 'Remove' -and -not $plan.Products.Count) {
-        throw 'Không nhận diện được bộ Office 2021/2024 Click-to-Run hỗ trợ. Không gỡ sản phẩm khác; dùng Settings > Apps nếu cần.'
-    }
-    if (-not $plan.Products.Count -and -not $plan.Keys.Count) { Write-Host 'Không có key Office để xoá.'; return }
-    if ($plan.Keys.Count) {
-        Write-Host "`nCHỌN KEY CẦN XOÁ — mặc định không chọn key nào."
-        $rows = @(for ($i = 0; $i -lt $plan.Keys.Count; $i++) {
-            $license = $plan.Keys[$i]
-            [pscustomobject]@{ STT = $i + 1; Loai = (Get-OfficeLicenseKind $license); DuoiKey = $license.PartialProductKey; License = $license.Name }
-        })
-        $rows | Format-Table -AutoSize -Wrap | Out-Host
-        Write-Host 'Chỉ nhập số của key muốn XOÁ, ví dụ 1,3. Key không chọn sẽ được giữ lại.'
-        Write-Host 'Muốn giữ Retail: không nhập số của dòng Retail. Enter để không chọn key nào.'
-        $choice = Read-Host 'Số thứ tự key cần xoá'
-        $plan = Select-OfficeCleanupKeys $plan $choice
-    }
-    if (-not $plan.Products.Count -and -not $plan.Keys.Count) { Write-Host 'Không chọn key; không thay đổi máy.'; return }
-    Write-Host ("`nSẢN PHẨM SẼ GỠ: " + ($plan.Products -join ', ')) -ForegroundColor Yellow
-    Write-Host 'KEY ĐÃ CHỌN XOÁ (bao gồm key hợp lệ nếu bạn chọn):' -ForegroundColor Yellow
-    $plan.Keys | Select-Object Name, PartialProductKey | Format-Table -AutoSize | Out-Host
-    Write-Host 'KEY GIỮ LẠI:' -ForegroundColor Green
-    $plan.PreservedKeys | Select-Object Name, PartialProductKey | Format-Table -AutoSize | Out-Host
-    Write-Host 'Lưu tài liệu và đóng toàn bộ Office. Sau khi xoá, cần key / tài khoản hợp lệ để kích hoạt lại.'
-    Write-Host 'Giữ lại thông tin mua bản quyền trước khi tiếp tục. Nhật ký không sao lưu key đầy đủ.'
-    if ((Read-Host 'Gõ XOA OFFICE để xác nhận') -cne 'XOA OFFICE') { Write-Host 'Đã huỷ; không thay đổi máy.'; return }
-    $officeMutex = New-Object System.Threading.Mutex($false, 'Global\TechMaster.OfficeDeployment')
-    try { $ownsMutex = $officeMutex.WaitOne(0) } catch [System.Threading.AbandonedMutexException] { $ownsMutex = $true }
-    if (-not $ownsMutex) { throw 'TechMaster đang cài hoặc dọn Office ở cửa sổ khác. Chờ hoàn tất rồi thử lại.' }
-    # Refuse to apply an outdated plan after an install/license change during confirmation.
-    $current = Get-OfficeCleanupInventory
-    if (($inventory.Products -join ',') -ne ($current.Products -join ',') -or
-        (($inventory.Keys | ForEach-Object { "$($_.ID):$($_.PartialProductKey)" } | Sort-Object) -join ',') -ne
-        (($current.Keys | ForEach-Object { "$($_.ID):$($_.PartialProductKey)" } | Sort-Object) -join ',')) {
-        throw 'Office đã thay đổi trong lúc xác nhận. Chạy lại để xem danh sách mới.'
-    }
-    Assert-OfficeCleanupAppsClosed
-    $setup = ''
-    if ($Mode -eq 'Remove') { $setup = Get-OfficeCleanupSetup (Join-Path $PSScriptRoot 'ODT') }
-    if ($ProgressPath) { [IO.File]::WriteAllText($ProgressPath, 'Đang gỡ / dọn Office…') }
-    Invoke-OfficeCleanupPlan $plan $setup (Split-Path -Parent $LogPath)
-} catch {
-    $exitCode = 1
-    Write-Host ("LỖI: " + $_.Exception.Message) -ForegroundColor Red
-} finally {
-    if ($ownsMutex) { $officeMutex.ReleaseMutex() }
-    if ($null -ne $officeMutex) { $officeMutex.Dispose() }
-    Write-Host "Nhật ký: $LogPath"
-    if ($transcriptStarted) { Stop-Transcript | Out-Null }
-    if ($Mode -eq 'Menu' -or [Environment]::UserInteractive) { Read-Host 'Nhấn Enter để đóng' | Out-Null }
+$cleanupWindow=Import-DeployWindow (Join-Path $PSScriptRoot 'Office-Cleanup.xml')
+$script:cleanup=@{ Job=$null; Inventory=$null; Rows=@(); ExitCode=0; Log=$LogPath }
+if (-not $script:cleanup.Log) { $script:cleanup.Log=Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Office Logs/'+[guid]::NewGuid().ToString('N')+'/Cleanup.log') }
+function Set-CleanupBusy([bool]$busy) {
+    foreach ($name in 'Keys','Refresh','SelectTrial','DeleteKeys','RemoveOffice','Close') { $cleanupWindow.FindName($name).IsEnabled = -not $busy }
+    if($Mode -eq 'Inspect'){foreach($name in 'SelectTrial','DeleteKeys','RemoveOffice'){$cleanupWindow.FindName($name).IsEnabled=$false};$cleanupWindow.FindName('Keys').IsReadOnly=$true}
+    $cleanupWindow.FindName('Progress').IsIndeterminate=$busy
 }
-exit $exitCode
+function Start-CleanupOperation([string]$operation,[string[]]$ids=@()) {
+    if ($script:cleanup.Job) { return }
+    Set-CleanupBusy $true
+    $cleanupWindow.FindName('Status').Text=if($operation -eq 'Inspect'){'Đang đọc Office…'}else{'Đang xử lý các mục đã chọn…'}
+    $script:cleanup.Job=Start-DeployWork @'
+param($directory,$operation,$inventory,$ids,$log,$progress)
+$ErrorActionPreference='Stop'
+. (Join-Path $directory 'Office-Cleanup.Core.ps1')
+. (Join-Path $directory 'Office-Cleanup.Engine.ps1')
+Invoke-OfficeCleanupTask -Operation $operation -Inventory $inventory -SelectedIds $ids -LogPath $log -ProgressPath $progress
+'@ @($PSScriptRoot,$operation,$script:cleanup.Inventory,$ids,$script:cleanup.Log,$ProgressPath)
+    $script:cleanup.Operation=$operation; $cleanupTimer.Start()
+}
+function Set-CleanupInventory($inventory) {
+    $script:cleanup.Inventory=$inventory
+    $script:cleanup.Rows=@($inventory.Keys | ForEach-Object {
+        [pscustomobject]@{ Selected=$false; ID=$_.ID; Kind=(Get-OfficeLicenseKind $_); Status=$(if($_.LicenseStatus -eq 1){'Đã kích hoạt'}else{'Chưa kích hoạt'}); Last5=$_.PartialProductKey; Name=$_.Name; Temporary=(Test-OfficeTemporaryLicense $_) }
+    })
+    $cleanupWindow.FindName('Keys').ItemsSource=$script:cleanup.Rows
+    $cleanupWindow.FindName('Products').Text='Click-to-Run: '+($inventory.Products -join ', ')
+}
+$cleanupTimer=New-DeployTimer 200 {
+    $job=$script:cleanup.Job
+    if (-not $job -or -not $job.Async.IsCompleted) { return }
+    $cleanupTimer.Stop();$script:cleanup.Job=$null
+    try {
+        $result=@(Receive-DeployWork $job)[-1]
+        if ($script:cleanup.Operation -eq 'Inspect') { Set-CleanupInventory $result; $cleanupWindow.FindName('Status').Text='Chọn key cần xoá hoặc chỉ kiểm tra danh sách.' }
+        else { Set-CleanupInventory $result.Inventory; $cleanupWindow.FindName('Status').Text=$result.Message; $script:cleanup.ExitCode=0 }
+    } catch { $script:cleanup.ExitCode=1; $cleanupWindow.FindName('Status').Text=$_.Exception.GetBaseException().Message; Show-DeployMessage $_.Exception.GetBaseException().Message 'Gỡ / dọn Office' 'Error' }
+    finally { Set-CleanupBusy $false }
+}
+function Confirm-CleanupOperation([string]$operation) {
+    if (-not $script:cleanup.Inventory -or $script:cleanup.Job) { return }
+    $cleanupWindow.FindName('Keys').CommitEdit() | Out-Null
+    $ids=@($script:cleanup.Rows | Where-Object Selected | ForEach-Object ID)
+    try { $plan=New-OfficeSelectedPlan $script:cleanup.Inventory $ids $operation }
+    catch { Show-DeployMessage $_.Exception.Message 'Kiểm tra lựa chọn' 'Warning';return }
+    if (-not @($plan.Keys).Count -and -not @($plan.Products).Count) { Show-DeployMessage 'Chưa chọn key để xoá.';return }
+    $names=(@($plan.Keys | ForEach-Object { $_.Name+' — '+$_.PartialProductKey }) -join "`n")
+    $message='Key sẽ xoá:' + "`n"+$names+"`n`nKey không chọn được giữ lại. Lưu tài liệu và đóng Office trước khi tiếp tục."
+    if ($operation -eq 'Remove') { $message+=' Sẽ gỡ các bộ Office: '+($plan.Products -join ', ') }
+    if (Confirm-Box $message 'Xác nhận gỡ / dọn Office' -ConfirmText $(if($operation -eq 'Remove'){'Gỡ Office'}else{'Xoá key đã chọn'}) -Danger -Owner $cleanupWindow) { Start-CleanupOperation $operation $ids }
+}
+$cleanupWindow.FindName('Refresh').Add_Click({ Start-CleanupOperation 'Inspect' })
+$cleanupWindow.FindName('SelectTrial').Add_Click({ foreach($row in $script:cleanup.Rows){$row.Selected=$row.Temporary};$cleanupWindow.FindName('Keys').Items.Refresh() })
+$cleanupWindow.FindName('DeleteKeys').Add_Click({ Confirm-CleanupOperation 'Keys' })
+$cleanupWindow.FindName('RemoveOffice').Add_Click({ Confirm-CleanupOperation 'Remove' })
+$cleanupWindow.FindName('Close').Add_Click({$cleanupWindow.Close()})
+$cleanupWindow.FindName('ViewLog').Add_Click({if(Test-Path -LiteralPath $script:cleanup.Log){Start-Process notepad.exe ('"{0}"' -f $script:cleanup.Log)}})
+$cleanupWindow.Add_Closing({param($sender,$event) if($script:cleanup.Job){$event.Cancel=$true}})
+$cleanupWindow.Add_ContentRendered({Start-CleanupOperation 'Inspect'})
+Set-CleanupBusy $false
+if($ValidateOnly){return $cleanupWindow}
+try{[void]$cleanupWindow.ShowDialog()}finally{$cleanupTimer.Stop()}
+exit $script:cleanup.ExitCode

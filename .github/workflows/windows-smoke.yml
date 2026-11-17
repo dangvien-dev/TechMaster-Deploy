@@ -33,6 +33,15 @@ jobs:
           & App/Test-DeployActions.ps1
           & FixClone/Test-UltraViewerDiagnostics.ps1
           & FixClone/Test-MasterPreflight.ps1
+          & FixClone/Test-UltraViewerLifecycle.ps1
+          & FixClone/Test-MasterDeployment.ps1
+          & FixClone/Test-WordSettings.ps1
+          & FixClone/Test-DinhDang.ps1
+          & FixClone/Test-BanPhim.ps1
+          & FixClone/Test-Unattend.ps1
+          & Office/Test-OfficeCleanup.ps1
+          & Office/Test-OfficeTemporary.ps1
+          & KichHoat/Test-QrLifecycle.ps1
           & App/Test-UpdateEngine.ps1
           & App/Build-UpdateIndex.ps1 -Check
           } catch {

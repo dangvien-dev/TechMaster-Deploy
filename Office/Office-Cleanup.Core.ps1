@@ -36,11 +36,47 @@ function Get-OfficeCleanupPlan($inventory, [ValidateSet('Keys', 'Remove')][strin
 
 function Get-OfficeLicenseKind($license) {
     $text = "$($license.Name) $($license.Description)"
-    if ($text -match 'Grace|Trial') { return 'Grace / dùng thử' }
+    if ($license.Name -match 'Grace|Trial') { return 'Grace / dùng thử' }
+    if ($license.Name -match 'Retail') { return 'Retail' }
     if ($text -match 'KMS|GVLK') { return 'KMS' }
     if ($text -match 'MAK') { return 'MAK' }
     if ($text -match 'Retail') { return 'Retail' }
     return 'Khác / chưa xác định'
+}
+
+function Test-OfficeTemporaryLicense($license) {
+    $status = 0
+    return $license.ApplicationID -eq $script:OfficeApplicationId -and
+        $license.PartialProductKey -match '^[A-Za-z0-9]{5}$' -and
+        $license.Name -match '(Office21|Office24|2021|2024)' -and $license.Name -notmatch '(Visio|Project)' -and
+        ($license.Name -match 'Grace|Trial') -and
+        [int]::TryParse([string]$license.LicenseStatus, [ref]$status) -and $status -in 0,2,3,4,5,6
+}
+
+function Get-OfficeTemporaryPlan($inventory) {
+    $plan = Get-OfficeCleanupPlan $inventory 'Keys'
+    [pscustomobject]@{
+        Mode='Keys'; Products=@(); TemporaryOnly=$true
+        Keys=@($plan.Keys | Where-Object { Test-OfficeTemporaryLicense $_ })
+        PreservedKeys=@($plan.Keys | Where-Object { -not (Test-OfficeTemporaryLicense $_) })
+    }
+}
+
+function Assert-OfficeInventoryUnchanged($before, $after) {
+    if ((($before.Products | Sort-Object) -join ',') -cne (($after.Products | Sort-Object) -join ',') -or
+        (($before.Keys | ForEach-Object { "$($_.ID):$($_.PartialProductKey):$($_.LicenseStatus)" } | Sort-Object) -join ',') -cne
+        (($after.Keys | ForEach-Object { "$($_.ID):$($_.PartialProductKey):$($_.LicenseStatus)" } | Sort-Object) -join ',')) {
+        throw 'Office đã thay đổi trong lúc xác nhận. Làm mới danh sách trước khi tiếp tục.'
+    }
+}
+
+function New-OfficeSelectedPlan($inventory, [string[]]$selectedIds, [ValidateSet('Keys','Remove')][string]$mode) {
+    $plan = Get-OfficeCleanupPlan $inventory $mode
+    foreach ($id in $selectedIds) {
+        if ($id -notin @($plan.Keys.ID)) { throw 'Có key ngoài phạm vi thao tác. Làm mới hoặc dùng chức năng chỉ xoá key.' }
+    }
+    $indices = @(for ($i=0; $i -lt $plan.Keys.Count; $i++) { if ($plan.Keys[$i].ID -in $selectedIds) { $i+1 } })
+    return Select-OfficeCleanupKeys $plan ($indices -join ',')
 }
 
 function Select-OfficeCleanupKeys($plan, [string]$selection) {
@@ -66,7 +102,7 @@ function Select-OfficeCleanupKeys($plan, [string]$selection) {
         else { $preserved += $plan.Keys[$i] }
     }
     if ($plan.Mode -eq 'Remove' -and $preserved.Count) {
-        throw 'Bạn đang giữ lại key của bộ Office sẽ gỡ. Đã dừng vì gỡ cả bộ có thể ảnh hưởng license này. Dùng lựa chọn 2 để chỉ xoá từng key và giữ Office / Retail.'
+        throw 'Bạn đang giữ lại key của bộ Office sẽ gỡ. Đã dừng vì gỡ cả bộ có thể ảnh hưởng license này. Bấm Xoá key đã chọn để chỉ dọn key và giữ Office / Retail.'
     }
     [pscustomobject]@{ Mode = $plan.Mode; Products = @($plan.Products); Keys = $chosen; PreservedKeys = $preserved }
 }
@@ -140,9 +176,11 @@ function Invoke-OfficeCleanupPlan($plan, [string]$setup, [string]$workDirectory)
     $failures = @()
     foreach ($license in $plan.Keys) {
         try {
-            Write-Host ("Dọn cấu hình KMS và key Office: {0} (đuôi {1})" -f $license.Name, $license.PartialProductKey)
-            Invoke-OfficeLicenseMethod $license 'ClearKeyManagementServiceMachine'
-            Invoke-OfficeLicenseMethod $license 'ClearKeyManagementServicePort'
+            Write-Host ("Dọn key Office: {0} (đuôi {1})" -f $license.Name, $license.PartialProductKey)
+            if (-not $plan.TemporaryOnly) {
+                Invoke-OfficeLicenseMethod $license 'ClearKeyManagementServiceMachine'
+                Invoke-OfficeLicenseMethod $license 'ClearKeyManagementServicePort'
+            }
             Invoke-OfficeLicenseMethod $license 'UninstallProductKey'
         } catch {
             $failures += $_.Exception.Message

@@ -1,8 +1,24 @@
 ﻿# Shared WPF helpers. Background pipelines never access UI controls.
 function Import-DeployWindow([string]$path) {
     Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
+    if (-not ('TechMaster.DesktopIdentity' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'DesktopIdentity.cs') }
+    [TechMaster.DesktopIdentity]::Initialize()
     $reader = [Xml.XmlReader]::Create($path, [Xml.XmlReaderSettings]@{ DtdProcessing = 'Prohibit'; XmlResolver = $null })
-    try { return [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Dispose() }
+    try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Dispose() }
+    $stream = [IO.File]::OpenRead((Join-Path $PSScriptRoot 'TechMaster.ico'))
+    try {
+        $icon = New-Object Windows.Media.Imaging.BitmapImage
+        $icon.BeginInit(); $icon.CacheOption = 'OnLoad'; $icon.StreamSource = $stream; $icon.EndInit(); $icon.Freeze()
+        $window.Icon = $icon
+    } finally { $stream.Dispose() }
+    $area=[Windows.SystemParameters]::WorkArea
+    $window.MinHeight=[Math]::Min($window.MinHeight,[Math]::Max(320,$area.Height-30))
+    $window.MaxHeight=[Math]::Min($window.MaxHeight,$area.Height-30)
+    if(-not [double]::IsNaN($window.Height)){$window.Height=[Math]::Min($window.Height,$window.MaxHeight)}
+    $window.MinWidth=[Math]::Min($window.MinWidth,[Math]::Max(320,$area.Width-30))
+    $window.MaxWidth=[Math]::Min($window.MaxWidth,$area.Width-30)
+    if(-not [double]::IsNaN($window.Width)){$window.Width=[Math]::Min($window.Width,$window.MaxWidth)}
+    return $window
 }
 
 function New-DeployTimer([int]$milliseconds, [scriptblock]$tick) {
@@ -42,12 +58,43 @@ function Receive-DeployWork($work) {
     } finally { $work.Pipeline.Dispose(); $work.Space.Dispose() }
 }
 
-function Show-DeployMessage([string]$message, [string]$title = 'TechMaster Deploy', [string]$icon = 'Information') {
-    [void][Windows.MessageBox]::Show($message, $title, 'OK', $icon)
+function New-DeployConfirmWindow([string]$message, [string]$title='Xác nhận', [string]$confirmText='Xác nhận', [string]$cancelText='Huỷ', [switch]$Danger, [switch]$Information, $Owner=$null) {
+    $dialog = Import-DeployWindow (Join-Path $PSScriptRoot 'ConfirmWindow.xml')
+    $dialog.Title = $title; $dialog.FindName('Heading').Text = $title
+    $dialog.FindName('Message').Text = $message
+    $dialog.FindName('Confirm').Content = $confirmText; $dialog.FindName('Cancel').Content = $cancelText
+    $dialog.Tag = $false
+    if ($Danger) { $dialog.FindName('Confirm').Background = '#B91C1C' }
+    if ($Information) { $dialog.FindName('Cancel').Visibility='Collapsed'; $dialog.FindName('Cancel').IsDefault=$false; $dialog.FindName('Confirm').IsDefault=$true }
+    if ($Owner -and $Owner.IsVisible) { $dialog.Owner=$Owner; $dialog.WindowStartupLocation='CenterOwner' }
+    $dialog.FindName('Confirm').Add_Click({ param($sender,$event) $parent=[Windows.Window]::GetWindow($sender); $parent.Tag=$true; $parent.Close() })
+    $dialog.FindName('Cancel').Add_Click({ param($sender,$event) [Windows.Window]::GetWindow($sender).Close() })
+    return $dialog
 }
-
-function Confirm-Box([string]$message, [string]$title = 'Xác nhận') {
-    return [Windows.MessageBox]::Show($message, $title, 'YesNo', 'Warning', 'No') -eq 'Yes'
+function Show-DeployMessage([string]$message, [string]$title='TechMaster Deploy', [string]$icon='Information') {
+    $dialog=New-DeployConfirmWindow $message $title 'Đóng' -Information -Danger:($icon -eq 'Error')
+    [void]$dialog.ShowDialog()
+}
+function Confirm-Box([string]$message, [string]$title='Xác nhận', [string]$ConfirmText='Xác nhận', [string]$CancelText='Huỷ', [switch]$Danger, $Owner=$null) {
+    $dialog=New-DeployConfirmWindow $message $title $ConfirmText $CancelText -Danger:$Danger -Owner $Owner
+    [void]$dialog.ShowDialog()
+    return $dialog.Tag -eq $true
+}
+function Select-DeployOption([string]$message, [string]$title, [string]$primaryText, [string]$alternateText) {
+    $dialog=New-DeployConfirmWindow $message $title $primaryText
+    $dialog.FindName('Alternate').Content=$alternateText; $dialog.FindName('Alternate').Visibility='Visible'
+    $dialog.FindName('Alternate').Add_Click({param($sender,$event) $parent=[Windows.Window]::GetWindow($sender);$parent.Tag='Alternate';$parent.Close()})
+    [void]$dialog.ShowDialog()
+    if($dialog.Tag -eq $true){return 'Primary'}
+    if($dialog.Tag -ceq 'Alternate'){return 'Alternate'}
+    return $null
+}
+function Request-DeployText([string]$message, [string]$title='Nhập thông tin', [string]$defaultValue='') {
+    $dialog=New-DeployConfirmWindow $message $title 'Tiếp tục'
+    $dialog.FindName('Input').Visibility='Visible'; $dialog.FindName('Input').Text=$defaultValue
+    [void]$dialog.ShowDialog()
+    if ($dialog.Tag -eq $true) { return [string]$dialog.FindName('Input').Text }
+    return $null
 }
 
 function Select-DeployFile([string]$title, [string]$filter) {

@@ -3,7 +3,7 @@
     Xử lý thông tin trùng lặp trên máy sau khi clone ổ (disk to disk / Ghost).
 
 .DESCRIPTION
-    Các bước (mỗi bước đều hỏi Y/N, trừ khi chạy với -Auto):
+    Các bước (mỗi bước xác nhận bằng nút bấm, trừ khi chạy với -Auto):
       1. Đổi Computer Name
       2. Tạo mới MachineGuid (HKLM\SOFTWARE\Microsoft\Cryptography)
       3. Reset Windows Update / WSUS Client ID (SusClientId)
@@ -45,6 +45,8 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
     Initialize-TechMasterConsole
 }
 
+if(-not $Auto){. (Join-Path $PSScriptRoot 'Load-Ui.ps1')}
+
 # ---------- Kiểm tra quyền Admin ----------
 $principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -66,10 +68,8 @@ function Write-Err($text)  { Write-Host "  [LỖI] $text" -ForegroundColor Red }
 
 function Confirm-Step([string]$question, [bool]$defaultYes = $true, [bool]$autoValue = $true) {
     if ($Auto) { return $autoValue }
-    $hint = if ($defaultYes) { '[Y/n]' } else { '[y/N]' }
-    $ans = Read-Host "$question $hint"
-    if ([string]::IsNullOrWhiteSpace($ans)) { return $defaultYes }
-    return $ans.Trim().ToLower() -in @('y', 'yes', 'c', 'co')
+    return Confirm-Box $question 'Xử lý sau clone' -ConfirmText 'Thực hiện'
+
 }
 
 function Get-MachineSidPrefix {
@@ -160,8 +160,8 @@ if (Confirm-Step "Đổi tên máy?") {
         $suggest = Get-SuggestedName
         if ($Auto) { $NewName = $suggest }
         else {
-            $in = Read-Host "Nhập tên mới (Enter = $suggest)"
-            $NewName = if ([string]::IsNullOrWhiteSpace($in)) { $suggest } else { $in.Trim() }
+            $in = Request-DeployText "Tên máy mới" "Đổi tên máy" $suggest
+            $NewName = if ($null -eq $in) { $env:COMPUTERNAME } elseif ([string]::IsNullOrWhiteSpace($in)) { $suggest } else { $in.Trim() }
         }
     }
     $NewName = $NewName.ToUpper()
@@ -247,13 +247,6 @@ if (-not $tvKeys) {
         Start-Service TeamViewer -ErrorAction SilentlyContinue
         Write-Ok "Đã xoá ClientID. Nếu sau restart ID vẫn trùng -> gỡ và cài lại TeamViewer."
     } catch { Write-Err $_.Exception.Message }
-}
-
-# UltraViewer has a separate identity mechanism; do not reuse AnyDesk/TeamViewer resets.
-$ultraInstalled = @(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match '^UltraViewer(?:\s|$)' })
-if ($ultraInstalled.Count) {
-    Write-Warn 'Có UltraViewer. Chưa reset ID tự động; nếu bị trùng, mở TechMaster → Sau khi clone → Chẩn đoán UltraViewer trên hai máy.'
-    Write-Host '  Giữ nguyên cấu hình và phiên kết nối UltraViewer đang chạy.'
 }
 
 # ---------- 6. IP tĩnh -> DHCP ----------
@@ -357,6 +350,14 @@ if (Test-Path -LiteralPath $dd -PathType Leaf) {
     catch { Write-Err "Định dạng số: $($_.Exception.Message)" }
 }
 else { Write-Warn "Không có $dd -> chạy Fix-DinhDang.bat bằng tay sau." }
+
+# Final prepared cleanup runs after Reinstall and only with the saved master policy.
+Write-Step '11. KEY OFFICE DÙNG THỬ / ID ULTRAVIEWER'
+try {
+    . (Join-Path $PSScriptRoot 'UltraViewer.Core.ps1')
+    . (Join-Path $PSScriptRoot 'Master.Deployment.Core.ps1')
+    Invoke-ClonePreparedCleanup $PSScriptRoot
+} catch { Write-Err ('Chuẩn bị sau clone: '+$_.Exception.Message) }
 
 # ---------- Machine SID ----------
 Write-Step "LƯU Ý VỀ MACHINE SID"

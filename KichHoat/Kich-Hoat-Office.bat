@@ -5,5 +5,4 @@ if %errorlevel% neq 0 (
     powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 )
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Kich-Hoat.ps1" -Product Office
-pause
+powershell -NoProfile -STA -ExecutionPolicy Bypass -File "%~dp0Kich-Hoat.ps1" -Product Office

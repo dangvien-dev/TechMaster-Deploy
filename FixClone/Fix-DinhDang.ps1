@@ -1,9 +1,9 @@
 ﻿<#
 .SYNOPSIS
-    Chỉnh dấu thập phân / hàng nghìn cho user ĐANG ĐĂNG NHẬP (máy đã clone).
+    Chỉnh ngày ngắn và dấu thập phân / hàng nghìn cho user ĐANG ĐĂNG NHẬP (máy đã clone).
 
-    Chỉ đổi Decimal symbol = "," và Digit grouping symbol = ".".
-    Giữ nguyên ngày giờ, vùng, ngôn ngữ, list separator và đơn vị đo.
+    Đổi Decimal symbol = "," và Digit grouping symbol = ".".
+    Ngày ngắn dd/MM/yyyy. Giữ giờ, vùng, ngôn ngữ, list separator và đơn vị đo.
 
     Chạy KHÔNG cần quyền Admin (ghi vào HKCU của user hiện tại).
     Thêm -AllNewUsers (cần Admin) để áp dụng luôn cho user tạo mới sau này.
@@ -18,6 +18,8 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
 $values = [ordered]@{
     'sDecimal'  = ','
     'sThousand' = '.'
+    'sShortDate' = 'dd/MM/yyyy'
+    'sDate' = '/'
 }
 
 function Set-Intl([string]$root) {
@@ -39,7 +41,7 @@ if ($AllNewUsers) {
 
 Write-Host "`n=== DINH DANG SO - user $env:USERNAME ===" -ForegroundColor Cyan
 # Formatting must not change the user's culture, language list or keyboard.
-# Only apply the two explicit number separators below.
+# Only apply the explicit number separators and short-date fields below.
 Set-Intl 'HKCU'
 $actual = Get-ItemProperty 'HKCU:\Control Panel\International' -ErrorAction Stop
 foreach ($name in $values.Keys) {
@@ -79,4 +81,4 @@ public static extern System.IntPtr SendMessageTimeout(System.IntPtr hWnd, uint M
 } catch {
     Write-Warning "Không gửi được thông báo cập nhật định dạng: $($_.Exception.Message)"
 }
-Write-Host "`nMở lại ứng dụng để nhận định dạng số mới. Các thiết lập vùng, ngày giờ và bàn phím được giữ nguyên."
+Write-Host "`nMở lại ứng dụng để nhận định dạng số mới. Ngày ngắn dd/MM/yyyy; giờ, vùng và bàn phím được giữ nguyên."

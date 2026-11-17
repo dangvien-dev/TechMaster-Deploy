@@ -28,15 +28,15 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
     . $consoleInit
     Initialize-TechMasterConsole
 }
+if(-not $Auto -and -not $PreCheck){. (Join-Path $PSScriptRoot 'Load-Ui.ps1')}
 function Write-Step($t) { Write-Host "`n=== $t ===" -ForegroundColor Cyan }
 function Write-Ok($t)   { Write-Host "  [OK] $t" -ForegroundColor Green }
 function Write-Warn($t) { Write-Host "  [!] $t" -ForegroundColor Yellow }
 function Write-Err($t)  { Write-Host "  [LỖI] $t" -ForegroundColor Red }
 function Confirm-Step([string]$q, [bool]$def = $true) {
     if ($Auto) { return $true }
-    $a = Read-Host "$q $(if ($def) {'[Y/n]'} else {'[y/N]'})"
-    if ([string]::IsNullOrWhiteSpace($a)) { return $def }
-    return $a.Trim().ToLower() -in 'y', 'yes', 'c', 'co'
+    return Confirm-Box $q 'Kiểm tra / sửa Sysprep' -ConfirmText 'Thực hiện' -Danger
+
 }
 
 # ---------- Quyền Admin ----------
@@ -54,6 +54,8 @@ $problems   = 0
 Write-Step "1. TIEN TRINH SYSPREP"
 $sp = Get-Process sysprep -ErrorAction SilentlyContinue
 if ($sp) {
+    if($PreCheck){Write-Err 'Sysprep vẫn đang chạy; chờ kết thúc trước.';exit 1}
+    if(-not (Confirm-Step 'Dừng tiến trình Sysprep đang chạy? Chỉ thực hiện nếu tiến trình đã bị treo.' $false)){exit 1}
     $sp | Stop-Process -Force
     Write-Ok "Đã đóng sysprep.exe đang chạy"
 } else { Write-Host "  Không có sysprep đang chạy." }
@@ -154,8 +156,10 @@ if (-not $PreCheck) {
 Write-Host ""
 if ($problems -le 0) {
     Write-Host "SẴN SÀNG CHẠY SYSPREP. Rút dây mạng / tắt Wi-Fi trước khi chạy." -ForegroundColor Green
+    if(-not $PreCheck -and -not $Auto){Show-DeployMessage 'Đã kiểm tra. Xem các dòng kết quả và nhật ký trước khi chạy Sysprep.' 'Kiểm tra Sysprep'}
     exit 0
 } else {
     Write-Host "CÒN $problems VẤN ĐỀ. Xử lý xong rồi chạy lại script này." -ForegroundColor Red
+    if(-not $PreCheck -and -not $Auto){Show-DeployMessage ('Còn '+$problems+' vấn đề. Sửa xong rồi kiểm tra lại.') 'Kiểm tra Sysprep' 'Warning'}
     exit 1
 }

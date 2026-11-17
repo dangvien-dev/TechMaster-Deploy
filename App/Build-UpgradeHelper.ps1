@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
-$names = @('Update.Core.ps1', 'Update-App.ps1', 'Update.Engine.ps1', 'Wpf.Runtime.ps1', 'UpdaterWindow.xml')
+$names = @('Update.Core.ps1', 'Update-App.ps1', 'Update.Engine.ps1', 'Wpf.Runtime.ps1', 'UpdaterWindow.xml', 'ConfirmWindow.xml', 'DesktopIdentity.cs', 'TechMaster.ico')
 $encoded = @($names | ForEach-Object { '"' + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $PSScriptRoot $_))) + '"' }) -join ",`n"
 $source = @'
 using System;
@@ -30,7 +30,7 @@ internal static class UpgradeHelper
             string runner = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "TechMaster Deploy", "Update Runner", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(runner);
-            string[] names = { "Update.Core.ps1", "Update-App.ps1", "Update.Engine.ps1", "Wpf.Runtime.ps1", "UpdaterWindow.xml" };
+            string[] names = { "Update.Core.ps1", "Update-App.ps1", "Update.Engine.ps1", "Wpf.Runtime.ps1", "UpdaterWindow.xml", "ConfirmWindow.xml", "DesktopIdentity.cs", "TechMaster.ico" };
             string[] data = { __EMBEDDED_FILES__ };
             for (int i = 0; i < names.Length; i++)
                 File.WriteAllBytes(Path.Combine(runner, names[i]), Convert.FromBase64String(data[i]));

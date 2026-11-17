@@ -1,4 +1,4 @@
-# Runs the actual formatting entrypoint with mocked registry/native commands.
+﻿# Runs the actual formatting entrypoint with mocked registry/native commands.
 $ErrorActionPreference = 'Stop'
 $global:TMFormatTestValues = @{ LocaleName = 'en-US'; sShortDate = 'MM/dd/yyyy'; sShortTime = 'h:mm tt'; sList = ','; iMeasure = '1' }
 $global:TMFormatTestWrites = @()
@@ -18,12 +18,12 @@ function Set-WinDefaultInputMethodOverride { throw 'Formatting must not change d
 function Add-Type { throw 'Native broadcast omitted in this test' }
 try {
     . (Join-Path $PSScriptRoot 'Fix-DinhDang.ps1')
-    foreach ($entry in @{ LocaleName = 'en-US'; sShortDate = 'MM/dd/yyyy'; sShortTime = 'h:mm tt'; sDecimal = ','; sThousand = '.'; sList = ','; iMeasure = '1' }.GetEnumerator()) {
+    foreach ($entry in @{ LocaleName = 'en-US'; sShortDate = 'dd/MM/yyyy'; sDate = '/'; sShortTime = 'h:mm tt'; sDecimal = ','; sThousand = '.'; sList = ','; iMeasure = '1' }.GetEnumerator()) {
         if ($global:TMFormatTestValues[$entry.Key] -cne $entry.Value) { throw "FAIL: formatting value $($entry.Key)" }
     }
-    if (($global:TMFormatTestWrites | Sort-Object) -join ',' -cne 'sDecimal,sThousand') { throw 'FAIL: more than the two number fields were written' }
+    if (($global:TMFormatTestWrites | Sort-Object) -join ',' -cne 'sDate,sDecimal,sShortDate,sThousand') { throw 'FAIL: unexpected regional setting was written' }
     $global:TMFormatTestWrites = @()
     Set-Intl 'HKU\FixtureDefault'
-    if (($global:TMFormatTestWrites | Sort-Object) -join ',' -cne 'sDecimal,sThousand') { throw 'FAIL: default-profile formatter writes other settings' }
-    Write-Host 'PASS: actual format entrypoint and default-profile writer change only decimal/group symbols; all other locale/input settings untouched.'
+    if (($global:TMFormatTestWrites | Sort-Object) -join ',' -cne 'sDate,sDecimal,sShortDate,sThousand') { throw 'FAIL: default-profile formatter writes other settings' }
+    Write-Host 'PASS: actual format entrypoint and default-profile writer change only number symbols and short date; all other locale/input settings untouched.'
 } finally { Remove-Variable TMFormatTestValues,TMFormatTestWrites -Scope Global }

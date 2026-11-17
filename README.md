@@ -2,7 +2,7 @@
 
 Bộ công cụ triển khai Windows và Office.
 
-Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** trên Windows PowerShell 5.1 / .NET Framework có sẵn trong Windows 10/11. Mở `TechMaster Deploy.exe`; chọn chức năng bằng thanh điều hướng bên trái. Các công cụ chuyên dụng như Sysprep, kích hoạt và gỡ / dọn Office tiếp tục dùng script hiện có và cửa sổ xác nhận riêng.
+Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** trên Windows PowerShell 5.1 / .NET Framework có sẵn trong Windows 10/11. Mở `TechMaster Deploy.exe`; chọn chức năng bằng thanh điều hướng bên trái. Từ 2.1.0.0, gỡ / dọn Office có bảng tích chọn từng key; các bước xác nhận dùng nút WPF, không yêu cầu gõ từ khoá. Công cụ triển khai vẫn ghi nhật ký chi tiết.
 
 | Tab | Công cụ | Thư mục |
 |---|---|---|
@@ -20,7 +20,7 @@ Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** t
 1. Chép cả thư mục `TechMaster-Deploy` ra USB, giữ nguyên cấu trúc thư mục con.
 2. Mở **`TechMaster Deploy.exe`** và chấp nhận yêu cầu Administrator. Muốn tạo shortcut Desktop, dùng File Explorer hoặc chạy `App\Tao-Shortcut.bat`.
 3. Thanh trên cùng hiện tên máy và trạng thái bản quyền Windows / Office (bấm **Làm mới** để đọc lại).
-4. Các nút ở tab 1–3 mở công cụ trong **cửa sổ console riêng**, vì các script có bước hỏi / xác nhận (Y/N, gõ YES…). Tab 4 xuất biên bản trực tiếp từ giao diện.
+4. Chọn thao tác, xem phạm vi thay đổi rồi bấm xác nhận. Công cụ triển khai có thể mở cửa sổ nhật ký riêng; không cần gõ YES / XOA OFFICE. Tab Biên bản xuất trực tiếp từ giao diện.
 
 ## Cập nhật phiên bản
 
@@ -32,13 +32,13 @@ Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiệ
 
 **Lịch sử cập nhật**, **Có gì mới?** và **Khôi phục bản trước** vẫn dùng được. Cấu hình biên bản, logo, biên bản đã xuất, kho Office, ODT, nhật ký và Reinstall được giữ nguyên. Sao lưu nằm ở `.updates`; đừng xoá nếu còn muốn quay lại. Tệp chương trình sửa riêng không bị tự ghi đè.
 
-**Bản cũ chưa hỗ trợ repo:** dùng công cụ `TechMaster Update.exe` mới để chọn thư mục app hiện tại và chọn **Yes** lấy trực tiếp từ repo. **No** cho phép chọn ZIP offline khi cần. Sau lần nâng cấp này chỉ dùng nút Kiểm tra cập nhật. Cập nhật ZIP vẫn có để chuyển bản offline.
+**Bản cũ chưa hỗ trợ repo:** dùng công cụ `TechMaster-Update.exe` mới để chọn thư mục app hiện tại, rồi bấm tải / cài; có nút chọn ZIP offline khi cần. Sau lần nâng cấp này chỉ dùng nút Kiểm tra cập nhật. Cập nhật ZIP vẫn có để chuyển bản offline.
 
 **Bản cũ lỗi HTTP 403 khi cập nhật:** đóng app, tải `App/Repair-Update.ps1` từ repo rồi chạy bằng PowerShell với `-Root` là thư mục TechMaster-Deploy hiện tại. Công cụ lấy updater mới riêng, giữ dữ liệu và hỏi xác nhận trước khi cài; xem [hướng dẫn sửa cập nhật](RELEASING.md#sửa-cập-nhật-trên-bản-cũ).
 
 **Nâng cấp bằng giao diện:** đóng app cũ, mở `TechMaster-Update.exe` trong Downloads của repo, chọn file `TechMaster Deploy.exe` đang dùng hoặc nhập thư mục app. Bấm **Tiếp tục → Tải bản cập nhật → Cài đặt và mở lại**. Có nút chọn ZIP nếu cần cập nhật offline. Từ bản 2.0 dùng nút cập nhật trong app; không nhập `y` hoặc `CAP NHAT` nữa.
 
-**UltraViewer trùng ID:** vào **Sau khi clone → Chẩn đoán UltraViewer** trên hai máy bị trùng và sao chép kết quả để so sánh. Công cụ chỉ đọc; chưa tự reset UltraViewer vì cần xác minh cách lưu ID của phiên bản thực tế. Chỉ biết số phiên bản chưa đủ kết luận nguyên nhân. Không tự dừng phiên hỗ trợ đang chạy.
+**UltraViewer trùng ID:** vào **Sau khi clone → Reset ID UltraViewer** để sao lưu rồi reset hai trường UID / PreferID của bản **6.6.133** đã kiểm tra. Thao tác ngắt UltraViewer, nên chạy tại máy hoặc qua remote khác. Có nút kiểm tra và khôi phục. Khi tạo ảnh mới, bật tuỳ chọn chuẩn bị UltraViewer trong cửa sổ trước Sysprep; dịch vụ được giữ tắt trên ảnh gốc và bật lại sau clone để nhận ID riêng một lần. Chẩn đoán UltraViewer vẫn chỉ đọc.
 
 Trước Sysprep có cửa sổ nhắc chọn **Screen Snipping → Always** cho Windows + Shift + S, kiểm tra và sao lưu / dọn icon Word / Excel trùng. Chỉ dọn shortcut cùng đích, giữ các thiết lập Word. Máy đã clone mở chức năng này ở **Sau khi clone → Kiểm tra Desktop và phím chụp**.
 
@@ -61,7 +61,7 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 
 - Thông tin đơn vị lưu ở `BienBan\BienBan-Config.json`, nhập một lần.
 - Logo: file `BienBan\Logo.svg` (hoặc `.png` / `.jpg`). Đổi bằng nút **Chọn logo…**.
-  WinForms không xem trước được SVG; logo SVG vẫn hiện đúng trong biên bản.
+  Giao diện không xem trước được SVG; logo SVG vẫn hiện đúng trong biên bản.
 - Biên bản lưu ở `BienBan\BienBan\<Tên máy>_<ngày giờ>.html`, tự mở trong trình duyệt → nút **In / Lưu PDF**.
 - Chỉ in 5 ký tự cuối key. Luôn có ghi chú "không phải chứng nhận do Microsoft cấp".
 - Tổng kết lấy từ cùng danh sách license hiển thị trong bảng; thiếu dữ liệu / lỗi đọc được báo riêng, không tự kết luận là chưa kích hoạt. Sau khi cập nhật công cụ hoặc trạng thái license, cần **xuất lại biên bản**; HTML cũ không tự cập nhật.
@@ -79,13 +79,13 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 
 ## Gỡ / dọn Office
 
-Trong tab **Tải / cài Office**, bấm **Gỡ / dọn Office…**. Công cụ mở cửa sổ riêng với ba lựa chọn:
+Trong tab **Tải / cài Office**, bấm **Gỡ / dọn Office…**. Bảng hiện loại license, trạng thái và 5 ký tự cuối key; mặc định không chọn key nào:
 
 1. **Kiểm tra**: liệt kê Product ID Click-to-Run và key Office đọc được từ SoftwareLicensingProduct; chỉ hiển thị 5 ký tự cuối.
-2. **Chọn key Office cần xoá**: hiển thị danh sách có số thứ tự, loại license (Retail, Grace / dùng thử, KMS, MAK), tên và 5 ký tự cuối. Nhập số của từng key muốn xoá, ví dụ `1,3`. Mặc định không chọn gì; Enter sẽ huỷ thao tác xoá. Key không chọn được giữ nguyên, gồm key Retail bạn cần dùng. Không gỡ ứng dụng.
-3. **Gỡ Office 2021/2024**: dùng ODT có chữ ký Microsoft để gỡ đúng các bộ Office 2021/2024 Click-to-Run nhận diện được, có bước chọn key. Nếu bạn giữ lại key của bộ Office trong phạm vi gỡ, công cụ dừng và hướng dẫn dùng lựa chọn 2 để tránh ảnh hưởng license cần giữ. Chỉ tiếp tục khi bạn chủ động chọn toàn bộ key trong phạm vi gỡ. Giữ các Product ID khác, gồm Microsoft 365, Visio / Project và Office đời cũ. Không hỗ trợ gỡ MSI hoặc sản phẩm không nhận diện được.
+2. **Xoá key đã chọn**: tích đúng các key cần xoá rồi bấm nút, kiểm tra danh sách trong hộp xác nhận. Key không chọn được giữ nguyên, gồm Retail bạn cần dùng. Nút chọn key dùng thử chỉ chọn Grace/Trial được nhận diện rõ; không gỡ ứng dụng.
+3. **Gỡ bộ Office**: chỉ áp dụng Office Click-to-Run 2021 / 2024. Tích key cần xoá rồi bấm Gỡ Office. Nếu còn key bộ Office cần giữ, công cụ từ chối gỡ ứng dụng để tránh ảnh hưởng key đó; Visio / Project được giữ.
 
-Trước thao tác thay đổi, công cụ hiện riêng danh sách **key sẽ xoá** và **key giữ lại**, rồi yêu cầu gõ **XOA OFFICE**. Sau thao tác, công cụ đọc lại để xác minh key đã chọn xoá không còn và các key chọn giữ vẫn khớp. Lưu tài liệu, đóng toàn bộ Office và giữ lại thông tin mua bản quyền trước khi tiếp tục. Nhật ký nằm trong `%LOCALAPPDATA%\TechMaster Deploy\Office Logs`; nút **Xem nhật ký** mở kết quả sau khi đóng công cụ. Lỗi xoá key sẽ chặn bước gỡ ứng dụng; thay đổi đã thực hiện trước lỗi không tự hoàn tác.
+**Trước Sysprep:** có lựa chọn dọn key tạm mặc định bật. Công cụ lưu thiết lập Word trước; chỉ tự xoá license Office 2021 / 2024 có tên chứa Grace / Trial và trạng thái chưa kích hoạt. Retail dù chưa kích hoạt vẫn được giữ, key không nhận diện chắc chắn cần bạn xem / chọn thủ công. Chỉ gọi UninstallProductKey, không xoá kho token / giấy phép chung hay ứng dụng. Sau clone kiểm tra lại theo lựa chọn đã lưu, giúp dọn key tạm Office có thể tạo lại khi mở trên máy gốc.
 
 Công cụ gọi `ClearKeyManagementServiceMachine`, `ClearKeyManagementServicePort`, `UninstallProductKey` trên từng license có Application ID của Office, rồi đọc lại để kiểm tra. Không chạy `slmgr /upk`, không xoá key Windows hoặc kho token dùng chung. Cấu hình KMS dùng chung với Windows không bị thay đổi.
 
@@ -96,9 +96,9 @@ KMS có thể thuộc bản quyền hợp lệ của tổ chức. Công cụ **k
 Chạy trực tiếp bằng Windows PowerShell (vẫn yêu cầu xác nhận khi xoá):
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Office\Office-Cleanup.ps1 -Mode Inspect
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Office\Office-Cleanup.ps1 -Mode Keys
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File Office\Office-Cleanup.ps1 -Mode Remove
+powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File Office\Office-Cleanup.ps1 -Mode Inspect
+powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File Office\Office-Cleanup.ps1 -Mode Keys
+powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File Office\Office-Cleanup.ps1 -Mode Remove
 ```
 
 Kiểm thử mô phỏng, không thay đổi Office trên máy:
@@ -124,7 +124,7 @@ powershell.exe -NoProfile -File Office\Test-OfficeCleanup.ps1
 |---|---|
 | Script FixClone, Kich-Hoat (TEST qua LAN) | Đã chạy trên máy thật 2026-11-16 |
 | Mẫu biên bản (bố cục, logo, 1 trang A4) | Đã xem trước bằng dữ liệu giả |
-| Giao diện `TechMaster-Deploy.ps1` (WinForms) | Founder đã mở được (tab 1, tab 4); tab Office **chưa chạy** |
+| Giao diện WPF và updater | Kiểm tra tải cửa sổ, điều khiển, xác nhận và trạng thái bằng Windows CI; thao tác hệ thống dùng mô phỏng |
 | `Office\Office-ODT.ps1` | XML cấu hình đã kiểm cú pháp; tải / cài thật **chưa chạy** |
 | Đọc WMI trong biên bản trên máy thật | **Chưa chạy** |
 

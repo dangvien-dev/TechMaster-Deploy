@@ -5,5 +5,4 @@ if %errorlevel% neq 0 (
     powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 )
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Fix-CloneDuplicate.ps1" %*
-pause
+powershell -NoProfile -STA -ExecutionPolicy Bypass -File "%~dp0Fix-CloneDuplicate.ps1" %*

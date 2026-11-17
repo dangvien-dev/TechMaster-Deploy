@@ -19,6 +19,8 @@ function Get-LicProducts { $global:CidLicense }
 function Get-CimInstance { [pscustomobject]@{ Name = 'fake service' } }
 function Invoke-CimMethod {}
 function Set-Clipboard {}
+function Confirm-Box {$true}
+function Select-DeployOption {'Primary'}
 function Remove-NetFirewallRule {}
 function Read-Host($Prompt) {
     if ($Prompt -match 'Làm portal') { return '1' }

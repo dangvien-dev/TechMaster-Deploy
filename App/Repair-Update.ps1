@@ -27,7 +27,7 @@ try {
     Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/dangvien-dev/TechMaster-Deploy/main/App/Update.Core.ps1' -UseBasicParsing -OutFile $core -TimeoutSec 60 -ErrorAction Stop
     . $core
     $release = Get-DeployOnlineRelease
-    foreach ($name in 'Update.Core.ps1', 'Update-App.ps1', 'Update.Engine.ps1', 'Wpf.Runtime.ps1', 'UpdaterWindow.xml') {
+    foreach ($name in 'Update.Core.ps1', 'Update-App.ps1', 'Update.Engine.ps1', 'Wpf.Runtime.ps1', 'UpdaterWindow.xml', 'ConfirmWindow.xml', 'DesktopIdentity.cs', 'TechMaster.ico') {
         $entry = @($release.files | Where-Object { $_.path -ceq ('App/' + $name) })
         if ($entry.Count -ne 1) { throw 'Bản cập nhật thiếu công cụ cần thiết.' }
         [byte[]]$bytes = Get-DeployRepositoryBlob $entry[0]

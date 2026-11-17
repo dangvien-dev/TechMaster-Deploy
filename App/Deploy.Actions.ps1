@@ -11,7 +11,7 @@ $offProducts = @(
 
 function Start-Tool([string]$file, [string]$label) {
     if (-not (Test-Path $file)) {
-        [Windows.MessageBox]::Show("Không tìm thấy:`n$file", 'TechMaster Deploy', 'OK', 'Error') | Out-Null
+        Show-DeployMessage "Không tìm thấy:`n$file" 'TechMaster Deploy' 'Error'
         return
     }
     # Mỗi công cụ chạy trong cửa sổ console riêng (các script có bước hỏi / xác nhận)
@@ -79,13 +79,13 @@ function Finish-ODT([Nullable[int]]$exitCode) {
 function Start-ODT([string]$mode) {
     if ($script:officeRun) { return }
     $sel = Get-OffSel
-    if ($sel.Langs.Count -eq 0) { [Windows.MessageBox]::Show('Chọn ít nhất 1 ngôn ngữ.', 'Office') | Out-Null; return }
+    if ($sel.Langs.Count -eq 0) { Show-DeployMessage 'Chọn ít nhất 1 ngôn ngữ.' 'Office'; return }
     $key = $tbOffKey.Text.Trim().ToUpper()
     if ($key -and $key -notmatch '^([A-Z0-9]{5}-){4}[A-Z0-9]{5}$') {
-        [Windows.MessageBox]::Show('Key sai định dạng XXXXX-XXXXX-XXXXX-XXXXX-XXXXX', 'Office', 'OK', 'Warning') | Out-Null; return
+        Show-DeployMessage 'Key sai định dạng XXXXX-XXXXX-XXXXX-XXXXX-XXXXX' 'Office' 'Warning'; return
     }
     if ($mode -eq 'InstallKho' -and -not (Test-Path (Join-Path $sel.Kho 'Office'))) {
-        [Windows.MessageBox]::Show("Chưa có kho cho lựa chọn này:`n$($sel.Kho)`n`nBấm 'Tải về kho' trước.", 'Office', 'OK', 'Warning') | Out-Null; return
+        Show-DeployMessage "Chưa có kho cho lựa chọn này:`n$($sel.Kho)`n`nBấm 'Tải về kho' trước." 'Office' 'Warning'; return
     }
     if ($mode -ne 'Download') {
         $msg = "Cài $($sel.Name) ($($sel.Arch)-bit, $($sel.Langs -join ', ')) lên máy này?"
@@ -138,12 +138,12 @@ function Start-OfficeCleanup {
     $runDir = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy\Office Logs\Cleanup_' + [guid]::NewGuid().ToString('N'))
     $log = Join-Path $runDir 'Cleanup.log'
     $progress = Join-Path $runDir 'Progress.txt'
-    $cleanupArgs = '-NoLogo -NoProfile -ExecutionPolicy Bypass -File "{0}" -LogPath "{1}" -ProgressPath "{2}"' -f (Join-Path $DirOffice 'Office-Cleanup.ps1'), $log, $progress
+    $cleanupArgs = '-NoLogo -NoProfile -STA -ExecutionPolicy Bypass -File "{0}" -LogPath "{1}" -ProgressPath "{2}"' -f (Join-Path $DirOffice 'Office-Cleanup.ps1'), $log, $progress
     try {
         New-Item -ItemType Directory -Path $runDir -Force -ErrorAction Stop | Out-Null
-        $process = Start-Process powershell.exe -ArgumentList $cleanupArgs -WorkingDirectory $DirOffice -PassThru -ErrorAction Stop
+        $process = Start-Process powershell.exe -ArgumentList $cleanupArgs -WorkingDirectory $DirOffice -WindowStyle Hidden -PassThru -ErrorAction Stop
     } catch {
-        [Windows.MessageBox]::Show($_.Exception.Message, 'Gỡ / dọn Office', 'OK', 'Error') | Out-Null
+        Show-DeployMessage $_.Exception.Message 'Gỡ / dọn Office' 'Error'
         return
     }
     try { $null = $process.Handle } catch [InvalidOperationException] {}

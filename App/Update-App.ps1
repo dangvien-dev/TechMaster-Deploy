@@ -27,6 +27,9 @@ function Set-UpdateView([string]$state, [string]$message) {
     $controls.Progress.IsIndeterminate = $view.busy
     $controls.Cancel.IsEnabled = $state -ne 'Applying'
     $controls.Cancel.Content = if ($view.busy) { 'Huỷ' } else { 'Đóng' }
+    $controls.Cancel.Visibility = if ($state -eq 'Complete') { 'Collapsed' } else { 'Visible' }
+    $controls.ChoosePackage.Visibility = if ($state -eq 'Complete' -or $Mode -in 'History','Rollback','Access') { 'Collapsed' } else { 'Visible' }
+    if ($state -eq 'Complete' -and $script:session.Root) { $controls.CurrentVersion.Text = 'Phiên bản đang dùng: ' + (Get-DeployVersion $script:session.Root) }
     if ($state -in 'Complete','Ready') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 100 }
     if ($state -in 'Error','Latest','Available','Idle') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 0 }
 }
@@ -103,8 +106,8 @@ $controls.Primary.Add_Click({
     $view = Get-DeployUpdateView $script:session.State
     switch ($view.action) {
         'Close' { $window.Close() }
-        'Apply' { if (Confirm-Box 'Cài bản cập nhật đã kiểm tra? Ứng dụng sẽ đóng, sao lưu và mở lại khi hoàn tất.' 'Cài đặt bản cập nhật') { Start-UpdateOperation 'Apply' } }
-        'Rollback' { if (Confirm-Box 'Khôi phục phiên bản trước? Ứng dụng sẽ đóng rồi mở lại. Cấu hình và dữ liệu được giữ nguyên.' 'Khôi phục') { Start-UpdateOperation 'Rollback' } }
+        'Apply' { if (Confirm-Box 'Cài bản cập nhật đã kiểm tra? Ứng dụng sẽ đóng, sao lưu và mở lại khi hoàn tất.' 'Cài đặt bản cập nhật' -ConfirmText 'Cài đặt' -Owner $window) { Start-UpdateOperation 'Apply' } }
+        'Rollback' { if (Confirm-Box 'Khôi phục phiên bản trước? Ứng dụng sẽ đóng rồi mở lại. Cấu hình và dữ liệu được giữ nguyên.' 'Khôi phục' -ConfirmText 'Khôi phục' -Owner $window) { Start-UpdateOperation 'Rollback' } }
         'Retry' { Start-InitialUpdate }
         default { if ($view.action) { Start-UpdateOperation $view.action } }
     }

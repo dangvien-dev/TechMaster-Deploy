@@ -42,5 +42,27 @@ Set-UpdateView 'Applying' 'Test only'
 Assert (-not $updater.FindName('Cancel').IsEnabled) 'Apply cannot be interrupted by Close button'
 $precheck = . (Join-Path (Split-Path -Parent $PSScriptRoot) 'FixClone/Master-Preflight.ps1') -AfterClone -ValidateOnly
 Assert ($precheck -is [Windows.Window] -and $null -ne $precheck.FindName('CleanDesktop')) 'Native WPF Sysprep/desktop preflight loads without running deployment'
-$precheck.Close(); $updater.Close(); $main.Close()
+Set-UpdateView 'Complete' 'Hoàn tất'
+Assert ($updater.FindName('Cancel').Visibility -eq 'Collapsed' -and $updater.FindName('Primary').Content -eq 'Đóng') 'Completed update has exactly one Close button'
+Assert ($updater.FindName('ChoosePackage').Visibility -eq 'Collapsed') 'Offline installer is hidden after completion'
+Assert ($null -ne $main.Icon -and $null -ne $updater.Icon) 'Application windows use TechMaster icon'
+Assert ([TechMaster.DesktopIdentity]::CurrentId() -ceq 'TechMaster.Deploy') 'PowerShell host uses TechMaster taskbar identity'
+$dialog=New-DeployConfirmWindow 'Test' 'Cài đặt bản cập nhật' 'Cài đặt' -Danger
+Assert ($dialog.FindName('Confirm').Content -eq 'Cài đặt' -and $dialog.FindName('Cancel').IsDefault -and $dialog.Tag -eq $false) 'Styled confirmation defaults to Cancel'
+Assert ($dialog.FindName('Input').Visibility -eq 'Collapsed') 'Destructive confirmation requires no typed phrase'
+$dialog.FindName('Confirm').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
+Assert ($dialog.Tag -eq $true) 'Confirm button returns explicit consent'
+$dialog=New-DeployConfirmWindow 'Test' 'Thông báo' 'Đóng' -Information
+Assert ($dialog.FindName('Cancel').Visibility -eq 'Collapsed' -and $dialog.FindName('Confirm').IsDefault) 'Information dialog shows one Close button'
+$dialog.Close()
+$root=Split-Path -Parent $PSScriptRoot
+$office= . (Join-Path $root 'Office/Office-Cleanup.ps1') -Mode Inspect -ValidateOnly
+Assert ($office -is [Windows.Window] -and $office.FindName('Keys').IsReadOnly -and -not $office.FindName('DeleteKeys').IsEnabled) 'Office inventory UI is read-only in Inspect mode'
+$ultra= . (Join-Path $root 'FixClone/UltraViewer-Reset.ps1') -ValidateOnly
+Assert ($ultra -is [Windows.Window] -and $null -ne $ultra.FindName('Restore')) 'UltraViewer UI loads with restore action; no identity mutation'
+$keyboard= . (Join-Path $root 'FixClone/Fix-BanPhim.ps1') -ValidateOnly
+Assert ($keyboard -is [Windows.Window]) 'Keyboard graphical choices load without changing input settings'
+$master= . (Join-Path $root 'FixClone/Master-Preflight.ps1') -ValidateOnly
+Assert ($master.FindName('CleanOfficeTrial').IsChecked -and $master.FindName('PrepareUltra').IsChecked) 'Master preflight offers conservative trial cleanup and clone identity preparation'
+$master.Close(); $keyboard.Close(); $ultra.Close(); $office.Close(); $precheck.Close(); $updater.Close(); $main.Close()
 Write-Host "PASS: $checks native WPF assertions; eight tabs, control binding, layout, Office defaults and updater states."

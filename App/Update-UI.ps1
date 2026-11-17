@@ -28,7 +28,7 @@ function Start-DeployUpdater([string]$mode, [string]$zipPath = '') {
     try {
         $runner = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Update Runner/' + [guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $runner -Force -ErrorAction Stop | Out-Null
-        foreach ($file in 'Update-App.ps1','Update.Core.ps1','Update.Engine.ps1','Wpf.Runtime.ps1','UpdaterWindow.xml') {
+        foreach ($file in 'Update.Core.ps1', 'Update-App.ps1', 'Update.Engine.ps1', 'Wpf.Runtime.ps1', 'UpdaterWindow.xml', 'ConfirmWindow.xml', 'DesktopIdentity.cs', 'TechMaster.ico') {
             Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination $runner -ErrorAction Stop
         }
         $script:updateCloseRequest = Join-Path $runner 'close.request'

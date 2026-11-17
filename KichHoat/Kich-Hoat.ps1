@@ -27,6 +27,8 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
     . $consoleInit
     Initialize-TechMasterConsole
 }
+$uiRuntime=Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Wpf.Runtime.ps1'
+if(Test-Path -LiteralPath $uiRuntime){. $uiRuntime}
 . (Join-Path $PSScriptRoot 'Activation.Core.ps1')
 . (Join-Path $PSScriptRoot 'QrWindow.Core.ps1')
 $cfg = @{
@@ -56,7 +58,8 @@ function Format-Groups([string]$digits, [int]$size) {
 # ---------- Nhập Confirmation ID: gõ tay / clipboard ----------
 function Read-CidKeyboard {
     while ($true) {
-        $in = Read-Host "`n  Nhập/dán Confirmation ID (48 số, có thể kèm khoảng trắng; Enter trống = đọc clipboard; q = bỏ qua)"
+        $in = Request-DeployText "Nhập / dán Confirmation ID 48 số. Để trống rồi bấm Tiếp tục để đọc clipboard; Huỷ để bỏ qua." "Confirmation ID"
+        if($null -eq $in){return $null}
         if ($in -eq 'q') { return $null }
         if ([string]::IsNullOrWhiteSpace($in)) { try { $in = Get-Clipboard -Raw } catch { $in = '' } }
         $c = ($in -replace '\D', '')
@@ -249,7 +252,7 @@ Write-Warn "Online thất bại -> chuyển sang kích hoạt qua Product Activa
 
 if ($Product -eq 'Office') {
     Write-Warn "Đóng hết Word/Excel/PowerPoint/Outlook trước khi tiếp tục (đóng cả cửa sổ Activation Wizard)."
-    Read-Host "  Nhấn Enter khi đã đóng"
+    if(-not (Confirm-Box 'Đã lưu tài liệu và đóng Word / Excel / PowerPoint / Outlook cùng cửa sổ Activation Wizard?' 'Chuẩn bị nạp mã' -ConfirmText 'Đã đóng Office')){exit 0}
 }
 
 # ---------- 2-4. Kích hoạt từng sản phẩm ----------
@@ -285,8 +288,9 @@ foreach ($p in $todo) {
     $tpl = Join-Path $PSScriptRoot 'QR-Template.html'
     $mode = '2'
     if (Test-Path $tpl) {
-        $mode = Read-Host "`n  Làm portal ở đâu? [1] Điện thoại - quét QR (mặc định)  [2] Trên máy này"
-        if ([string]::IsNullOrWhiteSpace($mode)) { $mode = '1' }
+        $choice=Select-DeployOption 'Chọn nơi thực hiện portal Microsoft. Điện thoại dùng QR và gửi mã về máy qua LAN.' 'Kích hoạt qua portal' 'Điện thoại / QR' 'Trên máy này'
+        if(-not $choice){continue}
+        $mode=if($choice -eq 'Primary'){'1'}else{'2'}
     }
     $cid = $null
     if ($mode -eq '1') {

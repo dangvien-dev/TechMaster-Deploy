@@ -7,9 +7,10 @@
     3. EVKey tự khởi động cho mọi user (HKLM\...\Run)
     4. Thiết lập Word (Normal.dotm, ribbon, Options) -> Default profile
     5. Menu chuột phải kiểu Windows 10 (user hiện tại + Default profile)
-    6. Chỉ dấu số: thập phân ",", phân nhóm "."; giữ nguyên vùng và ngôn ngữ
+    6. Ngày dd/MM/yyyy; dấu số: thập phân ",", phân nhóm "."; giữ nguyên vùng và ngôn ngữ
 #>
-$ErrorActionPreference = 'Continue'
+$ErrorActionPreference = 'Stop'
+if(Get-Process -Name WINWORD,EXCEL,POWERPNT,OUTLOOK -ErrorAction SilentlyContinue){throw 'Lưu tài liệu và đóng Office trước khi lưu thiết lập máy gốc.'}
 $consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
 if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
     . $consoleInit
@@ -85,44 +86,8 @@ if (-not $evk) {
 }
 # ---------- 4. Thiết lập Word -> Default profile ----------
 Write-Host "`n=== 4. THIET LAP WORD ===" -ForegroundColor Cyan
-if (Get-Process WINWORD -ErrorAction SilentlyContinue) {
-    Write-Warn "Word đang mở -> đóng Word rồi chạy lại (Normal.dotm đang bị khoá)."
-} else {
-    $def = 'C:\Users\Default\AppData'
-    # 4a. Normal.dotm: font, cỡ chữ, lề, style, khổ giấy mặc định
-    $files = @(
-        @{ Src = "$env:APPDATA\Microsoft\Templates\Normal.dotm";            Dst = "$def\Roaming\Microsoft\Templates" },
-        # 4b. Ribbon + Quick Access Toolbar tuỳ chỉnh
-        @{ Src = "$env:LOCALAPPDATA\Microsoft\Office\Word.officeUI";        Dst = "$def\Local\Microsoft\Office" }
-    )
-    foreach ($f in $files) {
-        if (Test-Path $f.Src) {
-            New-Item -ItemType Directory -Path $f.Dst -Force | Out-Null
-            Copy-Item $f.Src -Destination $f.Dst -Force
-            Write-Ok "$(Split-Path $f.Src -Leaf) -> $($f.Dst)"
-        } else { Write-Warn "Không có $($f.Src) (chưa tuỳ chỉnh thì bỏ qua)" }
-    }
-    # 4c. File > Options (đơn vị cm, định dạng lưu, autosave...) trong registry HKCU
-    $key = 'HKCU\Software\Microsoft\Office\16.0\Word\Options'
-    $exp = Join-Path $work 'WordOptions_export.reg'
-    $imp = Join-Path $work 'WordOptions_default.reg'
-    & reg.exe export $key $exp /y 2>$null | Out-Null
-    if (-not (Test-Path $exp)) {
-        Write-Warn "Không đọc được $key (Office không phải bản 2016/2019/2021/365?)"
-    } else {
-        (Get-Content $exp) -replace '^\[HKEY_CURRENT_USER', '[HKEY_USERS\FixCloneDefault' |
-            Set-Content $imp -Encoding Unicode
-        & reg.exe load 'HKU\FixCloneDefault' 'C:\Users\Default\NTUSER.DAT' | Out-Null
-        if ($LASTEXITCODE -ne 0) { Write-Warn "Không load được NTUSER.DAT của Default profile" }
-        else {
-            & reg.exe import $imp 2>$null
-            if ($LASTEXITCODE -eq 0) { Write-Ok "Đã chép Word Options vào Default profile" }
-            else { Write-Warn "reg import lỗi, ExitCode $LASTEXITCODE" }
-            [gc]::Collect(); Start-Sleep -Seconds 1
-            & reg.exe unload 'HKU\FixCloneDefault' | Out-Null
-        }
-    }
-}
+. (Join-Path $PSScriptRoot 'Word.Settings.Core.ps1')
+Save-MasterWordPreferences -Work $work
 # ---------- 5. Menu chuột phải kiểu Windows 10 ----------
 Write-Host "`n=== 5. MENU CHUOT PHAI KIEU WIN 10 ===" -ForegroundColor Cyan
 $clsid = 'Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32'

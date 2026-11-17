@@ -1,11 +1,10 @@
-﻿param([switch]$AfterClone, [switch]$ValidateOnly)
+﻿param([switch]$AfterClone, [switch]$ValidateOnly, [string]$OptionsPath='')
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase
+. (Join-Path $PSScriptRoot 'Load-Ui.ps1')
 . (Join-Path $PSScriptRoot 'Master.Preflight.Core.ps1')
-$reader = [Xml.XmlReader]::Create((Join-Path $PSScriptRoot 'Master-Preflight.xml'), [Xml.XmlReaderSettings]@{ DtdProcessing='Prohibit';XmlResolver=$null })
-try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Dispose() }
+$window=Import-DeployWindow (Join-Path $PSScriptRoot 'Master-Preflight.xml')
 $script:preflight = @{ Plan=@(); Allowed=$false }
-if ($AfterClone) { $window.Title='Desktop và phím chụp màn hình'; $window.FindName('Continue').Content='Đóng'; $window.FindName('Continue').IsEnabled=$true }
+if ($AfterClone) { $window.FindName('DeploymentOptions').Visibility='Collapsed'; $window.Title='Desktop và phím chụp màn hình'; $window.FindName('Continue').Content='Đóng'; $window.FindName('Continue').IsEnabled=$true }
 function Refresh-Preflight {
     try {
         $script:preflight.Plan = @(Get-OfficeShortcutPlan)
@@ -15,24 +14,54 @@ function Refresh-Preflight {
     } catch { $script:preflight.Plan=@(); $window.FindName('DesktopStatus').Text=$_.Exception.Message; $window.FindName('CleanDesktop').IsEnabled=$false }
     $window.FindName('ScreenStatus').Text = if (Get-ScreenClipChoice) { 'Đã có lựa chọn mặc định. Kiểm tra đúng Screen Snipping; lựa chọn này sẽ được xuất cho user mới.' } else { 'Chưa có lựa chọn mặc định; chọn Screen Snipping và Always trước khi Sysprep.' }
 }
+$script:officeReview=$null
+$window.FindName('ReviewOfficeKeys').Add_Click({
+    if($script:officeReview -and -not $script:officeReview.HasExited){return}
+    $entry=Join-Path (Split-Path -Parent $PSScriptRoot) 'Office/Office-Cleanup.ps1'
+    $command="& '{0}'" -f $entry.Replace("'","''")
+    $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+    $script:officeReview=Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+$encoded) -WindowStyle Hidden -PassThru
+})
 $window.FindName('OpenCapture').Add_Click({ Start-Process 'ms-screenclip:' })
 $window.FindName('OpenDefaults').Add_Click({ Start-Process 'ms-settings:defaultapps' })
 $window.FindName('Refresh').Add_Click({ Refresh-Preflight })
 $window.FindName('CleanDesktop').Add_Click({
-    if ([Windows.MessageBox]::Show('Sao lưu và dọn các icon cùng trỏ tới Word / Excel, giữ một icon dùng chung? Thiết lập Word và tài liệu được giữ nguyên.','Dọn icon trùng','YesNo','Question','No') -ne 'Yes') { return }
+    if (-not (Confirm-Box 'Sao lưu và dọn các icon cùng trỏ tới Word / Excel, giữ một icon dùng chung? Thiết lập Word và tài liệu được giữ nguyên.' 'Dọn icon trùng' -ConfirmText 'Sao lưu và dọn' -Owner $window)) { return }
     try {
         $backup = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Desktop Backups/'+(Get-Date -Format 'yyyyMMdd_HHmmss')+'-'+[guid]::NewGuid().ToString('N'))
         Invoke-OfficeShortcutPlan $script:preflight.Plan $backup
         Refresh-Preflight
-        [void][Windows.MessageBox]::Show('Đã dọn icon. Sao lưu: '+$backup,'Desktop','OK','Information')
-    } catch { [void][Windows.MessageBox]::Show($_.Exception.Message,'Chưa dọn được Desktop','OK','Error'); Refresh-Preflight }
+        Show-DeployMessage ('Đã dọn icon. Sao lưu: '+$backup) 'Desktop'
+    } catch { Show-DeployMessage $_.Exception.Message 'Chưa dọn được Desktop' 'Error'; Refresh-Preflight }
 })
 $changed = {
     if (-not $AfterClone) { $window.FindName('Continue').IsEnabled = $window.FindName('ScreenReviewed').IsChecked -and $window.FindName('DesktopReviewed').IsChecked }
 }
 $window.FindName('ScreenReviewed').Add_Click($changed); $window.FindName('DesktopReviewed').Add_Click($changed)
-$window.FindName('Continue').Add_Click({ $script:preflight.Allowed=$true; $window.Close() })
+$window.FindName('Continue').Add_Click({
+    if($script:officeReview -and -not $script:officeReview.HasExited){Show-DeployMessage 'Đóng cửa sổ Gỡ / dọn Office trước khi tiếp tục.';return}
+    if($OptionsPath -and -not $AfterClone) {
+        $options=[pscustomobject]@{Schema=1;CleanOfficeTrial=[bool]$window.FindName('CleanOfficeTrial').IsChecked;PrepareUltra=[bool]$window.FindName('PrepareUltra').IsChecked}
+        [IO.File]::WriteAllText($OptionsPath,($options|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
+    }
+    $script:preflight.Allowed=$true; $window.Close()
+})
 $window.FindName('Cancel').Add_Click({ $window.Close() })
+$script:trialCheck=$null
+$trialTimer=New-DeployTimer 200 {
+    if(-not $script:trialCheck -or -not $script:trialCheck.Async.IsCompleted){return}
+    $trialTimer.Stop();$job=$script:trialCheck;$script:trialCheck=$null
+    try{$result=@(Receive-DeployWork $job)[-1];$window.FindName('TrialStatus').Text=$result}
+    catch{$window.FindName('TrialStatus').Text='Chưa đọc được Office. Bước cuối sẽ kiểm tra lại và dừng nếu không xác minh được.'}
+}
+$window.Add_ContentRendered({
+    if(-not $AfterClone){
+        $office=Join-Path (Split-Path -Parent $PSScriptRoot) 'Office/Office-Cleanup.Core.ps1'
+        $script:trialCheck=Start-DeployWork 'param($core) $ErrorActionPreference="Stop"; . $core; $i=Get-OfficeCleanupInventory; $p=Get-OfficeTemporaryPlan $i; "Key dùng thử có thể dọn: $(@($p.Keys).Count). Key khác giữ lại: $(@($p.PreservedKeys).Count)."' @($office)
+        $trialTimer.Start()
+    }
+})
+$window.Add_Closing({param($sender,$event)if($script:trialCheck -or ($script:officeReview -and -not $script:officeReview.HasExited)){$event.Cancel=$true}})
 Refresh-Preflight
 if ($ValidateOnly) { return $window }
 [void]$window.ShowDialog()

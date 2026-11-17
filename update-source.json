@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.0.0.0",
+  "version": "2.1.0.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -32,8 +32,14 @@
     {
       "path": "App/Build-UpgradeHelper.ps1",
       "mode": "100644",
-      "size": 3342,
-      "sha": "3f08cd506fa971b6ef5c3b20330628c4e4d00b52"
+      "size": 3464,
+      "sha": "9a0705c30e44f88cb3d61e32cbf58fad697e9ca2"
+    },
+    {
+      "path": "App/ConfirmWindow.xml",
+      "mode": "100644",
+      "size": 2413,
+      "sha": "3d4c253f8785c4d336802f65220e846ee6c5f6af"
     },
     {
       "path": "App/Console.ps1",
@@ -50,8 +56,14 @@
     {
       "path": "App/Deploy.Actions.ps1",
       "mode": "100644",
-      "size": 12362,
-      "sha": "e4453662e6077694aae0f4db15393d4e30720987"
+      "size": 12254,
+      "sha": "777671414a9fe92f6b78165101363bc814c7b009"
+    },
+    {
+      "path": "App/DesktopIdentity.cs",
+      "mode": "100644",
+      "size": 978,
+      "sha": "4ffeb219afb411914629fa9933e2a3b9bd876463"
     },
     {
       "path": "App/DiagnosticsWindow.xml",
@@ -74,14 +86,14 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 20382,
-      "sha": "e23b2e925eab1b0900a59245007d3094c6f4a2bc"
+      "size": 20414,
+      "sha": "412be173d0effa9428bb31ed439a9ae63fa8dae4"
     },
     {
       "path": "App/Repair-Update.ps1",
       "mode": "100644",
-      "size": 3368,
-      "sha": "c53cc7411e1ab7e1c264556ce8ed76b3edf115ae"
+      "size": 3429,
+      "sha": "8f1b72a59bdba178ada4e69bb1743fc061f89ee8"
     },
     {
       "path": "App/Tao-Shortcut.bat",
@@ -98,8 +110,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 15179,
-      "sha": "f2278596a22ce25dc9c420fc2f0a0d33c1711717"
+      "size": 15583,
+      "sha": "11d9fa6044fa7315344c776e7fd0cdc23aa2c243"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -152,8 +164,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 3527,
-      "sha": "82622cad49ecb61ac97442519b659f33db1d15ab"
+      "size": 5926,
+      "sha": "b0a27b0a15841e24ed1be2ab327a0aa0724dbab3"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -164,14 +176,14 @@
     {
       "path": "App/Update-App.ps1",
       "mode": "100644",
-      "size": 9361,
-      "sha": "ed2cd9f9392369f760701a97145d779e7f750675"
+      "size": 9854,
+      "sha": "0a555f50d0ed980f3dbd15059d3d32401f19909a"
     },
     {
       "path": "App/Update-UI.ps1",
       "mode": "100644",
-      "size": 3719,
-      "sha": "59cbfb234c169a50ae4ff6eb4d6e4f3aaeb906bc"
+      "size": 3784,
+      "sha": "42078ed5ce2b523cdbd014c83a87d509b58a84f9"
     },
     {
       "path": "App/Update.Core.ps1",
@@ -194,8 +206,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 2463,
-      "sha": "4fa2e87439308ef36ea03a5b120fcd44512ced81"
+      "size": 5939,
+      "sha": "fa2bb436c632fdfd0fbec5d9ec46429d900fb853"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -218,14 +230,14 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 3081,
-      "sha": "f85d2c747a45efaf8778b236cb070c68f97b78e3"
+      "size": 4438,
+      "sha": "6f4d0451e66956b52b1104003c934074584a58e1"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
       "mode": "100644",
-      "size": 197,
-      "sha": "320be5f43e8d561a1a1b7a12ccbeafe5e956afd3"
+      "size": 196,
+      "sha": "66cca63470455a69157aa587f68395c8e2f45796"
     },
     {
       "path": "FixClone/Fix-BanPhim.Core.ps1",
@@ -236,56 +248,74 @@
     {
       "path": "FixClone/Fix-BanPhim.ps1",
       "mode": "100644",
-      "size": 3117,
-      "sha": "5bae396f05338c0945513bc714a14bd60d0c7ffa"
+      "size": 3026,
+      "sha": "47f1824e254d7a8d2132b1060c59833617d239c0"
+    },
+    {
+      "path": "FixClone/Fix-BanPhim.xml",
+      "mode": "100644",
+      "size": 861,
+      "sha": "06106142244fb7c208838ba2a28edf2a0df4055f"
     },
     {
       "path": "FixClone/Fix-CloneDuplicate.bat",
       "mode": "100644",
-      "size": 312,
-      "sha": "a64b209b8af0f4b3590a016dbb60219883987474"
+      "size": 311,
+      "sha": "db9391d6c7267e71675dd5ba7e2b979b7dd9220b"
     },
     {
       "path": "FixClone/Fix-CloneDuplicate.ps1",
       "mode": "100644",
-      "size": 17762,
-      "sha": "ab02749c57af446ffbca6070ab46c8496775318c"
+      "size": 17485,
+      "sha": "7db16afda901992acd689f0a07ff8d811b47bf9a"
     },
     {
       "path": "FixClone/Fix-DinhDang.bat",
       "mode": "100644",
-      "size": 263,
-      "sha": "de516d0104f0c0041a3c60c30a72eef0e90f9919"
+      "size": 262,
+      "sha": "c0d9f6751ec16c01d7fc1f7e56ebd2906ea67d25"
     },
     {
       "path": "FixClone/Fix-DinhDang.ps1",
       "mode": "100644",
-      "size": 3691,
-      "sha": "258ffc1a7c1367537c5a66a1620321235d9fce40"
+      "size": 3781,
+      "sha": "1ea382bdab254470a51ec3b2de6a2b49b624e588"
     },
     {
       "path": "FixClone/Fix-SysprepErrors.bat",
       "mode": "100644",
-      "size": 310,
-      "sha": "3df32b321a81f7e9c15a3595dcb2e86f34f8f534"
+      "size": 309,
+      "sha": "4c6505309569cf6ed174b882ff8f0afc6ccfb148"
     },
     {
       "path": "FixClone/Fix-SysprepErrors.ps1",
       "mode": "100644",
-      "size": 7577,
-      "sha": "24bb5091d9aef3192e7c5f81ad386118e0c54365"
+      "size": 8140,
+      "sha": "149ac41307dcf84f10a8dcda08e8e76af8877790"
+    },
+    {
+      "path": "FixClone/Load-Ui.ps1",
+      "mode": "100644",
+      "size": 345,
+      "sha": "125367653b9fbe8581e6109eba03db18686bed6f"
     },
     {
       "path": "FixClone/Master-Preflight.ps1",
       "mode": "100644",
-      "size": 3382,
-      "sha": "4fd2314bae8816667503a392f8dabbbf8689ef07"
+      "size": 5363,
+      "sha": "ffd84b7742630124958fd12a1d00e22c855d5e41"
     },
     {
       "path": "FixClone/Master-Preflight.xml",
       "mode": "100644",
-      "size": 2631,
-      "sha": "986d705f072ad7716245a0d5365e07107ceb37dd"
+      "size": 3787,
+      "sha": "d39ea6c5f2349acaa9dcf0e88a7558548afaceef"
+    },
+    {
+      "path": "FixClone/Master.Deployment.Core.ps1",
+      "mode": "100644",
+      "size": 3912,
+      "sha": "f2f6aa7076055af85d420e0c4f9ee82b5925f838"
     },
     {
       "path": "FixClone/Master.Preflight.Core.ps1",
@@ -302,20 +332,26 @@
     {
       "path": "FixClone/Prepare-Master.ps1",
       "mode": "100644",
-      "size": 8632,
-      "sha": "2b61467e61a49ca7a45bfe2c17775e2d7ddb0466"
+      "size": 6809,
+      "sha": "3d8498a02fd000cf81bcc7c9775d69828098842b"
     },
     {
       "path": "FixClone/README.md",
       "mode": "100644",
-      "size": 10399,
-      "sha": "3bb8f41424b5827a12caaa59bc2ddec92f666073"
+      "size": 13002,
+      "sha": "81e4dfa68a782a944d335a13b441d8262371b192"
     },
     {
       "path": "FixClone/Run-Sysprep.bat",
       "mode": "100644",
-      "size": 4169,
-      "sha": "a0ee40aca541e11901b00211c9ad2c8a6b6e0491"
+      "size": 115,
+      "sha": "ea4d763ea75cd2964e6ba4100d767e6c63ea4e94"
+    },
+    {
+      "path": "FixClone/Run-Sysprep.ps1",
+      "mode": "100644",
+      "size": 3587,
+      "sha": "6cb5071a84c59848f8ea089112b3fb1d0b09d5e9"
     },
     {
       "path": "FixClone/Test-BanPhim.ps1",
@@ -326,8 +362,14 @@
     {
       "path": "FixClone/Test-DinhDang.ps1",
       "mode": "100644",
-      "size": 2198,
-      "sha": "ba3cacdeba641f12621a662b8d666e9be11585f3"
+      "size": 2251,
+      "sha": "78349f70cbec28c678ac0228daefe786af0e8416"
+    },
+    {
+      "path": "FixClone/Test-MasterDeployment.ps1",
+      "mode": "100644",
+      "size": 3094,
+      "sha": "c5a2c206b9021373f7aafc318561efb3551b8ec2"
     },
     {
       "path": "FixClone/Test-MasterPreflight.ps1",
@@ -342,10 +384,40 @@
       "sha": "cab0de427f96728b3c682b7b723228cdea41717e"
     },
     {
+      "path": "FixClone/Test-UltraViewerLifecycle.ps1",
+      "mode": "100644",
+      "size": 5407,
+      "sha": "0652715fe00c1125289d3b0d38cc61ba3950f5c9"
+    },
+    {
       "path": "FixClone/Test-Unattend.ps1",
       "mode": "100644",
       "size": 3546,
       "sha": "60ce144c28a394bbb24f3f13265d353ba614610a"
+    },
+    {
+      "path": "FixClone/Test-WordSettings.ps1",
+      "mode": "100644",
+      "size": 3134,
+      "sha": "596c2489a9f8623df2f8a5b889354da7406781c7"
+    },
+    {
+      "path": "FixClone/UltraViewer-Reset.ps1",
+      "mode": "100644",
+      "size": 3860,
+      "sha": "b5b3d59777010e26758fac6061c24aaf5746bc6b"
+    },
+    {
+      "path": "FixClone/UltraViewer-Reset.xml",
+      "mode": "100644",
+      "size": 1729,
+      "sha": "bf2715557be964bf803f57c5b0852956f78d7e88"
+    },
+    {
+      "path": "FixClone/UltraViewer.Core.ps1",
+      "mode": "100644",
+      "size": 12568,
+      "sha": "1e2c30e0157415b513ce35adcba1282a96e8392d"
     },
     {
       "path": "FixClone/UltraViewer.Diagnostics.ps1",
@@ -360,6 +432,12 @@
       "sha": "aface74f9c448b2853cdf46c49afc7962cbe3f3f"
     },
     {
+      "path": "FixClone/Word.Settings.Core.ps1",
+      "mode": "100644",
+      "size": 3077,
+      "sha": "2c625fc939f351d298895eb8ea592ca005aceb35"
+    },
+    {
       "path": "KichHoat/Activation.Core.ps1",
       "mode": "100644",
       "size": 2720,
@@ -368,26 +446,26 @@
     {
       "path": "KichHoat/Kich-Hoat-Office.bat",
       "mode": "100644",
-      "size": 323,
-      "sha": "56dab462da38c2ddd5f32c4b63b4b8e50b57449c"
+      "size": 322,
+      "sha": "7236a5209da9e2d1a258ce16e4681f1d0ab0c199"
     },
     {
       "path": "KichHoat/Kich-Hoat-TEST.bat",
       "mode": "100644",
-      "size": 344,
-      "sha": "c6857fbf34f219aa24bee96cb55e9799eb2ab367"
+      "size": 343,
+      "sha": "f161d65f46ab03b34f7b965f1442b3531b09d0af"
     },
     {
       "path": "KichHoat/Kich-Hoat-Windows.bat",
       "mode": "100644",
-      "size": 325,
-      "sha": "a983d221e496ecd1ff0ec018fc1a5f28211f54e7"
+      "size": 324,
+      "sha": "171edd407c00424ecf4213273526dc2e25199e57"
     },
     {
       "path": "KichHoat/Kich-Hoat.ps1",
       "mode": "100644",
-      "size": 16796,
-      "sha": "de9819c87821f0cb1a69b5a9f55144f82f5ff502"
+      "size": 17256,
+      "sha": "1980771bc77eb67296317137af8f50d2fcd9e8d1"
     },
     {
       "path": "KichHoat/QR-Template.html",
@@ -422,8 +500,8 @@
     {
       "path": "KichHoat/Test-QrLifecycle.ps1",
       "mode": "100644",
-      "size": 4181,
-      "sha": "6d140cb70f9c3b1eafc6bfdf73a2d9ca0ffd4259"
+      "size": 4251,
+      "sha": "7907c6b427bf31dfb763d672a67fa7a08cb71641"
     },
     {
       "path": "KichHoat/Test-QrWindow.ps1",
@@ -434,14 +512,26 @@
     {
       "path": "Office/Office-Cleanup.Core.ps1",
       "mode": "100644",
-      "size": 10210,
-      "sha": "c24a2c7bb3d0a5ac4811ba5810918c377bc73430"
+      "size": 12220,
+      "sha": "7f81b7574489b57c9eb5b93800f82ac4def9c8c8"
+    },
+    {
+      "path": "Office/Office-Cleanup.Engine.ps1",
+      "mode": "100644",
+      "size": 2089,
+      "sha": "fa629f9fb2819fd2cd35e25ae8128337ab00042b"
     },
     {
       "path": "Office/Office-Cleanup.ps1",
       "mode": "100644",
-      "size": 6415,
-      "sha": "b73f517cde58e6d687a3d39cbf6ca9cfde3096ee"
+      "size": 5412,
+      "sha": "d36f63538f7421cb3540912c565cfb93b8151f43"
+    },
+    {
+      "path": "Office/Office-Cleanup.xml",
+      "mode": "100644",
+      "size": 3003,
+      "sha": "7a6d9aa4b28db0b995cbb57a5d5fea1b8f98ad9b"
     },
     {
       "path": "Office/Office-ODT.ps1",
@@ -456,6 +546,12 @@
       "sha": "c8e6f5134853f54b8083f489eb5cc131f7c2f7d8"
     },
     {
+      "path": "Office/Test-OfficeTemporary.ps1",
+      "mode": "100644",
+      "size": 3160,
+      "sha": "721bf4398a0cb9c077b2c9830daa8b81a8ff8327"
+    },
+    {
       "path": "PROGRESS.md",
       "mode": "100644",
       "size": 9230,
@@ -464,8 +560,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 15081,
-      "sha": "b2d6083096d0ce9262384e9cd801277cdecbd13c"
+      "size": 14921,
+      "sha": "86e0f4ebd3b20a2f14c4b3fb22619a77d4fb25d4"
     },
     {
       "path": "RELEASING.md",
@@ -477,7 +573,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "4c48821747662195fb3ef1808a321294764e26bd"
+      "sha": "9c1c5ffbd2db0e25e3dc28f5748ef280fb4f650c"
     }
   ]
 }
