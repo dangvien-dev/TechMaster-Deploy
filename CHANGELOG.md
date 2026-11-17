@@ -1,5 +1,9 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.6.0 — 18/11/2026
+
+- Đổi icon sang biểu tượng chữ T và mũi tên triển khai, nền navy với màu cyan / mint. Đồng bộ launcher, taskbar và cửa sổ cập nhật; hỗ trợ kích thước 16–256 px.
+
 ## 2.1.5.0 — 17/11/2026
 
 - Sửa lỗi mở Có gì mới, Hướng dẫn nhanh và Liên hệ khi vừa chạy app: cửa sổ thông tin tự nạp hàm đọc phiên bản, không phụ thuộc việc đã mở updater.
