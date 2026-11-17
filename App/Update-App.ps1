@@ -69,7 +69,7 @@ try {
             $installedManifest = Join-Path $Root 'update-package.json'
             if (Test-Path -LiteralPath $installedManifest -PathType Leaf) { $knownCommit = [string](Read-DeployManifest $installedManifest).source.commit }
             $release = Get-DeployOnlineRelease $knownCommit
-            if ($release.unchanged) { Write-Host 'Repo chưa có commit mới so với bản này. Không thay tệp chương trình.' -ForegroundColor Green; return }
+            if ($release.unchanged) { Write-Host 'Bạn đang dùng phiên bản mới nhất.' -ForegroundColor Green; return }
             if ([version]$release.version -lt (Get-DeployVersion $Root)) { throw 'Phiên bản trên repo cũ hơn bản đang dùng; không hạ cấp tự động.' }
             Write-Host ("Bản repo: $($release.version), commit $($release.commit.Substring(0,8))`n$($release.notes)")
             if ((Read-Host 'Lấy các tệp đã thay đổi từ repo? [y/N]') -notin 'y', 'Y') { Write-Host 'Đã huỷ.'; return }
