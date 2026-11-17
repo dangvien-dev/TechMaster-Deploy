@@ -41,8 +41,11 @@ try {
     Assert ($input.SelectedText -ceq 'Nội dung mẫu' -and $input.Parent.Clip -is [Windows.Media.RectangleGeometry]) 'Rounded input retains native text editing and receives a size-aware clip'
     $preview.FindName('tabs').SelectedIndex=4;$preview.UpdateLayout()
     $picker=$preview.FindName('cbProduct');[void]$picker.Items.Add('Office A');[void]$picker.Items.Add('Office B');$picker.SelectedIndex=1
-    $picker.IsDropDownOpen=$true;$preview.UpdateLayout()
-    Assert ($picker.SelectedItem -eq 'Office B' -and $picker.IsDropDownOpen) 'Rounded selector retains native selection and popup'
+    $preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle)
+    [void]$picker.Focus();$picker.IsDropDownOpen=$true;$preview.UpdateLayout()
+    $preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle)
+    Assert ($picker.SelectedItem -eq 'Office B') 'Rounded selector retains native selection'
+    Assert ($picker.IsLoaded -and $picker.IsDropDownOpen) ("Rounded selector popup opens after Loaded; loaded=$($picker.IsLoaded), open=$($picker.IsDropDownOpen), visible=$($picker.IsVisible)")
     $picker.IsDropDownOpen=$false
 
 } finally {$preview.Close()}

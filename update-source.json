@@ -164,8 +164,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 8073,
-      "sha": "84a15c4fdb3b66b27e45ea192d1fe74ecbad7ba3"
+      "size": 8449,
+      "sha": "b81ed8b724f96ce24512292b8a7b72841c91fbd2"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
