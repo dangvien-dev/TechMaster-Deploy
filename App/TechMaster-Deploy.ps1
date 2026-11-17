@@ -14,6 +14,7 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'Info.UI.ps1')
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
+. (Join-Path $PSScriptRoot 'Startup.UI.ps1')
 $form = Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
 $form.Width = [Math]::Max($form.MinWidth, [Math]::Min($form.Width, [Windows.SystemParameters]::WorkArea.Width - 30))
 $form.Height = [Math]::Max($form.MinHeight, [Math]::Min($form.Height, [Windows.SystemParameters]::WorkArea.Height - 30))
@@ -255,6 +256,7 @@ $form.Dispatcher.Add_UnhandledException({
 })
 }
 if ($ValidateOnly) { return $form }
+Wait-DeployUpdaterBeforeShow $Root
 try { [void]$form.ShowDialog() }
 finally {
     foreach ($timer in $uiTimer,$officeTimer,$basicAppTimer,$mediaTimer,$updateTimer,$availabilityTimer) { $timer.Stop() }

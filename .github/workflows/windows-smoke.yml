@@ -51,6 +51,7 @@ jobs:
           & KichHoat/Test-QrWindow.ps1
           & KichHoat/Test-CidPhone.ps1
           & App/Test-UpdateEngine.ps1
+          & App/Test-StartupWait.ps1
           & App/Build-UpdateIndex.ps1 -Check
           } catch {
             $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)

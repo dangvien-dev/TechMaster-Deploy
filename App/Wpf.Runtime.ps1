@@ -39,12 +39,17 @@ function Import-DeployWindow([string]$path) {
         $window.Icon = $icon
     } finally { $stream.Dispose() }
     $area=[Windows.SystemParameters]::WorkArea
-    $window.MinHeight=[Math]::Min($window.MinHeight,[Math]::Max(320,$area.Height-30))
-    $window.MaxHeight=[Math]::Min($window.MaxHeight,$area.Height-30)
-    if(-not [double]::IsNaN($window.Height)){$window.Height=[Math]::Min($window.Height,$window.MaxHeight)}
-    $window.MinWidth=[Math]::Min($window.MinWidth,[Math]::Max(320,$area.Width-30))
-    $window.MaxWidth=[Math]::Min($window.MaxWidth,$area.Width-30)
-    if(-not [double]::IsNaN($window.Width)){$window.Width=[Math]::Min($window.Width,$window.MaxWidth)}
+    $initialHeight=[Math]::Max(320,$area.Height-30);$initialWidth=[Math]::Max(320,$area.Width-30)
+    $window.MinHeight=[Math]::Min($window.MinHeight,$initialHeight)
+    $window.MinWidth=[Math]::Min($window.MinWidth,$initialWidth)
+    # Size the initial window, but let Windows maximize resizable windows to
+    # the monitor work area. Permanent caps leave gaps at the right/bottom.
+    if($window.ResizeMode -in 'NoResize','CanMinimize'){
+        $window.MaxHeight=[Math]::Min($window.MaxHeight,$initialHeight)
+        $window.MaxWidth=[Math]::Min($window.MaxWidth,$initialWidth)
+    }
+    if(-not [double]::IsNaN($window.Height)){$window.Height=[Math]::Min($window.Height,[Math]::Min($window.MaxHeight,$initialHeight))}
+    if(-not [double]::IsNaN($window.Width)){$window.Width=[Math]::Min($window.Width,[Math]::Min($window.MaxWidth,$initialWidth))}
     # Clip only marked containers. Native input/grid/progress templates stay intact.
     $pending=New-Object Collections.Queue
     $pending.Enqueue($window)

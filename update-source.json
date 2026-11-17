@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.3.0",
+  "version": "2.1.4.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -138,6 +138,12 @@
       "sha": "d6d4cd4aa9b3d9982380de1f9f1b2aaab8331116"
     },
     {
+      "path": "App/Startup.UI.ps1",
+      "mode": "100644",
+      "size": 1850,
+      "sha": "0fee2f2cf1dbfbd0f539c08abbc6e4e80cdb6064"
+    },
+    {
       "path": "App/Tao-Shortcut.bat",
       "mode": "100644",
       "size": 184,
@@ -152,8 +158,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 17044,
-      "sha": "78a93ab3f5794e1374d6b268080e88f1814ba07e"
+      "size": 17124,
+      "sha": "038416b8485cd43569ea77d6105fe846980d96c5"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -198,6 +204,12 @@
       "sha": "d57003d609d9abbee6bb46a02c61d77c046189f3"
     },
     {
+      "path": "App/Test-StartupWait.ps1",
+      "mode": "100644",
+      "size": 2554,
+      "sha": "31324c4a48a763318e2ae2d88b7ab8bec5224d40"
+    },
+    {
       "path": "App/Test-UltraInstall.ps1",
       "mode": "100644",
       "size": 5324,
@@ -212,8 +224,8 @@
     {
       "path": "App/Test-UpdateEngine.ps1",
       "mode": "100644",
-      "size": 6883,
-      "sha": "244a1bc94521a0c980dd3baa9773ebf80836333c"
+      "size": 7501,
+      "sha": "a1af43d24a6e471cac84bbb09b0088e88ce63fb8"
     },
     {
       "path": "App/Test-UpdateHandshake.ps1",
@@ -230,8 +242,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 15031,
-      "sha": "e85ab16d62c90c58923ef65f24d023bc20d7d59f"
+      "size": 15450,
+      "sha": "38c40bf1cc0004bca3f5ee19371282193931963c"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -296,8 +308,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 8052,
-      "sha": "cb62f70e7e6dcb7baf48b62f2c525beac3159693"
+      "size": 8391,
+      "sha": "dc0ac86b7705cd4d251ceecffe68c3925d09298a"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -320,8 +332,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 7156,
-      "sha": "0e93b06c8a0ccb1c1b47bea22e1facff841d5c8e"
+      "size": 7523,
+      "sha": "38efeebb1a6857eb5fcd76e443186d07a4f95d02"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -681,7 +693,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "d957460ba6b893dc889513c015ebb545c7a27351"
+      "sha": "5b3ef12d8b10004d738d547f174fec90a60593d6"
     }
   ]
 }

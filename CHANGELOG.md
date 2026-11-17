@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.4.0 — 17/11/2026
+
+- Sửa phóng to cửa sổ còn hở cạnh phải / dưới: chỉ co kích thước lúc mở ban đầu, để Windows xử lý chế độ phóng to theo màn hình.
+
+- Tương thích khi nâng từ updater cũ: nếu app bị gọi lên sớm, cửa sổ chính chờ updater đóng rồi mới hiện để không che kết quả.
+
 ## 2.1.3.0 — 17/11/2026
 
 - Bản chia sẻ để trống thông tin đơn vị và không kèm logo công ty; thêm nút xoá thông tin đơn vị / logo đang lưu.

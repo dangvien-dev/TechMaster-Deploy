@@ -2,6 +2,7 @@
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Update.Core.ps1')
 . (Join-Path $PSScriptRoot 'Update.Engine.ps1')
+. (Join-Path $PSScriptRoot 'Startup.UI.ps1')
 $script:checks = 0
 function Assert($condition, $message) { if (-not $condition) { throw "FAIL: $message" }; $script:checks++ }
 function Put($path, $text) { New-Item -ItemType Directory -Path (Split-Path -Parent $path) -Force | Out-Null; [IO.File]::WriteAllText($path,$text) }
@@ -21,6 +22,11 @@ function Start-Process { $script:restarts++ }
 $temp = Join-Path ([IO.Path]::GetTempPath()) ('tm-engine-'+[guid]::NewGuid().ToString('N'))
 try {
     $root=Join-Path $temp 'installed'; $work=Join-Path $temp 'work'; $script:restarts=0
+    $legacy="& 'C:/Temp/Update-App.ps1' -Root '"+$root.Replace("'","''")+"' -Mode Online"
+    $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($legacy))
+    Assert (Test-DeployUpdaterCommand ('powershell.exe -EncodedCommand '+$encoded) $root) 'Startup recognizes an old updater for the same installation'
+    Assert (-not (Test-DeployUpdaterCommand $legacy ($root+'-other'))) 'A different installation cannot hold startup'
+    Assert (-not (Test-DeployUpdaterCommand ("& 'C:/Temp/Other.ps1' -Root '"+$root+"'") $root)) 'Other tools do not hold startup'
     Payload $root '1.1.3.0'
     Put (Join-Path $root 'BienBan/BienBan-Config.json') 'my customer data'
     $script:remote=[pscustomobject]@{ unchanged=$true }

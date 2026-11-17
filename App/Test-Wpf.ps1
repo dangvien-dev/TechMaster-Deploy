@@ -56,6 +56,10 @@ foreach ($scale in 1.0,1.25,1.5) {
 $preview=Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
 try {
     $preview.Show()
+    $preview.WindowState='Maximized'
+    $preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle)
+    Assert ($preview.ActualWidth -ge [Windows.SystemParameters]::WorkArea.Width-2 -and $preview.ActualHeight -ge [Windows.SystemParameters]::WorkArea.Height-2) 'Maximized window fills the work area without right/bottom gaps'
+    $preview.WindowState='Normal';$preview.UpdateLayout()
     $nav=$preview.FindName('Navigation');$sidebar=$nav.Parent.Parent
     $beforeLock=Get-VisualPixel $sidebar 4 22
     $nav.IsEnabled=$false;$preview.UpdateLayout()
