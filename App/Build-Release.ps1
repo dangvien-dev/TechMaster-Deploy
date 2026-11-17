@@ -24,7 +24,7 @@ try {
     $sourceFiles = @(& git -C $root ls-files --cached --others --exclude-standard)
     if ($LASTEXITCODE -ne 0) { throw 'Không đọc được danh sách tệp Git.' }
     foreach ($relative in $sourceFiles) {
-        $default = $relative -cin @('BienBan/Logo.svg', 'FixClone/Reinstall/_DOC-TRUOC.txt')
+        $default = $relative -ceq 'FixClone/Reinstall/_DOC-TRUOC.txt'
         if (-not $default) {
             try { Assert-DeployPath $relative } catch { continue }
         }
@@ -36,7 +36,7 @@ try {
     [IO.File]::WriteAllText((Join-Path $app 'version.txt'), ($Version.ToString() + "`r`n"), [Text.UTF8Encoding]::new($false))
     $files = @(Get-ChildItem -LiteralPath $app -Recurse -File | ForEach-Object {
         $rel = $_.FullName.Substring($app.Length + 1).Replace('\', '/')
-        [pscustomobject]@{ path = $rel; sha256 = (Get-DeployHash $_.FullName); preserve = ($rel -cin @('BienBan/Logo.svg', 'FixClone/Reinstall/_DOC-TRUOC.txt')) }
+        [pscustomobject]@{ path = $rel; sha256 = (Get-DeployHash $_.FullName); preserve = ($rel -ceq 'FixClone/Reinstall/_DOC-TRUOC.txt') }
     } | Sort-Object path)
     $commit = ([string](& git -C $root rev-parse HEAD)).Trim()
     if ($LASTEXITCODE -ne 0 -or $commit -notmatch '^[0-9a-f]{40}$') { throw 'Không đọc được commit của checkout.' }

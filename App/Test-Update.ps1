@@ -166,6 +166,7 @@ try {
         $updateTimer = [pscustomobject]@{ Active = $false }
         $updateTimer | Add-Member ScriptMethod Start { $this.Active = $true }
         function Set-Status($message) {}
+        function Stop-DeployUpdateProbe {}
         function Show-DeployMessage($message) { throw $message }
         function Start-Process($FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle) {
             $script:startedArguments = $ArgumentList

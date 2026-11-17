@@ -3,13 +3,13 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.2.0",
+  "version": "2.1.3.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
       "mode": "100644",
-      "size": 6265,
-      "sha": "ac4f3112bf81ec23db6387b9addb2bbd12aa9509"
+      "size": 7620,
+      "sha": "4692406eb0eab0df81fd5797daf0253b9abbf395"
     },
     {
       "path": "App/Build-Launcher.ps1",
@@ -20,8 +20,8 @@
     {
       "path": "App/Build-Release.ps1",
       "mode": "100644",
-      "size": 3576,
-      "sha": "612bdd6c6435937eab672bde587c79bc7e7029bf"
+      "size": 3530,
+      "sha": "0d6e147c7109f6492fd1c0c9e6d1f55d3cd33334"
     },
     {
       "path": "App/Build-UpdateIndex.ps1",
@@ -54,6 +54,24 @@
       "sha": "2d0a5755d8adea605cd6b99c885e5b8a3c04684d"
     },
     {
+      "path": "App/CustomApps.Core.ps1",
+      "mode": "100644",
+      "size": 4324,
+      "sha": "42aa395e02017e196ad1ec018888f4619b744780"
+    },
+    {
+      "path": "App/CustomApps.UI.ps1",
+      "mode": "100644",
+      "size": 4786,
+      "sha": "ad65651cac56e1ef5caa822d4c3352001fd81bce"
+    },
+    {
+      "path": "App/CustomAppsWindow.xml",
+      "mode": "100644",
+      "size": 4388,
+      "sha": "8f21390cfbaec92de6de0114311f091731434790"
+    },
+    {
       "path": "App/Deploy.Actions.ps1",
       "mode": "100644",
       "size": 12254,
@@ -72,6 +90,18 @@
       "sha": "b1cfb9898e8fca267d48c529bff779b2fdec405d"
     },
     {
+      "path": "App/Info.UI.ps1",
+      "mode": "100644",
+      "size": 4360,
+      "sha": "4a9da00cc929d2adbeb3bf8a221e5601acdb2661"
+    },
+    {
+      "path": "App/InfoWindow.xml",
+      "mode": "100644",
+      "size": 4455,
+      "sha": "735c6862692329d9aa2547cd99c45a0a3f9f4c75"
+    },
+    {
       "path": "App/Launcher.cs",
       "mode": "100644",
       "size": 1338,
@@ -86,14 +116,26 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 22263,
-      "sha": "336feff40ff251651b71616d6ff7920f115b30c6"
+      "size": 23543,
+      "sha": "a40b932e94f761eca7b40ca76c357c39125dc4e7"
+    },
+    {
+      "path": "App/QuickGuide.md",
+      "mode": "100644",
+      "size": 6728,
+      "sha": "daf53d1513df630d77febb8ec89b7a9c523dc2a9"
     },
     {
       "path": "App/Repair-Update.ps1",
       "mode": "100644",
       "size": 3429,
       "sha": "8f1b72a59bdba178ada4e69bb1743fc061f89ee8"
+    },
+    {
+      "path": "App/Report.Identity.ps1",
+      "mode": "100644",
+      "size": 404,
+      "sha": "d6d4cd4aa9b3d9982380de1f9f1b2aaab8331116"
     },
     {
       "path": "App/Tao-Shortcut.bat",
@@ -110,8 +152,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 15518,
-      "sha": "0bfe486bdb3ddfc0f9ff1235dcc34d9871db5a36"
+      "size": 17044,
+      "sha": "78a93ab3f5794e1374d6b268080e88f1814ba07e"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -126,10 +168,22 @@
       "sha": "7c5020aa59827f2682c07dcaaae05fcfc54ab7fa"
     },
     {
+      "path": "App/Test-CustomApps.ps1",
+      "mode": "100644",
+      "size": 3416,
+      "sha": "2dd33f42c0c110f1246036806847dfaf2cbc3525"
+    },
+    {
       "path": "App/Test-DeployActions.ps1",
       "mode": "100644",
       "size": 2913,
       "sha": "59c05c85bfce0f7ce2edae19980cdebd96ef318e"
+    },
+    {
+      "path": "App/Test-Info.ps1",
+      "mode": "100644",
+      "size": 2685,
+      "sha": "0a713e507f5b90fac5489d0d59345bc0eba1f931"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",
@@ -144,16 +198,22 @@
       "sha": "d57003d609d9abbee6bb46a02c61d77c046189f3"
     },
     {
+      "path": "App/Test-UltraInstall.ps1",
+      "mode": "100644",
+      "size": 5324,
+      "sha": "804151ab34e69c4eee2c198c7a3bcc3d2f3c3935"
+    },
+    {
       "path": "App/Test-Update.ps1",
       "mode": "100644",
-      "size": 14697,
-      "sha": "9dd35b8a0446dba0e95a216c497c654db72e4b62"
+      "size": 14740,
+      "sha": "1a9b510f1672104ad61f73907dc167e7c29fab35"
     },
     {
       "path": "App/Test-UpdateEngine.ps1",
       "mode": "100644",
-      "size": 5645,
-      "sha": "d63f0c81c705e580587c40e4d1caea6874e71fbe"
+      "size": 6883,
+      "sha": "244a1bc94521a0c980dd3baa9773ebf80836333c"
     },
     {
       "path": "App/Test-UpdateHandshake.ps1",
@@ -162,10 +222,16 @@
       "sha": "9fd7b9ab947ed07d962f2f6032b583f2d65b6b77"
     },
     {
+      "path": "App/Test-UpdateNotification.ps1",
+      "mode": "100644",
+      "size": 2848,
+      "sha": "5cbe8ec96f3767a9495985dd2398e908dde07490"
+    },
+    {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 10278,
-      "sha": "f3a3903af1ba3c3b646a5c9b7a04ca104a8ae192"
+      "size": 15031,
+      "sha": "e85ab16d62c90c58923ef65f24d023bc20d7d59f"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -174,16 +240,22 @@
       "sha": "b048502e7b6526a25d4b5d6b05b9ec4b6a3a8137"
     },
     {
+      "path": "App/UltraViewer.Install.ps1",
+      "mode": "100644",
+      "size": 4932,
+      "sha": "b5f29b44f70429c9e94706b9f5db173a0c5e3d25"
+    },
+    {
       "path": "App/Update-App.ps1",
       "mode": "100644",
-      "size": 10308,
-      "sha": "5e2b73991dc38863274318a9a249d0c1cf436859"
+      "size": 10921,
+      "sha": "c22823165ceaf6d0e0328506317b36258981f73e"
     },
     {
       "path": "App/Update-UI.ps1",
       "mode": "100644",
-      "size": 4910,
-      "sha": "3d8cdb46c72103e8fcee202bab8a7a505db1d102"
+      "size": 5078,
+      "sha": "f9359c53512c94fff2f88b456263be65638f9ec7"
     },
     {
       "path": "App/Update.Core.ps1",
@@ -194,8 +266,26 @@
     {
       "path": "App/Update.Engine.ps1",
       "mode": "100644",
-      "size": 9157,
-      "sha": "77e2c41435957118c5d8ee017dc5101addc9d8df"
+      "size": 9441,
+      "sha": "090432ba4bb15743d044e0caa7b0a5328e831ca0"
+    },
+    {
+      "path": "App/Update.Notification.Core.ps1",
+      "mode": "100644",
+      "size": 872,
+      "sha": "afbf4f2573ff9933cca8f197c442a8be70507ad1"
+    },
+    {
+      "path": "App/Update.Notification.ps1",
+      "mode": "100644",
+      "size": 301,
+      "sha": "1cddebff083ff58286137b722eaf613c543037d4"
+    },
+    {
+      "path": "App/Update.Notifications.UI.ps1",
+      "mode": "100644",
+      "size": 3198,
+      "sha": "51ef158d67e94357b3afbf4dd315fbfd94832f01"
     },
     {
       "path": "App/UpdaterWindow.xml",
@@ -230,8 +320,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 5916,
-      "sha": "c177311f2bcb9e5135ca7f048a4f825955a14559"
+      "size": 7156,
+      "sha": "0e93b06c8a0ccb1c1b47bea22e1facff841d5c8e"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -578,8 +668,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 15277,
-      "sha": "03fdc71b5d52719e23da55aa19f4dbb5b0c8ce5f"
+      "size": 16834,
+      "sha": "b12eb194c6a4f0e1615825957d4dbde54f53dc0e"
     },
     {
       "path": "RELEASING.md",
@@ -591,7 +681,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "b910b89dbdd949ddd0466cc0f9f1476145b5ccf5"
+      "sha": "d957460ba6b893dc889513c015ebb545c7a27351"
     }
   ]
 }

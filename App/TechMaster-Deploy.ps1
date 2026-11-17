@@ -11,6 +11,9 @@ $Root = Split-Path -Parent $PSScriptRoot
 $DirClone = Join-Path $Root 'FixClone'; $DirKH = Join-Path $Root 'KichHoat'
 $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoOffice = Join-Path $Root 'KhoOffice'
 . (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
+. (Join-Path $PSScriptRoot 'Info.UI.ps1')
+. (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
+. (Join-Path $PSScriptRoot 'Report.Identity.ps1')
 $form = Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
 $form.Width = [Math]::Max($form.MinWidth, [Math]::Min($form.Width, [Windows.SystemParameters]::WorkArea.Width - 30))
 $form.Height = [Math]::Max($form.MinHeight, [Math]::Min($form.Height, [Windows.SystemParameters]::WorkArea.Height - 30))
@@ -67,11 +70,13 @@ function Status($id, $missing) {
 $Navigation.Add_SelectionChanged({ $tabs.SelectedIndex = $Navigation.SelectedIndex })
 $tabs.SelectedIndex = 0
 Bind-Click 'btnRefresh' { Update-MachineInfo }
+Bind-Click 'btnQuickGuide' { Show-DeployQuickGuide $Root $form }
+Bind-Click 'btnContact' { Show-DeployQuickGuide $Root $form -Section 'Liên hệ / góp ý' }
 Bind-Click 'headerUpdate' { if($script:updateProcess){Show-DeployUpdater}else{$Navigation.SelectedIndex = 7} }
 Bind-Click 'btnSysprepCheck' { Start-Tool (Join-Path $DirClone 'Fix-SysprepErrors.bat') 'Kiểm tra lỗi Sysprep' }
 Bind-Click 'btnSysprep' { if (Confirm-Box "Chuẩn bị máy gốc và chạy Sysprep?`nCuối quy trình máy sẽ tự tắt; clone ổ trước khi bật lại." 'Sysprep') { Start-Tool (Join-Path $DirClone 'Run-Sysprep.bat') 'Chuẩn bị + Sysprep' } }
 Bind-Click 'btnReinstall' { Open-DeployFolder (Join-Path $DirClone 'Reinstall') }
-Bind-Click 'btnCloneHelp' { Start-Process notepad.exe ('"{0}"' -f (Join-Path $DirClone 'README.md')) }
+Bind-Click 'btnCloneHelp' { Show-DeployQuickGuide $Root $form -Section 'Máy gốc / Sysprep' }
 Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' }
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
 Bind-Click 'btnKeyboard' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím / EVKey' }
@@ -141,6 +146,14 @@ Bind-Click 'btnLogo' {
     }
     Update-LogoPreview; Set-Status 'Đã lưu logo.'
 }
+Bind-Click 'btnResetIdentity' {
+    if(-not (Confirm-Box 'Xoá thông tin đơn vị, kỹ thuật viên và logo đang lưu trong bộ công cụ này?' 'Xoá thông tin đơn vị' -ConfirmText 'Xoá thông tin / logo' -Danger -Owner $form)){return}
+    Reset-DeployReportIdentity $DirBB
+    foreach($name in 'Company','Address','Phone','Technician'){$form.FindName($name).Text=''}
+    $tbCustomer.Text=''
+    Update-LogoPreview
+    Set-Status 'Đã xoá thông tin đơn vị và logo. Có thể nhập thông tin đơn vị mới.'
+}
 Bind-Click 'btnExport' {
     $cfg = [pscustomobject]@{ Company = $Company.Text.Trim(); Address = $Address.Text.Trim(); Phone = $Phone.Text.Trim(); Technician = $Technician.Text.Trim() }
     try { $cfg | ConvertTo-Json | Set-Content -LiteralPath $cfgFile -Encoding UTF8 }
@@ -203,16 +216,26 @@ Bind-Click 'btnWindowsIso' {
     Start-UiWork 'param($actions, $iso) $ErrorActionPreference = "Stop"; . $actions; Start-WindowsSetup $iso' @((Join-Path $PSScriptRoot 'Deploy.Actions.ps1'), $path) { Set-Status 'Đã mở Windows Setup.' }
 }
 . (Join-Path $PSScriptRoot 'BasicApps.ps1')
-$basicAppChoices = @()
-foreach ($app in $basicApps) {
-    $box = New-Object Windows.Controls.CheckBox
-    $box.Content = $app.Name; $box.ToolTip = $app.Description; $box.Tag = $app; $box.MinWidth = 205
-    $basicAppChoices += $box; [void]$lbBasicApps.Children.Add($box)
+function Update-DeployBasicChoices {
+    $selected=@($basicAppChoices|Where-Object IsChecked|ForEach-Object {$_.Tag.Id})
+    $script:basicAppChoices=@();$lbBasicApps.Children.Clear()
+    foreach($app in @(Get-DeployBasicApps)){
+        $box=New-Object Windows.Controls.CheckBox
+        $box.Content=$app.Name;$box.ToolTip=$app.Description;$box.Tag=$app;$box.MinWidth=205;$box.IsChecked=$app.Id -in $selected
+        $script:basicAppChoices+=$box;[void]$lbBasicApps.Children.Add($box)
+    }
+    if($script:customAppsError){$lblBasicAppStatus.Text='Chưa đọc được danh sách bổ sung. Mở Quản lý ứng dụng để kiểm tra.'}
+}
+$basicAppChoices=@()
+Update-DeployBasicChoices
+Bind-Click 'btnManageApps' {
+    if(Show-DeployCustomApps $script:customAppsPath $script:builtInBasicApps $form){Update-DeployBasicChoices}
 }
 $btnBasicAppLog.IsEnabled = $false
 Bind-Click 'btnBasicAppInstall' { Start-BasicApps }
 Bind-Click 'btnBasicAppLog' { Start-Process notepad.exe ('"{0}"' -f $script:basicAppLog) }
 Bind-Click 'btnBasicAppHelp' { Start-Process 'https://learn.microsoft.com/vi-vn/windows/package-manager/winget/' }
+. (Join-Path $PSScriptRoot 'Update.Notifications.UI.ps1')
 . (Join-Path $PSScriptRoot 'Update-UI.ps1')
 $form.Add_Closing({
     param($sender, $event)
@@ -222,7 +245,7 @@ $form.Add_Closing({
         Set-Status 'Chờ thao tác đang chạy hoàn tất trước khi thoát.'
     }
 })
-$form.Add_ContentRendered({ Update-LogoPreview; Update-MachineInfo })
+$form.Add_ContentRendered({ Update-LogoPreview; Update-MachineInfo; Start-DeployUpdateNotifications })
 if (-not $ValidateOnly) {
 $form.Dispatcher.Add_UnhandledException({
     param($sender, $event)
@@ -234,6 +257,7 @@ $form.Dispatcher.Add_UnhandledException({
 if ($ValidateOnly) { return $form }
 try { [void]$form.ShowDialog() }
 finally {
-    foreach ($timer in $uiTimer,$officeTimer,$basicAppTimer,$mediaTimer,$updateTimer) { $timer.Stop() }
+    foreach ($timer in $uiTimer,$officeTimer,$basicAppTimer,$mediaTimer,$updateTimer,$availabilityTimer) { $timer.Stop() }
+    Stop-DeployUpdateProbe
     if ($script:updateProcess) { $script:updateProcess.Dispose() }
 }

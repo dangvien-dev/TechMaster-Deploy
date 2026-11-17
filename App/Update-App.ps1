@@ -18,7 +18,7 @@ trap {
 $window = Import-DeployWindow (Join-Path $PSScriptRoot 'UpdaterWindow.xml')
 $controls = @{}
 foreach ($name in 'CurrentVersion','Heading','Summary','Progress','Primary','Cancel','RootPicker','RootPath','BrowseRoot','HistoryGrid','AccessPanel','AccessToken','SaveAccess','RemoveAccess','ChoosePackage') { $controls[$name] = $window.FindName($name) }
-$script:session = @{ Root = $Root; Mode = $Mode; Package = $PackagePath; Work = ''; Job = $null; Release = $null; Backup = ''; State = 'Idle'; Operation = ''; CloseRequested = $false }
+$script:session = @{ Root = $Root; Mode = $Mode; Package = $PackagePath; Work = ''; Job = $null; Release = $null; Backup = ''; State = 'Idle'; Operation = ''; CloseRequested = $false; OpenApplication = $false }
 function Publish-UpdateWindowState {
     if(-not $CloseRequestPath){return}
     try {
@@ -30,6 +30,7 @@ function Set-UpdateView([string]$state, [string]$message) {
     $script:session.State = $state
     $view = Get-DeployUpdateView $state
     $controls.Heading.Text = $view.heading; $controls.Summary.Text = $message
+    if($state -eq 'Complete'){$controls.Summary.Text += ' Bấm Đóng và mở ứng dụng khi bạn sẵn sàng.'}
     $controls.Primary.Content = $view.primary; $controls.Primary.IsEnabled = -not $view.busy; $controls.ChoosePackage.IsEnabled = -not $view.busy
     $controls.Progress.IsIndeterminate = $view.busy
     $controls.Cancel.IsEnabled = $state -ne 'Applying'
@@ -40,6 +41,11 @@ function Set-UpdateView([string]$state, [string]$message) {
     if ($state -in 'Complete','Ready') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 100 }
     if ($state -in 'Error','Latest','Available','Idle') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 0 }
     Publish-UpdateWindowState
+}
+function Request-UpdateApplicationOpen {
+    if($script:session.State -ne 'Complete' -or $script:session.Job){return}
+    $script:session.OpenApplication=$true
+    $window.Close()
 }
 function New-UpdateWork {
     $script:session.Work = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Update Downloads/' + [guid]::NewGuid().ToString('N'))
@@ -114,9 +120,9 @@ $controls.Primary.Add_Click({
     if ($controls.RootPicker.Visibility -eq 'Visible') { $script:session.Root = $controls.RootPath.Text.Trim(); Start-InitialUpdate; return }
     $view = Get-DeployUpdateView $script:session.State
     switch ($view.action) {
-        'Close' { $window.Close() }
-        'Apply' { if (Confirm-Box 'Cài bản cập nhật đã kiểm tra? Ứng dụng sẽ đóng, sao lưu và mở lại khi hoàn tất.' 'Cài đặt bản cập nhật' -ConfirmText 'Cài đặt' -Owner $window) { Start-UpdateOperation 'Apply' } }
-        'Rollback' { if (Confirm-Box 'Khôi phục phiên bản trước? Ứng dụng sẽ đóng rồi mở lại. Cấu hình và dữ liệu được giữ nguyên.' 'Khôi phục' -ConfirmText 'Khôi phục' -Owner $window) { Start-UpdateOperation 'Rollback' } }
+        'OpenApplication' { Request-UpdateApplicationOpen }
+        'Apply' { if (Confirm-Box 'Ứng dụng sẽ đóng để sao lưu và cài bản cập nhật. Khi hoàn tất, bạn bấm nút để mở lại ứng dụng.' 'Cài đặt bản cập nhật' -ConfirmText 'Cài đặt' -Owner $window) { Start-UpdateOperation 'Apply' } }
+        'Rollback' { if (Confirm-Box 'Ứng dụng sẽ đóng để khôi phục phiên bản trước. Khi hoàn tất, bạn bấm nút để mở lại ứng dụng.' 'Khôi phục' -ConfirmText 'Khôi phục' -Owner $window) { Start-UpdateOperation 'Rollback' } }
         'Retry' { Start-InitialUpdate }
         default { if ($view.action) { Start-UpdateOperation $view.action } }
     }
@@ -160,3 +166,6 @@ $window.Dispatcher.Add_UnhandledException({
 }
 if ($ValidateOnly) { return $window }
 try { [void]$window.ShowDialog() } finally { $timer.Stop() }
+# The new application takes focus only after this window has completely closed.
+try { Open-DeployUpdatedApplication $script:session }
+catch { Show-DeployMessage $_.Exception.GetBaseException().Message 'Mở TechMaster Deploy' 'Error' }

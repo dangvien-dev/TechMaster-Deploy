@@ -43,7 +43,7 @@ try {
     Assert ($view.busy -and -not $view.action) 'Applying cannot trigger another UI operation'
     $result=Invoke-DeployUpdateTask -Operation Apply -Root $root -Work $work
     Assert ($result.state -eq 'Complete' -and (Get-DeployVersion $root) -eq [version]'1.2.0.0') 'Explicit Apply commits real update transaction'
-    Assert ($script:restarts -eq 1) 'Successful Apply restarts once'
+    Assert ($script:restarts -eq 0) 'Successful Apply waits for the user; never steals focus from completion'
     Assert ([IO.File]::ReadAllText((Join-Path $root 'BienBan/BienBan-Config.json')) -ceq 'my customer data') 'WPF engine preserves customer configuration'
     $history=Invoke-DeployUpdateTask -Operation History -Root $root -Work $work
     Assert ($history.state -eq 'History' -and @($history.rows).Count -eq 1 -and $history.rows[0].Status -eq 'Đã cập nhật') 'History is a graphical data result with friendly status'
@@ -52,8 +52,25 @@ try {
     Assert ((Get-DeployVersion $root) -eq [version]'1.2.0.0') 'Rollback offer leaves current version intact'
     $result=Invoke-DeployUpdateTask -Operation Rollback -Root $root -Work $work -Backup $rollback.backup
     Assert ($result.state -eq 'Complete' -and (Get-DeployVersion $root) -eq [version]'1.1.3.0') 'Explicit rollback restores actual files'
-    Assert ($script:restarts -eq 2) 'Rollback restarts once'
+    Assert ($script:restarts -eq 0) 'Rollback also waits for an explicit open action'
     Assert ([IO.File]::ReadAllText((Join-Path $root 'BienBan/BienBan-Config.json')) -ceq 'my customer data') 'Rollback preserves customer configuration'
+    $progress=Get-Content -LiteralPath (Join-Path $work 'progress.json') -Raw | ConvertFrom-Json
+    Assert ($progress.percent -eq 100 -and $progress.message) 'Engine publishes completion progress without any console interaction'
+    $session=@{State='Complete';Root=$root;OpenApplication=$false}
+    Open-DeployUpdatedApplication $session
+    Assert ($script:restarts -eq 0) 'Closing with the title-bar X does not open the app'
+    $session.OpenApplication=$true
+    Open-DeployUpdatedApplication $session
+    Assert ($script:restarts -eq 1 -and -not $session.OpenApplication) 'Explicit completion action opens once and consumes its request'
+    Open-DeployUpdatedApplication $session
+    Assert ($script:restarts -eq 1) 'Repeated completion dispatch cannot open a second instance'
+    $session.State='Error';$session.OpenApplication=$true
+    Open-DeployUpdatedApplication $session
+    Assert ($script:restarts -eq 1) 'An error cannot accidentally launch an app'
+    function Assert-DeployToolsClosed {throw 'fixture busy tool'}
+    $caught='';try{Invoke-DeployUpdateTask -Operation Apply -Root $root -Work $work}catch{$caught=$_.Exception.Message}
+    Assert ($caught -match 'fixture busy tool' -and $script:restarts -eq 1) 'Failed apply also never opens an app in finally'
+    Assert ((Get-DeployVersion $root) -eq [version]'1.1.3.0') 'Failed apply before mutation preserves the installed version'
     function Get-CimInstance {
         $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes("& '$root/FixClone/Master-Preflight.ps1' -AfterClone"))
         [pscustomobject]@{ProcessId=($PID+100);CommandLine=('powershell.exe -EncodedCommand '+$encoded)}
@@ -61,7 +78,5 @@ try {
     $caught=''
     try { & $script:toolsCheck $root } catch { $caught=$_.Exception.Message }
     Assert ($caught -match 'Còn cửa sổ công cụ') 'Updater detects tools launched by encoded PowerShell commands before changing files'
-    $progress=Get-Content -LiteralPath (Join-Path $work 'progress.json') -Raw | ConvertFrom-Json
-    Assert ($progress.percent -eq 100 -and $progress.message) 'Engine publishes completion progress without any console interaction'
 } finally { if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Recurse -Force } }
 Write-Host "PASS: $script:checks graphical update engine assertions; real staging, explicit apply, history, restore and data preservation."

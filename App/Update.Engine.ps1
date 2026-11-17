@@ -86,7 +86,7 @@ function Invoke-DeployUpdateTask {
     }
     # Apply/Rollback are reachable only after the window's explicit confirmation.
     $officeLock = New-Object Threading.Mutex($false, 'Global\TechMaster.OfficeDeployment')
-    $owns = $false; $script:parentClosed = $false; $restartWarning = ''
+    $owns = $false; $script:parentClosed = $false
     try {
         try { $owns = $officeLock.WaitOne(0) } catch [Threading.AbandonedMutexException] { $owns = $true }
         if (-not $owns) { throw 'Đang cài / dọn Office. Chờ thao tác đó kết thúc rồi cập nhật.' }
@@ -105,23 +105,29 @@ function Invoke-DeployUpdateTask {
     } finally {
         if ($owns) { $officeLock.ReleaseMutex() }
         $officeLock.Dispose()
-        if ($script:parentClosed -and (Test-Path -LiteralPath (Join-Path $Root 'TechMaster Deploy.exe'))) {
-            try { Start-Process -FilePath (Join-Path $Root 'TechMaster Deploy.exe') -WorkingDirectory $Root -ErrorAction Stop }
-            catch { $restartWarning = ' Mở TechMaster Deploy.exe để tiếp tục.' }
-        }
     }
-    Set-DeployTaskProgress $Work ($message + $restartWarning) 100
-    return [pscustomobject]@{ state = 'Complete'; message = $message + $restartWarning }
+    Set-DeployTaskProgress $Work $message 100
+    return [pscustomobject]@{ state = 'Complete'; message = $message }
+}
+
+# Called only after the updater window closes with explicit user intent.
+function Open-DeployUpdatedApplication($session) {
+    if($session.State -ne 'Complete' -or -not $session.OpenApplication){return}
+    $session.OpenApplication=$false
+    Assert-DeployRegularPath $session.Root 'TechMaster Deploy.exe'
+    $path=Join-Path $session.Root 'TechMaster Deploy.exe'
+    if(-not (Test-Path -LiteralPath $path -PathType Leaf)){throw 'Không tìm thấy TechMaster Deploy.exe. Mở ứng dụng trong thư mục đã cập nhật để tiếp tục.'}
+    Start-Process -FilePath $path -WorkingDirectory $session.Root -ErrorAction Stop|Out-Null
 }
 
 function Get-DeployUpdateView([string]$state) {
     switch ($state) {
         'Available'     { return @{ heading = 'Có bản cập nhật mới'; primary = 'Tải bản cập nhật'; action = 'PrepareOnline'; busy = $false } }
-        'Ready'         { return @{ heading = 'Sẵn sàng cài đặt'; primary = 'Cài đặt và mở lại'; action = 'Apply'; busy = $false } }
-        'RollbackReady' { return @{ heading = 'Khôi phục phiên bản'; primary = 'Khôi phục và mở lại'; action = 'Rollback'; busy = $false } }
+        'Ready'         { return @{ heading = 'Sẵn sàng cài đặt'; primary = 'Cài đặt bản cập nhật'; action = 'Apply'; busy = $false } }
+        'RollbackReady' { return @{ heading = 'Khôi phục phiên bản'; primary = 'Khôi phục bản trước'; action = 'Rollback'; busy = $false } }
         'Latest'        { return @{ heading = 'Đã kiểm tra'; primary = 'Kiểm tra lại'; action = 'Retry'; busy = $false } }
         'History'       { return @{ heading = 'Lịch sử cập nhật'; primary = 'Làm mới'; action = 'History'; busy = $false } }
-        'Complete'      { return @{ heading = 'Hoàn tất'; primary = 'Đóng'; action = 'Close'; busy = $false } }
+        'Complete'      { return @{ heading = 'Hoàn tất'; primary = 'Đóng và mở ứng dụng'; action = 'OpenApplication'; busy = $false } }
         'Error'         { return @{ heading = 'Chưa hoàn tất'; primary = 'Thử lại'; action = 'Retry'; busy = $false } }
         'Checking'     { return @{ heading = 'Đang kiểm tra'; primary = 'Đang kiểm tra…'; action = ''; busy = $true } }
         'Preparing'    { return @{ heading = 'Đang chuẩn bị'; primary = 'Đang tải…'; action = ''; busy = $true } }

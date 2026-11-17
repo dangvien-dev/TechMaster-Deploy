@@ -1,5 +1,21 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.3.0 — 17/11/2026
+
+- Bản chia sẻ để trống thông tin đơn vị và không kèm logo công ty; thêm nút xoá thông tin đơn vị / logo đang lưu.
+
+- Quản lý ứng dụng bổ sung bằng ID WinGet hoặc tệp EXE / MSI; cấu hình chỉ lưu local theo tài khoản Windows, giữ khi cập nhật và không đưa lên repo.
+
+- Thêm chấm đỏ ở nút Cập nhật khi phát hiện bản mới bằng kiểm tra nền; không tự tải hoặc bật popup.
+
+- Có gì mới hiển thị theo phiên bản trong cửa sổ WPF; thêm Hướng dẫn nhanh theo từng tính năng và Liên hệ / góp ý qua Zalo 0976852096, email vienkendo@gmail.com.
+
+- Giữ nền xanh của menu khi khoá thao tác để cập nhật; tránh khối trắng làm menu trông như nổi lên.
+
+- Thêm UltraViewer trong Cài ứng dụng, dùng bộ cài tiếng Việt 6.6.133 chính thức thay vì bản WinGet cũ; kiểm tra chữ ký / phiên bản, giữ bản đã cài hoặc đang chạy.
+
+- Cập nhật / khôi phục xong giữ màn hình Hoàn tất. Chỉ mở app khi bấm Đóng và mở ứng dụng, sau khi cửa sổ updater đã đóng; nút X chỉ đóng updater. Không tự mở app khi lỗi.
+
 ## 2.1.2.0 — 17/11/2026
 
 - QR trên máy tính mở trang điện thoại có Installation ID, nút sao chép, link portal Microsoft và ô gửi Confirmation ID; không cần tự nhập link portal.

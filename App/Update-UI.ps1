@@ -29,6 +29,8 @@ function Update-DeployUpdaterState {
         try {
             if(Test-Path -LiteralPath $statePath){
                 $state=[IO.File]::ReadAllText($statePath)|ConvertFrom-Json
+                if($state.state -eq 'Latest'){Set-DeployUpdateAvailability $false}
+                elseif($state.state -in 'Available','Ready'){Set-DeployUpdateAvailability $true}
                 if($state.message){Set-Status ($state.message+' · Bấm Cập nhật để mở lại cửa sổ.')}
             }
         } catch {}
@@ -45,6 +47,7 @@ function Start-DeployUpdater([string]$mode, [string]$zipPath = '') {
         Show-DeployMessage 'Chờ các thao tác đang chạy kết thúc rồi cập nhật.' 'Cập nhật'
         return
     }
+    Stop-DeployUpdateProbe
     try {
         $runner = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Update Runner/' + [guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $runner -Force -ErrorAction Stop | Out-Null
@@ -68,4 +71,4 @@ Bind-Click 'checkUpdate' { Start-DeployUpdater 'Online' }
 Bind-Click 'localUpdate' { Start-DeployUpdater 'Local' }
 Bind-Click 'historyUpdate' { Start-DeployUpdater 'History' }
 Bind-Click 'rollbackUpdate' { Start-DeployUpdater 'Rollback' }
-Bind-Click 'changeLogUpdate' { Start-Process notepad.exe ('"{0}"' -f (Join-Path $Root 'CHANGELOG.md')) }
+Bind-Click 'changeLogUpdate' { Show-DeployChangeLog $Root $form }
