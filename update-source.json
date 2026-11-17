@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.5.0",
+  "version": "2.1.6.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -164,14 +164,14 @@
     {
       "path": "App/TechMaster-Icon.svg",
       "mode": "100644",
-      "size": 1138,
-      "sha": "c3bf3f9f1074e75c58d2eac222d63fbd2212b59c"
+      "size": 216290,
+      "sha": "b18b78258b27e87a9ace505af76766a219433c86"
     },
     {
       "path": "App/TechMaster.ico",
       "mode": "100644",
-      "size": 112795,
-      "sha": "7c5020aa59827f2682c07dcaaae05fcfc54ab7fa"
+      "size": 146169,
+      "sha": "d6efb567e4b17a0219db5fcfaeaf22f700a471b6"
     },
     {
       "path": "App/Test-CustomApps.ps1",
@@ -338,8 +338,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 7749,
-      "sha": "c4837c348c2c0fc4938bead404f471a57b666f83"
+      "size": 7982,
+      "sha": "f1f5dfd56ff4614f46ed240d913ae8201b69a1c8"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -699,7 +699,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "fb5a56ac0f6593c96fb3ffb838c3da2cab762aff"
+      "sha": "436e07b6ac797959b9c3bb13d995fd435305aa64"
     }
   ]
 }
