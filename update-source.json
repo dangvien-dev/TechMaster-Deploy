@@ -128,8 +128,8 @@
     {
       "path": "App/Logo.Preview.ps1",
       "mode": "100644",
-      "size": 587,
-      "sha": "eb400eb3a549957fe5286e57844432b1e5108043"
+      "size": 646,
+      "sha": "a46a4744830f9c39fa52d4a731c547ae36acdceb"
     },
     {
       "path": "App/LogoPreview.cs",
