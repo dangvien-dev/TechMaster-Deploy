@@ -1,5 +1,9 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.5.0 — 17/11/2026
+
+- Sửa lỗi mở Có gì mới, Hướng dẫn nhanh và Liên hệ khi vừa chạy app: cửa sổ thông tin tự nạp hàm đọc phiên bản, không phụ thuộc việc đã mở updater.
+
 ## 2.1.4.0 — 17/11/2026
 
 - Sửa phóng to cửa sổ còn hở cạnh phải / dưới: chỉ co kích thước lúc mở ban đầu, để Windows xử lý chế độ phóng to theo màn hình.
