@@ -18,7 +18,24 @@ $index = [ordered]@{
 $json = ($index | ConvertTo-Json -Depth 6) + "`n"
 $target = Join-Path $root 'update-source.json'
 if ($Check) {
-    if (-not (Test-Path -LiteralPath $target) -or [IO.File]::ReadAllText($target) -cne $json) { throw 'Danh sách cập nhật chưa khớp mã nguồn. Chạy App/Build-UpdateIndex.ps1 trước khi commit.' }
+    $valid = Test-Path -LiteralPath $target
+    if ($valid) {
+        $saved = [IO.File]::ReadAllText($target) | ConvertFrom-Json
+        foreach ($key in 'schema','product','repository','branch','version') { if ([string]$saved.$key -cne [string]$index[$key]) { $valid = $false } }
+        $map = @{}
+        foreach ($entry in $saved.files) {
+            if ($map.ContainsKey($entry.path)) { $valid = $false }
+            $map[$entry.path] = $entry
+        }
+        if ($map.Count -ne $files.Count) { $valid = $false }
+        foreach ($entry in $files) {
+            $old = $map[$entry.path]
+            if (-not $old -or $old.sha -cne $entry.sha -or [long]$old.size -ne [long]$entry.size -or $old.mode -cne $entry.mode) { $valid = $false }
+        }
+    }
+    # Windows PowerShell 5.1 and PowerShell 7 serialize indentation differently.
+    # Compare the actual metadata and hashes rather than JSON whitespace.
+    if (-not $valid) { throw 'Danh sách cập nhật chưa khớp mã nguồn. Chạy App/Build-UpdateIndex.ps1 trước khi commit.' }
     Write-Host 'Danh sách cập nhật khớp toàn bộ mã nguồn.'
 } else {
     [IO.File]::WriteAllText($target, $json, [Text.UTF8Encoding]::new($false))

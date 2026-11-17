@@ -9,13 +9,22 @@ jobs:
   wpf:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Native WPF layout and wiring
         shell: powershell
-        run: powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File App/Test-Wpf.ps1
+        run: |
+          try { & App/Test-Wpf.ps1 }
+          catch {
+            $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)
+            $detail | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            $escaped = $detail.Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+            Write-Output "::error title=Native WPF validation::$escaped"
+            exit 1
+          }
       - name: Update transactions and worker runspaces
         shell: powershell
         run: |
+          try {
           & App/Test-Update.ps1
           & App/Test-RepoUpdate.ps1
           & App/Test-PublicUpdate.ps1
@@ -26,6 +35,12 @@ jobs:
           & FixClone/Test-MasterPreflight.ps1
           & App/Test-UpdateEngine.ps1
           & App/Build-UpdateIndex.ps1 -Check
+          } catch {
+            $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)
+            $detail | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            Write-Output ("::error title=Update tests::" + $detail.Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A'))
+            exit 1
+          }
       - name: Build Windows applications
         shell: powershell
         run: |

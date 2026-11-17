@@ -1,6 +1,12 @@
 ﻿# WPF entry point. Use Windows PowerShell 5.1, STA, through the launcher.
 param([switch]$ValidateOnly)
 $ErrorActionPreference = 'Stop'
+trap {
+    if ($ValidateOnly) { throw $_ }
+    Add-Type -AssemblyName PresentationFramework
+    [void][Windows.MessageBox]::Show($_.Exception.GetBaseException().Message, 'TechMaster Deploy', 'OK', 'Error')
+    exit 1
+}
 $Root = Split-Path -Parent $PSScriptRoot
 $DirClone = Join-Path $Root 'FixClone'; $DirKH = Join-Path $Root 'KichHoat'
 $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoOffice = Join-Path $Root 'KhoOffice'
@@ -211,6 +217,14 @@ $form.Add_Closing({
     }
 })
 $form.Add_ContentRendered({ Update-LogoPreview; Update-MachineInfo })
+if (-not $ValidateOnly) {
+$form.Dispatcher.Add_UnhandledException({
+    param($sender, $event)
+    $event.Handled = $true
+    Set-Status 'Thao tác gặp lỗi; có thể thử lại.'
+    Show-DeployMessage $event.Exception.GetBaseException().Message 'TechMaster Deploy' 'Error'
+})
+}
 if ($ValidateOnly) { return $form }
 try { [void]$form.ShowDialog() }
 finally {

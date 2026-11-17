@@ -6,6 +6,12 @@ param(
     [switch]$ValidateOnly
 )
 $ErrorActionPreference = 'Stop'
+trap {
+    if ($ValidateOnly) { throw $_ }
+    Add-Type -AssemblyName PresentationFramework
+    [void][Windows.MessageBox]::Show($_.Exception.GetBaseException().Message, 'TechMaster Deploy', 'OK', 'Error')
+    exit 1
+}
 . (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'Update.Core.ps1')
 . (Join-Path $PSScriptRoot 'Update.Engine.ps1')
@@ -133,5 +139,12 @@ $window.Add_Closing({
     }
 })
 $window.Add_ContentRendered({ Start-InitialUpdate })
+if (-not $ValidateOnly) {
+$window.Dispatcher.Add_UnhandledException({
+    param($sender, $event)
+    $event.Handled = $true
+    Show-DeployMessage $event.Exception.GetBaseException().Message 'Cập nhật TechMaster' 'Error'
+})
+}
 if ($ValidateOnly) { return $window }
 try { [void]$window.ShowDialog() } finally { $timer.Stop() }

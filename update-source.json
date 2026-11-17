@@ -26,8 +26,8 @@
     {
       "path": "App/Build-UpdateIndex.ps1",
       "mode": "100644",
-      "size": 1481,
-      "sha": "ebae5ca7e8a57e11c385292181ebb22350cbd029"
+      "size": 2323,
+      "sha": "5230256e6764b1a66a8d013aa2fa49bf024b0f11"
     },
     {
       "path": "App/Build-UpgradeHelper.ps1",
@@ -98,8 +98,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 14675,
-      "sha": "7de85e1fe2e8078a606b7ee36b7feb718977712b"
+      "size": 15179,
+      "sha": "f2278596a22ce25dc9c420fc2f0a0d33c1711717"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -164,8 +164,8 @@
     {
       "path": "App/Update-App.ps1",
       "mode": "100644",
-      "size": 8912,
-      "sha": "c940d747acefccc67e5a8d994414b024b3cd6419"
+      "size": 9361,
+      "sha": "ed2cd9f9392369f760701a97145d779e7f750675"
     },
     {
       "path": "App/Update-UI.ps1",
