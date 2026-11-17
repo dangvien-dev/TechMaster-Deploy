@@ -1,4 +1,6 @@
 ﻿# Plain-text documentation rendered with WPF; Markdown is never executed as XAML or HTML.
+# This component is also opened before the updater has ever been loaded.
+. (Join-Path $PSScriptRoot 'Update.Core.ps1')
 function ConvertTo-DeployInfoText([string]$text){return ($text -replace '\[([^\]]+)\]\([^)]+\)','$1' -replace '`','' -replace '\*\*','').Trim()}
 function Get-DeployInfoSections([string]$path,[switch]$ReleaseNotes) {
     if(-not (Test-Path -LiteralPath $path -PathType Leaf)){return @()}
