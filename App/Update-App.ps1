@@ -1,131 +1,137 @@
-﻿param(
-    [Parameter(Mandatory = $true)][string]$Root,
-    [ValidateSet('Online', 'Local', 'History', 'Rollback', 'Access')][string]$Mode = 'Online',
-    [string]$PackagePath = '',
-    [int]$ParentId = 0,
-    [string]$CloseRequestPath = ''
+﻿# Graphical updater. No Read-Host, console prompts or UI-thread network calls.
+param(
+    [string]$Root = '',
+    [ValidateSet('Online','Local','History','Rollback','Access')][string]$Mode = 'Online',
+    [string]$PackagePath = '', [int]$ParentId = 0, [string]$CloseRequestPath = '',
+    [switch]$ValidateOnly
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'Update.Core.ps1')
-if (Test-Path (Join-Path $PSScriptRoot 'Console.ps1')) {
-    . (Join-Path $PSScriptRoot 'Console.ps1')
-    Initialize-TechMasterConsole
+. (Join-Path $PSScriptRoot 'Update.Engine.ps1')
+$window = Import-DeployWindow (Join-Path $PSScriptRoot 'UpdaterWindow.xml')
+$controls = @{}
+foreach ($name in 'CurrentVersion','Heading','Summary','Progress','Primary','Cancel','RootPicker','RootPath','BrowseRoot','HistoryGrid','AccessPanel','AccessToken','SaveAccess','RemoveAccess','ChoosePackage') { $controls[$name] = $window.FindName($name) }
+$script:session = @{ Root = $Root; Mode = $Mode; Package = $PackagePath; Work = ''; Job = $null; Release = $null; Backup = ''; State = 'Idle'; Operation = ''; CloseRequested = $false }
+function Set-UpdateView([string]$state, [string]$message) {
+    $script:session.State = $state
+    $view = Get-DeployUpdateView $state
+    $controls.Heading.Text = $view.heading; $controls.Summary.Text = $message
+    $controls.Primary.Content = $view.primary; $controls.Primary.IsEnabled = -not $view.busy; $controls.ChoosePackage.IsEnabled = -not $view.busy
+    $controls.Progress.IsIndeterminate = $view.busy
+    $controls.Cancel.IsEnabled = $state -ne 'Applying'
+    $controls.Cancel.Content = if ($view.busy) { 'Huỷ' } else { 'Đóng' }
+    if ($state -in 'Complete','Ready') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 100 }
+    if ($state -in 'Error','Latest','Available','Idle') { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = 0 }
 }
-$work = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy\Update Downloads\' + [guid]::NewGuid().ToString('N'))
-$exitCode = 0
-$parentClosed = $false
-$officeLock = $null
-$ownsOfficeLock = $false
-function Close-DeployForUpdate {
-    Write-Host 'Đang đóng cửa sổ TechMaster để thay tệp chương trình…'
-    if ($ParentId -gt 0) {
-        $parent = Get-Process -Id $ParentId -ErrorAction SilentlyContinue
-        if ($null -ne $parent) {
-            try {
-                if ($CloseRequestPath) {
-                    $expected = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'close.request'))
-                    if ([IO.Path]::GetFullPath($CloseRequestPath) -ne $expected) { throw 'Đường dẫn yêu cầu đóng app không hợp lệ.' }
-                    Assert-DeployRegularPath $PSScriptRoot 'close.request'
-                    [IO.File]::WriteAllText($CloseRequestPath, 'close', [Text.UTF8Encoding]::new($false))
-                } elseif (-not $parent.CloseMainWindow()) {
-                    throw 'Chưa đóng được TechMaster. Chưa thay tệp; đóng app và dùng công cụ nâng cấp riêng để nhận bản sửa.'
-                }
-                if (-not $parent.WaitForExit(15000)) { throw 'TechMaster chưa thoát hẳn. Chưa thay tệp; đóng app và dùng công cụ nâng cấp riêng để thử lại.' }
-            } finally {
-                if ($CloseRequestPath -and (Test-Path -LiteralPath $CloseRequestPath -PathType Leaf)) {
-                    # Remove only this runner's request, including on timeout.
-                    if ([IO.Path]::GetFullPath($CloseRequestPath) -eq [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'close.request'))) {
-                        Remove-Item -LiteralPath $CloseRequestPath -Force -ErrorAction SilentlyContinue
-                    }
-                }
-                $parent.Dispose()
-            }
-        }
-    }
-    if ($ParentId -gt 0) { $script:parentClosed = $true }
+function New-UpdateWork {
+    $script:session.Work = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Update Downloads/' + [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $script:session.Work -Force | Out-Null
 }
-try {
-    $Root = [IO.Path]::GetFullPath($Root)
-    Assert-DeployRegularPath $Root
-    if (-not (Test-Path -LiteralPath (Join-Path $Root 'App/TechMaster-Deploy.ps1') -PathType Leaf)) { throw 'Thư mục được chọn không có ứng dụng TechMaster Deploy.' }
-    Write-Host ('TECHMASTER DEPLOY — CẬP NHẬT | Hiện tại: ' + (Get-DeployVersion $Root)) -ForegroundColor Cyan
-    Write-Host 'Giữ cấu hình biên bản, logo, kho Office, bộ ODT, nhật ký và Reinstall.'
-    if ($Mode -eq 'Access') {
-        Write-Host ('Repo: ' + $script:DeployRepository + ' / ' + $script:DeployBranch)
-        Write-Host 'Repo công khai không cần token. Repo riêng tư: dùng fine-grained token chỉ có Contents: Read cho repo này.'
-        Write-Host 'Token chỉ lưu mã hoá bằng Windows DPAPI dưới user đang dùng; không đưa vào thư mục app, ZIP hoặc repo.'
-        $choice = Read-Host '[1] Lưu token  [2] Xoá token đã lưu  [0] Bỏ qua'
-        if ($choice -eq '1') {
-            $token = Read-Host 'Nhập token GitHub (nội dung được ẩn)' -AsSecureString
-            try { Save-DeployGitHubToken $token } finally { if ($token) { $token.Dispose() } }
-            Write-Host 'Đã lưu quyền đọc repo cho user Windows này.'
-        } elseif ($choice -eq '2') {
-            $credentialPath = Get-DeployCredentialPath
-            if (Test-Path -LiteralPath $credentialPath -PathType Leaf) { Remove-Item -LiteralPath $credentialPath -Force }
-            Write-Host 'Đã xoá token cục bộ.'
-        }
-        return
-    }
-    if ($Mode -eq 'History') {
-        @(Get-DeployHistory $Root) | Select-Object Date, From, To, Status | Format-Table -AutoSize | Out-Host
-        return
-    }
-    if ($Mode -eq 'Rollback') {
-        $current = (Get-DeployVersion $Root).ToString()
-        $last = @(Get-DeployHistory $Root | Where-Object { $_.Status -eq 'installed' -and [version]$_.To -eq [version]$current })
-        if (-not $last.Count) { Write-Host 'Không có bản sao lưu phù hợp để quay lại.'; return }
-        Write-Host ("Quay lại $($last[0].From) từ $current. Dữ liệu cá nhân và cấu hình vẫn được giữ.")
-        if ((Read-Host 'Gõ QUAY LAI để xác nhận') -cne 'QUAY LAI') { Write-Host 'Đã huỷ.'; return }
-    } else {
-        New-Item -ItemType Directory -Path $work -Force | Out-Null
-        $release = $null
-        $payload = Join-Path $work 'payload'
-        if ($Mode -eq 'Online') {
-            Write-Host 'Đang kiểm tra phiên bản mới…'
-            $knownCommit = ''
-            $installedManifest = Join-Path $Root 'update-package.json'
-            if (Test-Path -LiteralPath $installedManifest -PathType Leaf) { $knownCommit = [string](Read-DeployManifest $installedManifest).source.commit }
-            $release = Get-DeployOnlineRelease $knownCommit
-            if ($release.unchanged) { Write-Host 'Bạn đang dùng phiên bản mới nhất.' -ForegroundColor Green; return }
-            if ([version]$release.version -lt (Get-DeployVersion $Root)) { throw 'Phiên bản trên repo cũ hơn bản đang dùng; không hạ cấp tự động.' }
-            Write-Host ("Đã có phiên bản mới: $($release.version)")
-            if ((Read-Host 'Tải bản cập nhật? [y/N]') -notin 'y', 'Y') { Write-Host 'Đã huỷ.'; return }
-            $package = Save-DeployRepositoryPayload $release $payload $Root
-        } else {
-            if (-not (Test-Path -LiteralPath $PackagePath -PathType Leaf)) { throw 'Không tìm thấy ZIP. Hãy chọn gói cập nhật TechMaster Deploy.' }
-            $package = Expand-DeployPackage $PackagePath $payload
-        }
-        $plan = Get-DeployUpdatePlan $Root $payload
-        Write-Host ("Phiên bản: $($plan.from) -> $($plan.to)")
-        if ($plan.firstUpdate) { Write-Host 'Đây là lần nâng cấp đầu tiên: toàn bộ tệp chương trình sắp thay sẽ được sao lưu.' -ForegroundColor Yellow }
-        Write-Host 'Đóng các công cụ TechMaster đang mở riêng. Bản hiện tại sẽ được sao lưu để khôi phục khi cần.'
-        if ((Read-Host 'Gõ CAP NHAT để cài và mở lại ứng dụng') -cne 'CAP NHAT') { Write-Host 'Đã huỷ; không thay đổi ứng dụng.'; return }
-    }
-    $officeLock = New-Object Threading.Mutex($false, 'Global\TechMaster.OfficeDeployment')
-    try { $ownsOfficeLock = $officeLock.WaitOne(0) } catch [Threading.AbandonedMutexException] { $ownsOfficeLock = $true }
-    if (-not $ownsOfficeLock) { throw 'TechMaster đang cài / dọn Office. Chờ thao tác đó kết thúc trước khi cập nhật.' }
-    Close-DeployForUpdate
-    Assert-DeployToolsClosed $Root $ParentId
-    $parentClosed = $true
-    if ($Mode -eq 'Rollback') {
-        Undo-DeployUpdate $Root $last[0].Backup
-        Write-Host 'Đã quay lại bản trước.' -ForegroundColor Green
-    } else {
-        $backup = Install-DeployUpdate $Root $payload
-        Write-Host ("Đã cập nhật lên $($plan.to). Bạn có thể khôi phục bản trước trong ứng dụng.") -ForegroundColor Green
-    }
-} catch {
-    $exitCode = 1
-    Write-Host ('LỖI: ' + $_.Exception.Message) -ForegroundColor Red
-} finally {
-    if ($ownsOfficeLock) { $officeLock.ReleaseMutex() }
-    if ($null -ne $officeLock) { $officeLock.Dispose() }
-    if ($parentClosed -and (Test-Path (Join-Path $Root 'TechMaster Deploy.exe'))) {
-        try { Start-Process -FilePath (Join-Path $Root 'TechMaster Deploy.exe') -WorkingDirectory $Root -ErrorAction Stop }
-        catch { Write-Host 'Không tự mở lại được. Mở TechMaster Deploy.exe từ thư mục chương trình.' }
-    }
-    # Failed staging data is left for diagnosis; successful downloads can be discarded.
-    if ($exitCode -eq 0 -and (Test-Path -LiteralPath $work)) { Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue }
-    Read-Host 'Nhấn Enter để đóng' | Out-Null
+function Start-UpdateOperation([string]$operation) {
+    if ($script:session.Job) { return }
+    if (-not $script:session.Root) { $controls.RootPicker.Visibility = 'Visible'; Set-UpdateView 'Idle' 'Chọn thư mục ứng dụng đang dùng.'; return }
+    try {
+        $script:session.Root = [IO.Path]::GetFullPath($script:session.Root)
+        if (-not (Test-Path -LiteralPath (Join-Path $script:session.Root 'App/TechMaster-Deploy.ps1') -PathType Leaf)) { throw 'Chọn thư mục có App và TechMaster Deploy.exe.' }
+        $controls.CurrentVersion.Text = 'Phiên bản đang dùng: ' + (Get-DeployVersion $script:session.Root)
+        $controls.RootPicker.Visibility = 'Collapsed'
+        if ($operation -in 'Check','PrepareLocal','History','RollbackInfo') { New-UpdateWork }
+        $state = if ($operation -in 'Apply','Rollback') { 'Applying' } elseif ($operation -in 'PrepareOnline','PrepareLocal') { 'Preparing' } else { 'Checking' }
+        Set-UpdateView $state 'Đang xử lý…'
+        $script:session.Operation = $operation
+        $script:session.Job = Start-DeployWork @'
+param($directory, $operation, $root, $work, $release, $package, $parentId, $closeRequest, $backup)
+$ErrorActionPreference = 'Stop'
+. (Join-Path $directory 'Update.Core.ps1')
+. (Join-Path $directory 'Update.Engine.ps1')
+Invoke-DeployUpdateTask -Operation $operation -Root $root -Work $work -Release $release -PackagePath $package -ParentId $parentId -CloseRequestPath $closeRequest -Backup $backup
+'@ @($PSScriptRoot, $operation, $script:session.Root, $script:session.Work, $script:session.Release, $script:session.Package, $ParentId, $CloseRequestPath, $script:session.Backup)
+        $timer.Start()
+    } catch { Set-UpdateView 'Error' $_.Exception.GetBaseException().Message }
 }
-exit $exitCode
+function Start-InitialUpdate {
+    if ($script:session.Mode -eq 'Access') { $controls.AccessPanel.Visibility = 'Visible'; Set-UpdateView 'Idle' 'Quản lý quyền đọc cập nhật.'; $controls.Primary.Visibility = 'Collapsed'; return }
+    if (-not $script:session.Root) { $controls.RootPicker.Visibility = 'Visible'; return }
+    switch ($script:session.Mode) {
+        'Local' {
+            if (-not $script:session.Package) { $script:session.Package = Select-DeployFile 'Chọn gói cập nhật' 'TechMaster Deploy ZIP (*.zip)|*.zip' }
+            if ($script:session.Package) { Start-UpdateOperation 'PrepareLocal' }
+        }
+        'History' { Start-UpdateOperation 'History' }
+        'Rollback' { Start-UpdateOperation 'RollbackInfo' }
+        default { Start-UpdateOperation 'Check' }
+    }
+}
+$timer = New-DeployTimer 150 {
+    $job = $script:session.Job
+    if (-not $job) { return }
+    try {
+        $progressFile = Join-Path $script:session.Work 'progress.json'
+        if (Test-Path -LiteralPath $progressFile) {
+            $progress = [IO.File]::ReadAllText($progressFile) | ConvertFrom-Json
+            $controls.Summary.Text = $progress.message
+            if ($progress.percent -ge 0) { $controls.Progress.IsIndeterminate = $false; $controls.Progress.Value = $progress.percent }
+        }
+    } catch {}
+    if (-not $job.Async.IsCompleted) { return }
+    $timer.Stop(); $script:session.Job = $null
+    try {
+        $items = @(Receive-DeployWork $job)
+        if ($job.Cancelled) { Set-UpdateView 'Idle' 'Đã huỷ. Ứng dụng hiện tại được giữ nguyên.' }
+        else {
+            $result = $items[-1]
+            if ($result.release) { $script:session.Release = $result.release }
+            if ($result.backup) { $script:session.Backup = $result.backup }
+            Set-UpdateView $result.state $result.message
+            if ($result.state -eq 'History') { $controls.HistoryGrid.ItemsSource = @($result.rows); $controls.HistoryGrid.Visibility = 'Visible' }
+        }
+    } catch {
+        if ($job.Cancelled) { Set-UpdateView 'Idle' 'Đã huỷ. Ứng dụng hiện tại được giữ nguyên.' }
+        else { Set-UpdateView 'Error' $_.Exception.GetBaseException().Message }
+    }
+    if ($script:session.CloseRequested) { $window.Close() }
+}
+$controls.Primary.Add_Click({
+    if ($controls.RootPicker.Visibility -eq 'Visible') { $script:session.Root = $controls.RootPath.Text.Trim(); Start-InitialUpdate; return }
+    $view = Get-DeployUpdateView $script:session.State
+    switch ($view.action) {
+        'Close' { $window.Close() }
+        'Apply' { if (Confirm-Box 'Cài bản cập nhật đã kiểm tra? Ứng dụng sẽ đóng, sao lưu và mở lại khi hoàn tất.' 'Cài đặt bản cập nhật') { Start-UpdateOperation 'Apply' } }
+        'Rollback' { if (Confirm-Box 'Khôi phục phiên bản trước? Ứng dụng sẽ đóng rồi mở lại. Cấu hình và dữ liệu được giữ nguyên.' 'Khôi phục') { Start-UpdateOperation 'Rollback' } }
+        'Retry' { Start-InitialUpdate }
+        default { if ($view.action) { Start-UpdateOperation $view.action } }
+    }
+})
+$controls.BrowseRoot.Add_Click({
+    $path = Select-DeployFile 'Chọn ứng dụng TechMaster đang dùng' 'TechMaster Deploy (TechMaster Deploy.exe)|TechMaster Deploy.exe'
+    if ($path) { $controls.RootPath.Text = Split-Path -Parent $path }
+})
+$controls.SaveAccess.Add_Click({
+    try { Save-DeployGitHubToken $controls.AccessToken.SecurePassword; $controls.AccessToken.Clear(); $controls.Summary.Text = 'Đã lưu quyền đọc mã hoá cho tài khoản Windows này.' }
+    catch { Show-DeployMessage $_.Exception.Message 'Quyền đọc' 'Error' }
+})
+$controls.RemoveAccess.Add_Click({
+    try { $path = Get-DeployCredentialPath; if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }; $controls.Summary.Text = 'Đã xoá quyền đọc đã lưu.' }
+    catch { Show-DeployMessage $_.Exception.Message 'Quyền đọc' 'Error' }
+})
+if ($Mode -in 'History','Rollback','Access') { $controls.ChoosePackage.Visibility = 'Collapsed' }
+$controls.ChoosePackage.Add_Click({
+    if ($script:session.Job) { return }
+    $path = Select-DeployFile 'Chọn gói cập nhật offline' 'TechMaster Deploy ZIP (*.zip)|*.zip'
+    if ($path) { $script:session.Mode='Local'; $script:session.Package=$path; Start-UpdateOperation 'PrepareLocal' }
+})
+$controls.Cancel.Add_Click({ $window.Close() })
+$window.Add_Closing({
+    param($sender, $event)
+    if ($script:session.Job) {
+        $event.Cancel = $true
+        if ($script:session.State -eq 'Applying') { $controls.Summary.Text = 'Đang thay tệp chương trình. Chờ hoàn tất trước khi đóng.'; return }
+        $script:session.CloseRequested = $true
+        Request-DeployWorkCancel $script:session.Job
+        $controls.Cancel.IsEnabled = $false; $controls.Summary.Text = 'Đang huỷ thao tác…'
+    }
+})
+$window.Add_ContentRendered({ Start-InitialUpdate })
+if ($ValidateOnly) { return $window }
+try { [void]$window.ShowDialog() } finally { $timer.Stop() }

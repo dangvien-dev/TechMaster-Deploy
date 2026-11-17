@@ -2,6 +2,8 @@
 
 Bộ công cụ triển khai Windows và Office.
 
+Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** trên Windows PowerShell 5.1 / .NET Framework có sẵn trong Windows 10/11. Mở `TechMaster Deploy.exe`; chọn chức năng bằng thanh điều hướng bên trái. Các công cụ chuyên dụng như Sysprep, kích hoạt và gỡ / dọn Office tiếp tục dùng script hiện có và cửa sổ xác nhận riêng.
+
 | Tab | Công cụ | Thư mục |
 |---|---|---|
 | **Máy gốc (Sysprep)** | Kiểm tra / sửa lỗi Sysprep, chuẩn bị máy gốc và chạy Sysprep, thư mục `Reinstall` | `FixClone\` |
@@ -33,6 +35,12 @@ Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiệ
 **Bản cũ chưa hỗ trợ repo:** dùng công cụ `TechMaster Update.exe` mới để chọn thư mục app hiện tại và chọn **Yes** lấy trực tiếp từ repo. **No** cho phép chọn ZIP offline khi cần. Sau lần nâng cấp này chỉ dùng nút Kiểm tra cập nhật. Cập nhật ZIP vẫn có để chuyển bản offline.
 
 **Bản cũ lỗi HTTP 403 khi cập nhật:** đóng app, tải `App/Repair-Update.ps1` từ repo rồi chạy bằng PowerShell với `-Root` là thư mục TechMaster-Deploy hiện tại. Công cụ lấy updater mới riêng, giữ dữ liệu và hỏi xác nhận trước khi cài; xem [hướng dẫn sửa cập nhật](RELEASING.md#sửa-cập-nhật-trên-bản-cũ).
+
+**Nâng cấp bằng giao diện:** đóng app cũ, mở `TechMaster-Update.exe` trong Downloads của repo, chọn file `TechMaster Deploy.exe` đang dùng hoặc nhập thư mục app. Bấm **Tiếp tục → Tải bản cập nhật → Cài đặt và mở lại**. Có nút chọn ZIP nếu cần cập nhật offline. Từ bản 2.0 dùng nút cập nhật trong app; không nhập `y` hoặc `CAP NHAT` nữa.
+
+**UltraViewer trùng ID:** vào **Sau khi clone → Chẩn đoán UltraViewer** trên hai máy bị trùng và sao chép kết quả để so sánh. Công cụ chỉ đọc; chưa tự reset UltraViewer vì cần xác minh cách lưu ID của phiên bản thực tế. Chỉ biết số phiên bản chưa đủ kết luận nguyên nhân. Không tự dừng phiên hỗ trợ đang chạy.
+
+Trước Sysprep có cửa sổ nhắc chọn **Screen Snipping → Always** cho Windows + Shift + S, kiểm tra và sao lưu / dọn icon Word / Excel trùng. Chỉ dọn shortcut cùng đích, giữ các thiết lập Word. Máy đã clone mở chức năng này ở **Sau khi clone → Kiểm tra Desktop và phím chụp**.
 
 Các thay đổi chỉ có trong workspace hoặc ZIP chưa tự xuất hiện trên GitHub. Người quản lý phải đẩy mã mới lên `main`; app không tự push hoặc thay đổi repo. Xem [RELEASING.md](RELEASING.md).
 

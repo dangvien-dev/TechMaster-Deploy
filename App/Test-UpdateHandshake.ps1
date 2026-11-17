@@ -20,14 +20,15 @@ New-Item -ItemType Directory -Path $temp | Out-Null
 try {
     . (Import-Function (Join-Path $PSScriptRoot 'Update-UI.ps1') 'Set-DeployUpdateBusy' $PSScriptRoot)
     . (Import-Function (Join-Path $PSScriptRoot 'Update-UI.ps1') 'Update-DeployUpdaterState' $PSScriptRoot)
-    . (Import-Function (Join-Path $PSScriptRoot 'Update-App.ps1') 'Close-DeployForUpdate' $temp)
+    . (Import-Function (Join-Path $PSScriptRoot 'Update.Engine.ps1') 'Close-DeployForUpdate' $temp)
     function Set-Status($message) { $script:lastStatus = $message }
     function Reset-Fixture {
-        $script:form = [pscustomobject]@{ Enabled = $true; Closed = $false; Activated = $false }
+        $script:form = [pscustomobject]@{ IsEnabled = $true; Closed = $false; Activated = $false }
         $script:form | Add-Member ScriptMethod Close { $this.Closed = $true }
         $script:form | Add-Member ScriptMethod Activate { $this.Activated = $true }
-        $script:tabs = [pscustomobject]@{ Enabled = $true }
-        $script:header = [pscustomobject]@{ Enabled = $true }
+        $script:tabs = [pscustomobject]@{ IsEnabled = $true }
+        $script:header = [pscustomobject]@{ IsEnabled = $true }
+        $script:Navigation = [pscustomobject]@{ IsEnabled = $true }
         $script:updateTimer = [pscustomobject]@{ Stopped = $false }
         $script:updateTimer | Add-Member ScriptMethod Stop { $this.Stopped = $true }
         $script:updateProcess = [pscustomobject]@{ HasExited = $false; Disposed = $false }
@@ -38,7 +39,7 @@ try {
     }
     Reset-Fixture
     Set-DeployUpdateBusy $true
-    Assert ($form.Enabled -and -not $tabs.Enabled -and -not $header.Enabled) 'Busy state leaves window enabled while blocking actions'
+    Assert ($form.IsEnabled -and -not $tabs.IsEnabled -and -not $header.IsEnabled) 'Busy state leaves window enabled while blocking actions'
     Update-DeployUpdaterState
     Assert (-not $form.Closed) 'No marker means app remains open during check, download and confirmation'
     [IO.File]::WriteAllText($script:updateCloseRequest, 'not-a-close-command')
@@ -54,7 +55,7 @@ try {
     $script:updateProcess.HasExited = $true
     $oldProcess = $script:updateProcess
     Update-DeployUpdaterState
-    Assert (-not $form.Closed -and $form.Enabled -and $tabs.Enabled -and $header.Enabled) 'Completed/cancelled updater unlocks UI instead of honoring a stale close marker'
+    Assert (-not $form.Closed -and $form.IsEnabled -and $tabs.IsEnabled -and $header.IsEnabled) 'Completed/cancelled updater unlocks UI instead of honoring a stale close marker'
     Assert ($oldProcess.Disposed -and $null -eq $script:updateProcess -and -not (Test-Path (Join-Path $temp 'close.request'))) 'Updater handle and marker cleaned after exit'
 
     function Get-Process { if (-not $script:missingParent) { $script:parent } }

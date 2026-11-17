@@ -2,6 +2,12 @@
 
 Cập nhật ngày 17/11/2026.
 
+**2.0.0.0:** chuyển shell 8 mục và updater sang WPF; giữ xử lý Office, WinGet, Windows Setup, bản quyền và biên bản. Tiến trình nền dùng runspace riêng, kết quả được DispatcherTimer đọc trên UI thread. Đã kiểm tra runspace thật (tham số Unicode, kết quả, lỗi và huỷ), 17 kiểm tra engine cập nhật với file / ZIP thật và 6 kiểm tra lựa chọn Office / khởi chạy ẩn. Thêm kiểm tra native WPF dành cho Windows và workflow build Windows; việc nạp / chạy giao diện thật không thể xác minh bằng runtime Linux.
+
+UltraViewer 6.6.133: bước FixClone trước đây chưa reset UltraViewer. Thêm chẩn đoán chỉ đọc và cảnh báo sau clone; không suy ra cách reset từ tên phiên bản, không thay MAC / UUID / cấu hình hoặc dừng kết nối. Cần kết quả chẩn đoán từ hai máy trùng ID để tiếp tục xác định nguyên nhân.
+
+Thêm preflight WPF trước Sysprep và sau clone: nhắc chọn Screen Snipping / Always, xuất lựa chọn ms-screenclip bằng default-app XML; lập kế hoạch dọn icon theo executable đích, kiểm tra drift, sao lưu trước xoá và giữ Word settings / shortcut có tham số riêng. 12 kiểm tra với file thật và COM shell mô phỏng đã qua. Chưa chạy Sysprep, đổi mặc định hoặc dọn Desktop thật trên máy khách.
+
 Phiên bản **1.1.3.0** thêm đường tải công khai không dùng API: đọc commit main từ Git smart HTTP, lấy danh sách có kiểm soát và tệp raw ghim commit, kiểm tra Git blob và chỉ tải tệp đổi. 34 kiểm tra mới qua với API bị mô phỏng chặn 403, gồm parse pkt-line, từ chối dữ liệu thiếu / sai hash / path / link, tái sử dụng tệp và fallback riêng tư. Đã đọc refs công khai thật trong khi endpoint API của môi trường cloud bị proxy trả 403; đây không phải bằng chứng về nguyên nhân 403 trên máy khách. Công cụ bootstrap cho bản cũ dùng updater tách riêng, không sửa tệp quản lý trước giao dịch. Nâng quyền và luồng sửa trên Windows còn cần kiểm tra thực tế.
 
 Phiên bản **1.1.2.0** sửa phối hợp đóng app trước khi cập nhật (15 kiểm tra bắt tay đóng cửa sổ; 60 kiểm tra updater và 27 kiểm tra repo), tinh gọn màn hình cập nhật và căn hai nút trên thanh đầu. Trang QR có liên kết portal Microsoft và dùng cửa sổ Chrome / Edge riêng để có thể đóng đúng cửa sổ sau khi nhận CID (18 kiểm tra QR, kiểm tra luồng nhận CID → đóng QR → nạp mã với các thao tác hệ điều hành mô phỏng; biên dịch C# tương thích .NET Framework).

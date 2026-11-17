@@ -3,19 +3,19 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "1.1.3.0",
+  "version": "2.0.0.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
       "mode": "100644",
-      "size": 9292,
-      "sha": "81b844a4be40e05a55877a8172e5139c3c8c952a"
+      "size": 6265,
+      "sha": "ac4f3112bf81ec23db6387b9addb2bbd12aa9509"
     },
     {
       "path": "App/Build-Launcher.ps1",
       "mode": "100644",
-      "size": 892,
-      "sha": "a99a3715f4e5ee3e4223166b36c1c9c2e6984953"
+      "size": 859,
+      "sha": "ccb3dce9be75169290dffce32f20b328e0393a70"
     },
     {
       "path": "App/Build-Release.ps1",
@@ -32,8 +32,8 @@
     {
       "path": "App/Build-UpgradeHelper.ps1",
       "mode": "100644",
-      "size": 5110,
-      "sha": "011524a708fff7582378522a45984d519d92b64e"
+      "size": 3342,
+      "sha": "3f08cd506fa971b6ef5c3b20330628c4e4d00b52"
     },
     {
       "path": "App/Console.ps1",
@@ -48,10 +48,22 @@
       "sha": "2d0a5755d8adea605cd6b99c885e5b8a3c04684d"
     },
     {
+      "path": "App/Deploy.Actions.ps1",
+      "mode": "100644",
+      "size": 12362,
+      "sha": "e4453662e6077694aae0f4db15393d4e30720987"
+    },
+    {
+      "path": "App/DiagnosticsWindow.xml",
+      "mode": "100644",
+      "size": 996,
+      "sha": "b1cfb9898e8fca267d48c529bff779b2fdec405d"
+    },
+    {
       "path": "App/Launcher.cs",
       "mode": "100644",
-      "size": 1202,
-      "sha": "944585ea6cdd0688f2c2e43ecd69118f611153f2"
+      "size": 1338,
+      "sha": "0e826645c33d58823b80de6e1b8ba119a47acbf6"
     },
     {
       "path": "App/Launcher.manifest",
@@ -60,16 +72,16 @@
       "sha": "eb72a12f188e71c5bfa7e08de2657fada23cfb8b"
     },
     {
-      "path": "App/Repair-Update.ps1",
+      "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 3787,
-      "sha": "1e72dd073a951fb7bce7c12e9baeb2d02877eb97"
+      "size": 20382,
+      "sha": "e23b2e925eab1b0900a59245007d3094c6f4a2bc"
     },
     {
-      "path": "App/RoundedTheme.cs",
+      "path": "App/Repair-Update.ps1",
       "mode": "100644",
-      "size": 4029,
-      "sha": "80749235be4f782549472cffc68939bb26f7c0dc"
+      "size": 3368,
+      "sha": "c53cc7411e1ab7e1c264556ce8ed76b3edf115ae"
     },
     {
       "path": "App/Tao-Shortcut.bat",
@@ -86,8 +98,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 39790,
-      "sha": "1369423c467b6e9789ac55ba2d186385baeb2708"
+      "size": 14675,
+      "sha": "7de85e1fe2e8078a606b7ee36b7feb718977712b"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -100,6 +112,12 @@
       "mode": "100644",
       "size": 112795,
       "sha": "7c5020aa59827f2682c07dcaaae05fcfc54ab7fa"
+    },
+    {
+      "path": "App/Test-DeployActions.ps1",
+      "mode": "100644",
+      "size": 2913,
+      "sha": "59c05c85bfce0f7ce2edae19980cdebd96ef318e"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",
@@ -116,32 +134,68 @@
     {
       "path": "App/Test-Update.ps1",
       "mode": "100644",
-      "size": 12874,
-      "sha": "9cf9d3800e29311bc5edc2b4cee2dab5db9fe4f7"
+      "size": 13026,
+      "sha": "f826add7390dbf7180bdd758022b5a43a1fb9d71"
+    },
+    {
+      "path": "App/Test-UpdateEngine.ps1",
+      "mode": "100644",
+      "size": 5645,
+      "sha": "d63f0c81c705e580587c40e4d1caea6874e71fbe"
     },
     {
       "path": "App/Test-UpdateHandshake.ps1",
       "mode": "100644",
-      "size": 6276,
-      "sha": "3a5e24ed47a5a1e95f90c5d8013bc3989cb05d7e"
+      "size": 6365,
+      "sha": "2184a84aeac7dfa0bc01c4620f92732a72e2e029"
+    },
+    {
+      "path": "App/Test-Wpf.ps1",
+      "mode": "100644",
+      "size": 3527,
+      "sha": "82622cad49ecb61ac97442519b659f33db1d15ab"
+    },
+    {
+      "path": "App/Test-WpfRuntime.ps1",
+      "mode": "100644",
+      "size": 1225,
+      "sha": "b048502e7b6526a25d4b5d6b05b9ec4b6a3a8137"
     },
     {
       "path": "App/Update-App.ps1",
       "mode": "100644",
-      "size": 8420,
-      "sha": "657b3a9d39454233ca1af27e8c0726f51833c5b3"
+      "size": 8912,
+      "sha": "c940d747acefccc67e5a8d994414b024b3cd6419"
     },
     {
       "path": "App/Update-UI.ps1",
       "mode": "100644",
-      "size": 6074,
-      "sha": "6b7aee2db7d3d5fd891843b7050306afc817fba4"
+      "size": 3719,
+      "sha": "59cbfb234c169a50ae4ff6eb4d6e4f3aaeb906bc"
     },
     {
       "path": "App/Update.Core.ps1",
       "mode": "100644",
-      "size": 34476,
-      "sha": "530a6a59dd296b8b7567bf47c91e29bd0c7fafad"
+      "size": 34861,
+      "sha": "9c0f3ca7fcc8e5db38a51a540468e2007e87b97c"
+    },
+    {
+      "path": "App/Update.Engine.ps1",
+      "mode": "100644",
+      "size": 9053,
+      "sha": "6a238a8dc61de8483ea8894cdb778dcfeb471c81"
+    },
+    {
+      "path": "App/UpdaterWindow.xml",
+      "mode": "100644",
+      "size": 4720,
+      "sha": "41605ca3b636363ae3bddfd40b76c826708ee670"
+    },
+    {
+      "path": "App/Wpf.Runtime.ps1",
+      "mode": "100644",
+      "size": 2463,
+      "sha": "4fa2e87439308ef36ea03a5b120fcd44512ced81"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -164,8 +218,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 1914,
-      "sha": "59fa66fc779234f119cdca20ce12315f3cbfee66"
+      "size": 3016,
+      "sha": "a7c9c802a768741da3756bc096dee92febf187f1"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -194,8 +248,8 @@
     {
       "path": "FixClone/Fix-CloneDuplicate.ps1",
       "mode": "100644",
-      "size": 17111,
-      "sha": "432f4ea3ecbfd19f2af1313e52f35b2d1fa3f385"
+      "size": 17762,
+      "sha": "ab02749c57af446ffbca6070ab46c8496775318c"
     },
     {
       "path": "FixClone/Fix-DinhDang.bat",
@@ -222,6 +276,24 @@
       "sha": "24bb5091d9aef3192e7c5f81ad386118e0c54365"
     },
     {
+      "path": "FixClone/Master-Preflight.ps1",
+      "mode": "100644",
+      "size": 3382,
+      "sha": "4fd2314bae8816667503a392f8dabbbf8689ef07"
+    },
+    {
+      "path": "FixClone/Master-Preflight.xml",
+      "mode": "100644",
+      "size": 2631,
+      "sha": "986d705f072ad7716245a0d5365e07107ceb37dd"
+    },
+    {
+      "path": "FixClone/Master.Preflight.Core.ps1",
+      "mode": "100644",
+      "size": 5588,
+      "sha": "fe75ab3bacf6847c6623a76db9f34df55c76d7cb"
+    },
+    {
       "path": "FixClone/New-Unattend.ps1",
       "mode": "100644",
       "size": 2001,
@@ -230,20 +302,20 @@
     {
       "path": "FixClone/Prepare-Master.ps1",
       "mode": "100644",
-      "size": 8042,
-      "sha": "bfd2b3779fd158524bba59b0bde4289ff9ff7ca3"
+      "size": 8632,
+      "sha": "2b61467e61a49ca7a45bfe2c17775e2d7ddb0466"
     },
     {
       "path": "FixClone/README.md",
       "mode": "100644",
-      "size": 8624,
-      "sha": "ab1008a3cf1a7809827e058343ca80e9af9e7072"
+      "size": 10226,
+      "sha": "c0485ae6bd0d161a5a7cfbd81afe956917f1fe8e"
     },
     {
       "path": "FixClone/Run-Sysprep.bat",
       "mode": "100644",
-      "size": 3784,
-      "sha": "2d318eef8468b8ff493748bd2c881a8a6a8d47cf"
+      "size": 4169,
+      "sha": "a0ee40aca541e11901b00211c9ad2c8a6b6e0491"
     },
     {
       "path": "FixClone/Test-BanPhim.ps1",
@@ -258,10 +330,28 @@
       "sha": "ba3cacdeba641f12621a662b8d666e9be11585f3"
     },
     {
+      "path": "FixClone/Test-MasterPreflight.ps1",
+      "mode": "100644",
+      "size": 4850,
+      "sha": "4fdf1183607b5754c2e68a3be04309f640e16cd2"
+    },
+    {
+      "path": "FixClone/Test-UltraViewerDiagnostics.ps1",
+      "mode": "100644",
+      "size": 1755,
+      "sha": "4c65f327155a6baa043354be70a8807fcf54a87d"
+    },
+    {
       "path": "FixClone/Test-Unattend.ps1",
       "mode": "100644",
       "size": 3546,
       "sha": "60ce144c28a394bbb24f3f13265d353ba614610a"
+    },
+    {
+      "path": "FixClone/UltraViewer.Diagnostics.ps1",
+      "mode": "100644",
+      "size": 3774,
+      "sha": "1865fd9c6e3549bbf61072864a0a3b9483a8c6c7"
     },
     {
       "path": "FixClone/unattend.xml",
@@ -368,26 +458,26 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 7418,
-      "sha": "4955b81bbea13ace250d25e2aee331ea1c0a4d25"
+      "size": 8835,
+      "sha": "d6a39d557f5f78e425adb825df167b358c907453"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 13538,
-      "sha": "7c7bfdb7529090f516961207f3227c401b3c8f3e"
+      "size": 15081,
+      "sha": "b2d6083096d0ce9262384e9cd801277cdecbd13c"
     },
     {
       "path": "RELEASING.md",
       "mode": "100644",
-      "size": 5436,
-      "sha": "8b908b589477f3f68c186454dfc7d548bb2e72ad"
+      "size": 6489,
+      "sha": "679e2d173a4afc7e0701ce57094593543b30159c"
     },
     {
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "9abfbcb9ea482e665dc57c6426ae175023d9431e"
+      "sha": "4c48821747662195fb3ef1808a321294764e26bd"
     }
   ]
 }

@@ -272,15 +272,16 @@ function Build-DeployRepositoryLauncher([string]$payload) {
         ('/out:' + (Join-Path $payload 'TechMaster Deploy.exe')) `
         ('/win32icon:' + (Join-Path $payload 'App/TechMaster.ico')) `
         ('/win32manifest:' + (Join-Path $payload 'App/Launcher.manifest')) `
-        /reference:System.Windows.Forms.dll (Join-Path $payload 'App/Launcher.cs') | Out-Host
+        (Join-Path $payload 'App/Launcher.cs') | Out-Host
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path (Join-Path $payload 'TechMaster Deploy.exe'))) { throw 'Không build được launcher từ repo; chưa thay đổi app.' }
 }
 
-function Save-DeployRepositoryPayload($release, [string]$payload, [string]$installedRoot) {
+function Save-DeployRepositoryPayload($release, [string]$payload, [string]$installedRoot, [scriptblock]$Progress = $null) {
     if ($release.unchanged -or $release.commit -notmatch '^[0-9a-f]{40}$') { throw 'Chưa có snapshot repo mới để cài.' }
     if (Test-Path -LiteralPath $payload) { throw 'Thư mục chuẩn bị repo đã tồn tại.' }
     New-Item -ItemType Directory -Path $payload | Out-Null
     $total = [long]0
+    $completedFiles = 0
     foreach ($f in $release.files) {
         Assert-DeployPath $f.path
         if ($f.path -ceq 'TechMaster Deploy.exe') { throw 'Nguồn repo phải dùng Launcher.cs thay cho exe không kiểm soát.' }
@@ -296,6 +297,8 @@ function Save-DeployRepositoryPayload($release, [string]$payload, [string]$insta
         $target = Join-Path $payload $f.path
         New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
         [IO.File]::WriteAllBytes($target, $bytes)
+        $completedFiles++
+        if ($Progress) { try { & $Progress $completedFiles @($release.files).Count } catch {} }
     }
     # Compile with our installed updater code; never execute a downloaded build script.
     Build-DeployRepositoryLauncher $payload
@@ -315,7 +318,11 @@ function Assert-DeployToolsClosed([string]$root, [int]$ignoreId = 0) {
     $processes = @(Get-CimInstance -ClassName Win32_Process -Filter "Name='powershell.exe' OR Name='pwsh.exe' OR Name='cmd.exe' OR Name='TechMaster Deploy.exe'" -ErrorAction Stop)
     foreach ($p in $processes) {
         if ($p.ProcessId -in @($PID, $ignoreId) -or -not $p.CommandLine) { continue }
-        if (([string]$p.CommandLine).IndexOf($root, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+        $command = [string]$p.CommandLine
+        if ($command -match '(?i)-EncodedCommand\s+"?([A-Za-z0-9+/=]{1,65536})') {
+            try { $command += ' ' + [Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($Matches[1])) } catch {}
+        }
+        if ($command.IndexOf($root, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
             throw "Còn cửa sổ công cụ TechMaster đang mở (PID $($p.ProcessId)). Đóng cửa sổ đó rồi cập nhật lại."
         }
     }

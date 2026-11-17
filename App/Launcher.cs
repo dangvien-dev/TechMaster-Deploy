@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 internal static class Launcher
 {
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int MessageBox(IntPtr window, string message, string title, uint flags);
     [STAThread]
     private static void Main()
     {
@@ -30,7 +32,7 @@ internal static class Launcher
         }
         catch (Exception error)
         {
-            MessageBox.Show(error.Message, "TechMaster Deploy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox(IntPtr.Zero, error.Message, "TechMaster Deploy", 0x10);
         }
     }
 }

@@ -18,6 +18,8 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
 function Write-Ok($t)   { Write-Host "  [OK] $t" -ForegroundColor Green }
 function Write-Warn($t) { Write-Host "  [!] $t" -ForegroundColor Yellow }
 
+. (Join-Path $PSScriptRoot 'Master.Preflight.Core.ps1')
+
 $work = 'C:\FixClone'
 if (-not (Test-Path $work)) { New-Item -ItemType Directory $work | Out-Null }
 
@@ -31,6 +33,8 @@ if (Test-Path $xml) {
         Write-Warn "File xuất ra KHÔNG có ChromeHTML -> user hiện tại chưa đặt Chrome làm mặc định."
         Write-Warn "Đặt Chrome mặc định (Settings > Apps > Default apps > Chrome > Set default) rồi chạy lại."
     }
+    if (Add-ScreenClipDefault $xml) { Write-Ok 'Đã thêm lựa chọn ms-screenclip vào cấu hình cho user mới (không chép UserChoice hash).' }
+    else { Write-Warn 'Chưa có mặc định ms-screenclip. Chọn Screen Snipping và Always rồi chạy lại trước khi Sysprep.' }
     & dism.exe /Online /Import-DefaultAppAssociations:"$xml" | Out-Null
     if ($LASTEXITCODE -eq 0) { Write-Ok "Đã import $xml (áp dụng cho user tạo mới)" }
     else { Write-Warn "DISM import lỗi, ExitCode $LASTEXITCODE" }
@@ -40,16 +44,15 @@ if (Test-Path $xml) {
 
 # ---------- 2. Shortcut Word, Excel ra Public Desktop ----------
 Write-Host "`n=== 2. SHORTCUT DESKTOP ===" -ForegroundColor Cyan
-$startMenu  = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs"
-$publicDesk = "$env:PUBLIC\Desktop"
-foreach ($app in 'Word', 'Excel') {
-    $lnk = Get-ChildItem $startMenu -Recurse -Filter "$app*.lnk" -ErrorAction SilentlyContinue |
-           Where-Object { $_.BaseName -match "^$app( \d{4})?$" } | Select-Object -First 1
-    if ($lnk) {
-        Copy-Item $lnk.FullName -Destination $publicDesk -Force
-        Write-Ok "$($lnk.Name) -> $publicDesk"
-    } else { Write-Warn "Không tìm thấy shortcut $app trong Start Menu" }
-}
+try {
+    $plans = @(Get-OfficeShortcutPlan)
+    # Creating a shared icon is safe only if no personal icon would duplicate it.
+    $newOnly = @($plans | Where-Object { $_.Create -and @($_.Remove).Count -eq 0 })
+    if ($newOnly.Count) { Invoke-OfficeShortcutPlan $newOnly (Join-Path $work 'Desktop Backups') }
+    $pending = @($plans | Where-Object { @($_.Remove).Count -gt 0 })
+    if ($pending.Count) { Write-Warn 'Còn icon Word / Excel trùng. Dùng Sao lưu và dọn icon trùng trong cửa sổ kiểm tra; chưa tạo thêm icon cho các mục này.' }
+    else { Write-Ok 'Mỗi ứng dụng dùng một shortcut Desktop; thiết lập Word được giữ riêng ở bước 4.' }
+} catch { Write-Warn ('Chưa kiểm tra được shortcut: ' + $_.Exception.Message) }
 
 # ---------- 3. EVKey tự khởi động ----------
 Write-Host "`n=== 3. EVKEY TU KHOI DONG ===" -ForegroundColor Cyan

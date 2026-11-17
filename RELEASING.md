@@ -24,6 +24,8 @@ API là đường dự phòng cho repo riêng tư hoặc nguồn chưa có danh 
 
 ## ZIP cài ban đầu / chuyển offline
 
+Giao diện 2.0 dùng WPF với markup XAML lưu trong `App/*Window.xml`; đuôi XML giúp updater 1.1.x nhận được các tệp này mà không phải thay whitelist trước. Launcher vẫn là host nhỏ mở Windows PowerShell STA ẩn console, dùng các script và markup bên cạnh. Công cụ nâng cấp nhúng đủ engine, runtime WPF và markup để nâng bản cũ độc lập. Không cần cài thêm .NET SDK hoặc module bên ngoài.
+
 Tại checkout trên Windows, với Git và Windows PowerShell 5.1:
 
 ```powershell
@@ -42,6 +44,10 @@ powershell.exe -NoProfile -File App\Test-Update.ps1
 powershell.exe -NoProfile -File App\Test-RepoUpdate.ps1
 powershell.exe -NoProfile -File App\Test-PublicUpdate.ps1
 powershell.exe -NoProfile -File App\Build-UpdateIndex.ps1 -Check
+powershell.exe -NoProfile -File App\Test-UpdateEngine.ps1
+powershell.exe -NoProfile -File App\Test-WpfRuntime.ps1
+powershell.exe -NoProfile -File App\Test-DeployActions.ps1
+powershell.exe -NoProfile -STA -File App\Test-Wpf.ps1
 ```
 
 Updater giữ cấu hình / logo biên bản, biên bản đã xuất, KhoOffice, Office/ODT, FixClone/Logs, FixClone/Reinstall, shortcut và desktop.ini. Tệp chương trình sửa riêng sẽ khiến updater dừng thay vì ghi đè.
@@ -49,3 +55,5 @@ Updater giữ cấu hình / logo biên bản, biên bản đã xuất, KhoOffice
 Biên nhận và sao lưu ở `.updates`. Quay lại chỉ khôi phục chương trình, không đưa dữ liệu cá nhân về quá khứ. Không xoá `.updates` khi còn muốn quay lại. Gói lỗi checksum, thiếu tệp, cây Git không đầy đủ hoặc công cụ vẫn đang chạy đều khiến updater dừng. Khi lỗi giữa giao dịch, updater thử khôi phục từ backup và báo rõ kết quả.
 
 Chuẩn bị ZIP / công cụ nâng cấp hoặc chỉnh checkout không tự commit, push hoặc công khai repo. Cần kiểm tra giao diện, DPAPI, bootstrap nâng quyền và đóng / mở lại app trên Windows thực tế sau khi mã đã lên repo.
+
+Workflow `Windows WPF validation` nạp cửa sổ WPF thật và kiểm tra điều khiển / bố cục trên Windows, chạy các kiểm tra giao dịch, rồi build ZIP và công cụ nâng cấp. Lấy kết quả build từ artifact `TechMaster-Deploy-WPF`. Kiểm tra WPF chỉ dựng cửa sổ, không chạy Sysprep, cài Office hoặc kích hoạt thật.

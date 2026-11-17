@@ -37,6 +37,17 @@ if not exist "%~dp0New-Unattend.ps1" (
     pause & exit /b 1
 )
 
+:: Nhac chon Screen Snipping va don icon truoc khi chuan bi may goc.
+if not exist "%~dp0Master-Preflight.ps1" (
+    echo [LOI] Thieu Master-Preflight.ps1. Tai lai bo cong cu day du.
+    pause & exit /b 1
+)
+powershell -NoProfile -STA -ExecutionPolicy Bypass -File "%~dp0Master-Preflight.ps1"
+if errorlevel 1 (
+    echo Da huy kiem tra truoc Sysprep. Chua chay Sysprep.
+    exit /b 1
+)
+
 :: Kiem tra BitLocker / Device Encryption o C: (ConversionStatus 0 = FullyDecrypted)
 powershell -NoProfile -Command "$v = Get-CimInstance -Namespace root/cimv2/Security/MicrosoftVolumeEncryption -ClassName Win32_EncryptableVolume -Filter \"DriveLetter='C:'\" -ErrorAction SilentlyContinue; if ($v -and $v.ConversionStatus -ne 0) { exit 1 }"
 if %errorlevel% neq 0 (

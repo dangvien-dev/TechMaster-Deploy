@@ -14,8 +14,7 @@
 
 $script:basicAppRun = $null
 $script:basicAppLog = $null
-$basicAppTimer = New-Object System.Windows.Forms.Timer
-$basicAppTimer.Interval = 400
+$basicAppTimer = New-DeployTimer 400 {}
 
 function Get-BasicAppResult([int]$code) {
     switch ($code.ToString('X8')) {
@@ -27,7 +26,8 @@ function Get-BasicAppResult([int]$code) {
 }
 
 function Finish-BasicApp($run, $result, [string]$details) {
-    $run.Rows[$run.Index].SubItems[1].Text = $result.Status
+    $run.Rows[$run.Index].Status = $result.Status
+    $lvBasicAppResults.Items.Refresh()
     $run.Counts[$result.Group]++
     $header = "`r`n=== $($run.Items[$run.Index].Name) ===`r`n$($result.Status)`r`n"
     try { [IO.File]::AppendAllText($script:basicAppLog, $header + $details + "`r`n") }
@@ -39,7 +39,8 @@ function Finish-BasicApp($run, $result, [string]$details) {
 function Start-NextBasicApp($run) {
     while ($run.Index -lt $run.Items.Count) {
         $app = $run.Items[$run.Index]
-        $run.Rows[$run.Index].SubItems[1].Text = 'Đang cài…'
+        $run.Rows[$run.Index].Status = 'Đang cài…'
+        $lvBasicAppResults.Items.Refresh()
         $lblBasicAppStatus.Text = "Đang xử lý $($run.Index + 1)/$($run.Items.Count) · $($app.Name)"
         try {
             $start = New-Object System.Diagnostics.ProcessStartInfo
@@ -63,8 +64,8 @@ function Start-NextBasicApp($run) {
 
     $basicAppTimer.Stop()
     $script:basicAppRun = $null
-    $lbBasicApps.Enabled = $true
-    $btnBasicAppInstall.Enabled = $true
+    $lbBasicApps.IsEnabled = $true
+    $btnBasicAppInstall.IsEnabled = $true
     $lblBasicAppStatus.Text = "$($run.Counts.Installed) đã cài · $($run.Counts.Skipped) đã có · $($run.Counts.Failed) lỗi"
     if ($run.Counts.Restart) { $lblBasicAppStatus.Text += " · $($run.Counts.Restart) cần khởi động lại" }
     if ($run.LogFailed) { $lblBasicAppStatus.Text += ' · Nhật ký ghi chưa đủ' }
@@ -73,7 +74,7 @@ function Start-NextBasicApp($run) {
 
 function Start-BasicApps {
     if ($script:basicAppRun) { return }
-    $items = @($lbBasicApps.CheckedIndices | ForEach-Object { $basicApps[$_] })
+    $items = @($basicAppChoices | Where-Object IsChecked | ForEach-Object { $_.Tag })
     if (-not $items.Count) {
         $lblBasicAppStatus.Text = 'Chọn ít nhất một ứng dụng.'
         return
@@ -98,15 +99,15 @@ function Start-BasicApps {
     $script:basicAppLog = $logFile
     $lvBasicAppResults.Items.Clear()
     foreach ($app in $items) {
-        $row = $lvBasicAppResults.Items.Add($app.Name)
-        [void]$row.SubItems.Add('Đang chờ')
+        $row = [pscustomobject]@{ Name = $app.Name; Status = 'Đang chờ' }
+        [void]$lvBasicAppResults.Items.Add($row)
         $run.Rows += $row
     }
     $basicAppBar.Maximum = $items.Count
     $basicAppBar.Value = 0
-    $lbBasicApps.Enabled = $false
-    $btnBasicAppInstall.Enabled = $false
-    $btnBasicAppLog.Enabled = $true
+    $lbBasicApps.IsEnabled = $false
+    $btnBasicAppInstall.IsEnabled = $false
+    $btnBasicAppLog.IsEnabled = $true
     $script:basicAppRun = $run
     $basicAppTimer.Start()
     Start-NextBasicApp $run
@@ -123,65 +124,3 @@ $basicAppTimer.Add_Tick({
     Finish-BasicApp $run (Get-BasicAppResult $code) $details
     Start-NextBasicApp $run
 })
-
-$t7 = New-Tab 'Cài ứng dụng'
-$appsHeading = New-Label 'Ứng dụng cơ bản' 22 20 810 26 $fBold
-$t7.Controls.Add($appsHeading)
-$appsHint = New-Label 'Chọn app để WinGet tải và cài. Nút cài chấp nhận điều khoản của nguồn và các gói đã chọn.' 22 51 810 39
-$appsHint.ForeColor = $cMuted
-$t7.Controls.Add($appsHint)
-
-$choiceCard = New-Object TechMaster.RoundedCard
-$choiceCard.Location = New-Object Drawing.Point(12, 96)
-$choiceCard.Size = New-Object Drawing.Size(408, 235)
-$choiceHeading = New-Label 'Chọn ứng dụng' 15 12 378 25 $fBold
-$choiceHeading.BackColor = [Drawing.Color]::Transparent
-$choiceCard.Controls.Add($choiceHeading)
-$lbBasicApps = New-Object Windows.Forms.CheckedListBox
-$lbBasicApps.Location = New-Object Drawing.Point(15, 44)
-$lbBasicApps.Size = New-Object Drawing.Size(378, 171)
-$lbBasicApps.BorderStyle = 'None'
-$lbBasicApps.BackColor = $choiceCard.SurfaceColor
-$lbBasicApps.CheckOnClick = $true
-$lbBasicApps.IntegralHeight = $false
-$lbBasicApps.AccessibleName = 'Chọn ứng dụng để cài'
-foreach ($app in $basicApps) { [void]$lbBasicApps.Items.Add("$($app.Name)  ·  $($app.Description)") }
-$choiceCard.Controls.Add($lbBasicApps)
-$t7.Controls.Add($choiceCard)
-
-$resultsCard = New-Object TechMaster.RoundedCard
-$resultsCard.Location = New-Object Drawing.Point(434, 96)
-$resultsCard.Size = New-Object Drawing.Size(422, 235)
-$resultsHeading = New-Label 'Kết quả' 15 12 390 25 $fBold
-$resultsHeading.BackColor = [Drawing.Color]::Transparent
-$resultsCard.Controls.Add($resultsHeading)
-$lvBasicAppResults = New-Object Windows.Forms.ListView
-$lvBasicAppResults.Location = New-Object Drawing.Point(15, 44)
-$lvBasicAppResults.Size = New-Object Drawing.Size(390, 171)
-$lvBasicAppResults.View = 'Details'
-$lvBasicAppResults.BorderStyle = 'None'
-$lvBasicAppResults.BackColor = $resultsCard.SurfaceColor
-$lvBasicAppResults.FullRowSelect = $true
-[void]$lvBasicAppResults.Columns.Add('Ứng dụng', 218)
-[void]$lvBasicAppResults.Columns.Add('Trạng thái', 152)
-$resultsCard.Controls.Add($lvBasicAppResults)
-$t7.Controls.Add($resultsCard)
-
-$basicAppBar = New-Object Windows.Forms.ProgressBar
-$basicAppBar.Location = New-Object Drawing.Point(22, 343)
-$basicAppBar.Size = New-Object Drawing.Size(824, 13)
-$basicAppBar.AccessibleName = 'Số ứng dụng đã xử lý'
-$t7.Controls.Add($basicAppBar)
-
-$lblBasicAppStatus = New-Label 'Sẵn sàng' 22 362 824 23
-$t7.Controls.Add($lblBasicAppStatus)
-$btnBasicAppHelp = New-Button 'Hướng dẫn WinGet' 22 390 160 36 -secondary
-$btnBasicAppHelp.Add_Click({ Start-Process 'https://learn.microsoft.com/vi-vn/windows/package-manager/winget/' })
-$t7.Controls.Add($btnBasicAppHelp)
-$btnBasicAppLog = New-Button 'Xem nhật ký' 491 390 150 36 -secondary
-$btnBasicAppLog.Enabled = $false
-$btnBasicAppLog.Add_Click({ Start-Process notepad.exe ('"{0}"' -f $script:basicAppLog) })
-$t7.Controls.Add($btnBasicAppLog)
-$btnBasicAppInstall = New-Button 'Cài ứng dụng đã chọn' 655 390 191 36
-$btnBasicAppInstall.Add_Click({ Start-BasicApps })
-$t7.Controls.Add($btnBasicAppInstall)

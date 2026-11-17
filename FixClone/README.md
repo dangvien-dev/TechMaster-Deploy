@@ -141,4 +141,10 @@ Khi dùng EVKey, mở **Sau khi clone → Bàn phím / EVKey → 1** để chỉ
 
 Chạy dưới đúng user khách hàng; nếu app được nâng quyền bằng tài khoản khác, mở `Fix-BanPhim.bat` trực tiếp tại user khách hàng. Công cụ từ chối ghi khi tài khoản đang chạy không khớp desktop đăng nhập. Sao lưu nằm trong Local AppData của user đó, không đi kèm bộ cài.
 
-Vấn đề Windows + Shift + S hỏi chọn hai ứng dụng cần tên ứng dụng thực tế để xử lý; chưa tự đổi mặc định hoặc gỡ ứng dụng chụp màn hình.
+Windows + Shift + S: khi hộp chọn hiện **Screen Snipping** và **Snipping Tool**, chọn **Screen Snipping** (dòng trên) rồi **Always**. Nếu đã chọn app khác, vào Ứng dụng mặc định, tìm giao thức `ms-screenclip` và đổi lại. Cửa sổ kiểm tra trước Sysprep có nút mở lựa chọn / Settings, nhắc kiểm tra và xuất ProgId đã chọn sang `DefaultApps.xml` cho user mới bằng DISM. Không chép hash UserChoice hoặc gỡ Snipping Tool. Cần kiểm tra lại trên máy clone thực tế vì Windows quản lý đăng ký ứng dụng theo từng user.
+
+Trước Sysprep, cửa sổ này cũng kiểm tra shortcut Word / Excel ở Desktop cá nhân và Public Desktop theo đích thực tế. Nút **Sao lưu và dọn icon trùng** giữ một icon dùng chung, sao lưu rồi dọn các icon cùng đích; giữ shortcut có tham số riêng, tài liệu, Normal.dotm và Word Options. Chế độ chuẩn bị không tạo thêm icon Public khi nó sẽ trùng icon cá nhân chưa được dọn. Máy đã clone có thể mở lại từ **Sau khi clone → Kiểm tra Desktop và phím chụp**.
+
+## UltraViewer bị trùng ID
+
+UltraViewer có cơ chế nhận diện riêng; các bước reset AnyDesk / TeamViewer không áp dụng cho UltraViewer. Trong WPF mở **Sau khi clone → Chẩn đoán UltraViewer** trên hai máy đang trùng ID, rồi sao chép kết quả để đối chiếu. Báo cáo gồm phiên bản, tiến trình, card mạng / MAC, NetworkAddress đặt thủ công và tên trường registry; không xuất mật khẩu, token hoặc giá trị cấu hình nhận diện. Chưa tự xoá cấu hình hoặc dừng phiên hỗ trợ. Script FixClone ghi cảnh báo khi thấy UltraViewer đã cài.

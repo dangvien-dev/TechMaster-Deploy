@@ -249,6 +249,13 @@ if (-not $tvKeys) {
     } catch { Write-Err $_.Exception.Message }
 }
 
+# UltraViewer has a separate identity mechanism; do not reuse AnyDesk/TeamViewer resets.
+$ultraInstalled = @(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match '^UltraViewer(?:\s|$)' })
+if ($ultraInstalled.Count) {
+    Write-Warn 'Có UltraViewer. Chưa reset ID tự động; nếu bị trùng, mở TechMaster → Sau khi clone → Chẩn đoán UltraViewer trên hai máy.'
+    Write-Host '  Giữ nguyên cấu hình và phiên kết nối UltraViewer đang chạy.'
+}
+
 # ---------- 6. IP tĩnh -> DHCP ----------
 Write-Step "6. KIỂM TRA IP TĨNH"
 $staticIfs = Get-NetIPInterface -AddressFamily IPv4 -Dhcp Disabled -ErrorAction SilentlyContinue |
