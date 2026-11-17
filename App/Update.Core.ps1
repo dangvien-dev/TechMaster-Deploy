@@ -329,7 +329,7 @@ function Assert-DeployToolsClosed([string]$root, [int]$ignoreId = 0) {
 }
 
 function New-DeployArchive([string]$directory, [string]$zipPath) {
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
     $directory = [IO.Path]::GetFullPath($directory).TrimEnd([char[]]@('\','/'))
     $archive = [IO.Compression.ZipFile]::Open($zipPath, [IO.Compression.ZipArchiveMode]::Create)
     try {
@@ -343,7 +343,7 @@ function New-DeployArchive([string]$directory, [string]$zipPath) {
 function Expand-DeployPackage([string]$zipPath, [string]$work, [string]$expectedHash = '') {
     if ((Get-Item -LiteralPath $zipPath -ErrorAction Stop).Length -gt 100MB) { throw 'Gói cập nhật vượt quá 100 MB.' }
     if ($expectedHash -and (Get-DeployHash $zipPath) -ne $expectedHash.ToLowerInvariant()) { throw 'SHA256 của bản tải về không khớp; không cài.' }
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
     if (Test-Path -LiteralPath $work) { throw 'Thư mục chuẩn bị gói đã tồn tại.' }
     New-Item -ItemType Directory -Path $work -ErrorAction Stop | Out-Null
     $zip = [IO.Compression.ZipFile]::OpenRead($zipPath)

@@ -176,8 +176,8 @@
     {
       "path": "App/Update.Core.ps1",
       "mode": "100644",
-      "size": 35754,
-      "sha": "46b733dffd9bbe365817aa6755a7e78c9ab60e71"
+      "size": 35800,
+      "sha": "3600ba2a1ee64626c86f801ff492802a9ea0774b"
     },
     {
       "path": "App/Update.Engine.ps1",
