@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.7.0",
+  "version": "2.1.9.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -126,10 +126,22 @@
       "sha": "9e60258bd3f63eda6f2e796f64a01e2274afb479"
     },
     {
+      "path": "App/Logo.Preview.ps1",
+      "mode": "100644",
+      "size": 646,
+      "sha": "a46a4744830f9c39fa52d4a731c547ae36acdceb"
+    },
+    {
+      "path": "App/LogoPreview.cs",
+      "mode": "100644",
+      "size": 15000,
+      "sha": "28eff875739d326b3590c1789a2756d052d3ae99"
+    },
+    {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 24178,
-      "sha": "076627ef12222cfb5b2b9cbc543aaed1bcd52df1"
+      "size": 24197,
+      "sha": "d77bb70a37f97f76386d75edc368d207695faa17"
     },
     {
       "path": "App/QuickGuide.md",
@@ -170,8 +182,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 19114,
-      "sha": "4e076c35da86b84c82b3b77bfec76e4c434014d4"
+      "size": 18308,
+      "sha": "3ef22e996292a0a7c2c5243c8353fd9bdc60a9fb"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -208,6 +220,12 @@
       "mode": "100644",
       "size": 2625,
       "sha": "262e8bfb9953adbb77f1fa6f27bb9bfcd55b2744"
+    },
+    {
+      "path": "App/Test-LogoPreview.ps1",
+      "mode": "100644",
+      "size": 4756,
+      "sha": "969ed0d647de7b6b23abd129c50091d57d63764a"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",
@@ -368,8 +386,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 8802,
-      "sha": "ca8f25580e6eea7ed49889a662904ad3ee542d7a"
+      "size": 9255,
+      "sha": "e73103d9d84e3dbaa9673868ab8bc9810b8196dd"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -729,7 +747,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "6b0869106915e55ed0c744e52bce1efd3f988c97"
+      "sha": "e211f58da4ae15792b4ee8db133270d98d6dfc1d"
     }
   ]
 }

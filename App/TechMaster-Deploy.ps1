@@ -14,6 +14,7 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'Info.UI.ps1')
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
+. (Join-Path $PSScriptRoot 'Logo.Preview.ps1')
 . (Join-Path $PSScriptRoot 'LicenseConfirmation.UI.ps1')
 . (Join-Path $PSScriptRoot 'Startup.UI.ps1')
 $form = Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
@@ -119,24 +120,12 @@ if (Test-Path -LiteralPath $cfgFile) {
     } catch { Set-Status 'Chưa đọc được cấu hình biên bản đã lưu.' }
 }
 function Update-LogoPreview {
-    $logoBox.Source = $null; $logoWeb.Visibility = 'Collapsed'; $logoBox.Visibility = 'Visible'
+    $logoBox.Source = $null
     $file = Get-ChildItem -LiteralPath $DirBB -File | Where-Object { $_.BaseName -eq 'Logo' -and $_.Extension -in '.svg','.png','.jpg','.jpeg' } | Select-Object -First 1
     if (-not $file) { $lblLogo.Text = 'Chưa có logo'; return }
     $lblLogo.Text = $file.Name
-    try {
-        if ($file.Extension -eq '.svg') {
-            $data = [Convert]::ToBase64String([IO.File]::ReadAllBytes($file.FullName))
-            $logoWeb.Visibility = 'Visible'; $logoBox.Visibility = 'Collapsed'
-            $logoWeb.NavigateToString('<!doctype html><html><head><meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body style="margin:0;text-align:center"><img style="max-width:100%;max-height:140px" src="data:image/svg+xml;base64,' + $data + '"></body></html>')
-        } else {
-            $stream = New-Object IO.MemoryStream(,([IO.File]::ReadAllBytes($file.FullName)))
-            try {
-                $image = New-Object Windows.Media.Imaging.BitmapImage
-                $image.BeginInit(); $image.CacheOption = 'OnLoad'; $image.StreamSource = $stream; $image.EndInit(); $image.Freeze()
-                $logoBox.Source = $image
-            } finally { $stream.Dispose() }
-        }
-    } catch { $lblLogo.Text = $file.Name + ' (không xem trước được)' }
+    try { $logoBox.Source = Get-DeployLogoPreview $file.FullName }
+    catch { $lblLogo.Text = $file.Name + ' (chưa xem trước được; có thể chọn PNG/JPG). Logo gốc vẫn dùng trong biên bản.' }
 }
 Bind-Click 'btnLogo' {
     $path = Select-DeployFile 'Chọn logo đơn vị' 'Logo (*.svg;*.png;*.jpg;*.jpeg)|*.svg;*.png;*.jpg;*.jpeg'
