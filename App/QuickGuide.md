@@ -31,6 +31,8 @@
 - Nhập thông tin đơn vị, kỹ thuật viên, khách hàng và chọn logo. Thông tin đơn vị được lưu cho lần sau.
 - Bấm Xuất biên bản. Trang HTML mở trong trình duyệt; chọn In / Lưu PDF để giao cho khách.
 - Biên bản phản ánh trạng thái kiểm tra tại thời điểm xuất, chỉ hiện 5 ký tự cuối key. Sau khi kích hoạt hoặc cập nhật mẫu, hãy xuất lại biên bản.
+- Xác nhận cho khách lẻ và Xác nhận cho công ty là hai mẫu riêng về việc cung cấp / bàn giao phần mềm để đơn vị cung cấp ký. Nhập khách hàng, chọn đúng phần mềm đã bàn giao rồi xuất HTML và In / Lưu PDF.
+- Mẫu công ty dùng kèm hóa đơn / chứng từ đã cấp; mã số thuế và số chứng từ đều tuỳ chọn khi kỹ thuật viên không có thông tin. Xác nhận chỉ ghi 5 ký tự cuối key, không lưu dữ liệu khách vào cấu hình dùng chung.
 
 ## Tải / cài Office
 - Chọn đúng sản phẩm, ngôn ngữ và 32 / 64-bit. Có thể bỏ trống key để nhập sau trong Word.
@@ -51,7 +53,7 @@
 - Bảng Kết quả và nút Xem nhật ký giúp xác định ứng dụng đã cài, đã có sẵn hoặc đang gặp lỗi.
 
 ## Cập nhật / khôi phục
-- Chấm đỏ trên nút Cập nhật báo có bản mới. App kiểm tra nền khi mở và định kỳ, không tự tải hoặc chen thông báo.
+- Chấm đỏ trên nút Cập nhật báo có bản mới. App đọc số phiên bản trong nền khi mở và định kỳ, không tự tải hoặc chen thông báo. Nếu mạng lỗi sẽ thử lại sau 1 phút; bấm Làm mới để yêu cầu kiểm tra ngay.
 - Bấm Kiểm tra cập nhật, Tải bản cập nhật rồi Cài đặt bản cập nhật. Nút Cập nhật trên đầu app gọi lại cửa sổ đang bị khuất.
 - Khi hiện Hoàn tất, đọc kết quả rồi bấm Đóng và mở ứng dụng. Nút X chỉ đóng updater; app không tự mở chen lên.
 - Cài từ tệp dùng gói ZIP khi cần cập nhật offline. Lịch sử cập nhật cho biết các lần cập nhật trên máy này.

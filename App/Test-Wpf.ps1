@@ -48,7 +48,7 @@ foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity') {
+    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
@@ -115,6 +115,23 @@ foreach ($node in $markup.SelectNodes('//*[@x:Name and not(ancestor::*[local-nam
     $name = $node.GetAttribute('Name', 'http://schemas.microsoft.com/winfx/2006/xaml')
     Assert ($null -ne $main.FindName($name)) "XAML control $name resolves"
 }
+# Exercise both real handover dialogs and export handlers, without opening a browser.
+$confirmationOutput=Join-Path ([IO.Path]::GetTempPath()) ('tm-confirm-ui-'+[guid]::NewGuid().ToString('N'))
+$confirmationSupplier=[pscustomobject]@{Company='Supplier test';Address='';Phone='';Technician='Test tech'}
+$confirmationSnapshot=[pscustomobject]@{Computer='TEST';Model='Model';Serial='Serial';CheckedAt=(Get-Date);Products=@([pscustomobject]@{Name='Windows 11 Pro';KeyTail='12345';Status='Đã kích hoạt'})}
+function Start-Process{param($FilePath)$script:confirmationOpened=$FilePath}
+try{
+    foreach($kind in 'Retail','Company'){
+        $confirm=New-DeployLicenseConfirmationWindow -Template $kind -Supplier $confirmationSupplier -CustomerName 'Test customer' -Snapshot $confirmationSnapshot -OutputDirectory $confirmationOutput
+        Assert ($confirm.FindName('CompanyFields').Visibility.ToString() -eq $(if($kind -eq 'Company'){'Visible'}else{'Collapsed'})) "$kind shows only its relevant fields"
+        $confirm.FindName('Export').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        Assert (-not $confirm.Tag.Path -and $confirm.FindName('Validation').Text) 'An unselected product cannot be confirmed'
+        $confirm.Tag.Choices[0].Check.IsChecked=$true
+        $confirm.FindName('Export').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        Assert ((Test-Path $confirm.Tag.Path) -and $script:confirmationOpened -eq $confirm.Tag.Path) "$kind export writes and opens its own document"
+    }
+    Assert (@(Get-ChildItem $confirmationOutput -File).Count -eq 2) 'Retail and company actions produce separate files'
+}finally{Remove-Item Function:Start-Process;if(Test-Path $confirmationOutput){Remove-Item $confirmationOutput -Recurse -Force}}
 $updater = . (Join-Path $PSScriptRoot 'Update-App.ps1') -Root (Split-Path -Parent $PSScriptRoot) -ValidateOnly
 Assert ($updater -is [Windows.Window]) 'Updater is a native WPF Window'
 foreach ($state in 'Available','Ready','Applying','Latest','History','Error','Complete','RollbackReady') {

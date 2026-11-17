@@ -22,7 +22,9 @@ try {
     . (Import-Function (Join-Path $PSScriptRoot 'Update-UI.ps1') 'Update-DeployUpdaterState' $PSScriptRoot)
     . (Import-Function (Join-Path $PSScriptRoot 'Update.Engine.ps1') 'Close-DeployForUpdate' $temp)
     function Set-Status($message) { $script:lastStatus = $message }
+    function Request-DeployUpdateNotification { $script:notificationRequested=$true }
     function Reset-Fixture {
+        $script:notificationRequested=$false
         $script:form = [pscustomobject]@{ IsEnabled = $true; Closed = $false; Activated = $false }
         $script:form | Add-Member ScriptMethod Close { $this.Closed = $true }
         $script:form | Add-Member ScriptMethod Activate { $this.Activated = $true }
@@ -60,6 +62,7 @@ try {
     $oldProcess = $script:updateProcess
     Update-DeployUpdaterState
     Assert (-not $form.Closed -and $form.IsEnabled -and $tabs.IsEnabled -and $header.IsEnabled) 'Completed/cancelled updater unlocks UI instead of honoring a stale close marker'
+    Assert $script:notificationRequested 'Closing updater schedules a new background check'
     Assert ($oldProcess.Disposed -and $null -eq $script:updateProcess -and -not (Test-Path (Join-Path $temp 'close.request'))) 'Updater handle and marker cleaned after exit'
 
     function Get-Process { if (-not $script:missingParent) { $script:parent } }

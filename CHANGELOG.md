@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.7.0 — 18/11/2026
+
+- Thêm hai mẫu xác nhận cung cấp / bàn giao bản quyền riêng cho khách lẻ và khách công ty đã được cấp hóa đơn / chứng từ. Chọn từng phần mềm, dùng thông tin đơn vị / logo đang lưu, xuất HTML để xem, in hoặc lưu PDF; key chỉ hiện 5 ký tự cuối.
+- Mẫu công ty có mã số thuế và tham chiếu hóa đơn tuỳ chọn; không yêu cầu kỹ thuật viên biết số chứng từ. Thông tin khách chỉ ghi vào file xuất, không đưa vào cấu hình dùng chung.
+- Kiểm tra chấm đỏ bằng số phiên bản công khai trước, tránh phụ thuộc Git refs / API khi có bản mới. Mạng lỗi thử lại sau 1 phút, giữ thông báo đã biết và cho phép Làm mới yêu cầu kiểm tra ngay.
+
 ## 2.1.6.0 — 18/11/2026
 
 - Đổi icon sang biểu tượng chữ T và mũi tên triển khai, nền navy với màu cyan / mint. Đồng bộ launcher, taskbar và cửa sổ cập nhật; hỗ trợ kích thước 16–256 px.
