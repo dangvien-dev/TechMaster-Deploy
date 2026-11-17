@@ -10,6 +10,11 @@
     6. Định dạng vùng: ngày dd/MM/yyyy, thập phân ",", hàng nghìn ".", list ";", Metric
 #>
 $ErrorActionPreference = 'Continue'
+$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
+if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
+    . $consoleInit
+    Initialize-TechMasterConsole
+}
 function Write-Ok($t)   { Write-Host "  [OK] $t" -ForegroundColor Green }
 function Write-Warn($t) { Write-Host "  [!] $t" -ForegroundColor Yellow }
 

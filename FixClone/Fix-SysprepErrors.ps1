@@ -23,6 +23,11 @@
 param([switch]$PreCheck, [switch]$Auto)
 
 $ErrorActionPreference = 'Continue'
+$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
+if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
+    . $consoleInit
+    Initialize-TechMasterConsole
+}
 function Write-Step($t) { Write-Host "`n=== $t ===" -ForegroundColor Cyan }
 function Write-Ok($t)   { Write-Host "  [OK] $t" -ForegroundColor Green }
 function Write-Warn($t) { Write-Host "  [!] $t" -ForegroundColor Yellow }

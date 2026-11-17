@@ -6,6 +6,8 @@
   nên đổi ký tự ổ USB vẫn giữ icon).
   Shortcut dùng đường dẫn tuyệt đối: chép thư mục sang chỗ khác / USB đổi ký tự ổ thì chạy lại file này.
 #>
+. (Join-Path $PSScriptRoot 'Console.ps1')
+Initialize-TechMasterConsole
 $root = Split-Path -Parent $PSScriptRoot
 $exe  = Join-Path $root 'TechMaster Deploy.exe'
 $ico  = Join-Path $PSScriptRoot 'TechMaster.ico'

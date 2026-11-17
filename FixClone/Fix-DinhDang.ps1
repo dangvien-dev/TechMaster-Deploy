@@ -13,6 +13,11 @@
     Thêm -AllNewUsers (cần Admin) để áp dụng luôn cho user tạo mới sau này.
 #>
 param([switch]$AllNewUsers)
+$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
+if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
+    . $consoleInit
+    Initialize-TechMasterConsole
+}
 
 $values = [ordered]@{
     'LocaleName'     = 'vi-VN'

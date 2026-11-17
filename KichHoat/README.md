@@ -98,7 +98,9 @@ Chạy `Kich-Hoat-TEST.bat` trên máy bất kỳ, rồi kiểm tra:
 | Điện thoại báo **"The request is blocked."** | Tường lửa web Azure (WAF) của Microsoft chặn | Mở portal từ trang đầu (không mở thẳng `/captcha`), tắt VPN/DNS chặn quảng cáo, xoá cookie trang, đổi Wi-Fi ↔ 4G. Vẫn bị chặn thì chọn **[2] Trên máy này** |
 | Không đăng nhập Microsoft được trên điện thoại | Trình duyệt nhúng (Zalo, Messenger…), chặn popup/cookie, chế độ ẩn danh | Mở bằng Chrome/Safari, cho phép popup + cookie bên thứ ba |
 | Quét QR ② không mở được trang | Khác mạng, hoặc router bật **AP/Client isolation** | Cho điện thoại và máy tính chung mạng, hoặc nhấn phím bất kỳ để gõ tay |
-| Nạp Confirmation ID thất bại | Confirmation ID không khớp Installation ID | Lấy lại Confirmation ID từ **đúng** Installation ID đang hiện trên máy |
+| Nạp CID báo lỗi có mã cụ thể | Có thể CID không khớp IID hoặc lỗi dịch vụ / quyền truy cập | Xem mã lỗi; nếu CID không khớp thì lấy lại từ **đúng** Installation ID đang hiện trên máy |
+| Bản cũ báo `ReturnValue 0x` trống nhưng trạng thái đã kích hoạt | Provider CIM không trả `ReturnValue`; bản cũ nhận nhầm là lỗi | Dùng bản mới: đọc lại đúng license và báo thành công khi `LicenseStatus = 1` |
+| Đã gửi CID nhưng chưa xác nhận kích hoạt | Chưa đọc được trạng thái hoặc trạng thái chưa cập nhật | Kiểm tra trong Word / Settings; thông báo này chưa kết luận CID sai |
 
 ---
 

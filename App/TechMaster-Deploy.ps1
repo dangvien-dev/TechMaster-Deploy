@@ -392,7 +392,7 @@ $chkMsi.Text = 'Gỡ Office cũ dạng MSI (2010 / 2013 / 2016) trước khi cà
 $chkMsi.Location = New-Object System.Drawing.Point(150, 322); $chkMsi.Size = New-Object System.Drawing.Size(470, 26)
 $t5.Controls.Add($chkMsi)
 
-$lblKho = New-Label '' 650 250 190 90
+$lblKho = New-Label '' 650 284 190 64
 $t5.Controls.Add($lblKho)
 
 function Get-OffSel {
@@ -442,7 +442,7 @@ function Finish-ODT([Nullable[int]]$exitCode) {
     $officeBar.Value = 0
     if ($exitCode -eq 0) {
         $officeBar.Value = 100
-        $lblOfficeProgress.Text = if ($run.Mode -eq 'Download') { 'Đã tải bộ cài về kho.' } else { 'Đã cài Office.' }
+        $lblOfficeProgress.Text = if ($run.Mode -eq 'Download') { 'Đã tải bộ cài về kho.' } elseif ($run.Mode -eq 'Cleanup') { 'Đã kết thúc công cụ gỡ / dọn. Xem nhật ký để biết kết quả.' } else { 'Đã cài Office.' }
         $lblOfficeProgress.ForeColor = $cPrimary
     } else {
         $lblOfficeProgress.Text = if ($null -eq $exitCode) {
@@ -456,6 +456,7 @@ function Finish-ODT([Nullable[int]]$exitCode) {
     $bDl.Enabled = $true
     $bKho.Enabled = $true
     $bNet.Enabled = $true
+    $bCleanup.Enabled = $true
     Update-OffInfo
 }
 
@@ -521,6 +522,7 @@ function Start-ODT([string]$mode) {
     $bDl.Enabled = $false
     $bKho.Enabled = $false
     $bNet.Enabled = $false
+    $bCleanup.Enabled = $false
     $bOfficeLog.Enabled = $false
     $lblOfficeProgress.Text = $script:officeRun.Stage
     $lblOfficeProgress.ForeColor = $cPrimary
@@ -540,6 +542,35 @@ $bNet.Add_Click({ Start-ODT 'Install' }); $t5.Controls.Add($bNet)
 $bOpenKho = New-Button 'Mở thư mục kho' 650 190 190 32 -secondary
 $bOpenKho.Add_Click({ if (-not (Test-Path $KhoOffice)) { New-Item -ItemType Directory $KhoOffice | Out-Null }; Start-Process explorer.exe $KhoOffice })
 $t5.Controls.Add($bOpenKho)
+
+function Start-OfficeCleanup {
+    if ($script:officeRun) { return }
+    $runDir = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy\Office Logs\Cleanup_' + [guid]::NewGuid().ToString('N'))
+    $log = Join-Path $runDir 'Cleanup.log'
+    $progress = Join-Path $runDir 'Progress.txt'
+    $cleanupArgs = '-NoLogo -NoProfile -ExecutionPolicy Bypass -File "{0}" -LogPath "{1}" -ProgressPath "{2}"' -f (Join-Path $DirOffice 'Office-Cleanup.ps1'), $log, $progress
+    try {
+        New-Item -ItemType Directory -Path $runDir -Force -ErrorAction Stop | Out-Null
+        $process = Start-Process powershell.exe -ArgumentList $cleanupArgs -WorkingDirectory $DirOffice -PassThru -ErrorAction Stop
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'Gỡ / dọn Office', 'OK', 'Error') | Out-Null
+        return
+    }
+    try { $null = $process.Handle } catch [InvalidOperationException] {}
+    $script:officeRun = @{
+        Process = $process; Mode = 'Cleanup'; Log = $log; ErrorLog = (Join-Path $runDir 'unused.log')
+        Progress = $progress; Started = Get-Date; Stage = 'Chọn thao tác và xác nhận trong cửa sổ gỡ / dọn Office.'
+    }
+    $bDl.Enabled = $false; $bKho.Enabled = $false; $bNet.Enabled = $false; $bCleanup.Enabled = $false
+    $bOfficeLog.Enabled = $false
+    $lblOfficeProgress.Text = $script:officeRun.Stage
+    $lblOfficeProgress.ForeColor = $cPrimary
+    $officeBar.Value = 0; $officeBar.Style = 'Marquee'; $officeBar.MarqueeAnimationSpeed = 30
+    Set-Status $lblOfficeProgress.Text
+    $officeTimer.Start()
+}
+$bCleanup = New-Button 'Gỡ / dọn Office…' 650 232 190 40 -danger $true
+$bCleanup.Add_Click({ Start-OfficeCleanup }); $t5.Controls.Add($bCleanup)
 
 $offNote = New-Label 'Bộ cài được tải từ Microsoft và lưu vào kho để cài offline.' 20 352 820 24
 $offNote.ForeColor = $cMuted
@@ -709,6 +740,7 @@ Add-Card $t6 312 'Dọn Windows.old sau khi cài' `
     'Dọn Windows.old' { Open-WindowsOldCleanup }
 
 . (Join-Path $PSScriptRoot 'BasicApps.ps1')
+. (Join-Path $PSScriptRoot 'Update-UI.ps1')
 
 # Thanh trạng thái
 $script:status = New-Object System.Windows.Forms.Label
@@ -729,6 +761,8 @@ $officeTimer.Dispose()
 $basicAppTimer.Dispose()
 if ($script:basicAppRun.Process) { $script:basicAppRun.Process.Dispose() }
 $mediaTimer.Dispose()
+$updateTimer.Dispose()
+if ($script:updateProcess) { $script:updateProcess.Dispose() }
 if ($script:mediaDownload) {
     $script:mediaDownload.Client.CancelAsync()
     $script:mediaDownload.Client.Dispose()

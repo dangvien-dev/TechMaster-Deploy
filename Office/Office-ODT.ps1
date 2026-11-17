@@ -27,62 +27,20 @@ param(
     [string]$ProgressPath = ''
 )
 $ErrorActionPreference = 'Stop'
-
-# Lucida Console and raster fonts can omit Vietnamese glyphs in the classic console.
-if (-not [Console]::IsOutputRedirected) {
-    try {
-        if (-not ('TechMaster.OfficeConsole' -as [type])) {
-            Add-Type -Namespace TechMaster -Name OfficeConsole -MemberDefinition @'
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-private struct ConsoleFont
-{
-    public uint Size;
-    public uint Index;
-    public short Width;
-    public short Height;
-    public uint Family;
-    public uint Weight;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-    public string FaceName;
+$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
+if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
+    . $consoleInit
+    Initialize-TechMasterConsole
 }
-
-[DllImport("kernel32.dll")]
-private static extern IntPtr GetStdHandle(int standardHandle);
-
-[DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-private static extern bool GetCurrentConsoleFontEx(IntPtr output, bool maximum, ref ConsoleFont font);
-
-[DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-private static extern bool SetCurrentConsoleFontEx(IntPtr output, bool maximum, ref ConsoleFont font);
-
-public static void UseVietnameseFont()
-{
-    var output = GetStdHandle(-11);
-    var font = new ConsoleFont { Size = (uint)Marshal.SizeOf(typeof(ConsoleFont)) };
-    if (!GetCurrentConsoleFontEx(output, false, ref font))
-        return;
-
-    const uint TrueType = 0x04;
-    if ((font.Family & TrueType) != 0 && font.FaceName != "Lucida Console")
-        return;
-
-    font.Index = 0;
-    font.Width = 0;
-    font.Family = 0x36; // Modern fixed-pitch TrueType font.
-    font.FaceName = "Consolas";
-    SetCurrentConsoleFontEx(output, false, ref font);
-}
-'@ -ErrorAction Stop
-        }
-        [TechMaster.OfficeConsole]::UseVietnameseFont()
-    } catch {
-        Write-Verbose "Không thể đổi font console: $($_.Exception.Message)"
+$officeMutex = $null
+$ownsOfficeMutex = $false
+try {
+    if ($Mode -ne 'Download') {
+        $officeMutex = New-Object System.Threading.Mutex($false, 'Global\TechMaster.OfficeDeployment')
+        try { $ownsOfficeMutex = $officeMutex.WaitOne(0) }
+        catch [System.Threading.AbandonedMutexException] { $ownsOfficeMutex = $true }
+        if (-not $ownsOfficeMutex) { throw 'TechMaster đang cài hoặc dọn Office ở cửa sổ khác. Chờ hoàn tất rồi thử lại.' }
     }
-}
-
-if ($ProgressPath -and [Console]::IsOutputRedirected) {
-    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
-}
 
 function Write-OfficeProgress([string]$message) {
     if (-not $ProgressPath) { return }
@@ -259,4 +217,9 @@ if ($p.ExitCode -eq 0) {
 } else {
     Write-Err "ODT trả về ExitCode $($p.ExitCode). Log của ODT: %TEMP% (file *.log mới nhất)."
     exit $p.ExitCode
+}
+
+} finally {
+    if ($ownsOfficeMutex) { $officeMutex.ReleaseMutex() }
+    if ($null -ne $officeMutex) { $officeMutex.Dispose() }
 }

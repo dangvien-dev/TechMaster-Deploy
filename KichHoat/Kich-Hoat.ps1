@@ -22,6 +22,12 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
+if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
+    . $consoleInit
+    Initialize-TechMasterConsole
+}
+. (Join-Path $PSScriptRoot 'Activation.Core.ps1')
 $cfg = @{
     Windows = @{ AppId = '55c92734-d682-4d71-983e-d6ec3f16059f'; Url = 'https://aka.ms/WindowsActivate'
                  Check = 'Settings -> System -> Activation' }
@@ -223,9 +229,11 @@ Write-Step "2. THU KICH HOAT ONLINE (khong can tai khoan)"
 foreach ($p in $todo) {
     Write-Host "  $($p.Name) ..." -NoNewline
     try {
-        $r = Invoke-CimMethod -InputObject $p -MethodName Activate
-        if ($r.ReturnValue -eq 0) { Write-Host ""; Write-Ok "Kích hoạt online thành công" }
-        else { Write-Host ""; Write-Warn ("Online thất bại, mã 0x{0:X8}" -f $r.ReturnValue) }
+        $activation = Invoke-VerifiedLicenseActivation $p 'Activate'
+        Write-Host ""
+        if ($activation.State -eq 'Activated') { Write-Ok 'Kích hoạt online thành công (đã kiểm tra trạng thái).' }
+        elseif ($activation.State -eq 'Failed') { Write-Warn ("Online thất bại: " + $activation.Detail) }
+        else { Write-Warn ("Chưa xác nhận kích hoạt online: " + $activation.Detail) }
     } catch {
         $code = $_.Exception.HResult
         Write-Host ""
@@ -316,13 +324,18 @@ foreach ($p in $todo) {
     Write-Host ("  Confirmation ID: " + (Format-Groups $cid 6))
 
     try {
-        $r = Invoke-CimMethod -InputObject $p -MethodName DepositOfflineConfirmationId `
-                -Arguments @{ InstallationId = $iid; ConfirmationId = $cid }
-        if ($r.ReturnValue -ne 0) { throw ("ReturnValue 0x{0:X8}" -f $r.ReturnValue) }
-        Write-Ok "Đã nạp Confirmation ID"
+        $activation = Invoke-VerifiedLicenseActivation $p 'DepositOfflineConfirmationId' $iid $cid
+        if ($activation.State -eq 'Activated') {
+            Write-Ok 'Sản phẩm ĐÃ KÍCH HOẠT sau khi nạp Confirmation ID (đã kiểm tra trạng thái).'
+        } elseif ($activation.State -eq 'Failed') {
+            Write-Err ("Nạp Confirmation ID thất bại: " + $activation.Detail)
+            Write-Host '  Xem lỗi trên. Nếu cần lấy lại CID, dùng đúng Installation ID của license này.'
+        } else {
+            Write-Warn ("Đã gửi Confirmation ID nhưng chưa xác nhận kích hoạt: " + $activation.Detail)
+            Write-Host ("  Kiểm tra lại: " + $cfg.Check)
+        }
     } catch {
         Write-Err "Nạp Confirmation ID thất bại: $($_.Exception.Message)"
-        Write-Host "  Kiểm tra lại: Confirmation ID phải lấy từ ĐÚNG Installation ID ở trên."
         continue
     }
 }

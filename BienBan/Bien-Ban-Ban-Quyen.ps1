@@ -15,6 +15,11 @@ param(
     [switch]$NoPrompt      # GUI gọi: không hỏi, không pause
 )
 $ErrorActionPreference = 'Stop'
+$consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
+if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
+    . $consoleInit
+    Initialize-TechMasterConsole
+}
 $here = $PSScriptRoot
 
 # ---------- Cấu hình đơn vị / kỹ thuật viên (lưu cạnh script, nhập 1 lần) ----------
@@ -78,7 +83,7 @@ function Get-Channel($p) {
 }
 
 function Get-Products([string]$appId) {
-    @(Get-CimInstance SoftwareLicensingProduct -Filter "ApplicationID='$appId' AND PartialProductKey IS NOT NULL" -ErrorAction SilentlyContinue)
+    Get-CimInstance SoftwareLicensingProduct -Filter "ApplicationID='$appId' AND PartialProductKey IS NOT NULL" -ErrorAction Stop
 }
 
 function HtmlEnc([string]$s) { [System.Net.WebUtility]::HtmlEncode($s) }
@@ -103,17 +108,29 @@ function New-ProductRows($products, [string]$emptyText) {
     return ($rows -join "`n")
 }
 
-$win = Get-Products '55c92734-d682-4d71-983e-d6ec3f16059f'
-$off = Get-Products '0ff1ce15-a989-479d-af46-f275c6370663'
+# PowerShell unwraps a single function result. A scalar CIM object may not
+# expose Count on Windows PowerShell 5.1, so wrap results at the call site.
+$win = @()
+$off = @()
+$winReadFailed = $false
+$offReadFailed = $false
+try { $win = @(Get-Products '55c92734-d682-4d71-983e-d6ec3f16059f') }
+catch { $winReadFailed = $true; Write-Warning ('Không đọc được license Windows: ' + $_.Exception.Message) }
+try { $off = @(Get-Products '0ff1ce15-a989-479d-af46-f275c6370663') }
+catch { $offReadFailed = $true; Write-Warning ('Không đọc được license Office: ' + $_.Exception.Message) }
 
 $now = Get-Date
 $serial = ([string]$bios.SerialNumber).Trim()
 if ($serial -match 'to be filled|default string|system serial|^0+$|^$') { $serial = "$serial (BIOS không có serial)" }
 
-$winAll = $win.Count -gt 0 -and -not ($win | Where-Object { $_.LicenseStatus -ne 1 })
-$offAll = $off.Count -eq 0 -or -not ($off | Where-Object { $_.LicenseStatus -ne 1 })
-if ($winAll -and $offAll) { $summary = '<div class="sum ok">Tất cả sản phẩm phát hiện được đều ở trạng thái <b>Đã kích hoạt</b>.</div>' }
-else                      { $summary = '<div class="sum bad">Có sản phẩm <b>chưa kích hoạt</b> – xem chi tiết bên dưới.</div>' }
+$notActivated = @($win + $off | Where-Object { $_.LicenseStatus -ne 1 })
+if ($notActivated.Count -gt 0) {
+    $summary = '<div class="sum bad">Có sản phẩm <b>chưa kích hoạt</b> – xem chi tiết bên dưới.</div>'
+} elseif ($winReadFailed -or $offReadFailed -or $win.Count -eq 0) {
+    $summary = '<div class="sum warn">Chưa đủ thông tin để kết luận trạng thái của toàn bộ sản phẩm – xem chi tiết bên dưới.</div>'
+} else {
+    $summary = '<div class="sum ok">Tất cả sản phẩm phát hiện được đều ở trạng thái <b>Đã kích hoạt</b>.</div>'
+}
 
 # ---------- Mẫu biên bản ----------
 $html = @'
@@ -123,30 +140,31 @@ $html = @'
 <style>
  @page { size: A4; margin: 14mm 14mm 16mm 14mm; }
  * { box-sizing: border-box; }
- body { font-family: "Segoe UI", Arial, sans-serif; color: #111827; font-size: 13.5px; margin: 0; background: #f3f4f6; }
+ body { font-family: "Segoe UI", Arial, sans-serif; color: #111827; font-size: 14.5px; margin: 0; background: #f3f4f6; }
  .page { background: #fff; max-width: 210mm; margin: 16px auto; padding: 14mm; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
  .head { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1f2937; padding-bottom: 8px; }
  .brand { display: flex; align-items: center; gap: 12px; } .brand img { height: 64px; width: auto; }
- .head .co { font-weight: 700; font-size: 15px; } .head .small { color: #4b5563; font-size: 12.5px; }
- h1 { text-align: center; font-size: 19px; margin: 18px 0 2px; letter-spacing: .3px; }
+ .head .co { font-weight: 700; font-size: 16px; } .head .small { color: #4b5563; font-size: 13.5px; }
+ h1 { text-align: center; font-size: 20px; margin: 18px 0 2px; letter-spacing: .3px; }
  .date { text-align: center; color: #4b5563; margin-bottom: 14px; }
- h2 { font-size: 14px; margin: 16px 0 6px; padding-left: 8px; border-left: 4px solid #0067c0; }
+ h2 { font-size: 15px; margin: 16px 0 6px; padding-left: 8px; border-left: 4px solid #0067c0; }
  table { width: 100%; border-collapse: collapse; }
  th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; vertical-align: top; }
  th { background: #f3f4f6; font-weight: 600; }
  table.kv td:first-child { width: 32%; background: #f9fafb; font-weight: 600; }
  .mono { font-family: Consolas, monospace; }
  .ok  { color: #166534; font-weight: 700; } .bad { color: #b91c1c; font-weight: 700; }
- .muted { color: #6b7280; font-style: italic; } .sub { color: #6b7280; font-size: 11.5px; margin-top: 2px; }
+ .muted { color: #6b7280; font-style: italic; } .sub { color: #6b7280; font-size: 12.5px; margin-top: 2px; }
  .sum { margin: 12px 0 2px; padding: 9px 12px; border-radius: 6px; }
  .sum.ok { background: #ecfdf5; border: 1px solid #a7f3d0; } .sum.bad { background: #fef2f2; border: 1px solid #fecaca; }
+ .sum.warn { color: #92400e; background: #fffbeb; border: 1px solid #fde68a; }
  ol { margin: 4px 0 0 18px; padding: 0; line-height: 1.6; }
- .note { margin-top: 14px; padding: 9px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 12.5px; }
+ .note { margin-top: 14px; padding: 9px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 13.5px; }
  .sign { display: flex; justify-content: space-between; margin-top: 26px; text-align: center; }
- .sign > div { width: 45%; } .sign .hint, .sign .space { width: auto; } .sign .hint { color: #6b7280; font-size: 12px; } .sign .space { height: 70px; }
+ .sign > div { width: 45%; } .sign .hint, .sign .space { width: auto; } .sign .hint { color: #6b7280; font-size: 13px; } .sign .space { height: 70px; }
  .bar { max-width: 210mm; margin: 12px auto 0; text-align: right; }
- .bar button { padding: 8px 18px; font-size: 14px; background: #0067c0; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
- @media print { body { background: #fff; font-size: 12.5px; } .page { box-shadow: none; margin: 0; padding: 0; max-width: none; } .bar { display: none; }
+ .bar button { padding: 8px 18px; font-size: 15px; background: #0067c0; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+ @media print { body { background: #fff; font-size: 13.5px; } .page { box-shadow: none; margin: 0; padding: 0; max-width: none; } .bar { display: none; }
    h1 { margin-top: 12px; } h2 { margin: 11px 0 5px; } th, td { padding: 4px 7px; } .sign { margin-top: 16px; } .sign .space { height: 60px; } }
 </style></head><body>
 <div class="bar"><button onclick="window.print()">In / Lưu PDF</button></div>
@@ -236,7 +254,8 @@ $html = $html.Replace('{{SERIAL}}',   (OrDash $serial))
 $html = $html.Replace('{{OS}}',       (OrDash ("{0} (build {1})" -f $os.Caption, $os.BuildNumber)))
 $html = $html.Replace('{{SUMMARY}}',  $summary)
 $html = $html.Replace('{{WINROWS}}',  (New-ProductRows $win 'Không đọc được thông tin Windows'))
-$html = $html.Replace('{{OFFROWS}}',  (New-ProductRows $off 'Không phát hiện Office (hoặc Office không dùng key, ví dụ Microsoft 365 đăng nhập tài khoản)'))
+$officeEmptyText = if ($offReadFailed) { 'Không đọc được thông tin Office; chưa xác định trạng thái kích hoạt.' } else { 'Không phát hiện Office (hoặc Office không dùng key, ví dụ Microsoft 365 đăng nhập tài khoản)' }
+$html = $html.Replace('{{OFFROWS}}',  (New-ProductRows $off $officeEmptyText))
 
 # ---------- Ghi file + mở ----------
 $outDir = Join-Path $here 'BienBan'
