@@ -248,8 +248,8 @@
     {
       "path": "App/Test-UpdateHandshake.ps1",
       "mode": "100644",
-      "size": 6787,
-      "sha": "9fd7b9ab947ed07d962f2f6032b583f2d65b6b77"
+      "size": 7010,
+      "sha": "1d5f45d8056b912cc31c87cad2d1a6f2504aa12a"
     },
     {
       "path": "App/Test-UpdateNotification.ps1",
