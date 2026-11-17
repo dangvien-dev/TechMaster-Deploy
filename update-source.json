@@ -218,8 +218,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 3016,
-      "sha": "a7c9c802a768741da3756bc096dee92febf187f1"
+      "size": 3081,
+      "sha": "f85d2c747a45efaf8778b236cb070c68f97b78e3"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -308,8 +308,8 @@
     {
       "path": "FixClone/README.md",
       "mode": "100644",
-      "size": 10226,
-      "sha": "c0485ae6bd0d161a5a7cfbd81afe956917f1fe8e"
+      "size": 10399,
+      "sha": "3bb8f41424b5827a12caaa59bc2ddec92f666073"
     },
     {
       "path": "FixClone/Run-Sysprep.bat",
@@ -338,8 +338,8 @@
     {
       "path": "FixClone/Test-UltraViewerDiagnostics.ps1",
       "mode": "100644",
-      "size": 1755,
-      "sha": "4c65f327155a6baa043354be70a8807fcf54a87d"
+      "size": 2121,
+      "sha": "942799e3458c6761370a9db3e4b3299f42d3992f"
     },
     {
       "path": "FixClone/Test-Unattend.ps1",
@@ -350,8 +350,8 @@
     {
       "path": "FixClone/UltraViewer.Diagnostics.ps1",
       "mode": "100644",
-      "size": 3774,
-      "sha": "1865fd9c6e3549bbf61072864a0a3b9483a8c6c7"
+      "size": 5225,
+      "sha": "30f7ad0d310782229fe6b7c270fe1598ba178af4"
     },
     {
       "path": "FixClone/unattend.xml",
@@ -458,8 +458,8 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 8835,
-      "sha": "d6a39d557f5f78e425adb825df167b358c907453"
+      "size": 9230,
+      "sha": "d2cdb0e7b2b1e9da0186982374b48ae2e923d6a9"
     },
     {
       "path": "README.md",

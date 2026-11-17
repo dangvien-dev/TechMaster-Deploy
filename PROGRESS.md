@@ -2,9 +2,9 @@
 
 Cập nhật ngày 17/11/2026.
 
-**2.0.0.0:** chuyển shell 8 mục và updater sang WPF; giữ xử lý Office, WinGet, Windows Setup, bản quyền và biên bản. Tiến trình nền dùng runspace riêng, kết quả được DispatcherTimer đọc trên UI thread. Đã kiểm tra runspace thật (tham số Unicode, kết quả, lỗi và huỷ), 17 kiểm tra engine cập nhật với file / ZIP thật và 6 kiểm tra lựa chọn Office / khởi chạy ẩn. Thêm kiểm tra native WPF dành cho Windows và workflow build Windows; việc nạp / chạy giao diện thật không thể xác minh bằng runtime Linux.
+**2.0.0.0:** chuyển shell 8 mục và updater sang WPF; giữ xử lý Office, WinGet, Windows Setup, bản quyền và biên bản. Tiến trình nền dùng runspace riêng, kết quả được DispatcherTimer đọc trên UI thread. Đã kiểm tra runspace thật (tham số Unicode, kết quả, lỗi và huỷ), 18 kiểm tra engine cập nhật với file / ZIP thật và 6 kiểm tra lựa chọn Office / khởi chạy ẩn. Workflow Windows WPF validation [#4](https://github.com/dangvien-dev/TechMaster-Deploy/actions/runs/44084065962) đã qua: nạp WPF / kiểm tra bố cục thật, 63 kiểm tra updater, các kiểm tra engine / repo / preflight và build EXE + ZIP trên Windows PowerShell 5.1. Đã sửa khác biệt ZIP Windows legacy và kiểm tra index độc lập định dạng JSON của PowerShell 5.1 / 7. Chưa chạy Sysprep, cài Office hoặc kích hoạt thật trên máy khách.
 
-UltraViewer 6.6.133: bước FixClone trước đây chưa reset UltraViewer. Thêm chẩn đoán chỉ đọc và cảnh báo sau clone; không suy ra cách reset từ tên phiên bản, không thay MAC / UUID / cấu hình hoặc dừng kết nối. Cần kết quả chẩn đoán từ hai máy trùng ID để tiếp tục xác định nguyên nhân.
+UltraViewer 6.6.133: bước FixClone trước đây chưa reset UltraViewer. Thêm chẩn đoán chỉ đọc, SHA256 cho trường định danh có tên rõ ràng và cảnh báo sau clone; không xuất giá trị gốc, suy ra cách reset từ tên phiên bản, thay MAC / UUID / cấu hình hoặc dừng kết nối. Cần kết quả chẩn đoán từ hai máy trùng ID để tiếp tục xác định nguyên nhân.
 
 Thêm preflight WPF trước Sysprep và sau clone: nhắc chọn Screen Snipping / Always, xuất lựa chọn ms-screenclip bằng default-app XML; lập kế hoạch dọn icon theo executable đích, kiểm tra drift, sao lưu trước xoá và giữ Word settings / shortcut có tham số riêng. 12 kiểm tra với file thật và COM shell mô phỏng đã qua. Chưa chạy Sysprep, đổi mặc định hoặc dọn Desktop thật trên máy khách.
 

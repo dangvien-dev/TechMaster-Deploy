@@ -14,8 +14,22 @@ function Get-UltraViewerDiagnostic {
     $fields = @(foreach ($key in 'HKLM:\SOFTWARE\UltraViewer','HKLM:\SOFTWARE\WOW6432Node\UltraViewer','HKCU:\SOFTWARE\UltraViewer') {
         if (Test-Path -LiteralPath $key) {
             $item = Get-Item -LiteralPath $key -ErrorAction Stop
-            # Metadata only: neither registry values nor passwords are exported.
-            [pscustomobject]@{ Key = $key; ValueNames = @($item.GetValueNames() | Where-Object { $_ -notmatch '(?i)pass|token|secret|credential' }) }
+            $names = @($item.GetValueNames() | Where-Object { $_ -notmatch '(?i)pass|token|secret|credential' })
+            $identityHashes = @(foreach ($name in $names) {
+                if ($name -notmatch '^(?i:ID|ClientID|ComputerID|DeviceID|UniqueID|GUID|UUID|MachineID|HardwareID|HWID)$') { continue }
+                try {
+                    $value = $item.GetValue($name, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+                    if ($null -eq $value -or ($value -is [string] -and [string]::IsNullOrWhiteSpace($value))) { continue }
+                    [byte[]]$bytes = if ($value -is [byte[]]) { $value } else { [Text.Encoding]::UTF8.GetBytes(($value -join [char]0)) }
+                    if ($bytes.Length -eq 0 -or $bytes.Length -gt 1MB) { continue }
+                    $sha = [Security.Cryptography.SHA256]::Create()
+                    try { $fingerprint = ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant() } finally { $sha.Dispose() }
+                    [pscustomobject]@{ Name = $name; SHA256 = $fingerprint }
+                } catch { }
+            })
+            # Hash only explicitly named identity fields; never output their
+            # values, passwords, tokens or unrelated configuration values.
+            [pscustomobject]@{ Key = $key; ValueNames = $names; IdentityHashes = $identityHashes }
         }
     })
     [pscustomobject]@{ Computer = $env:COMPUTERNAME; Date = (Get-Date).ToString('o'); Applications = $applications; Running = $processes; Adapters = $adapters; MacOverrides = $overrides; RegistryFields = $fields }
@@ -33,6 +47,10 @@ function Format-UltraViewerDiagnostic($report) {
     if (-not @($report.MacOverrides).Count) { $lines += 'Không thấy NetworkAddress đặt thủ công.' }
     $lines += ''; $lines += 'Tên trường cấu hình (không xuất giá trị / mật khẩu):'
     foreach ($entry in $report.RegistryFields) { $lines += $entry.Key + ': ' + ($entry.ValueNames -join ', ') }
+    $lines += ''; $lines += 'Dấu vân tay trường định danh (SHA256, không xuất giá trị gốc):'
+    foreach ($entry in $report.RegistryFields) {
+        foreach ($hash in $entry.IdentityHashes) { $lines += $entry.Key + ' | ' + $hash.Name + ' | ' + $hash.SHA256 }
+    }
     $lines += ''; $lines += 'Cần so sánh kết quả từ hai máy đang trùng ID để xác định nguồn trùng. Phiên bản giống nhau không đủ để kết luận.'
     $lines += 'Chẩn đoán chỉ đọc, chưa thay ID, mật khẩu, địa chỉ MAC hoặc dừng UltraViewer.'
     return $lines -join "`r`n"
