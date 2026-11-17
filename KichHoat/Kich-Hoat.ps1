@@ -31,6 +31,7 @@ $uiRuntime=Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Wpf.Runtime.ps1'
 if(Test-Path -LiteralPath $uiRuntime){. $uiRuntime}
 . (Join-Path $PSScriptRoot 'Activation.Core.ps1')
 . (Join-Path $PSScriptRoot 'QrWindow.Core.ps1')
+. (Join-Path $PSScriptRoot 'Cid.Phone.Core.ps1')
 $cfg = @{
     Windows = @{ AppId = '55c92734-d682-4d71-983e-d6ec3f16059f'; Url = 'https://aka.ms/WindowsActivate'
                  Check = 'Settings -> System -> Activation' }
@@ -80,24 +81,6 @@ function Get-LanIP {
     return $null
 }
 
-$FormHtml = @'
-<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Gửi Confirmation ID</title>
-<style>
- body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:20px;max-width:480px;margin:auto;color:#111}
- textarea{width:100%;font:18px -apple-system,Segoe UI,Roboto,Arial,sans-serif;letter-spacing:1px;padding:10px;box-sizing:border-box;height:120px;border:1px solid #9ca3af;border-radius:8px}
- button{width:100%;padding:14px;font-size:18px;margin-top:12px;background:#0067c0;color:#fff;border:0;border-radius:8px}
- .msg{padding:12px;border-radius:8px;margin:12px 0}.err{background:#fde8e8;color:#9b1c1c}.ok{background:#e6f4ea;color:#1e6b34}
-</style></head><body>
-<h2>Gửi Confirmation ID</h2>
-<p>Máy: <b>__PCNAME__</b> &ndash; __PRODUCT__</p>
-__MSG__
-<form method="post">
- <textarea name="cid" inputmode="numeric" placeholder="Dán 48 số Confirmation ID vào đây"></textarea>
- <button type="submit">Gửi về máy tính</button>
-</form></body></html>
-'@
-
 function Send-Html($ctx, [string]$html) {
     $bytes = [Text.Encoding]::UTF8.GetBytes($html)
     $ctx.Response.ContentType = 'text/html; charset=utf-8'
@@ -133,11 +116,15 @@ function Stop-CidReceiver($rcv) {
     Remove-NetFirewallRule -DisplayName $FwRuleName -ErrorAction SilentlyContinue
 }
 
-function Wait-Cid($rcv) {
+function Test-CidManualInput {
+    try{return [Console]::KeyAvailable}catch{return $false}
+}
+function Wait-Cid($rcv,[string]$InstallationId,[string]$Portal) {
     # Vừa chờ điện thoại gửi qua LAN, vừa cho phép gõ tay (nhấn phím bất kỳ)
     Write-Host "`n  Đang chờ Confirmation ID gửi từ điện thoại..." -ForegroundColor White
     Write-Host "  (Nhấn phím bất kỳ nếu muốn gõ tay thay vì gửi từ điện thoại)"
-    $page = $FormHtml.Replace('__PCNAME__', $env:COMPUTERNAME).Replace('__PRODUCT__', $Product)
+    $phoneProduct=if($Test){'TEST '+$Product}else{$Product}
+    $page = New-CidPhonePage $InstallationId $env:COMPUTERNAME $phoneProduct $Portal
     $task = $rcv.Listener.GetContextAsync()
     while ($true) {
         $done = $false
@@ -150,19 +137,19 @@ function Wait-Cid($rcv) {
                     $body = [Uri]::UnescapeDataString(($reader.ReadToEnd() -replace '\+', ' '))
                     $c = $body -replace '\D', ''
                     if ($c.Length -eq 48) {
-                        Send-Html $ctx ($page.Replace('__MSG__', '<div class="msg ok">&#10004; Đã gửi về máy tính. Xem kết quả trên màn hình máy.</div>'))
+                        Send-Html $ctx (New-CidPhonePage $InstallationId $env:COMPUTERNAME $phoneProduct $Portal '<div class="msg ok">&#10004; Đã gửi về máy tính. Xem kết quả trên màn hình máy.</div>')
                         Write-Ok "Đã nhận Confirmation ID từ điện thoại ($($ctx.Request.RemoteEndPoint.Address))"
                         return $c
                     }
-                    Send-Html $ctx ($page.Replace('__MSG__', "<div class=`"msg err`">Cần đủ 48 số, đang nhận $($c.Length) số. Dán lại.</div>"))
+                    Send-Html $ctx (New-CidPhonePage $InstallationId $env:COMPUTERNAME $phoneProduct $Portal "<div class=`"msg err`">Cần đủ 48 số, đang nhận $($c.Length) số. Dán lại.</div>")
                     Write-Warn "Điện thoại gửi $($c.Length) số (cần 48) -> đã báo lại trên điện thoại."
                 } else {
-                    Send-Html $ctx ($page.Replace('__MSG__', ''))
+                    Send-Html $ctx $page
                 }
             } catch { }
             $task = $rcv.Listener.GetContextAsync()
         }
-        if ([Console]::KeyAvailable) {
+        if (Test-CidManualInput) {
             [void][Console]::ReadKey($true)
             return (Read-CidKeyboard)
         }
@@ -191,12 +178,12 @@ if ($Test) {
         Write-Host @"
 
   Kiểm tra lần lượt:
-    1. Quét QR 1 -> điện thoại phải hiện đúng dãy: 1234567 1234567 ... (9 nhóm)
-    2. Quét QR 2 -> điện thoại mở trang "Gửi Confirmation ID"
+    1. Quét QR 1 -> trang điện thoại có mã giả và nút Sao chép Installation ID / Mở portal Microsoft
+    2. Quét QR 2 -> mở thẳng phần Gửi Confirmation ID trên cùng trang
     3. Dán 48 số bất kỳ (vd 111111 222222 333333 444444 555555 666666 777777 888888) -> Gửi
     4. Thử gửi thiếu số -> điện thoại phải báo lỗi, script vẫn chờ
 "@
-        if ($rcv) { $cid = Wait-Cid $rcv } else { $cid = Read-CidKeyboard }
+        if ($rcv) { $cid = Wait-Cid $rcv $iid $Url } else { $cid = Read-CidKeyboard }
         if ($cid) {
             Write-Ok ("Nhận được: " + (Format-Groups $cid 6))
             Write-Host "`n  TEST THÀNH CÔNG - chưa nạp gì vào máy." -ForegroundColor Green
@@ -302,11 +289,11 @@ foreach ($p in $todo) {
             if ($rcv) { $cidUrl = $rcv.Url }
             $qrWindow = Open-CidQrWindow $tpl $iid $env:COMPUTERNAME $Product $Url $cidUrl
             Write-Host "`n  Đã mở trang QR trên trình duyệt:"
-            Write-Host "    QR 1: quét lấy Installation ID -> làm portal trên điện thoại ($Url)"
+            Write-Host "    QR 1: mở trang trên điện thoại -> Sao chép Installation ID -> Mở portal Microsoft"
             if ($rcv) {
                 Write-Host "    QR 2: quét mở trang gửi Confirmation ID về máy này ($cidUrl)"
                 Write-Host "          (điện thoại phải CHUNG MẠNG Wi-Fi/LAN với máy này)" -ForegroundColor Yellow
-                $cid = Wait-Cid $rcv
+                $cid = Wait-Cid $rcv $iid $Url
             } else {
                 $cid = Read-CidKeyboard
             }

@@ -23,7 +23,7 @@ Bộ công cụ kích hoạt **Windows** và **Office** bằng key hợp lệ đ
 | `Kich-Hoat.ps1` | Script chính (các file `.bat` gọi file này) |
 | `QR-Template.html` | Trang hiển thị mã QR (nhúng thư viện `qrcode-generator`, MIT) |
 
-Giữ **cả 5 file trong cùng một thư mục**. Các file `.bat` tự xin quyền Administrator.
+Giữ nguyên cả thư mục KichHoat và App; gồm CID-Phone.html / Cid.Phone.Core.ps1 cho trang điện thoại. Các file `.bat` tự xin quyền Administrator.
 
 ---
 
@@ -47,9 +47,9 @@ Chạy Kich-Hoat-Windows.bat / Kich-Hoat-Office.bat
   └─ 3. Kích hoạt qua Portal
         ├─ [1] Điện thoại (mặc định)
         │     • Máy mở trang có 2 mã QR
-        │     • QR ①: quét → copy Installation ID → dán vào portal trên điện thoại
+        │     • QR ①: mở trang điện thoại → Sao chép Installation ID → Mở portal Microsoft
         │     • Portal cấp Confirmation ID (48 số) → copy
-        │     • QR ②: quét → dán Confirmation ID → "Gửi về máy tính"
+        │     • QR ②: mở phần gửi CID, hoặc quay lại trang điện thoại → dán mã → "Gửi về máy tính"
         │     • (Nhấn phím bất kỳ trên máy nếu muốn gõ tay)
         │
         └─ [2] Trên máy này
@@ -117,3 +117,5 @@ Chạy `Kich-Hoat-TEST.bat` trên máy bất kỳ, rồi kiểm tra:
 Trang QR có nút **Mở portal Microsoft**, mở riêng trang kích hoạt chính thức. Với Edge / Chrome có chữ ký hợp lệ, QR được mở trong một cửa sổ riêng; sau khi nhận CID hoặc kết thúc phiên, công cụ gửi lệnh đóng đúng cửa sổ QR đó. Không dừng tiến trình trình duyệt và không đóng các tab portal / tab cá nhân khác.
 
 Cửa sổ được đánh dấu riêng ngay khi mở; nếu không nhận diện được an toàn hoặc phải dùng trình duyệt mặc định khác, trang vẫn mở bình thường và có thể cần đóng thủ công. Chế độ TEST dùng mã giả cũng kiểm tra cùng vòng đời QR, không nạp license.
+
+Trang điện thoại có nút sao chép Installation ID và đường link portal chính thức bấm được. Portal mở trong tab riêng; quay lại trang vừa quét để gửi CID. QR 1 / QR 2 cần cùng Wi-Fi/LAN với máy tính. Nếu không mở được cổng LAN, QR 1 vẫn chứa dãy số và nhập CID trên máy tính như trước.

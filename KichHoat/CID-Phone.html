@@ -1,0 +1,17 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kích hoạt __PRODUCT__</title>
+<style>body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f6fb;color:#10223f;margin:0;padding:18px}main{max-width:520px;margin:auto;background:white;border:1px solid #dfe7f1;border-radius:16px;padding:22px;box-sizing:border-box}h1{font-size:23px;margin-top:0}h2{font-size:18px;margin:24px 0 12px}p{line-height:1.5}textarea{width:100%;padding:12px;box-sizing:border-box;border:1px solid #c7d5e5;border-radius:8px;font-size:17px;resize:vertical}#phone-iid{font-family:ui-monospace,Consolas,monospace;min-height:100px}button,.portal{display:block;width:100%;padding:14px;box-sizing:border-box;font:600 17px -apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:12px 0;border-radius:8px;border:0;background:#214674;color:white;text-align:center;text-decoration:none;cursor:pointer}.secondary{background:#e7eef8;color:#183655}.hint{color:#526880;font-size:14px}.msg{padding:12px;border-radius:8px;margin:12px 0}.err{background:#fde8e8;color:#9b1c1c}.ok{background:#e6f4ea;color:#1e6b34}</style></head><body><main>
+<h1>Kích hoạt __PRODUCT__</h1><p>Máy: <b>__PCNAME__</b></p>
+<section id="installation-id"><h2>1. Installation ID</h2><textarea id="phone-iid" readonly aria-label="Installation ID">__IID__</textarea><button id="copy-iid" type="button" class="secondary">Sao chép Installation ID</button><p id="copy-status" class="hint" role="status" aria-live="polite"></p></section>
+<section><h2>2. Lấy mã xác nhận</h2><a class="portal" href="__PORTAL__" target="_blank" rel="noopener noreferrer">Mở portal Microsoft</a><p class="hint">Dán Installation ID trên portal, lấy Confirmation ID rồi quay lại trang này. Portal mở trong tab riêng.</p></section>
+<section id="confirmation-id"><h2>3. Gửi Confirmation ID</h2>__MSG__<form method="post"><textarea name="cid" rows="3" inputmode="numeric" aria-label="Confirmation ID" placeholder="Dán 48 số Confirmation ID vào đây"></textarea><button type="submit">Gửi về máy tính</button></form></section>
+</main><script>
+(function(){
+ var field=document.getElementById('phone-iid'),status=document.getElementById('copy-status');
+ function fallback(value){
+  var temp=document.createElement('textarea');temp.value=value;temp.setAttribute('readonly','');temp.style.position='fixed';temp.style.left='-9999px';document.body.appendChild(temp);temp.focus();temp.select();temp.setSelectionRange(0,value.length);
+  var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(temp);
+  if(ok){status.textContent='Đã sao chép Installation ID.';}else{field.focus();field.select();field.setSelectionRange(0,field.value.length);status.textContent='Đã chọn mã. Nhấn giữ và chọn Sao chép nếu điện thoại chưa cho phép sao chép tự động.';}
+ }
+ document.getElementById('copy-iid').addEventListener('click',function(){var value=field.value.replace(/\s/g,'');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(function(){status.textContent='Đã sao chép Installation ID.';},function(){fallback(value);});}else{fallback(value);}});
+})();
+</script></body></html>

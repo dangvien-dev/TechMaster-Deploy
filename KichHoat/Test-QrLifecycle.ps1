@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $temp = Join-Path ([IO.Path]::GetTempPath()) ('tm-cid-flow-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temp | Out-Null
 try {
-    foreach ($file in 'Activation.Core.ps1', 'QrWindow.Core.ps1', 'QR-Template.html') {
+    foreach ($file in 'Activation.Core.ps1', 'QrWindow.Core.ps1', 'Cid.Phone.Core.ps1', 'CID-Phone.html', 'QR-Template.html') {
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination $temp
     }
     $source = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Kich-Hoat.ps1'))

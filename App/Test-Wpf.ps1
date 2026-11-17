@@ -4,6 +4,30 @@ if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) { throw 'Run th
 if ([Threading.Thread]::CurrentThread.ApartmentState -ne 'STA') { throw 'Use powershell.exe -STA -File App/Test-Wpf.ps1.' }
 $checks = 0
 function Assert($condition, $message) { if (-not $condition) { throw "FAIL: $message" }; $script:checks++ }
+function Assert-RoundedCornerPixels($frame) {
+    foreach($scale in 1.0,1.25,1.5){
+        $width=[int][Math]::Ceiling($frame.ActualWidth*$scale);$height=[int][Math]::Ceiling($frame.ActualHeight*$scale)
+        $bitmap=[Windows.Media.Imaging.RenderTargetBitmap]::new($width,$height,(96*$scale),(96*$scale),[Windows.Media.PixelFormats]::Pbgra32)
+        $drawing=New-Object Windows.Media.DrawingVisual
+        $context=$drawing.RenderOpen()
+        try{$context.DrawRectangle([Windows.Media.VisualBrush]::new($frame),$null,[Windows.Rect]::new(0,0,$frame.ActualWidth,$frame.ActualHeight))}finally{$context.Close()}
+        $bitmap.Render($drawing)
+        $pixels=New-Object byte[] ($width*$height*4);$bitmap.CopyPixels($pixels,($width*4),0)
+        $start=[int][Math]::Ceiling($scale);$end=[int][Math]::Floor(7*$scale)
+        foreach($corner in 'TL','TR','BL','BR'){
+            $ink=0
+            for($y=$start;$y -le $end;$y++){
+                for($x=$start;$x -le $end;$x++){
+                    $px=if($corner.EndsWith('R')){$width-1-$x}else{$x}
+                    $py=if($corner.StartsWith('B')){$height-1-$y}else{$y}
+                    $i=4*($py*$width+$px)
+                    if($pixels[$i+3] -gt 64 -and ([int]$pixels[$i]-[int]$pixels[$i+2]) -gt 4){$ink++}
+                }
+            }
+            Assert ($ink -ge 3) "Rounded stroke visible at $corner / scale $scale (pixels=$ink)"
+        }
+    }
+}
 $main = . (Join-Path $PSScriptRoot 'TechMaster-Deploy.ps1') -ValidateOnly
 Assert ($main -is [Windows.Window]) 'Main shell is a native WPF Window'
 Assert ($main.FindName('Navigation').Items.Count -eq 8 -and $main.FindName('tabs').Items.Count -eq 8) 'All eight sections are present'
@@ -47,6 +71,15 @@ try {
     Assert ($picker.SelectedItem -eq 'Office B') 'Rounded selector retains native selection'
     Assert ($picker.IsLoaded -and $picker.IsDropDownOpen) ("Rounded selector popup opens after Loaded; loaded=$($picker.IsLoaded), open=$($picker.IsDropDownOpen), visible=$($picker.IsVisible)")
     $picker.IsDropDownOpen=$false
+    $key=$preview.FindName('tbOffKey')
+    $frame=$key.Parent
+    while($frame -and $frame.Tag -cne 'RoundedClip'){$frame=[Windows.Media.VisualTreeHelper]::GetParent($frame)}
+    Assert ($null -ne $frame) 'Office key uses a rounded frame'
+    [void]$update.Focus();$preview.UpdateLayout()
+    Assert-RoundedCornerPixels $frame
+    [void]$key.Focus();$preview.UpdateLayout()
+    Assert-RoundedCornerPixels $frame
+
 
 } finally {$preview.Close()}
 $selected = Get-OffSel

@@ -41,7 +41,10 @@ jobs:
           & FixClone/Test-Unattend.ps1
           & Office/Test-OfficeCleanup.ps1
           & Office/Test-OfficeTemporary.ps1
+          & BienBan/Test-Report.ps1
           & KichHoat/Test-QrLifecycle.ps1
+          & KichHoat/Test-QrWindow.ps1
+          & KichHoat/Test-CidPhone.ps1
           & App/Test-UpdateEngine.ps1
           & App/Build-UpdateIndex.ps1 -Check
           } catch {

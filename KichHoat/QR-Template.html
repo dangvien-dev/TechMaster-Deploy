@@ -14,14 +14,14 @@
 <p class="sub">Máy: <b>__PCNAME__</b></p>
 <a class="portal" href="__URL__" target="_blank" rel="noopener noreferrer">Mở portal Microsoft</a>
 <div class="row">
- <div class="box"><h2>1 Installation ID</h2><div id="qr"></div></div>
+ <div class="box"><h2 id="first-title">1 Mở trên điện thoại</h2><div id="qr"></div></div>
  <div class="box" id="box2"><h2>2 Gửi Confirmation ID về máy này</h2><div id="qr2"></div><div class="url" id="url2"></div></div>
 </div>
 <div class="iid" id="iidtext"></div>
 <ol>
- <li>Quét <b>QR 1</b> bằng camera &rarr; chạm dòng số hiện ra &rarr; <b>Sao chép</b>.</li>
- <li>Trên điện thoại (đã đăng nhập sẵn): mở <a href="__URL__" target="_blank" rel="noopener noreferrer">__URL__</a> &rarr; dán Installation ID &rarr; lấy Confirmation ID (48 số) &rarr; <b>Sao chép</b>.</li>
- <li id="step3">Quét <b>QR 2</b> &rarr; dán Confirmation ID &rarr; <b>Gửi về máy tính</b>. Điện thoại phải chung Wi-Fi/LAN với máy này.</li>
+ <li id="first-step">Điện thoại cùng Wi-Fi/LAN: quét <b>QR 1</b> &rarr; bấm <b>Sao chép Installation ID</b> và <b>Mở portal Microsoft</b> ngay trên điện thoại.</li>
+ <li>Trên portal (đã đăng nhập sẵn): mở <a href="__URL__" target="_blank" rel="noopener noreferrer">__URL__</a> &rarr; dán Installation ID &rarr; lấy Confirmation ID (48 số) &rarr; <b>Sao chép</b>.</li>
+ <li id="step3">Quay lại trang điện thoại hoặc quét <b>QR 2</b> &rarr; dán Confirmation ID &rarr; <b>Gửi về máy tính</b>. Điện thoại phải chung Wi-Fi/LAN với máy này.</li>
 </ol>
 </div>
 <script>
@@ -2325,14 +2325,17 @@ var qrcode = function() {
 
 (function(){
   var iid = "__IID__";
-  var q = qrcode(0, "M"); q.addData(iid, "Numeric"); q.make();
-  document.getElementById("qr").innerHTML = q.createSvgTag({cellSize: 8, margin: 4, scalable: true});
   var cidUrl = "__CIDURL__";
-  if (cidUrl.indexOf("http") === 0) {
-    var q2 = qrcode(0, "M"); q2.addData(cidUrl, "Byte"); q2.make();
+  var hasReceiver = cidUrl.indexOf("http") === 0;
+  var q = qrcode(0, "M"); q.addData(hasReceiver ? cidUrl + "#installation-id" : iid, hasReceiver ? "Byte" : "Numeric"); q.make();
+  document.getElementById("qr").innerHTML = q.createSvgTag({cellSize: 8, margin: 4, scalable: true});
+  if (hasReceiver) {
+    var q2 = qrcode(0, "M"); q2.addData(cidUrl + "#confirmation-id", "Byte"); q2.make();
     document.getElementById("qr2").innerHTML = q2.createSvgTag({cellSize: 8, margin: 4, scalable: true});
-    document.getElementById("url2").textContent = cidUrl;
+    document.getElementById("url2").textContent = cidUrl + "#confirmation-id";
   } else {
+    document.getElementById("first-title").textContent = "1 Installation ID";
+    document.getElementById("first-step").textContent = "Không mở được trang LAN: QR 1 chứa dãy Installation ID để sao chép; mở portal Microsoft bằng đường link chính thức.";
     document.getElementById("box2").style.display = "none";
     document.getElementById("step3").innerHTML = "Gõ Confirmation ID (48 số) vào cửa sổ script trên máy này.";
   }

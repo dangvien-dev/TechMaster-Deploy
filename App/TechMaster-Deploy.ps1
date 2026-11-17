@@ -147,10 +147,10 @@ Bind-Click 'btnExport' {
     catch { Show-DeployMessage $_.Exception.Message 'Lưu biên bản' 'Error'; return }
     Set-Status 'Đang đọc bản quyền và xuất biên bản…'
     Start-UiWork @'
-param($script, $customer, $invoice, $technician)
+param($script, $customer, $technician)
 $ErrorActionPreference = 'Stop'
-& $script -NoPrompt -Customer $customer -Invoice $invoice -Technician $technician 6>$null
-'@ @((Join-Path $DirBB 'Bien-Ban-Ban-Quyen.ps1'), $tbCustomer.Text.Trim(), $tbInvoice.Text.Trim(), $cfg.Technician) {
+& $script -NoPrompt -Customer $customer -Technician $technician 6>$null
+'@ @((Join-Path $DirBB 'Bien-Ban-Ban-Quyen.ps1'), $tbCustomer.Text.Trim(), $cfg.Technician) {
         param($result)
         $files = @($result | Where-Object { $_ -is [string] -and $_ -like '*.html' })
         if ($files.Count) { Set-Status ('Đã xuất: ' + $files[-1]) } else { Set-Status 'Đã xuất biên bản; xem thư mục biên bản.' }

@@ -10,7 +10,6 @@
 #>
 param(
     [string]$Customer,
-    [string]$Invoice,
     [string]$Technician,
     [switch]$NoPrompt      # GUI gọi: không hỏi, không pause
 )
@@ -40,11 +39,10 @@ if (-not $cfg) {
 
 Write-Host "`n=== BIEN BAN KIEM TRA BAN QUYEN ===" -ForegroundColor Cyan
 if ($NoPrompt) {
-    $customer = $Customer; $invoice = $Invoice
+    $customer = $Customer
     if (-not [string]::IsNullOrWhiteSpace($Technician)) { $cfg.Technician = $Technician }
 } else {
     $customer = Read-Host "  Tên khách hàng / đơn vị (Enter để bỏ trống)"
-    $invoice  = Read-Host "  Số hóa đơn / nguồn mua key (Enter để bỏ trống)"
     $techIn   = Read-Host "  Kỹ thuật viên (Enter = $($cfg.Technician))"
     if (-not [string]::IsNullOrWhiteSpace($techIn)) { $cfg.Technician = $techIn }
 }
@@ -181,7 +179,6 @@ $html = @'
  <table class="kv">
   <tr><td>Khách hàng</td><td>{{CUSTOMER}}</td></tr>
   <tr><td>Kỹ thuật viên</td><td>{{TECH}}</td></tr>
-  <tr><td>Số hóa đơn / nguồn mua key</td><td>{{INVOICE}}</td></tr>
  </table>
 
  <h2>2. Thông tin máy</h2>
@@ -216,7 +213,6 @@ $html = @'
  <div class="note">
   <b>Ghi chú:</b> Biên bản phản ánh trạng thái kích hoạt do Windows / Office báo tại thời điểm kiểm tra.
   Đây <b>không phải</b> chứng nhận do Microsoft cấp. Key chỉ in 5 ký tự cuối để bảo mật.
-  Bằng chứng mua bản quyền hợp lệ là hóa đơn / chứng từ mua hàng ghi ở mục 1.
  </div>
 
  <div class="sign">
@@ -246,7 +242,7 @@ $html = $html.Replace('{{COMPANY}}',  (OrDash $cfg.Company)).Replace('{{ADDRESS}
 $html = $html.Replace('{{PHONE}}',    (OrDash $cfg.Phone)).Replace('{{TECH}}', (OrDash $cfg.Technician))
 $html = $html.Replace('{{DOCNO}}',    ("BB-{0:yyyyMMdd-HHmm}-{1}" -f $now, $env:COMPUTERNAME))
 $html = $html.Replace('{{DATETIME}}', ("{0:HH:mm}, ngày {0:dd/MM/yyyy}" -f $now))
-$html = $html.Replace('{{CUSTOMER}}', (OrDash $customer)).Replace('{{INVOICE}}', (OrDash $invoice))
+$html = $html.Replace('{{CUSTOMER}}', (OrDash $customer))
 $html = $html.Replace('{{CUSTOMER_SIGN}}', $(if ($customer) { HtmlEnc $customer } else { '' }))
 $html = $html.Replace('{{PC}}',       (HtmlEnc $env:COMPUTERNAME))
 $html = $html.Replace('{{MODEL}}',    (OrDash ("{0} {1}" -f $cs.Manufacturer, $cs.Model).Trim()))

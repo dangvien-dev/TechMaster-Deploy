@@ -1,4 +1,31 @@
 ﻿# Shared WPF helpers. Background pipelines never access UI controls.
+function Initialize-DeployRoundedBorder([Windows.Controls.Border]$frame) {
+    $content=$frame.Child
+    if(-not $content){return}
+    $stroke=$frame.BorderThickness
+    $radius=[Math]::Max(0,$frame.CornerRadius.TopLeft-[Math]::Max([Math]::Max($stroke.Left,$stroke.Right),[Math]::Max($stroke.Top,$stroke.Bottom)))
+    $frame.Child=$null
+    # Clip the content, then paint a separate outline above it. Clipping the
+    # complete frame lets opaque native controls cover the curved stroke.
+    $frame.BorderThickness=[Windows.Thickness]::new(0)
+    $layers=New-Object Windows.Controls.Grid
+    $inside=New-Object Windows.Controls.Border
+    $inside.Tag='RoundedContent';$inside.Margin=$stroke
+    $inside.CornerRadius=[Windows.CornerRadius]::new($radius)
+    $inside.Child=$content
+    $inside.Add_SizeChanged({param($sender,$event)
+        $r=[Math]::Min($sender.CornerRadius.TopLeft,[Math]::Min($sender.ActualWidth,$sender.ActualHeight)/2)
+        $sender.Clip=[Windows.Media.RectangleGeometry]::new([Windows.Rect]::new(0,0,$sender.ActualWidth,$sender.ActualHeight),$r,$r)
+    })
+    $outline=New-Object Windows.Controls.Border
+    $outline.Tag='RoundedOutline';$outline.BorderThickness=$stroke;$outline.IsHitTestVisible=$false
+    foreach($property in 'CornerRadius','BorderBrush'){
+        $binding=[Windows.Data.Binding]::new($property);$binding.Source=$frame
+        [void]$outline.SetBinding([Windows.Controls.Border]::($property+'Property'),$binding)
+    }
+    [void]$layers.Children.Add($inside);[void]$layers.Children.Add($outline)
+    $frame.Child=$layers
+}
 function Import-DeployWindow([string]$path) {
     Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
     if (-not ('TechMaster.DesktopIdentity' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'DesktopIdentity.cs') }
@@ -24,10 +51,7 @@ function Import-DeployWindow([string]$path) {
     while($pending.Count){
         $element=$pending.Dequeue()
         if($element -is [Windows.Controls.Border] -and $element.Tag -ceq 'RoundedClip'){
-            $element.Add_SizeChanged({param($sender,$event)
-                $radius=[Math]::Min($sender.CornerRadius.TopLeft,[Math]::Min($sender.ActualWidth,$sender.ActualHeight)/2)
-                $sender.Clip=[Windows.Media.RectangleGeometry]::new([Windows.Rect]::new(0,0,$sender.ActualWidth,$sender.ActualHeight),$radius,$radius)
-            })
+            Initialize-DeployRoundedBorder $element
         }
         foreach($child in [Windows.LogicalTreeHelper]::GetChildren($element)){
             if($child -is [Windows.DependencyObject]){$pending.Enqueue($child)}
