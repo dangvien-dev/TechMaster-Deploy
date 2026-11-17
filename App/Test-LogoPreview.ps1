@@ -17,6 +17,9 @@ try{
     New-Item -ItemType Directory -Path $temp|Out-Null
     $svg=Join-Path $temp 'Logo.svg'
     [IO.File]::WriteAllText($svg,'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><g fill-rule="evenodd" fill="#f97316"><path d="M0,0 H200 V200 H0 Z"/></g></svg>')
+    $defaultSvg=Join-Path $temp 'Default.svg'
+    [IO.File]::WriteAllText($defaultSvg,'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0H10V10H0Z"/></svg>')
+    Assert ((Get-DeployLogoPreview $defaultSvg) -is [Windows.Media.DrawingImage]) 'Default and named SVG fill colors are supported'
     $source=Get-DeployLogoPreview $svg
     Assert ($source -is [Windows.Media.DrawingImage] -and $source.IsFrozen) 'SVG becomes a frozen native drawing, with no browser child window'
     $preview=Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')

@@ -95,6 +95,7 @@ namespace TechMaster
                 if (linear.GradientStops.Count == 0) throw new NotSupportedException("Empty SVG gradient.");
                 linear.RelativeTransform = Transform(gradient.GetAttribute("gradientTransform")); brush = linear;
             } else brush = (Brush)new BrushConverter().ConvertFromInvariantString(text);
+            brush = brush.Clone(); // WPF caches named brushes as frozen instances.
             brush.Opacity = Math.Max(0, Math.Min(1, opacity)); return brush;
         }
         private Drawing Render(XmlElement node, Dictionary<string, string> parent, int depth)

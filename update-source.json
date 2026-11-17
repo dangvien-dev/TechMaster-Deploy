@@ -134,8 +134,8 @@
     {
       "path": "App/LogoPreview.cs",
       "mode": "100644",
-      "size": 14916,
-      "sha": "03e8beb890122510ed3f9dd08fc97d11ebf02422"
+      "size": 15000,
+      "sha": "28eff875739d326b3590c1789a2756d052d3ae99"
     },
     {
       "path": "App/MainWindow.xml",
@@ -224,8 +224,8 @@
     {
       "path": "App/Test-LogoPreview.ps1",
       "mode": "100644",
-      "size": 4443,
-      "sha": "230e6d97a1e90810b651ad4ff8aa267f382ee4e2"
+      "size": 4756,
+      "sha": "969ed0d647de7b6b23abd129c50091d57d63764a"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",
