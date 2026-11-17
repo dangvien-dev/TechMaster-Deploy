@@ -28,6 +28,7 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
     Initialize-TechMasterConsole
 }
 . (Join-Path $PSScriptRoot 'Activation.Core.ps1')
+. (Join-Path $PSScriptRoot 'QrWindow.Core.ps1')
 $cfg = @{
     Windows = @{ AppId = '55c92734-d682-4d71-983e-d6ec3f16059f'; Url = 'https://aka.ms/WindowsActivate'
                  Check = 'Settings -> System -> Activation' }
@@ -179,15 +180,11 @@ if ($Test) {
     if (-not (Test-Path $tpl)) { Write-Err "Thiếu QR-Template.html cạnh script."; exit 1 }
     Remove-NetFirewallRule -DisplayName $FwRuleName -ErrorAction SilentlyContinue
     $rcv = Start-CidReceiver
+    $qrWindow = $null
     try {
         $cidUrl = ''
         if ($rcv) { $cidUrl = $rcv.Url; Write-Ok "Đã mở cổng nhận: $cidUrl" }
-        $html = Get-Content $tpl -Raw -Encoding UTF8
-        $html = $html.Replace('__IID__', $iid).Replace('__PCNAME__', "$env:COMPUTERNAME (TEST)")
-        $html = $html.Replace('__PRODUCT__', "TEST $Product").Replace('__URL__', $Url).Replace('__CIDURL__', $cidUrl)
-        $qrFile = Join-Path $env:TEMP "KichHoat_TEST_IID.html"
-        [IO.File]::WriteAllText($qrFile, $html, (New-Object Text.UTF8Encoding $true))
-        Start-Process $qrFile
+        $qrWindow = Open-CidQrWindow $tpl $iid "$env:COMPUTERNAME (TEST)" "TEST $Product" $Url $cidUrl
         Write-Host @"
 
   Kiểm tra lần lượt:
@@ -202,6 +199,7 @@ if ($Test) {
             Write-Host "`n  TEST THÀNH CÔNG - chưa nạp gì vào máy." -ForegroundColor Green
         } else { Write-Warn "Không nhận được Confirmation ID." }
     } finally {
+        Close-CidQrWindow $qrWindow
         Stop-CidReceiver $rcv
         if (-not (Get-NetFirewallRule -DisplayName $FwRuleName -ErrorAction SilentlyContinue)) {
             Write-Ok "Đã đóng cổng tường lửa tạm"
@@ -294,15 +292,11 @@ foreach ($p in $todo) {
     if ($mode -eq '1') {
         Remove-NetFirewallRule -DisplayName $FwRuleName -ErrorAction SilentlyContinue   # dọn rule sót lần trước
         $rcv = Start-CidReceiver
+        $qrWindow = $null
         try {
             $cidUrl = ''
             if ($rcv) { $cidUrl = $rcv.Url }
-            $html = Get-Content $tpl -Raw -Encoding UTF8
-            $html = $html.Replace('__IID__', $iid).Replace('__PCNAME__', $env:COMPUTERNAME)
-            $html = $html.Replace('__PRODUCT__', $Product).Replace('__URL__', $Url).Replace('__CIDURL__', $cidUrl)
-            $qrFile = Join-Path $env:TEMP "KichHoat_$Product`_IID.html"
-            [IO.File]::WriteAllText($qrFile, $html, (New-Object Text.UTF8Encoding $true))
-            Start-Process $qrFile
+            $qrWindow = Open-CidQrWindow $tpl $iid $env:COMPUTERNAME $Product $Url $cidUrl
             Write-Host "`n  Đã mở trang QR trên trình duyệt:"
             Write-Host "    QR 1: quét lấy Installation ID -> làm portal trên điện thoại ($Url)"
             if ($rcv) {
@@ -313,6 +307,7 @@ foreach ($p in $todo) {
                 $cid = Read-CidKeyboard
             }
         } finally {
+            Close-CidQrWindow $qrWindow
             Stop-CidReceiver $rcv
         }
     } else {

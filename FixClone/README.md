@@ -20,7 +20,9 @@ Bộ công cụ triển khai Windows hàng loạt bằng clone ổ (disk to disk
 | `Fix-SysprepErrors.bat` / `.ps1` | Máy gốc | Kiểm tra và sửa lỗi *"Sysprep was not able to validate…"* |
 | `unattend.xml` | Sysprep | Bỏ qua OOBE, tạo user `admin`, tự chạy Fix-CloneDuplicate lần đăng nhập đầu |
 | `Fix-CloneDuplicate.bat` / `.ps1` | Máy clone | Đổi tên máy, reset ID trùng, cài lại phần mềm (tự chạy) |
-| `Fix-DinhDang.bat` / `.ps1` | Máy clone | Chỉnh định dạng ngày giờ / số cho user đang đăng nhập |
+| `New-Unattend.ps1` | Máy gốc | Tạo cấu hình Sysprep theo vùng / ngôn ngữ hiện tại của máy gốc |
+| `Fix-DinhDang.bat` / `.ps1` | Máy clone | Chỉ đổi dấu thập phân `,` và dấu hàng nghìn `.` |
+| `Fix-BanPhim.bat` / `.ps1` | Máy clone | Tuỳ chọn chỉ dùng bàn phím US với EVKey, có sao lưu và khôi phục |
 | `Reinstall\` | Máy clone | Bỏ file cài `.exe` / `.msi` vào đây để tự cài lại sau khi clone |
 
 Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
@@ -31,11 +33,11 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
 
 ### Bước 1 – Máy gốc
 
-1. Cài Windows (bản tiếng Việt), driver, phần mềm. Đăng nhập user sẽ làm mẫu và thiết lập:
+1. Cài Windows theo ngôn ngữ mong muốn, driver, phần mềm. Đăng nhập user sẽ làm mẫu và thiết lập:
    Chrome mặc định, Word (font, lề, style…), EVKey.
 2. **Đóng Word**, **rút mạng**.
 3. Chạy `Run-Sysprep.bat`:
-   - Copy script vào `C:\FixClone`, đặt `unattend.xml` vào thư mục Sysprep
+   - Copy script vào `C:\FixClone`, tạo `unattend.xml` trong thư mục Sysprep theo vùng / ngôn ngữ của máy gốc
    - Chạy `Prepare-Master.ps1` → xem kết quả, sửa các dòng `[!]` nếu có
    - Chạy `Fix-SysprepErrors.ps1 -PreCheck` → còn vấn đề thì **dừng**, không chạy sysprep
    - Gõ `YES` → sysprep chạy → **máy tự tắt**
@@ -45,7 +47,7 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
 
 ### Bước 3 – Máy clone (tự động lần bật đầu)
 
-1. Bỏ qua OOBE (ngôn ngữ vi-VN, múi giờ UTC+7)
+1. Bỏ qua OOBE (giữ vùng / ngôn ngữ máy gốc, bàn phím US, múi giờ UTC+7)
 2. Tạo user `admin` (mật khẩu trống), tự đăng nhập 1 lần
 3. Tắt AutoLogon, xoá `unattend.xml`
 4. Chạy `Fix-CloneDuplicate.ps1 -Auto` rồi restart
@@ -61,7 +63,7 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
 | 3 | EVKey tự chạy cho mọi user | `HKLM\...\Run`; nằm trong thư mục user thì chuyển sang `C:\Program Files\EVKey` |
 | 4 | Thiết lập Word | `Normal.dotm`, `Word.officeUI`, Word Options → Default profile |
 | 5 | Menu chuột phải kiểu Windows 10 | CLSID `{86ca1aa0-…}` cho user hiện tại + Default profile |
-| 6 | Định dạng vùng | Ngày `dd/MM/yyyy`, thập phân `,`, hàng nghìn `.`, list `;`, Metric |
+| 6 | Dấu số | Chỉ đổi thập phân `,` và hàng nghìn `.`, giữ các thiết lập khác |
 
 ## Fix-CloneDuplicate.ps1 – xử lý trên máy clone
 
@@ -76,7 +78,7 @@ Giữ tất cả trong **cùng một thư mục** (ví dụ `F:\FixClone`).
 | 7 | KMS rearm (chỉ khi có `-RearmKMS` và máy dùng KMS) |
 | 8 | Cài lại phần mềm trong `Reinstall\` |
 | 9 | Máy ASUS: bật lại service ASUS (quạt, cert, update) |
-| 10 | Định dạng ngày giờ / số (gọi `Fix-DinhDang.ps1`) |
+| 10 | Dấu thập phân / hàng nghìn (gọi `Fix-DinhDang.ps1`) |
 | – | **Không** đổi Machine SID (sysprep đã làm) |
 
 Log lưu tại `C:\FixClone\Logs\<tên máy>_<thời gian>.log`.
@@ -108,10 +110,10 @@ Mỗi package được gỡ với **timeout 3 phút**. Quá thời gian thì res
 
 | Mục | Giá trị |
 |---|---|
-| Ngày | `dd/MM/yyyy` |
-| Giờ | `HH:mm` / `HH:mm:ss` (24 giờ) |
-| Thập phân / Hàng nghìn / List | `,` / `.` / `;` |
-| Đơn vị đo | Metric |
+| Decimal symbol (thập phân) | `,` |
+| Digit grouping symbol (hàng nghìn) | `.` |
+
+Giữ nguyên ngày giờ, tiền tệ, list separator, đơn vị đo, vùng, ngôn ngữ và bàn phím. Không cần chọn Việt Nam trong Settings của Windows.
 
 Máy clone tự áp dụng định dạng cho `admin` và cập nhật Default profile cho tài khoản được tạo sau đó. Với tài khoản đã có hồ sơ, mở script trong phiên của tài khoản đó. Để cập nhật Default profile bằng tay, mở PowerShell bằng quyền Administrator trong thư mục `FixClone` và chạy:
 `powershell -ExecutionPolicy Bypass -File Fix-DinhDang.ps1 -AllNewUsers`
@@ -130,3 +132,13 @@ Máy clone tự áp dụng định dạng cho `admin` và cập nhật Default p
   Máy ráp không có key trong BIOS. Clone cùng một key sang nhiều máy sẽ báo `0xC004C008`.
 - **Volume License (MAK)** cho Windows desktop chỉ là bản nâng cấp, mỗi máy vẫn cần license gốc.
 - Kích hoạt từng máy: dùng bộ công cụ **Kich-Hoat** (`Kich-Hoat-Windows.bat`, `Kich-Hoat-Office.bat`).
+
+## Bàn phím và định dạng số
+
+`Fix-DinhDang.ps1` chỉ ghi `sDecimal` và `sThousand`, không gọi Set-Culture hoặc thay LocaleName, không cài hay đổi bàn phím. Chế độ AllNewUsers cũng chỉ ghi hai giá trị này vào hồ sơ mặc định.
+
+Khi dùng EVKey, mở **Sau khi clone → Bàn phím / EVKey → 1** để chỉ giữ kiểu nhập US trong các ngôn ngữ hiện có. Công cụ hiển thị user sẽ thay đổi, hỏi xác nhận, lưu sao lưu rồi đọc lại để kiểm tra. Không gỡ gói ngôn ngữ, không đổi thứ tự ngôn ngữ hiển thị hoặc tắt EVKey. Nếu cần, chọn **2** để khôi phục. Đăng xuất / đăng nhập lại nếu Windows còn hiện danh sách cũ.
+
+Chạy dưới đúng user khách hàng; nếu app được nâng quyền bằng tài khoản khác, mở `Fix-BanPhim.bat` trực tiếp tại user khách hàng. Công cụ từ chối ghi khi tài khoản đang chạy không khớp desktop đăng nhập. Sao lưu nằm trong Local AppData của user đó, không đi kèm bộ cài.
+
+Vấn đề Windows + Shift + S hỏi chọn hai ứng dụng cần tên ứng dụng thực tế để xử lý; chưa tự đổi mặc định hoặc gỡ ứng dụng chụp màn hình.

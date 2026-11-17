@@ -111,3 +111,9 @@ Chạy `Kich-Hoat-TEST.bat` trên máy bất kỳ, rồi kiểm tra:
 | Tạo QR ① / QR ② (giải mã lại đúng nội dung) | ✅ Đã kiểm tra |
 | Nhận Confirmation ID qua LAN, kiểm tra 48 số, đóng tường lửa | ✅ Đã chạy thực tế (`Kich-Hoat-TEST.bat`) |
 | Nạp Confirmation ID thật vào Windows/Office (`DepositOfflineConfirmationId`) | ⏳ Chưa chạy với Confirmation ID thật |
+
+## Portal và cửa sổ QR
+
+Trang QR có nút **Mở portal Microsoft**, mở riêng trang kích hoạt chính thức. Với Edge / Chrome có chữ ký hợp lệ, QR được mở trong một cửa sổ riêng; sau khi nhận CID hoặc kết thúc phiên, công cụ gửi lệnh đóng đúng cửa sổ QR đó. Không dừng tiến trình trình duyệt và không đóng các tab portal / tab cá nhân khác.
+
+Cửa sổ được đánh dấu riêng ngay khi mở; nếu không nhận diện được an toàn hoặc phải dùng trình duyệt mặc định khác, trang vẫn mở bình thường và có thể cần đóng thủ công. Chế độ TEST dùng mã giả cũng kiểm tra cùng vòng đời QR, không nạp license.

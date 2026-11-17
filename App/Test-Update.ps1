@@ -138,6 +138,8 @@ try {
         $chosenZip = Join-Path $temp "Bản mới's [1].zip"
         $script:officeRun = $null; $script:basicAppRun = $null; $script:mediaDownload = $null; $script:updateProcess = $null
         $form = [pscustomobject]@{ Enabled = $true }
+        $tabs = [pscustomobject]@{ Enabled = $true }
+        $header = [pscustomobject]@{ Enabled = $true }
         $updateTimer = [pscustomobject]@{ Active = $false }
         $updateTimer | Add-Member ScriptMethod Start { $this.Active = $true }
         function Set-Status($message) {}
@@ -147,6 +149,8 @@ try {
         }
         $tokens = $null; $parseErrors = $null
         $ast = [Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot 'Update-UI.ps1'), [ref]$tokens, [ref]$parseErrors)
+        $busy = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Set-DeployUpdateBusy' }, $true)
+        Invoke-Expression $busy.Extent.Text
         $starter = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Start-DeployUpdater' }, $true)
         # Surface errors in the test runner instead of opening a WinForms dialog.
         $starterText = [regex]::Replace($starter.Extent.Text, '(?m)^\s*\[void\]\[System.Windows.Forms.MessageBox\].*$', 'throw')
@@ -158,7 +162,8 @@ try {
         Assert ($decoded.Contains("-Root '" + $Root.Replace("'", "''") + "'") -and $decoded.Contains("-PackagePath '" + $chosenZip.Replace("'", "''") + "'")) 'GUI starter preserves Unicode, whitespace and apostrophes without command injection'
         $tokens = $null; $parseErrors = $null
         [void][Management.Automation.Language.Parser]::ParseInput($decoded, [ref]$tokens, [ref]$parseErrors)
-        Assert ($parseErrors.Count -eq 0 -and -not $form.Enabled -and $updateTimer.Active) 'Encoded updater command parses; app is disabled until updater exits'
+        Assert ($parseErrors.Count -eq 0 -and $form.Enabled -and -not $tabs.Enabled -and -not $header.Enabled -and $updateTimer.Active) 'Encoded updater command parses; controls are blocked while main window remains closable'
+        Assert ($decoded.Contains("-CloseRequestPath '" + $script:updateCloseRequest.Replace("'", "''") + "'")) 'Updater receives the unique per-run close request path'
     } finally { $env:LOCALAPPDATA = $savedLocalAppData; $env:SystemRoot = $savedSystemRoot }
 } finally { Remove-Item -LiteralPath $temp -Recurse -Force }
 Write-Host "PASS: $script:checks updater assertions; real ZIP, install, preservation and rollback transactions."

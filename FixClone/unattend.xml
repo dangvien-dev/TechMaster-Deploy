@@ -3,7 +3,7 @@
   unattend.xml cho sysprep /generalize /oobe - Windows 10/11 x64
   CẦN SỬA TRƯỚC KHI DÙNG:
     - User: admin, mật khẩu trống (2 chỗ <Password> phải giống nhau)
-    - Windows bản tiếng Việt: UILanguage/SystemLocale/UserLocale = vi-VN, bàn phím US (gõ tiếng Việt bằng EVKey)
+    - Run-Sysprep.bat tạo các giá trị vùng/ngôn ngữ từ máy gốc; không ép vi-VN. Bàn phím US cho EVKey.
 -->
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
 
@@ -32,9 +32,6 @@
   <settings pass="oobeSystem">
     <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <InputLocale>0409:00000409</InputLocale>
-      <SystemLocale>vi-VN</SystemLocale>
-      <UILanguage>vi-VN</UILanguage>
-      <UserLocale>vi-VN</UserLocale>
     </component>
 
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

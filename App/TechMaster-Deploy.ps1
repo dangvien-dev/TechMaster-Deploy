@@ -192,7 +192,7 @@ Add-Card $t1 64 '1. Kiểm tra và sửa lỗi Sysprep' `
     'BitLocker, sysprep treo, Appx cài cho user chưa provision (ArmouryCrate, WinRAR.ShellExtension, Widgets...), service ASUS. Hỏi trước khi gỡ.' `
     'Kiểm tra lỗi' { Start-Tool (Join-Path $DirClone 'Fix-SysprepErrors.bat') 'Kiểm tra lỗi Sysprep' }
 Add-Card $t1 160 '2. Chuẩn bị máy gốc và chạy Sysprep' `
-    'Chrome mặc định, shortcut Word/Excel, EVKey, thiết lập Word, menu chuột phải Win 10, định dạng ngày giờ -> áp cho user mới. Kiểm tra lỗi lại, gõ YES để chạy sysprep.' `
+    'Chrome mặc định, shortcut Word/Excel, EVKey, thiết lập Word, menu chuột phải Win 10, dấu số -> áp cho user mới. Kiểm tra lỗi lại, gõ YES để chạy sysprep.' `
     'Chạy Sysprep' {
         if (Confirm-Box "Chạy chuẩn bị máy gốc và Sysprep?`n`nCuối quy trình máy sẽ TỰ TẮT. Không bật lại máy gốc trước khi clone." 'Sysprep') {
             Start-Tool (Join-Path $DirClone 'Run-Sysprep.bat') 'Chuẩn bị + Sysprep'
@@ -208,10 +208,12 @@ $t2.Controls.Add((New-Label 'Máy clone đã chạy tự động lần đầu qu
 Add-Card $t2 64 'Xử lý thông tin trùng lặp' `
     'Đổi tên máy (PC- + Serial BIOS / 6 ký tự cuối MAC, kiểm trùng LAN), MachineGuid mới, Windows Update ID, ID AnyDesk / TeamViewer, service ASUS, định dạng.' `
     'Xử lý trùng lặp' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' } $true
-Add-Card $t2 160 'Chỉnh định dạng ngày giờ / số' `
-    'dd/MM/yyyy, HH:mm (24 giờ), thập phân ",", hàng nghìn ".", list ";", Metric - cho user đang đăng nhập.' `
-    'Chỉnh định dạng' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh định dạng' }
-Add-Card $t2 256 'Hướng dẫn FixClone' 'Quy trình đầy đủ, danh sách lỗi Sysprep đã gặp và cách xử lý.' `
+Add-Card $t2 160 'Định dạng số' `
+    'Thập phân ",", phân nhóm "." (123.456.789,00). Giữ nguyên vùng, ngôn ngữ, ngày giờ và bàn phím.' `
+    'Chỉnh dấu số' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh định dạng' }
+Add-Card $t2 256 'Bàn phím US cho EVKey' 'Tránh chuyển nhầm sang bộ gõ tiếng Việt của Windows. Giữ ngôn ngữ hiển thị, có sao lưu và khôi phục.' `
+    'Bàn phím / EVKey' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím cho EVKey' }
+Add-Card $t2 352 'Hướng dẫn FixClone' 'Quy trình đầy đủ, danh sách lỗi Sysprep đã gặp và cách xử lý.' `
     'Mở README' { Start-Process notepad.exe ('"{0}"' -f (Join-Path $DirClone 'README.md')) }
 
 # ===== Tab 3: Kích hoạt =====

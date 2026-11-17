@@ -102,7 +102,7 @@ function Invoke-DeployGitHub([string]$endpoint) {
         # Do not include request headers or a token value in diagnostics.
         $status = 'không xác định'
         try { if ($null -ne $_.Exception.Response.StatusCode) { $status = [string][int]$_.Exception.Response.StatusCode } } catch {}
-        throw "Không đọc được repo GitHub (HTTP $status). Nếu repo riêng tư, vào Quyền truy cập repo và nhập token chỉ có quyền Contents: Read cho repo này. Kiểm tra mạng hoặc giới hạn API nếu quyền đã đúng."
+        throw "Không kết nối được máy chủ cập nhật (HTTP $status). Kiểm tra Internet và thử lại sau."
     } finally { $headers.Remove('Authorization') }
 }
 

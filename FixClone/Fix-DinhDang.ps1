@@ -1,13 +1,9 @@
 ﻿<#
 .SYNOPSIS
-    Chỉnh định dạng ngày giờ / số cho user ĐANG ĐĂNG NHẬP (chạy trên máy đã clone).
+    Chỉnh dấu thập phân / hàng nghìn cho user ĐANG ĐĂNG NHẬP (máy đã clone).
 
-    Ngày         : dd/MM/yyyy      (16/11/2026)
-    Giờ          : HH:mm / HH:mm:ss (24 giờ)
-    Thập phân    : ,
-    Hàng nghìn   : .
-    List         : ;
-    Đơn vị đo    : Metric
+    Chỉ đổi Decimal symbol = "," và Digit grouping symbol = ".".
+    Giữ nguyên ngày giờ, vùng, ngôn ngữ, list separator và đơn vị đo.
 
     Chạy KHÔNG cần quyền Admin (ghi vào HKCU của user hiện tại).
     Thêm -AllNewUsers (cần Admin) để áp dụng luôn cho user tạo mới sau này.
@@ -20,20 +16,8 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
 }
 
 $values = [ordered]@{
-    'LocaleName'     = 'vi-VN'
-    'sShortDate'     = 'dd/MM/yyyy'
-    'sDate'          = '/'
-    'iDate'          = '1'          # 1 = Ngày-Tháng-Năm
-    'sShortTime'     = 'HH:mm'
-    'sTimeFormat'    = 'HH:mm:ss'
-    'sTime'          = ':'
-    'iTime'          = '1'          # 1 = 24 giờ
-    'sDecimal'       = ','
-    'sMonDecimalSep' = ','
-    'sThousand'      = '.'
-    'sMonThousandSep'= '.'
-    'sList'          = ';'
-    'iMeasure'       = '0'          # 0 = Metric
+    'sDecimal'  = ','
+    'sThousand' = '.'
 }
 
 function Set-Intl([string]$root) {
@@ -53,8 +37,9 @@ if ($AllNewUsers) {
     }
 }
 
-Write-Host "`n=== DINH DANG NGAY GIO / SO - user $env:USERNAME ===" -ForegroundColor Cyan
-Set-Culture vi-VN -ErrorAction Stop
+Write-Host "`n=== DINH DANG SO - user $env:USERNAME ===" -ForegroundColor Cyan
+# Formatting must not change the user's culture, language list or keyboard.
+# Only apply the two explicit number separators below.
 Set-Intl 'HKCU'
 $actual = Get-ItemProperty 'HKCU:\Control Panel\International' -ErrorAction Stop
 foreach ($name in $values.Keys) {
@@ -62,7 +47,7 @@ foreach ($name in $values.Keys) {
         throw "Giá trị đã lưu của $name không khớp với cấu hình."
     }
 }
-Write-Host "  [OK] $env:USERNAME - $($actual.LocaleName), $($actual.sShortDate), $($actual.sShortTime)" -ForegroundColor Green
+Write-Host "  [OK] Dấu thập phân: $($actual.sDecimal) | Dấu phân nhóm: $($actual.sThousand)" -ForegroundColor Green
 
 if ($AllNewUsers) {
     $hive = 'HKU\FixDinhDang'
@@ -94,4 +79,4 @@ public static extern System.IntPtr SendMessageTimeout(System.IntPtr hWnd, uint M
 } catch {
     Write-Warning "Không gửi được thông báo cập nhật định dạng: $($_.Exception.Message)"
 }
-Write-Host "`nMở lại ứng dụng. Nếu đồng hồ taskbar chưa đổi, hãy đăng xuất rồi đăng nhập lại."
+Write-Host "`nMở lại ứng dụng để nhận định dạng số mới. Các thiết lập vùng, ngày giờ và bàn phím được giữ nguyên."

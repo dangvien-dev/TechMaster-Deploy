@@ -7,7 +7,7 @@
     3. EVKey tự khởi động cho mọi user (HKLM\...\Run)
     4. Thiết lập Word (Normal.dotm, ribbon, Options) -> Default profile
     5. Menu chuột phải kiểu Windows 10 (user hiện tại + Default profile)
-    6. Định dạng vùng: ngày dd/MM/yyyy, thập phân ",", hàng nghìn ".", list ";", Metric
+    6. Chỉ dấu số: thập phân ",", phân nhóm "."; giữ nguyên vùng và ngôn ngữ
 #>
 $ErrorActionPreference = 'Continue'
 $consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
@@ -135,5 +135,5 @@ else {
     [gc]::Collect(); Start-Sleep -Seconds 1
     & reg.exe unload 'HKU\FixCloneDefault' | Out-Null
 }
-# ---------- 6. Định dạng vùng cho user hiện tại và Default profile ----------
+# ---------- 6. Dấu số cho user hiện tại và Default profile ----------
 & (Join-Path $PSScriptRoot 'Fix-DinhDang.ps1') -AllNewUsers

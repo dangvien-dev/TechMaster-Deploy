@@ -2,6 +2,10 @@
 
 Cập nhật ngày 17/11/2026.
 
+Phiên bản **1.1.2.0** sửa phối hợp đóng app trước khi cập nhật (15 kiểm tra bắt tay đóng cửa sổ; 60 kiểm tra updater và 27 kiểm tra repo), tinh gọn màn hình cập nhật và căn hai nút trên thanh đầu. Trang QR có liên kết portal Microsoft và dùng cửa sổ Chrome / Edge riêng để có thể đóng đúng cửa sổ sau khi nhận CID (18 kiểm tra QR, kiểm tra luồng nhận CID → đóng QR → nạp mã với các thao tác hệ điều hành mô phỏng; biên dịch C# tương thích .NET Framework).
+
+Định dạng chỉ ghi hai giá trị `sDecimal=,` và `sThousand=.` cho user hiện tại / hồ sơ mặc định. Đã chạy điểm vào thực tế với registry mô phỏng để kiểm tra không đổi ngày giờ, list separator, đơn vị đo, culture hoặc bàn phím. Tạo unattend theo vùng / ngôn ngữ máy gốc thay vì ép vi-VN (10 kiểm tra XML); không chạy Sysprep trong môi trường này. Thêm tuỳ chọn bàn phím US cho EVKey có sao lưu / khôi phục (13 kiểm tra, giữ thứ tự ngôn ngữ và khôi phục khi lỗi). Giao diện Windows, đóng cửa sổ trình duyệt và kết quả bàn phím thực tế cần kiểm tra trên máy Windows. Vấn đề Windows + Shift + S đang chờ người dùng gửi tên hai ứng dụng, chưa đổi mặc định.
+
 Phiên bản **1.1.1.0** chuyển sang đọc trực tiếp repo dangvien-dev/TechMaster-Deploy/main. Không cần Release hoặc feed ở repo khác. Đã qua 27 kiểm tra repo (GitHub mô phỏng, hash Git blob chuẩn, tải tệp đổi, giao dịch tệp thật, giữ dữ liệu và quay lại) và 59 kiểm tra ZIP / giao dịch / khởi chạy updater. API GitHub, DPAPI và giao diện Windows còn cần kiểm tra thực tế. Bản cục bộ ghi cả commit nền và dấu dirty để không nhầm với bản đã công bố.
 
 Lịch sử: phiên bản **1.1.0.0** thêm cập nhật ngay trong app, công cụ nâng cấp một lần cho bản cũ, kiểm tra gói bằng SHA256, chỉ thay tệp chương trình có thay đổi, sao lưu / quay lại và giữ dữ liệu người dùng. 63 kiểm tra updater đã qua với ZIP và giao dịch tệp thật trong thư mục thử; giao diện, đóng / mở lại app và nâng cấp trên Windows PowerShell 5.1 còn cần thử thực tế. Luồng Release này được thay bằng cập nhật repo ở 1.1.1.0.
@@ -11,7 +15,7 @@ Console: đã dùng chung thiết lập UTF-8 / Consolas cho gỡ và cài Offic
 | Hạng mục | Đã kiểm tra | Còn cần thử trên máy thật |
 | --- | --- | --- |
 | Launcher và giao diện | Build `TechMaster Deploy.exe`. Kiểm tra bố cục 7 tab ở mức mô phỏng 100%, 125% và 150%. | Mở bản ZIP đã giải nén trên máy triển khai. |
-| Sysprep và định dạng vùng | Mô phỏng ghi `dd/MM/yyyy`, `HH:mm` cho tài khoản hiện tại và hồ sơ mặc định, gồm các trường hợp ghi lỗi. | Sysprep, bung ảnh và kiểm tra định dạng sau khi đăng nhập bằng `admin` và một tài khoản mới. |
+| Sysprep và định dạng số | Kiểm tra chỉ ghi hai dấu số cho tài khoản hiện tại / hồ sơ mặc định; 10 kiểm tra tạo unattend theo vùng / ngôn ngữ máy gốc. | Sysprep, bung ảnh và kiểm tra định dạng sau khi đăng nhập bằng `admin` và một tài khoản mới. |
 | Office | Mô phỏng tiến trình, kết quả thành công hoặc lỗi, nhật ký và việc chạy nền. | Tải bộ cài về kho rồi cài thử trên một máy. |
 | Gỡ / dọn Office | 52 kiểm tra mô phỏng (gồm chọn từng key, giữ Retail khi xoá Grace, không chọn thì không xoá, chặn gỡ khi còn key muốn giữ, lỗi CIM không trả ReturnValue trên Retail / Grace): chọn đúng Office 2021/2024, giữ key Windows và các sản phẩm ngoài phạm vi, lỗi CIM / ODT, xác minh sau thao tác, chặn Office đang mở và ODT không có chữ ký hợp lệ. Đã thử menu huỷ và khoá chéo tiến trình cài / dọn. | Thử bằng Windows PowerShell 5.1 trên máy thử có Office 2021/2024; xác nhận gỡ thực tế, dọn key / cấu hình KMS, giữ sản phẩm khác và nhật ký. Không kiểm tra gỡ thật trong môi trường Linux. |
 | Thông báo kích hoạt online / CID | 26 kiểm tra mô phỏng: CIM không trả mã, mã 0 nhưng chưa active, mã lỗi thật, lỗi CIM, trạng thái cập nhật chậm và đọc đúng license. Không còn suy ra thất bại từ `ReturnValue` trống; báo thành công theo trạng thái đã xác minh. | Kiểm tra lại thông báo trên Windows PowerShell 5.1 sau khi nạp CID thật. Bản sửa chưa được chạy kích hoạt thật trong môi trường Linux. |

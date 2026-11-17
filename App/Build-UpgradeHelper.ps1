@@ -38,8 +38,8 @@ internal static class UpgradeHelper
             string zip = null;
             string mode = "Online";
             DialogResult sourceChoice = MessageBox.Show(
-                "Lấy bản mới trực tiếp từ repo dangvien-dev/TechMaster-Deploy (main)?\n\nYes: tự lấy từ repo, không cần ZIP.\nNo: chọn ZIP offline đã tải.\nCancel: thoát.",
-                "Nguồn cập nhật", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                "Tự tải phiên bản mới qua Internet?\n\nYes: kiểm tra và tải bản mới tự động.\nNo: chọn tệp cập nhật đã có.\nCancel: thoát.",
+                "Cập nhật TechMaster", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (sourceChoice == DialogResult.Cancel) return;
             if (sourceChoice == DialogResult.No)
             {

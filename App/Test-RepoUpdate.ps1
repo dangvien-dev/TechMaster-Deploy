@@ -134,7 +134,7 @@ try {
     $requestError = ''
     try { & $script:realGitHub 'commits/main' | Out-Null } catch { $requestError = $_.Exception.Message }
     Assert ($script:requestedUri -ceq 'https://api.github.com/repos/dangvien-dev/TechMaster-Deploy/commits/main' -and $script:hadAuthorization) 'Private repo authorization is sent only to the fixed GitHub API endpoint'
-    Assert ($requestError -match 'Không đọc được repo GitHub' -and $requestError -notmatch 'TEST-DUMMY-NOT-A-TOKEN') 'Request errors do not expose authorization contents'
+    Assert ($requestError -match 'Không kết nối được máy chủ cập nhật' -and $requestError -notmatch 'TEST-DUMMY-NOT-A-TOKEN') 'Request errors do not expose authorization contents'
     Assert (-not $script:requestHeaders.ContainsKey('Authorization')) 'Authorization header is cleared after a request failure'
 } finally { $env:LOCALAPPDATA = $savedLocalAppData; Remove-Item -LiteralPath $temp -Recurse -Force }
 Write-Host "PASS: $script:checks repo updater assertions; commit-pinned blobs, changed-file reuse, install and rollback."

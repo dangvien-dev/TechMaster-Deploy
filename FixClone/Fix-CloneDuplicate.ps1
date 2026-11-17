@@ -13,7 +13,7 @@
       7. Reset KMS CMID (chỉ khi Windows đang dùng license KMS Volume)
       8. Cài lại phần mềm trong thư mục Reinstall (WinRAR...)
       9. Bật lại service ASUS nếu là máy ASUS
-     10. Định dạng ngày giờ / số (gọi Fix-DinhDang.ps1)
+     10. Dấu thập phân / hàng nghìn (gọi Fix-DinhDang.ps1)
      11. Khởi động lại
 
     KHÔNG xử lý: Machine SID. Muốn có SID mới thì phải chạy sysprep /generalize
@@ -342,12 +342,12 @@ if ($maker -notmatch 'ASUS') {
     }
 }
 
-# ---------- 10. Định dạng vùng (ngày giờ, số, đơn vị đo) ----------
-Write-Step "10. ĐỊNH DẠNG NGÀY GIỜ / SỐ"
+# ---------- 10. Chỉ dấu thập phân / phân nhóm số ----------
+Write-Step "10. DẤU THẬP PHÂN / HÀNG NGHÌN"
 $dd = Join-Path $PSScriptRoot 'Fix-DinhDang.ps1'
 if (Test-Path -LiteralPath $dd -PathType Leaf) {
     try { & $dd -AllNewUsers }
-    catch { Write-Err "Định dạng vùng: $($_.Exception.Message)" }
+    catch { Write-Err "Định dạng số: $($_.Exception.Message)" }
 }
 else { Write-Warn "Không có $dd -> chạy Fix-DinhDang.bat bằng tay sau." }
 

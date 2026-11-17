@@ -5,7 +5,7 @@ Bộ công cụ triển khai Windows và Office.
 | Tab | Công cụ | Thư mục |
 |---|---|---|
 | **Máy gốc (Sysprep)** | Kiểm tra / sửa lỗi Sysprep, chuẩn bị máy gốc và chạy Sysprep, thư mục `Reinstall` | `FixClone\` |
-| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh định dạng ngày giờ / số | `FixClone\` |
+| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh dấu số, bàn phím US cho EVKey | `FixClone\` |
 | **Kích hoạt bản quyền** | Kích hoạt Windows / Office (online → portal, QR, nhận Confirmation ID qua LAN), chạy TEST | `KichHoat\` |
 | **Biên bản bản quyền** | Nhập thông tin đơn vị, khách hàng, số hóa đơn, chọn logo → xuất biên bản HTML (in / lưu PDF) | `BienBan\` |
 | **Tải / cài Office** | Office Deployment Tool: tải bộ cài về kho (cài offline nhiều máy), cài từ kho, cài trực tiếp | `Office\`, kho ở `KhoOffice\` |
@@ -22,15 +22,15 @@ Bộ công cụ triển khai Windows và Office.
 
 ## Cập nhật phiên bản
 
-Từ **v1.1.1.0**, tab **Cập nhật → Cập nhật từ repo** lấy mã trực tiếp từ **dangvien-dev/TechMaster-Deploy**, nhánh **main**. Không cần GitHub Release, manifest phát hành trên repo khác hoặc tải / giải nén ZIP bằng tay.
+Từ **v1.1.1.0**, tab **Cập nhật → Kiểm tra cập nhật** lấy mã trực tiếp từ **dangvien-dev/TechMaster-Deploy**, nhánh **main**. Không cần GitHub Release, manifest phát hành trên repo khác hoặc tải / giải nén ZIP bằng tay.
 
 App kiểm tra commit mới, hiển thị phiên bản và nội dung thay đổi, chỉ lấy những tệp nguồn đã thay đổi, rồi sao lưu và hỏi xác nhận trước khi đóng / cập nhật / mở lại. Mỗi lần chỉ dùng tệp của cùng một commit; tệp tải về được đối chiếu Git blob và các bước thay tệp được kiểm tra SHA256. Launcher được biên dịch bằng .NET Framework sẵn có trên Windows, không thực thi script build tải từ repo.
 
-Repo **public** không cần token. Nếu dùng repo **private**, mở **Quyền truy cập repo**, nhập fine-grained token chỉ có **Contents: Read** cho repo này. Token được mã hoá bằng Windows DPAPI dưới user hiện tại trong Local AppData, không nằm trong thư mục app, ZIP, lịch sử cập nhật hoặc mã nguồn. Không gửi token trong chat. Có thể xoá quyền đã lưu ngay tại đây.
+Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiện phiên bản và các lựa chọn cập nhật / khôi phục. Cấu hình truy cập dành cho người quản lý được mô tả trong RELEASING.md.
 
-**Lịch sử cập nhật**, **Nội dung phiên bản** và **Quay lại bản trước** vẫn dùng được. Cấu hình biên bản, logo, biên bản đã xuất, kho Office, ODT, nhật ký và Reinstall được giữ nguyên. Sao lưu nằm ở `.updates`; đừng xoá nếu còn muốn quay lại. Tệp chương trình sửa riêng không bị tự ghi đè.
+**Lịch sử cập nhật**, **Có gì mới?** và **Khôi phục bản trước** vẫn dùng được. Cấu hình biên bản, logo, biên bản đã xuất, kho Office, ODT, nhật ký và Reinstall được giữ nguyên. Sao lưu nằm ở `.updates`; đừng xoá nếu còn muốn quay lại. Tệp chương trình sửa riêng không bị tự ghi đè.
 
-**Bản cũ chưa hỗ trợ repo:** dùng công cụ `TechMaster Update.exe` mới để chọn thư mục app hiện tại và chọn **Yes** lấy trực tiếp từ repo. **No** cho phép chọn ZIP offline khi cần. Sau lần nâng cấp này chỉ dùng nút Cập nhật từ repo. Cập nhật ZIP vẫn có để chuyển bản offline.
+**Bản cũ chưa hỗ trợ repo:** dùng công cụ `TechMaster Update.exe` mới để chọn thư mục app hiện tại và chọn **Yes** lấy trực tiếp từ repo. **No** cho phép chọn ZIP offline khi cần. Sau lần nâng cấp này chỉ dùng nút Kiểm tra cập nhật. Cập nhật ZIP vẫn có để chuyển bản offline.
 
 Các thay đổi chỉ có trong workspace hoặc ZIP chưa tự xuất hiện trên GitHub. Người quản lý phải đẩy mã mới lên `main`; app không tự push hoặc thay đổi repo. Xem [RELEASING.md](RELEASING.md).
 

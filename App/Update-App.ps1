@@ -2,7 +2,8 @@
     [Parameter(Mandatory = $true)][string]$Root,
     [ValidateSet('Online', 'Local', 'History', 'Rollback', 'Access')][string]$Mode = 'Online',
     [string]$PackagePath = '',
-    [int]$ParentId = 0
+    [int]$ParentId = 0,
+    [string]$CloseRequestPath = ''
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Update.Core.ps1')
@@ -21,8 +22,24 @@ function Close-DeployForUpdate {
         $parent = Get-Process -Id $ParentId -ErrorAction SilentlyContinue
         if ($null -ne $parent) {
             try {
-                if (-not $parent.CloseMainWindow() -or -not $parent.WaitForExit(15000)) { throw 'Chưa đóng được TechMaster. Không thay tệp; đóng app rồi thử lại.' }
-            } finally { $parent.Dispose() }
+                if ($CloseRequestPath) {
+                    $expected = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'close.request'))
+                    if ([IO.Path]::GetFullPath($CloseRequestPath) -ne $expected) { throw 'Đường dẫn yêu cầu đóng app không hợp lệ.' }
+                    Assert-DeployRegularPath $PSScriptRoot 'close.request'
+                    [IO.File]::WriteAllText($CloseRequestPath, 'close', [Text.UTF8Encoding]::new($false))
+                } elseif (-not $parent.CloseMainWindow()) {
+                    throw 'Chưa đóng được TechMaster. Chưa thay tệp; đóng app và dùng công cụ nâng cấp riêng để nhận bản sửa.'
+                }
+                if (-not $parent.WaitForExit(15000)) { throw 'TechMaster chưa thoát hẳn. Chưa thay tệp; đóng app và dùng công cụ nâng cấp riêng để thử lại.' }
+            } finally {
+                if ($CloseRequestPath -and (Test-Path -LiteralPath $CloseRequestPath -PathType Leaf)) {
+                    # Remove only this runner's request, including on timeout.
+                    if ([IO.Path]::GetFullPath($CloseRequestPath) -eq [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'close.request'))) {
+                        Remove-Item -LiteralPath $CloseRequestPath -Force -ErrorAction SilentlyContinue
+                    }
+                }
+                $parent.Dispose()
+            }
         }
     }
     if ($ParentId -gt 0) { $script:parentClosed = $true }
@@ -64,24 +81,24 @@ try {
         $release = $null
         $payload = Join-Path $work 'payload'
         if ($Mode -eq 'Online') {
-            Write-Host ('Đang đọc trực tiếp repo ' + $script:DeployRepository + ', nhánh ' + $script:DeployBranch + '…')
+            Write-Host 'Đang kiểm tra phiên bản mới…'
             $knownCommit = ''
             $installedManifest = Join-Path $Root 'update-package.json'
             if (Test-Path -LiteralPath $installedManifest -PathType Leaf) { $knownCommit = [string](Read-DeployManifest $installedManifest).source.commit }
             $release = Get-DeployOnlineRelease $knownCommit
             if ($release.unchanged) { Write-Host 'Bạn đang dùng phiên bản mới nhất.' -ForegroundColor Green; return }
             if ([version]$release.version -lt (Get-DeployVersion $Root)) { throw 'Phiên bản trên repo cũ hơn bản đang dùng; không hạ cấp tự động.' }
-            Write-Host ("Bản repo: $($release.version), commit $($release.commit.Substring(0,8))`n$($release.notes)")
-            if ((Read-Host 'Lấy các tệp đã thay đổi từ repo? [y/N]') -notin 'y', 'Y') { Write-Host 'Đã huỷ.'; return }
+            Write-Host ("Đã có phiên bản mới: $($release.version)")
+            if ((Read-Host 'Tải bản cập nhật? [y/N]') -notin 'y', 'Y') { Write-Host 'Đã huỷ.'; return }
             $package = Save-DeployRepositoryPayload $release $payload $Root
         } else {
             if (-not (Test-Path -LiteralPath $PackagePath -PathType Leaf)) { throw 'Không tìm thấy ZIP. Hãy chọn gói cập nhật TechMaster Deploy.' }
             $package = Expand-DeployPackage $PackagePath $payload
         }
         $plan = Get-DeployUpdatePlan $Root $payload
-        Write-Host ("Phiên bản: $($plan.from) -> $($plan.to)`nTệp chương trình thay đổi: $(@($plan.changes).Count - 1)")
+        Write-Host ("Phiên bản: $($plan.from) -> $($plan.to)")
         if ($plan.firstUpdate) { Write-Host 'Đây là lần nâng cấp đầu tiên: toàn bộ tệp chương trình sắp thay sẽ được sao lưu.' -ForegroundColor Yellow }
-        Write-Host 'Đóng các công cụ TechMaster đang mở riêng. Bản sao lưu và lịch sử nằm trong .updates của thư mục app.'
+        Write-Host 'Đóng các công cụ TechMaster đang mở riêng. Bản hiện tại sẽ được sao lưu để khôi phục khi cần.'
         if ((Read-Host 'Gõ CAP NHAT để cài và mở lại ứng dụng') -cne 'CAP NHAT') { Write-Host 'Đã huỷ; không thay đổi ứng dụng.'; return }
     }
     $officeLock = New-Object Threading.Mutex($false, 'Global\TechMaster.OfficeDeployment')
@@ -95,7 +112,7 @@ try {
         Write-Host 'Đã quay lại bản trước.' -ForegroundColor Green
     } else {
         $backup = Install-DeployUpdate $Root $payload
-        Write-Host ("Đã cập nhật lên $($plan.to). Sao lưu: $backup") -ForegroundColor Green
+        Write-Host ("Đã cập nhật lên $($plan.to). Bạn có thể khôi phục bản trước trong ứng dụng.") -ForegroundColor Green
     }
 } catch {
     $exitCode = 1

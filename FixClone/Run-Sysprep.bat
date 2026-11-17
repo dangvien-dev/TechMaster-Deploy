@@ -32,6 +32,11 @@ if not exist "%~dp0Fix-DinhDang.ps1" (
     pause & exit /b 1
 )
 
+if not exist "%~dp0New-Unattend.ps1" (
+    echo [LOI] Thieu file New-Unattend.ps1. Tai lai bo cong cu day du.
+    pause & exit /b 1
+)
+
 :: Kiem tra BitLocker / Device Encryption o C: (ConversionStatus 0 = FullyDecrypted)
 powershell -NoProfile -Command "$v = Get-CimInstance -Namespace root/cimv2/Security/MicrosoftVolumeEncryption -ClassName Win32_EncryptableVolume -Filter \"DriveLetter='C:'\" -ErrorAction SilentlyContinue; if ($v -and $v.ConversionStatus -ne 0) { exit 1 }"
 if %errorlevel% neq 0 (
@@ -44,7 +49,8 @@ if %errorlevel% neq 0 (
 if not exist C:\FixClone mkdir C:\FixClone
 copy /y "%~dp0Fix-CloneDuplicate.ps1" C:\FixClone\ >nul || goto :CopyFailed
 copy /y "%~dp0Fix-DinhDang.ps1" C:\FixClone\ >nul || goto :CopyFailed
-copy /y "%~dp0unattend.xml" "%SYSDIR%\Sysprep\unattend.xml" >nul || goto :CopyFailed
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0New-Unattend.ps1" -OutputPath "%SYSDIR%\Sysprep\unattend.xml"
+if errorlevel 1 goto :CopyFailed
 if exist "%~dp0Reinstall\" (
     xcopy "%~dp0Reinstall" C:\FixClone\Reinstall\ /E /I /Y /Q >nul
     if errorlevel 2 goto :CopyFailed
