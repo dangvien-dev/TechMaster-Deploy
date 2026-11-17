@@ -328,6 +328,18 @@ function Assert-DeployToolsClosed([string]$root, [int]$ignoreId = 0) {
     }
 }
 
+function New-DeployArchive([string]$directory, [string]$zipPath) {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $directory = [IO.Path]::GetFullPath($directory).TrimEnd([char[]]@('\','/'))
+    $archive = [IO.Compression.ZipFile]::Open($zipPath, [IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($file in (Get-ChildItem -LiteralPath $directory -Recurse -File)) {
+            $relative = $file.FullName.Substring($directory.Length + 1).Replace('\','/')
+            [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $relative, [IO.Compression.CompressionLevel]::Optimal) | Out-Null
+        }
+    } finally { $archive.Dispose() }
+}
+
 function Expand-DeployPackage([string]$zipPath, [string]$work, [string]$expectedHash = '') {
     if ((Get-Item -LiteralPath $zipPath -ErrorAction Stop).Length -gt 100MB) { throw 'Gói cập nhật vượt quá 100 MB.' }
     if ($expectedHash -and (Get-DeployHash $zipPath) -ne $expectedHash.ToLowerInvariant()) { throw 'SHA256 của bản tải về không khớp; không cài.' }
@@ -338,7 +350,9 @@ function Expand-DeployPackage([string]$zipPath, [string]$work, [string]$expected
     try {
         if ($zip.Entries.Count -gt 600) { throw 'ZIP chứa quá nhiều mục.' }
         $prefix = 'TechMaster-Deploy/'
-        $manifestEntry = @($zip.Entries | Where-Object { $_.FullName -ceq ($prefix + 'update-package.json') })
+        # .NET Framework's legacy ZIP writer emits Windows backslashes. Normalize
+        # only entry separators; manifest paths still use the strict allowlist.
+        $manifestEntry = @($zip.Entries | Where-Object { $_.FullName.Replace('\','/') -ceq ($prefix + 'update-package.json') })
         if ($manifestEntry.Count -ne 1 -or $manifestEntry[0].Length -gt 1MB) { throw 'ZIP thiếu manifest cập nhật TechMaster Deploy.' }
         $mp = Join-Path $work 'update-package.json'
         [IO.Compression.ZipFileExtensions]::ExtractToFile($manifestEntry[0], $mp)
@@ -348,7 +362,7 @@ function Expand-DeployPackage([string]$zipPath, [string]$work, [string]$expected
         $seen = @{}
         $total = [long]0
         foreach ($entry in $zip.Entries) {
-            $name = $entry.FullName
+            $name = $entry.FullName.Replace('\','/')
             if (-not $name.StartsWith($prefix, [StringComparison]::Ordinal)) { throw 'ZIP chứa tệp ngoài thư mục TechMaster-Deploy.' }
             if (($entry.ExternalAttributes -shr 16 -band 0xF000) -eq 0xA000) { throw 'ZIP chứa symbolic link.' }
             if ($name -ceq ($prefix + 'update-package.json')) { continue }

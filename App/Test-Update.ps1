@@ -36,10 +36,31 @@ try {
     New-TestPayload $payload '1.2.0.0'
     $zipPath = Join-Path $temp 'release.zip'
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [IO.Compression.ZipFile]::CreateFromDirectory($stage, $zipPath)
+    New-DeployArchive $stage $zipPath
     $extracted = Join-Path $temp 'extracted'
     $m = Expand-DeployPackage $zipPath $extracted (Get-DeployHash $zipPath)
     Assert ($m.version -eq '1.2.0.0' -and (Get-DeployVersion $extracted) -eq [version]'1.2.0.0') 'Valid ZIP extracted and all content hashes verified'
+    $canonicalZip = Join-Path $temp 'canonical.zip'
+    New-DeployArchive $stage $canonicalZip
+    $canonicalArchive = [IO.Compression.ZipFile]::OpenRead($canonicalZip)
+    try { Assert (@($canonicalArchive.Entries | Where-Object { $_.FullName.Contains('\') }).Count -eq 0) 'Release writer uses portable forward-slash entries on .NET Framework and modern .NET' }
+    finally { $canonicalArchive.Dispose() }
+    $legacyZip = Join-Path $temp 'windows-legacy.zip'
+    $legacyArchive = [IO.Compression.ZipFile]::Open($legacyZip, [IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($source in (Get-ChildItem -LiteralPath $stage -Recurse -File)) {
+            $name = $source.FullName.Substring($stage.Length + 1).Replace('/','\')
+            [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($legacyArchive,$source.FullName,$name) | Out-Null
+        }
+    } finally { $legacyArchive.Dispose() }
+    $legacyManifest = Expand-DeployPackage $legacyZip (Join-Path $temp 'legacy-zip-out')
+    Assert ($legacyManifest.version -eq '1.2.0.0') 'Reader accepts legacy Windows ZIP separators after safe normalization'
+    $legacyArchive = [IO.Compression.ZipFile]::Open($legacyZip, [IO.Compression.ZipArchiveMode]::Update)
+    try {
+        $duplicate = $legacyArchive.CreateEntry('TechMaster-Deploy/App/TechMaster-Deploy.ps1')
+        $writer = New-Object IO.StreamWriter($duplicate.Open()); $writer.Write('duplicate'); $writer.Dispose()
+    } finally { $legacyArchive.Dispose() }
+    Expect-Failure { Expand-DeployPackage $legacyZip (Join-Path $temp 'mixed-duplicates') } 'không khai báo hoặc trùng'
     Expect-Failure { Expand-DeployPackage $zipPath (Join-Path $temp 'wrong-sha') ('0' * 64) } 'SHA256'
     Expect-Failure { Expand-DeployPackage $zipPath $extracted } 'đã tồn tại'
     foreach ($badPath in @('../outside.ps1', 'App/../../outside.ps1', 'App\evil.ps1', 'App/a:stream.ps1', 'App/CON.ps1', 'App/file.ps1 ', 'BienBan/BienBan-Config.json', 'BienBan/Logo.svg', 'Office/ODT/setup.exe', 'FixClone/Reinstall/user.ps1', '.updates/receipt.json')) {

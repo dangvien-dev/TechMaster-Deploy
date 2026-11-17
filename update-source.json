@@ -20,8 +20,8 @@
     {
       "path": "App/Build-Release.ps1",
       "mode": "100644",
-      "size": 3606,
-      "sha": "05f39e097ef1539b1899742cec3bf24ba8540b27"
+      "size": 3576,
+      "sha": "612bdd6c6435937eab672bde587c79bc7e7029bf"
     },
     {
       "path": "App/Build-UpdateIndex.ps1",
@@ -134,8 +134,8 @@
     {
       "path": "App/Test-Update.ps1",
       "mode": "100644",
-      "size": 13026,
-      "sha": "f826add7390dbf7180bdd758022b5a43a1fb9d71"
+      "size": 14609,
+      "sha": "306e35072b37f82982f094e0a2daf3469d9c0f58"
     },
     {
       "path": "App/Test-UpdateEngine.ps1",
@@ -176,8 +176,8 @@
     {
       "path": "App/Update.Core.ps1",
       "mode": "100644",
-      "size": 34861,
-      "sha": "9c0f3ca7fcc8e5db38a51a540468e2007e87b97c"
+      "size": 35754,
+      "sha": "46b733dffd9bbe365817aa6755a7e78c9ab60e71"
     },
     {
       "path": "App/Update.Engine.ps1",

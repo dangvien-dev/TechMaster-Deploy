@@ -47,7 +47,7 @@ try {
     }
     Write-DeployJson $manifest (Join-Path $app 'update-package.json')
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [IO.Compression.ZipFile]::CreateFromDirectory($stage, $zipPath)
+    New-DeployArchive $stage $zipPath
     $hash = Get-DeployHash $zipPath
     $verifyDir = Join-Path $stage 'verify'
     $null = Expand-DeployPackage $zipPath $verifyDir $hash
