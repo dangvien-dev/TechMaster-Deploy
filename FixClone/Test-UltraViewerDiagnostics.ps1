@@ -1,7 +1,8 @@
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'UltraViewer.Diagnostics.ps1')
-function Get-ItemProperty($Path) {
-    if ($Path -like '*Uninstall*') { [pscustomobject]@{ DisplayName='UltraViewer';DisplayVersion='6.6.133';InstallLocation='C:\UltraViewer' } }
+function Get-ItemProperty($Path,$LiteralPath) {
+    if ($LiteralPath -like '*Cryptography') { [pscustomobject]@{MachineGuid='11111111-2222-3333-4444-555555555555'} }
+    elseif ($Path -like '*Uninstall*') { [pscustomobject]@{ DisplayName='UltraViewer';DisplayVersion='6.6.133';InstallLocation='C:\UltraViewer' } }
     else { [pscustomobject]@{ DriverDesc='Test adapter';NetworkAddress='001122334455' } }
 }
 function Get-CimInstance { [pscustomobject]@{ Name='UltraViewer_Desktop.exe';ProcessId=999;CommandLine='password=DO-NOT-EXPORT' } }
@@ -20,7 +21,8 @@ function Set-NetAdapterAdvancedProperty { throw 'Diagnostic must never change MA
 $result=Get-UltraViewerDiagnostic
 $text=Format-UltraViewerDiagnostic $result
 if ($text -notmatch '6.6.133' -or $text -notmatch '00-11-22-33-44-55' -or $text -notmatch '001122334455' -or $text -notmatch '999') { throw 'Missing required diagnostics.' }
-if ($text -match 'DO-NOT-EXPORT|Password|SecretToken|cloned-install-identity-test') { throw 'Sensitive fields or raw identity were exposed.' }
+if ($text -match 'DO-NOT-EXPORT|Password|SecretToken|cloned-install-identity-test|11111111-2222-3333-4444-555555555555') { throw 'Sensitive fields or raw identity were exposed.' }
 if ($result.RegistryFields[0].IdentityHashes[0].SHA256 -notmatch '^[a-f0-9]{64}$') { throw 'Missing comparable identity fingerprint.' }
+if ($result.MachineGuidSHA256 -notmatch '^[a-f0-9]{64}$') { throw 'Missing comparable Windows identity fingerprint.' }
 if ($result.Running[0].PSObject.Properties.Name -contains 'CommandLine') { throw 'Unexpected process secrets exported.' }
 Write-Host 'PASS: UltraViewer 6.6.133 read-only diagnostics include versions/MAC/override/session IDs; no passwords or mutation.'

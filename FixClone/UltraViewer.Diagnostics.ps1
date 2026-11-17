@@ -1,6 +1,15 @@
 ﻿# Read-only UltraViewer clone diagnostics. Never stops a remote session or edits identity/network settings.
 function Get-UltraViewerDiagnostic {
     $ErrorActionPreference = 'Stop'
+    $machineHash = ''
+    try {
+        $machineGuid = [string](Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Cryptography' -ErrorAction Stop).MachineGuid
+        $parsed = [guid]::Empty
+        if ([guid]::TryParse($machineGuid, [ref]$parsed) -and $parsed -ne [guid]::Empty) {
+            $sha = [Security.Cryptography.SHA256]::Create()
+            try { $machineHash = ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($parsed.ToString('D'))))).Replace('-','').ToLowerInvariant() } finally { $sha.Dispose() }
+        }
+    } catch { }
     $applications = @(foreach ($root in 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*') {
         Get-ItemProperty -Path $root -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match '^UltraViewer(?:\s|$)' } |
             ForEach-Object { [pscustomobject]@{ Name = $_.DisplayName; Version = $_.DisplayVersion; Location = $_.InstallLocation } }
@@ -32,7 +41,7 @@ function Get-UltraViewerDiagnostic {
             [pscustomobject]@{ Key = $key; ValueNames = $names; IdentityHashes = $identityHashes }
         }
     })
-    [pscustomobject]@{ Computer = $env:COMPUTERNAME; Date = (Get-Date).ToString('o'); Applications = $applications; Running = $processes; Adapters = $adapters; MacOverrides = $overrides; RegistryFields = $fields }
+    [pscustomobject]@{ Computer = $env:COMPUTERNAME; Date = (Get-Date).ToString('o'); MachineGuidSHA256 = $machineHash; Applications = $applications; Running = $processes; Adapters = $adapters; MacOverrides = $overrides; RegistryFields = $fields }
 }
 function Format-UltraViewerDiagnostic($report) {
     $lines = @('TECHMASTER — CHẨN ĐOÁN ULTRAVIEWER', ('Máy: ' + $report.Computer), ('Thời điểm: ' + $report.Date), '', 'Bản đã cài:')
@@ -48,6 +57,7 @@ function Format-UltraViewerDiagnostic($report) {
     $lines += ''; $lines += 'Tên trường cấu hình (không xuất giá trị / mật khẩu):'
     foreach ($entry in $report.RegistryFields) { $lines += $entry.Key + ': ' + ($entry.ValueNames -join ', ') }
     $lines += ''; $lines += 'Dấu vân tay trường định danh (SHA256, không xuất giá trị gốc):'
+    $lines += 'Windows MachineGuid | ' + $(if ($report.MachineGuidSHA256) { $report.MachineGuidSHA256 } else { 'Không đọc được' })
     foreach ($entry in $report.RegistryFields) {
         foreach ($hash in $entry.IdentityHashes) { $lines += $entry.Key + ' | ' + $hash.Name + ' | ' + $hash.SHA256 }
     }

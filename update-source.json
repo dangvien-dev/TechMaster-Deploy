@@ -338,8 +338,8 @@
     {
       "path": "FixClone/Test-UltraViewerDiagnostics.ps1",
       "mode": "100644",
-      "size": 2121,
-      "sha": "942799e3458c6761370a9db3e4b3299f42d3992f"
+      "size": 2412,
+      "sha": "cab0de427f96728b3c682b7b723228cdea41717e"
     },
     {
       "path": "FixClone/Test-Unattend.ps1",
@@ -350,8 +350,8 @@
     {
       "path": "FixClone/UltraViewer.Diagnostics.ps1",
       "mode": "100644",
-      "size": 5225,
-      "sha": "30f7ad0d310782229fe6b7c270fe1598ba178af4"
+      "size": 5969,
+      "sha": "68e16d327243a5a4ea3911cc2e5776363a5b1ca1"
     },
     {
       "path": "FixClone/unattend.xml",
