@@ -1,5 +1,9 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.9.0 — 18/11/2026
+
+- Sửa logo SVG đè lên header khi cuộn: xem trước bằng ảnh WPF để được cắt theo vùng cuộn. Giữ nguyên tệp logo gốc khi xuất biên bản và xác nhận.
+
 ## 2.1.8.0 — 18/11/2026
 
 - Tinh chỉnh chấm báo cập nhật: thu nhỏ, đặt cạnh chữ bên trong nút và căn giữa theo chiều dọc. Chấm và chữ cùng đổi trạng thái với nút, không còn nhô khỏi góc.

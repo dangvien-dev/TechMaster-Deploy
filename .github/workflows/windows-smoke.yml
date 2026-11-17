@@ -18,6 +18,7 @@ jobs:
             & App/Test-InfoEntryPoints.ps1
             & App/Test-Wpf.ps1
             & App/Test-UpdateProbe.ps1
+            & App/Test-LogoPreview.ps1
           }
           catch {
             $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)
