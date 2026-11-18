@@ -1,4 +1,5 @@
-﻿# Read-only data and printable supplier handover confirmations. No activation changes.
+﻿. (Join-Path (Split-Path -Parent $PSScriptRoot) 'FixClone/Windows.License.Core.ps1')
+# Read-only data and printable supplier handover confirmations. No activation changes.
 function Get-DeployConfirmationSnapshot {
     $machine=Get-CimInstance Win32_ComputerSystem -ErrorAction Stop
     $bios=Get-CimInstance Win32_BIOS -ErrorAction Stop
@@ -9,7 +10,7 @@ function Get-DeployConfirmationSnapshot {
             foreach($p in $products){
                 $tail=[string]$p.PartialProductKey
                 if($tail.Length -gt 5){$tail=$tail.Substring($tail.Length-5)}
-                $items.Add([pscustomobject]@{Name=[string]$p.Name;KeyTail=$tail;Status=$(switch([int]$p.LicenseStatus){1{'Đã kích hoạt'}2{'Chưa kích hoạt (dùng thử)'}3{'Hết hạn dùng thử'}4{'Không hợp lệ (Non-Genuine)'}default{'Chưa kích hoạt'}});Selected=$false})
+                $items.Add([pscustomobject]@{Name=[string]$p.Name;KeyTail=$tail;Status=$(if($group.Name -eq 'Windows'){Get-WindowsLicenseStateText ([int]$p.LicenseStatus)}else{switch([int]$p.LicenseStatus){1{'Đã kích hoạt'}2{'Chưa kích hoạt (dùng thử)'}3{'Hết hạn dùng thử'}4{'Không hợp lệ (Non-Genuine)'}default{'Chưa kích hoạt'}}});Selected=$false})
             }
             if(-not $products.Count){$items.Add([pscustomobject]@{Name=$group.Name;KeyTail='';Status='Không đọc được giấy phép dùng key; kiểm tra sản phẩm thực tế';Selected=$false})}
         }catch{$items.Add([pscustomobject]@{Name=$group.Name;KeyTail='';Status='Chưa đọc được trạng thái kích hoạt';Selected=$false})}

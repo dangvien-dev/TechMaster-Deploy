@@ -48,7 +48,7 @@ foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnConfirmRetail','btnConfirmCompany') {
+    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
@@ -189,8 +189,11 @@ Assert ($ultra -is [Windows.Window] -and $null -ne $ultra.FindName('Restore')) '
 $keyboard= . (Join-Path $root 'FixClone/Fix-BanPhim.ps1') -ValidateOnly
 Assert ($keyboard -is [Windows.Window]) 'Keyboard graphical choices load without changing input settings'
 $master= . (Join-Path $root 'FixClone/Master-Preflight.ps1') -ValidateOnly
-Assert ($master.FindName('CleanOfficeTrial').IsChecked -and $master.FindName('PrepareUltra').IsChecked) 'Master preflight offers conservative trial cleanup and clone identity preparation'
-$master.Close(); $keyboard.Close(); $ultra.Close(); $office.Close(); $precheck.Close()
+Assert ($master.FindName('CleanOfficeTrial').IsChecked -and $master.FindName('PrepareUltra').IsChecked -and -not $master.FindName('CleanWindowsSetupKey').IsChecked) 'Master preflight offers conservative trial cleanup and clone identity preparation'
+$master.Close()
+$windowsKeyView= . (Join-Path $root 'FixClone/Windows-SetupKey.ps1') -ValidateOnly
+Assert ($windowsKeyView -is [Windows.Window] -and -not $windowsKeyView.FindName('Clean').IsEnabled -and -not $windowsKeyView.FindName('Restore').IsEnabled) 'Windows setup-key review requires inspection before any cleanup or undo is enabled'
+$windowsKeyView.Close(); $keyboard.Close(); $ultra.Close(); $office.Close(); $precheck.Close()
 $docs=New-DeployInfoWindow (Split-Path -Parent $PSScriptRoot) -Kind Changes
 Assert ($docs -is [Windows.Window] -and $docs.FindName('Sections').Items.Count -ge 3 -and $docs.FindName('ContentTitle').Text -match 'Phiên bản') 'Changelog is readable in WPF with initial content'
 $docs.Show();$docs.UpdateLayout()

@@ -62,6 +62,12 @@ try {
     $html = Run-Report 'bad'
     Assert ($html -match 'Office Grace' -and $html -match 'Chưa kích hoạt \(dùng thử\)') 'A real inactive Grace row remains visible and makes the summary red'
 
+    $global:TMReportTestFixture.Office = @(New-License 'Office Retail' 1)
+    foreach($state in 2,3,6){
+        $global:TMReportTestFixture.Win = @(New-License 'Windows Professional' $state)
+        $html = Run-Report 'bad'
+        Assert ($html -match 'ân hạn' -and $html -notmatch 'dùng thử') 'Windows grace rows do not invent trial-key licensing'
+    }
     $global:TMReportTestFixture.Win = @(New-License 'Windows Professional' 5)
     $global:TMReportTestFixture.Office = @(New-License 'Office Retail' 1)
     $null = Run-Report 'bad'

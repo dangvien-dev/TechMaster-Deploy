@@ -16,7 +16,7 @@ try {
 $global:CidFlow = [pscustomobject]@{ Events = @(); Portal = ''; Active = $false }
 $global:CidLicense = [pscustomobject]@{ Name = 'Office test'; ID = 'fixture'; ApplicationID = '0ff1ce15-a989-479d-af46-f275c6370663'; PartialProductKey = 'ABCDE'; LicenseStatus = 2; OfflineInstallationId = ('1' * 63) }
 function Get-LicProducts { $global:CidLicense }
-function Get-CimInstance { [pscustomobject]@{ Name = 'fake service' } }
+function Get-CimInstance {param($ClassName,$InputObject) if($InputObject){return $global:CidLicense};[pscustomobject]@{ Name = 'fake service' }}
 function Invoke-CimMethod {}
 function Set-Clipboard {}
 function Confirm-Box {$true}

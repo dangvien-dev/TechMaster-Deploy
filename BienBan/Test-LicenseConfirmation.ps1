@@ -9,14 +9,14 @@ function Get-CimInstance {
         Win32_BIOS {[pscustomobject]@{SerialNumber='SN-TEST'}}
         SoftwareLicensingProduct {
             if($script:queryFailure){throw 'fixture query failed'}
-            if($Filter -match '55c92734'){[pscustomobject]@{Name='Windows 11 Pro';PartialProductKey='ABCDE-SECRET-12345';LicenseStatus=1}}
+            if($Filter -match '55c92734'){[pscustomobject]@{Name='Windows 11 Pro';PartialProductKey='ABCDE-SECRET-12345';LicenseStatus=$script:windowsState}}
             else{[pscustomobject]@{Name='Office Home & Business 2024';PartialProductKey='VWXYZ';LicenseStatus=2}}
         }
     }
 }
 $temp=Join-Path ([IO.Path]::GetTempPath()) ('tm-confirmation-'+[guid]::NewGuid().ToString('N'))
 try{
-    $script:queryFailure=$false;$snapshot=Get-DeployConfirmationSnapshot
+    $script:windowsState=1;$script:queryFailure=$false;$snapshot=Get-DeployConfirmationSnapshot
     Assert ($snapshot.Products.Count -eq 2 -and $snapshot.Products[0].KeyTail -eq '12345') 'Snapshot excludes all but the last five key characters'
     Assert ($snapshot.Products[1].Status -match 'dùng thử' -and -not $snapshot.Products[0].Selected) 'Trial state is preserved and no product is preselected'
     $supplier=[pscustomobject]@{Company='Đơn vị <script> & {{CUSTOMER}}';Address='Địa chỉ mẫu';Phone='000';Technician='KTV'}
@@ -40,6 +40,8 @@ try{
     Assert ($blocked -and @(Get-ChildItem $temp -File).Count -eq 2) 'No file is written without an explicit delivered product selection'
     $blocked=$false;try{New-DeployLicenseConfirmationHtml -Template Retail -Supplier $supplier -Customer ([pscustomobject]@{Name=''}) -Snapshot $snapshot -Products $snapshot.Products|Out-Null}catch{$blocked=$true}
     Assert $blocked 'An unnamed customer cannot be issued a confirmation'
+    $script:windowsState=2;$grace=Get-DeployConfirmationSnapshot
+    Assert ($grace.Products[0].Status -match 'OOBGrace' -and $grace.Products[0].Status -notmatch 'dùng thử') 'Windows confirmation identifies grace without inventing a trial key'
     $script:queryFailure=$true;$unknown=Get-DeployConfirmationSnapshot
     Assert ($unknown.Products.Count -eq 2 -and $unknown.Products[0].Status -match 'Chưa đọc') 'Query failures remain unknown rather than being called licensed'
     Assert ($retail -ne $company) 'The two templates generate separate uniquely named files'

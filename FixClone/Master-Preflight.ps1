@@ -14,13 +14,19 @@ function Refresh-Preflight {
     } catch { $script:preflight.Plan=@(); $window.FindName('DesktopStatus').Text=$_.Exception.Message; $window.FindName('CleanDesktop').IsEnabled=$false }
     $window.FindName('ScreenStatus').Text = if (Get-ScreenClipChoice) { 'Đã có lựa chọn mặc định. Kiểm tra đúng Screen Snipping; lựa chọn này sẽ được xuất cho user mới.' } else { 'Chưa có lựa chọn mặc định; chọn Screen Snipping và Always trước khi Sysprep.' }
 }
-$script:officeReview=$null
+$script:officeReview=$null;$script:windowsReview=$null
 $window.FindName('ReviewOfficeKeys').Add_Click({
     if($script:officeReview -and -not $script:officeReview.HasExited){return}
     $entry=Join-Path (Split-Path -Parent $PSScriptRoot) 'Office/Office-Cleanup.ps1'
     $command="& '{0}'" -f $entry.Replace("'","''")
     $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
     $script:officeReview=Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+$encoded) -WindowStyle Hidden -PassThru
+})
+$window.FindName('ReviewWindowsKey').Add_Click({
+    if($script:windowsReview -and -not $script:windowsReview.HasExited){return}
+    $entry=Join-Path $PSScriptRoot 'Windows-SetupKey.ps1'
+    $command="& '{0}'" -f $entry.Replace("'","''")
+    $script:windowsReview=Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))) -WindowStyle Hidden -PassThru
 })
 $window.FindName('OpenCapture').Add_Click({ Start-Process 'ms-screenclip:' })
 $window.FindName('OpenDefaults').Add_Click({ Start-Process 'ms-settings:defaultapps' })
@@ -40,8 +46,9 @@ $changed = {
 $window.FindName('ScreenReviewed').Add_Click($changed); $window.FindName('DesktopReviewed').Add_Click($changed)
 $window.FindName('Continue').Add_Click({
     if($script:officeReview -and -not $script:officeReview.HasExited){Show-DeployMessage 'Đóng cửa sổ Gỡ / dọn Office trước khi tiếp tục.';return}
+    if($script:windowsReview -and -not $script:windowsReview.HasExited){Show-DeployMessage 'Đóng cửa sổ Key cài đặt chung Windows trước khi tiếp tục.';return}
     if($OptionsPath -and -not $AfterClone) {
-        $options=[pscustomobject]@{Schema=1;CleanOfficeTrial=[bool]$window.FindName('CleanOfficeTrial').IsChecked;PrepareUltra=[bool]$window.FindName('PrepareUltra').IsChecked}
+        $options=[pscustomobject]@{Schema=1;CleanOfficeTrial=[bool]$window.FindName('CleanOfficeTrial').IsChecked;PrepareUltra=[bool]$window.FindName('PrepareUltra').IsChecked;CleanWindowsSetupKey=[bool]$window.FindName('CleanWindowsSetupKey').IsChecked}
         [IO.File]::WriteAllText($OptionsPath,($options|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
     }
     $script:preflight.Allowed=$true; $window.Close()
@@ -52,16 +59,16 @@ $trialTimer=New-DeployTimer 200 {
     if(-not $script:trialCheck -or -not $script:trialCheck.Async.IsCompleted){return}
     $trialTimer.Stop();$job=$script:trialCheck;$script:trialCheck=$null
     try{$result=@(Receive-DeployWork $job)[-1];$window.FindName('TrialStatus').Text=$result}
-    catch{$window.FindName('TrialStatus').Text='Chưa đọc được Office. Bước cuối sẽ kiểm tra lại và dừng nếu không xác minh được.'}
+    catch{$window.FindName('TrialStatus').Text='Chưa đọc được đầy đủ Windows / Office. Bước cuối sẽ kiểm tra lại và dừng nếu không xác minh được.'}
 }
 $window.Add_ContentRendered({
     if(-not $AfterClone){
         $office=Join-Path (Split-Path -Parent $PSScriptRoot) 'Office/Office-Cleanup.Core.ps1'
-        $script:trialCheck=Start-DeployWork 'param($core) $ErrorActionPreference="Stop"; . $core; $i=Get-OfficeCleanupInventory; $p=Get-OfficeTemporaryPlan $i; "Key dùng thử có thể dọn: $(@($p.Keys).Count). Key khác giữ lại: $(@($p.PreservedKeys).Count)."' @($office)
+        $script:trialCheck=Start-DeployWork 'param($core,$windowsCore) $ErrorActionPreference="Stop"; . $core; . $windowsCore; $w=Get-WindowsSetupKeyInventory; $i=Get-OfficeCleanupInventory; $p=Get-OfficeTemporaryPlan $i; "Key dùng thử có thể dọn: $(@($p.Keys).Count). Key khác giữ lại: $(@($p.PreservedKeys).Count).`nWindows: $(@($w.Items|Where-Object Eligible).Count) key chung Pro chưa kích hoạt đủ điều kiện dọn; key khác giữ nguyên."' @($office,(Join-Path $PSScriptRoot 'Windows.License.Core.ps1'))
         $trialTimer.Start()
     }
 })
-$window.Add_Closing({param($sender,$event)if($script:trialCheck -or ($script:officeReview -and -not $script:officeReview.HasExited)){$event.Cancel=$true}})
+$window.Add_Closing({param($sender,$event)if($script:trialCheck -or ($script:officeReview -and -not $script:officeReview.HasExited) -or ($script:windowsReview -and -not $script:windowsReview.HasExited)){$event.Cancel=$true}})
 Refresh-Preflight
 if ($ValidateOnly) { return $window }
 [void]$window.ShowDialog()
