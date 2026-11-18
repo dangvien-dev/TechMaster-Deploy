@@ -27,7 +27,7 @@ try {
     function Copy-DeploymentFile([string]$source,[string]$target) {
         if([IO.Path]::GetFullPath($source) -ne [IO.Path]::GetFullPath($target)){Copy-Item -LiteralPath $source -Destination $target -Force -ErrorAction Stop}
     }
-    foreach($name in 'Fix-CloneDuplicate.ps1','Fix-DinhDang.ps1','UltraViewer.Core.ps1','Master.Deployment.Core.ps1','Load-Ui.ps1','UltraViewer-Reset.ps1','UltraViewer-Reset.xml','UltraViewer.Diagnostics.ps1') {Copy-DeploymentFile (Join-Path $PSScriptRoot $name) (Join-Path $work $name)}
+    foreach($name in 'Fix-CloneDuplicate.ps1','Fix-DinhDang.ps1','UltraViewer.Core.ps1','Master.Deployment.Core.ps1','Load-Ui.ps1','UltraViewer-Reset.ps1','UltraViewer-Reset.xml','UltraViewer.Diagnostics.ps1','Windows.License.Core.ps1') {Copy-DeploymentFile (Join-Path $PSScriptRoot $name) (Join-Path $work $name)}
     foreach($name in 'Office-Cleanup.Core.ps1','Office-Cleanup.Engine.ps1'){Copy-DeploymentFile (Join-Path $office $name) (Join-Path $work $name)}
     $uiSource=Split-Path -Parent $runtime
     New-Item -ItemType Directory -Path (Join-Path $work 'App') -Force|Out-Null

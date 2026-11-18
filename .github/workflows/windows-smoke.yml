@@ -45,6 +45,7 @@ jobs:
           & FixClone/Test-MasterPreflight.ps1
           & FixClone/Test-UltraViewerLifecycle.ps1
           & FixClone/Test-MasterDeployment.ps1
+          & FixClone/Test-WindowsLicense.ps1
           & FixClone/Test-WordSettings.ps1
           & FixClone/Test-DinhDang.ps1
           & FixClone/Test-BanPhim.ps1
@@ -53,6 +54,7 @@ jobs:
           & Office/Test-OfficeTemporary.ps1
           & BienBan/Test-Report.ps1
           & BienBan/Test-LicenseConfirmation.ps1
+          & KichHoat/Test-Activation.ps1
           & KichHoat/Test-QrLifecycle.ps1
           & KichHoat/Test-QrWindow.ps1
           & KichHoat/Test-CidPhone.ps1

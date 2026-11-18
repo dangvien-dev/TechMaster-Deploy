@@ -20,6 +20,7 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
     Initialize-TechMasterConsole
 }
 $here = $PSScriptRoot
+. (Join-Path (Split-Path -Parent $PSScriptRoot) 'FixClone/Windows.License.Core.ps1')
 
 # ---------- Cấu hình đơn vị / kỹ thuật viên (lưu cạnh script, nhập 1 lần) ----------
 $cfgFile = Join-Path $here 'BienBan-Config.json'
@@ -86,14 +87,14 @@ function Get-Products([string]$appId) {
 
 function HtmlEnc([string]$s) { [System.Net.WebUtility]::HtmlEncode($s) }
 
-function New-ProductRows($products, [string]$emptyText) {
+function New-ProductRows($products, [string]$emptyText, [switch]$Windows) {
     if (-not $products -or $products.Count -eq 0) {
         return "<tr><td colspan='4' class='muted'>$(HtmlEnc $emptyText)</td></tr>"
     }
     $rows = foreach ($p in $products) {
         $s = [int]$p.LicenseStatus
         $cls = if ($s -eq 1) { 'ok' } else { 'bad' }
-        $st = $statusText[$s]
+        $st = if($Windows){Get-WindowsLicenseStateText $s}else{$statusText[$s]}
         $ch = Get-Channel $p
         # Volume KMS: kích hoạt có thời hạn -> ghi số ngày còn lại
         if ($s -eq 1 -and $ch -like 'Volume – KMS*' -and $p.GracePeriodRemaining -gt 0) {
@@ -249,7 +250,7 @@ $html = $html.Replace('{{MODEL}}',    (OrDash ("{0} {1}" -f $cs.Manufacturer, $c
 $html = $html.Replace('{{SERIAL}}',   (OrDash $serial))
 $html = $html.Replace('{{OS}}',       (OrDash ("{0} (build {1})" -f $os.Caption, $os.BuildNumber)))
 $html = $html.Replace('{{SUMMARY}}',  $summary)
-$html = $html.Replace('{{WINROWS}}',  (New-ProductRows $win 'Không đọc được thông tin Windows'))
+$html = $html.Replace('{{WINROWS}}',  (New-ProductRows $win 'Không đọc được thông tin Windows' -Windows))
 $officeEmptyText = if ($offReadFailed) { 'Không đọc được thông tin Office; chưa xác định trạng thái kích hoạt.' } else { 'Không phát hiện Office (hoặc Office không dùng key, ví dụ Microsoft 365 đăng nhập tài khoản)' }
 $html = $html.Replace('{{OFFROWS}}',  (New-ProductRows $off $officeEmptyText))
 
@@ -263,7 +264,8 @@ Write-Host ""
 foreach ($p in @($win) + @($off)) {
     $s = [int]$p.LicenseStatus
     $c = if ($s -eq 1) { 'Green' } else { 'Red' }
-    Write-Host ("  - {0} (...{1}): {2}" -f $p.Name, $p.PartialProductKey, $statusText[$s]) -ForegroundColor $c
+    $label=if($p -in $win){Get-WindowsLicenseStateText $s}else{$statusText[$s]}
+    Write-Host ("  - {0} (...{1}): {2}" -f $p.Name, $p.PartialProductKey, $label) -ForegroundColor $c
 }
 Write-Host "`n  [OK] Đã xuất: $outFile" -ForegroundColor Green
 Write-Host "  Bấm nút 'In / Lưu PDF' trên trang (hoặc Ctrl+P -> Microsoft Print to PDF)."

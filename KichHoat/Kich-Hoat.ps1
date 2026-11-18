@@ -30,6 +30,7 @@ if (Test-Path -LiteralPath $consoleInit -PathType Leaf) {
 $uiRuntime=Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Wpf.Runtime.ps1'
 if(Test-Path -LiteralPath $uiRuntime){. $uiRuntime}
 . (Join-Path $PSScriptRoot 'Activation.Core.ps1')
+if($Product -eq 'Windows'){. (Join-Path (Split-Path -Parent $PSScriptRoot) 'FixClone/Windows.License.Core.ps1')}
 . (Join-Path $PSScriptRoot 'QrWindow.Core.ps1')
 . (Join-Path $PSScriptRoot 'Cid.Phone.Core.ps1')
 $cfg = @{
@@ -48,6 +49,7 @@ function Write-Err($t)  { Write-Host "  [LỖI] $t" -ForegroundColor Red }
 
 $statusText = @{ 0 = 'Chưa có license'; 1 = 'ĐÃ KÍCH HOẠT'; 2 = 'Đang dùng thử (OOB Grace)'; 3 = 'Hết hạn dùng thử';
                  4 = 'Non-Genuine Grace'; 5 = 'Notification (chưa kích hoạt)'; 6 = 'Extended Grace' }
+if($Product -eq 'Windows'){foreach($state in 0..6){$statusText[$state]=Get-WindowsLicenseStateText $state}}
 
 function Get-LicProducts {
     Get-CimInstance SoftwareLicensingProduct -Filter "ApplicationID='$AppId' AND PartialProductKey IS NOT NULL"
@@ -119,14 +121,19 @@ function Stop-CidReceiver($rcv) {
 function Test-CidManualInput {
     try{return [Console]::KeyAvailable}catch{return $false}
 }
-function Wait-Cid($rcv,[string]$InstallationId,[string]$Portal) {
+function Wait-Cid($rcv,[string]$InstallationId,[string]$Portal,$License=$null) {
     # Vừa chờ điện thoại gửi qua LAN, vừa cho phép gõ tay (nhấn phím bất kỳ)
     Write-Host "`n  Đang chờ Confirmation ID gửi từ điện thoại..." -ForegroundColor White
     Write-Host "  (Nhấn phím bất kỳ nếu muốn gõ tay thay vì gửi từ điện thoại)"
-    $phoneProduct=if($Test){'TEST '+$Product}else{$Product}
+    $phoneProduct=if($Test){'TEST '+$Product}elseif($License){$Product+' · key …'+$License.PartialProductKey}else{$Product}
+    $nextKeyCheck=[DateTime]::UtcNow
     $page = New-CidPhonePage $InstallationId $env:COMPUTERNAME $phoneProduct $Portal
     $task = $rcv.Listener.GetContextAsync()
     while ($true) {
+        if(-not $Test -and $License -and [DateTime]::UtcNow -ge $nextKeyCheck){
+            $null=Get-OfflineActivationLicense $License $InstallationId
+            $nextKeyCheck=[DateTime]::UtcNow.AddSeconds(5)
+        }
         $done = $false
         try { $done = $task.Wait(300) } catch { Write-Warn "Kết nối LAN lỗi -> chuyển sang gõ tay."; return (Read-CidKeyboard) }
         if ($done) {
@@ -200,17 +207,27 @@ if ($Test) {
 
 # ---------- 1. Tìm sản phẩm ----------
 Write-Step "1. TIM SAN PHAM $($Product.ToUpper()) (mat khoang 10-30 giay)"
-$all = @(Get-LicProducts)
+try{$all = @(Get-LicProducts)}catch{Show-DeployMessage 'Chưa đọc được thông tin giấy phép. Kiểm tra lại Windows / Office rồi thử lại; chưa thay đổi key trên máy.' 'Kiểm tra bản quyền' 'Warning';exit 1}
 if (-not $all) {
-    Write-Err "Không thấy $Product nào đã nhập key."
-    Write-Host "  Nhập Product Key trước, rồi chạy lại script."
+    $message=Get-MissingActivationKeyMessage $Product
+    Write-Warn $message
+    Show-DeployMessage $message ('Chưa có key '+$Product) 'Warning'
+    exit 1
+}
+if($Product -eq 'Office' -and (Test-OfficeActivationNeedsKey $all)){
+    $message='Office hiện chỉ có giấy phép Grace / Trial / Evaluation. '+(Get-MissingActivationKeyMessage 'Office')
+    Show-DeployMessage $message 'Office cần key bản quyền' 'Warning'
+    exit 1
+}
+if($Product -eq 'Office' -and (Test-OfficeActivationNeedsKey $all)){
+    Show-DeployMessage ('Office đang có giấy phép Grace / Trial, chưa phải key bản quyền riêng. '+(Get-MissingActivationKeyMessage 'Office')) 'Cần nhập key Office' 'Warning'
     exit 1
 }
 foreach ($p in $all) {
     Write-Host ("  - {0}  (key ...{1}) : {2}" -f $p.Name, $p.PartialProductKey, $statusText[[int]$p.LicenseStatus])
 }
-$todo = @($all | Where-Object { $_.LicenseStatus -ne 1 })
-if (-not $todo) { Write-Ok "$Product đã kích hoạt, không cần làm gì."; exit 0 }
+$todo = @(Select-ActivationLicenses -Product $Product -Products $all | Where-Object { $_.LicenseStatus -ne 1 })
+if (-not $todo) { Write-Ok "$Product đã kích hoạt, không cần làm gì."; Show-DeployMessage "$Product đã kích hoạt. Không cần kích hoạt lại." 'Kiểm tra bản quyền'; exit 0 }
 
 # ---------- 1b. Thử kích hoạt online trước ----------
 Write-Step "2. THU KICH HOAT ONLINE (khong can tai khoan)"
@@ -229,11 +246,18 @@ foreach ($p in $todo) {
     }
 }
 try { Invoke-CimMethod -InputObject (Get-CimInstance SoftwareLicensingService) -MethodName RefreshLicenseStatus | Out-Null } catch {}
-$todo = @(Get-LicProducts | Where-Object { $_.LicenseStatus -ne 1 })
+try{$currentProducts=@(Select-ActivationLicenses -Product $Product -Products @(Get-LicProducts))}catch{Show-DeployMessage 'Chưa đọc lại được key hiện tại. Kiểm tra lại trước khi lấy Installation ID.' 'Kiểm tra bản quyền' 'Warning';exit 1}
+if(-not $currentProducts.Count){Show-DeployMessage (Get-MissingActivationKeyMessage $Product) 'Chưa xác định được key hiện tại' 'Warning';exit 1}
+$todo = @($currentProducts | Where-Object { $_.LicenseStatus -ne 1 })
 if (-not $todo) {
     Write-Ok "$Product đã kích hoạt online, không cần dùng portal."
     Write-Host "`n  Kiểm tra lại: $($cfg.Check)"
+    Show-DeployMessage "$Product đã kích hoạt online. Kiểm tra lại trong ứng dụng Microsoft trước khi bàn giao." 'Hoàn tất kích hoạt'
     exit 0
+}
+if($Product -eq 'Windows'){
+    try{$notice=Get-WindowsSetupActivationNotice (Get-WindowsSetupKeyInventory)}catch{Show-DeployMessage 'Chưa xác minh được key Windows. Kiểm tra lại trong Windows Settings trước khi dùng QR / portal.' 'Kiểm tra key Windows' 'Warning';exit 1}
+    if($notice){Show-DeployMessage $notice 'Windows cần key riêng / bản quyền số' 'Warning';exit 1}
 }
 Write-Warn "Online thất bại -> chuyển sang kích hoạt qua Product Activation Portal."
 
@@ -245,8 +269,14 @@ if ($Product -eq 'Office') {
 # ---------- 2-4. Kích hoạt từng sản phẩm ----------
 foreach ($p in $todo) {
     Write-Step "3. KICH HOAT QUA PORTAL: $($p.Name)"
-    $iid = ($p.OfflineInstallationId -replace '\D', '')
-    if (-not $iid) { Write-Err "Không lấy được Installation ID."; continue }
+    try{
+        $p=Get-OfflineActivationLicense $p
+        if($p.LicenseStatus -eq 1){Write-Ok 'Sản phẩm hiện đã kích hoạt, bỏ qua bước offline.';continue}
+        $iid=([string]$p.OfflineInstallationId -replace '\D','')
+        $details="Sản phẩm: $($p.Name)`nKey hiện tại: …$($p.PartialProductKey)`n`nĐối chiếu 5 ký tự cuối với key bạn vừa nhập trước khi lấy Installation ID."
+        if(-not (Confirm-Box $details 'Xác nhận key cần kích hoạt' -ConfirmText 'Đúng key này')){continue}
+        $p=Get-OfflineActivationLicense $p $iid
+    }catch{Show-DeployMessage $_.Exception.GetBaseException().Message 'Chưa lấy Installation ID' 'Warning';continue}
 
     Write-Host "  Installation ID (9 nhóm):" -ForegroundColor White
     Write-Host ("    " + (Format-Groups $iid 7)) -ForegroundColor Yellow
@@ -287,16 +317,19 @@ foreach ($p in $todo) {
         try {
             $cidUrl = ''
             if ($rcv) { $cidUrl = $rcv.Url }
-            $qrWindow = Open-CidQrWindow $tpl $iid $env:COMPUTERNAME $Product $Url $cidUrl
+            $qrWindow = Open-CidQrWindow $tpl $iid $env:COMPUTERNAME ($Product+' · key …'+$p.PartialProductKey) $Url $cidUrl
             Write-Host "`n  Đã mở trang QR trên trình duyệt:"
             Write-Host "    QR 1: mở trang trên điện thoại -> Sao chép Installation ID -> Mở portal Microsoft"
             if ($rcv) {
                 Write-Host "    QR 2: quét mở trang gửi Confirmation ID về máy này ($cidUrl)"
                 Write-Host "          (điện thoại phải CHUNG MẠNG Wi-Fi/LAN với máy này)" -ForegroundColor Yellow
-                $cid = Wait-Cid $rcv $iid $Url
+                $cid = Wait-Cid $rcv $iid $Url $p
             } else {
                 $cid = Read-CidKeyboard
             }
+        } catch {
+            Show-DeployMessage $_.Exception.GetBaseException().Message 'Dừng QR / kiểm tra lại key' 'Warning'
+            continue
         } finally {
             Close-CidQrWindow $qrWindow
             Stop-CidReceiver $rcv
@@ -322,6 +355,7 @@ foreach ($p in $todo) {
         }
     } catch {
         Write-Err "Nạp Confirmation ID thất bại: $($_.Exception.Message)"
+        Show-DeployMessage $_.Exception.GetBaseException().Message 'Chưa nạp Confirmation ID' 'Warning'
         continue
     }
 }

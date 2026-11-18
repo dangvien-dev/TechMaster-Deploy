@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.11.0 — 18/11/2026
+
+- Thêm kiểm tra / dọn riêng key cài đặt chung Windows Pro …3V66T: chỉ dọn khi chưa kích hoạt, khớp SKU / kênh và xác minh đầy đủ từ hệ thống. Giữ giấy phép đang kích hoạt và key khác; có biên nhận, hoàn tác và khôi phục khi Sysprep lỗi. Thêm lựa chọn vào chuẩn bị Sysprep và xử lý sau clone theo cấu hình đã lưu.
+- Phân biệt ân hạn Windows với giấy phép dùng thử. Key chung vẫn có thể có Installation ID, nhưng không được dùng để lấy QR / nạp CID offline; vẫn cho phép thử online để nhận bản quyền số.
+- Khi có bản ghi key chung và key riêng, ưu tiên key riêng. Đọc mới và xác nhận 5 ký tự cuối trước QR; đối chiếu lại đúng sản phẩm / key / IID trước khi nạp CID, dừng nếu có thay đổi.
+- Office thiếu key hoặc chỉ có SKU Grace / Trial hiện hướng dẫn bằng hộp thoại, thay vì chỉ ghi lỗi rồi đóng cửa sổ lệnh.
+
 ## 2.1.10.0 — 18/11/2026
 
 - Thêm nút Lưu thông tin tại Biên bản bản quyền: lưu riêng thông tin đơn vị / kỹ thuật viên sau khi sửa hoặc xoá trắng, không cần xuất biên bản.

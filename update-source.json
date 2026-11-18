@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.10.0",
+  "version": "2.1.11.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -140,14 +140,14 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 24418,
-      "sha": "f2250b9c3629ddbdef6874bdc4fefe49b4c4df9b"
+      "size": 24533,
+      "sha": "693501ce726111cb89232f7b7fa221393f342556"
     },
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 7604,
-      "sha": "f1bb46f6c4c1de7d6424feb0428cbda206810d21"
+      "size": 8674,
+      "sha": "8399898b1d5be1e65971b63ce224bae97a80a3ad"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 18769,
-      "sha": "d8288b6a4093932afe3fdde0c23c58336338924d"
+      "size": 19119,
+      "sha": "1241f7b925a240a5b1d88d75672b3e38c957f4b6"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -284,8 +284,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 19681,
-      "sha": "9957549f0339855ec3549f52122c3f09a4a92a85"
+      "size": 20106,
+      "sha": "4f04be68dbacb63f20401d72d9f5487db886a156"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -362,32 +362,32 @@
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.ps1",
       "mode": "100644",
-      "size": 14515,
-      "sha": "04bbe31b7a3822aa204045f1ee1fae261ad7fc6b"
+      "size": 14748,
+      "sha": "6d7f5c1fdd53fd4b714f347a605bef9579309a71"
     },
     {
       "path": "BienBan/LicenseConfirmation.Core.ps1",
       "mode": "100644",
-      "size": 9707,
-      "sha": "940ef19214f974dc74dd490b8c19e143824fb373"
+      "size": 9880,
+      "sha": "345121323ef8c36b198e4531a5c8349ea37964b7"
     },
     {
       "path": "BienBan/Test-LicenseConfirmation.ps1",
       "mode": "100644",
-      "size": 4933,
-      "sha": "0f9e0bd0e4a9226d8688812e3526112623105ea7"
+      "size": 5222,
+      "sha": "f279ccca89732aa7d2957616751f6da09c565764"
     },
     {
       "path": "BienBan/Test-Report.ps1",
       "mode": "100644",
-      "size": 5067,
-      "sha": "e791c981d0d070fe3956300a42c59ba62fab7937"
+      "size": 5429,
+      "sha": "d855091f0a33a1f36a20f78aef68927ecafae7dc"
     },
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 9607,
-      "sha": "f36d8c8c2e99ef3ebb0be827563aa7610fd66f2f"
+      "size": 10660,
+      "sha": "30cb9008c96b3f00e9fd84bf574949b0978e96a3"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -458,20 +458,20 @@
     {
       "path": "FixClone/Master-Preflight.ps1",
       "mode": "100644",
-      "size": 5363,
-      "sha": "ffd84b7742630124958fd12a1d00e22c855d5e41"
+      "size": 6464,
+      "sha": "e5dcee7e0222e232f5f8809899dd1421b6df3f5d"
     },
     {
       "path": "FixClone/Master-Preflight.xml",
       "mode": "100644",
-      "size": 3787,
-      "sha": "d39ea6c5f2349acaa9dcf0e88a7558548afaceef"
+      "size": 4268,
+      "sha": "19e1392a5be332e9e11b1276dee712be66092c8a"
     },
     {
       "path": "FixClone/Master.Deployment.Core.ps1",
       "mode": "100644",
-      "size": 3912,
-      "sha": "f2f6aa7076055af85d420e0c4f9ee82b5925f838"
+      "size": 5277,
+      "sha": "d009a16aa58630558bbb5d7396cf2436e07c19f9"
     },
     {
       "path": "FixClone/Master.Preflight.Core.ps1",
@@ -506,8 +506,8 @@
     {
       "path": "FixClone/Run-Sysprep.ps1",
       "mode": "100644",
-      "size": 3587,
-      "sha": "6cb5071a84c59848f8ea089112b3fb1d0b09d5e9"
+      "size": 3614,
+      "sha": "a1f9fb75a4d5a73cf1ce323205d0ffd7e61ec016"
     },
     {
       "path": "FixClone/Test-BanPhim.ps1",
@@ -524,8 +524,8 @@
     {
       "path": "FixClone/Test-MasterDeployment.ps1",
       "mode": "100644",
-      "size": 3094,
-      "sha": "c5a2c206b9021373f7aafc318561efb3551b8ec2"
+      "size": 5596,
+      "sha": "dab109dc0b41c2637ea4dd1575935a0dd6545547"
     },
     {
       "path": "FixClone/Test-MasterPreflight.ps1",
@@ -550,6 +550,12 @@
       "mode": "100644",
       "size": 3546,
       "sha": "60ce144c28a394bbb24f3f13265d353ba614610a"
+    },
+    {
+      "path": "FixClone/Test-WindowsLicense.ps1",
+      "mode": "100644",
+      "size": 5855,
+      "sha": "c491cf99cd2f7c20fb8db33f090f3e58890c05e6"
     },
     {
       "path": "FixClone/Test-WordSettings.ps1",
@@ -588,6 +594,24 @@
       "sha": "aface74f9c448b2853cdf46c49afc7962cbe3f3f"
     },
     {
+      "path": "FixClone/Windows-SetupKey.ps1",
+      "mode": "100644",
+      "size": 4628,
+      "sha": "a23f99577b8a5c25f9fd9cc4598c28d5f710afa7"
+    },
+    {
+      "path": "FixClone/Windows-SetupKey.xml",
+      "mode": "100644",
+      "size": 3573,
+      "sha": "2d765f822c78fd4c844e0bf69285d906f9af6179"
+    },
+    {
+      "path": "FixClone/Windows.License.Core.ps1",
+      "mode": "100644",
+      "size": 9513,
+      "sha": "dcf992f761ebf5ee7942ebf8ee4b655d65e4684e"
+    },
+    {
       "path": "FixClone/Word.Settings.Core.ps1",
       "mode": "100644",
       "size": 3077,
@@ -596,8 +620,8 @@
     {
       "path": "KichHoat/Activation.Core.ps1",
       "mode": "100644",
-      "size": 2720,
-      "sha": "d702480a26650d070f19be22a89d1015562cf8e7"
+      "size": 6506,
+      "sha": "39b3f4ff415a74eb68330bcf07e7c8aa1ae4bb41"
     },
     {
       "path": "KichHoat/CID-Phone.html",
@@ -632,8 +656,8 @@
     {
       "path": "KichHoat/Kich-Hoat.ps1",
       "mode": "100644",
-      "size": 16555,
-      "sha": "adc31cc8f385f8ce9c3f652cd44437653ff21d66"
+      "size": 19917,
+      "sha": "432400ed65aa2df94ae510156a74aaa1ca08438f"
     },
     {
       "path": "KichHoat/QR-Template.html",
@@ -662,8 +686,8 @@
     {
       "path": "KichHoat/Test-Activation.ps1",
       "mode": "100644",
-      "size": 5437,
-      "sha": "a6573fd7982e8eae304d5023cd57ae81e03fa945"
+      "size": 8487,
+      "sha": "0998cae2808c0c434bef9bc7a1bb1896085c7882"
     },
     {
       "path": "KichHoat/Test-CidPhone.ps1",
@@ -674,8 +698,8 @@
     {
       "path": "KichHoat/Test-QrLifecycle.ps1",
       "mode": "100644",
-      "size": 4291,
-      "sha": "588d2c7b17e87b4d7a0d83ae6a5ee6f54d141c88"
+      "size": 4364,
+      "sha": "e2498a1cebf027119ee41bfec964db0f2250de19"
     },
     {
       "path": "KichHoat/Test-QrWindow.ps1",
@@ -747,7 +771,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "2be968261e3689bc653e4d122045045ca17b8851"
+      "sha": "eb94a7bee494ba73ba0156c892e655150fefe5f9"
     }
   ]
 }

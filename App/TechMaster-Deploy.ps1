@@ -109,7 +109,12 @@ Bind-Click 'btnDesktopPreflight' {
     $script:desktopProcess = Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand ' + $encoded) -WindowStyle Hidden -PassThru
 }
 Bind-Click 'btnActivateWindows' { Start-Tool (Join-Path $DirKH 'Kich-Hoat-Windows.bat') 'Kích hoạt Windows' }
-Bind-Click 'btnActivateOffice' { Start-Tool (Join-Path $DirKH 'Kich-Hoat-Office.bat') 'Kích hoạt Office' }
+Bind-Click 'btnWindowsSetupKey' {
+    $entry=Join-Path $DirClone 'Windows-SetupKey.ps1'
+    $command="& '{0}'" -f $entry.Replace("'","''")
+    Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))) -WindowStyle Hidden|Out-Null
+}
+Bind-Click 'btnActivateOffice'  { Start-Tool (Join-Path $DirKH 'Kich-Hoat-Office.bat') 'Kích hoạt Office' }
 Bind-Click 'btnActivationTest' { Start-Tool (Join-Path $DirKH 'Kich-Hoat-TEST.bat') 'TEST kích hoạt' }
 Bind-Click 'btnPortalWindows' { Start-Process 'https://aka.ms/WindowsActivate' }
 Bind-Click 'btnPortalOffice' { Start-Process 'https://visualsupport.microsoft.com/' }
