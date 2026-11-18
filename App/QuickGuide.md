@@ -28,7 +28,8 @@
 
 ## Biên bản bản quyền
 - Bản chia sẻ mới để trống thông tin đơn vị và không kèm logo công ty. Xoá thông tin đơn vị / logo giúp dọn cấu hình đang lưu trước khi chuyển cho bên khác; biên bản đã xuất vẫn được giữ.
-- Nhập thông tin đơn vị, kỹ thuật viên, khách hàng và chọn logo. Thông tin đơn vị được lưu cho lần sau.
+- Nhập hoặc sửa thông tin đơn vị / kỹ thuật viên rồi bấm Lưu thông tin để dùng cho lần sau; trường xoá trắng cũng được lưu. Tên khách hàng dùng cho biên bản đang lập.
+- Chọn logo được lưu ngay. Xoá logo chỉ xoá ảnh logo đang lưu, giữ thông tin đơn vị và biên bản đã xuất.
 - Bấm Xuất biên bản. Trang HTML mở trong trình duyệt; chọn In / Lưu PDF để giao cho khách.
 - Biên bản phản ánh trạng thái kiểm tra tại thời điểm xuất, chỉ hiện 5 ký tự cuối key. Sau khi kích hoạt hoặc cập nhật mẫu, hãy xuất lại biên bản.
 - Xác nhận cho khách lẻ và Xác nhận cho công ty là hai mẫu riêng về việc cung cấp / bàn giao phần mềm để đơn vị cung cấp ký. Nhập khách hàng, chọn đúng phần mềm đã bàn giao rồi xuất HTML và In / Lưu PDF.

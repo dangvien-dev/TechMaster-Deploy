@@ -48,7 +48,7 @@ foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnConfirmRetail','btnConfirmCompany') {
+    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
@@ -115,6 +115,30 @@ foreach ($node in $markup.SelectNodes('//*[@x:Name and not(ancestor::*[local-nam
     $name = $node.GetAttribute('Name', 'http://schemas.microsoft.com/winfx/2006/xaml')
     Assert ($null -ne $main.FindName($name)) "XAML control $name resolves"
 }
+# Report settings actions use an isolated directory, never the checkout's identity.
+$identityFixture=Join-Path ([IO.Path]::GetTempPath()) ('tm-settings-ui-'+[guid]::NewGuid().ToString('N'))
+$previousReportDirectory=$DirBB
+try{
+    $DirBB=$identityFixture
+    $Company.Text='Đơn vị kiểm tra';$Address.Text='Địa chỉ kiểm tra';$Phone.Text='0123';$Technician.Text='Kỹ thuật viên kiểm tra'
+    $main.FindName('btnSaveIdentity').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    $settingsPath=Join-Path $identityFixture 'BienBan-Config.json'
+    $saved=[IO.File]::ReadAllText($settingsPath)|ConvertFrom-Json
+    Assert ($saved.Company -ceq 'Đơn vị kiểm tra') 'Save button persists edited settings without exporting a report'
+    $Address.Text='';$Phone.Text=''
+    $main.FindName('btnSaveIdentity').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    $saved=[IO.File]::ReadAllText($settingsPath)|ConvertFrom-Json
+    Assert ($saved.Address -ceq '' -and $saved.Phone -ceq '' -and $saved.Company -ceq 'Đơn vị kiểm tra') 'Save button persists cleared fields while retaining other values'
+    $logoFixture=Join-Path $identityFixture 'Logo.svg'
+    [IO.File]::WriteAllText($logoFixture,'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0H10V10H0Z"/></svg>')
+    [IO.File]::WriteAllText((Join-Path $identityFixture 'customer-report.html'),'retained')
+    Update-LogoPreview
+    Assert ($main.FindName('btnRemoveLogo').IsEnabled -and $main.FindName('logoBox').Source) 'A stored logo enables the remove action and renders its preview'
+    $before=[IO.File]::ReadAllText($settingsPath)
+    $main.FindName('btnRemoveLogo').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    Assert (-not (Test-Path $logoFixture) -and -not $main.FindName('logoBox').Source -and -not $main.FindName('btnRemoveLogo').IsEnabled) 'Remove-logo button clears the stored file, preview and enabled state'
+    Assert ([IO.File]::ReadAllText($settingsPath) -ceq $before -and (Test-Path (Join-Path $identityFixture 'customer-report.html'))) 'Remove-logo button preserves settings and existing reports'
+}finally{$DirBB=$previousReportDirectory;if(Test-Path $identityFixture){Remove-Item $identityFixture -Recurse -Force}}
 # Exercise both real handover dialogs and export handlers, without opening a browser.
 $confirmationOutput=Join-Path ([IO.Path]::GetTempPath()) ('tm-confirm-ui-'+[guid]::NewGuid().ToString('N'))
 $confirmationSupplier=[pscustomobject]@{Company='Supplier test';Address='';Phone='';Technician='Test tech'}

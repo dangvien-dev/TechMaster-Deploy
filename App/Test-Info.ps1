@@ -26,6 +26,18 @@ try{
     }
     $identityDir=$temp+'.identity';New-Item -ItemType Directory -Path $identityDir|Out-Null
     foreach($name in 'BienBan-Config.json','Logo.svg','Logo.png','customer-report.html','unrelated.log'){[IO.File]::WriteAllText((Join-Path $identityDir $name),'fixture')}
+    $saved=Save-DeployReportIdentity -Directory $identityDir -Company ' Đơn vị mẫu ' -Address 'Địa chỉ' -Phone '0123' -Technician 'Kỹ thuật viên'
+    $configPath=Join-Path $identityDir 'BienBan-Config.json'
+    $loaded=[IO.File]::ReadAllText($configPath)|ConvertFrom-Json
+    Assert ($loaded.Company -ceq 'Đơn vị mẫu' -and $loaded.Technician -ceq 'Kỹ thuật viên') 'Edited identity fields persist independently of report export'
+    $null=Save-DeployReportIdentity -Directory $identityDir -Company '' -Address '' -Phone '' -Technician ''
+    $loaded=[IO.File]::ReadAllText($configPath)|ConvertFrom-Json
+    Assert ($loaded.Company -ceq '' -and $loaded.Address -ceq '' -and $loaded.Phone -ceq '' -and $loaded.Technician -ceq '') 'Explicitly cleared fields remain blank when reloaded'
+    $configBefore=[IO.File]::ReadAllText($configPath)
+    [IO.File]::WriteAllText((Join-Path $identityDir 'Logo.svg.backup'),'keep')
+    Remove-DeployReportLogo $identityDir
+    Assert (-not (Test-Path (Join-Path $identityDir 'Logo.svg')) -and -not (Test-Path (Join-Path $identityDir 'Logo.png'))) 'Remove-logo deletes only known logo assets'
+    Assert ([IO.File]::ReadAllText($configPath) -ceq $configBefore -and (Test-Path (Join-Path $identityDir 'customer-report.html')) -and (Test-Path (Join-Path $identityDir 'Logo.svg.backup'))) 'Removing a logo retains saved identity, exported reports and similarly named unrelated files'
     Reset-DeployReportIdentity $identityDir
     Assert (-not (Test-Path (Join-Path $identityDir 'BienBan-Config.json')) -and -not (Test-Path (Join-Path $identityDir 'Logo.svg'))) 'Identity reset removes configuration and logo assets'
     Assert ((Test-Path (Join-Path $identityDir 'customer-report.html')) -and (Test-Path (Join-Path $identityDir 'unrelated.log'))) 'Identity reset retains existing reports and unrelated files'
