@@ -189,7 +189,7 @@ Assert ($ultra -is [Windows.Window] -and $null -ne $ultra.FindName('Restore')) '
 $keyboard= . (Join-Path $root 'FixClone/Fix-BanPhim.ps1') -ValidateOnly
 Assert ($keyboard -is [Windows.Window]) 'Keyboard graphical choices load without changing input settings'
 $master= . (Join-Path $root 'FixClone/Master-Preflight.ps1') -ValidateOnly
-Assert ($master.FindName('CleanOfficeTrial').IsChecked -and $master.FindName('PrepareUltra').IsChecked -and $master.FindName('CleanWindowsSetupKey').IsChecked) 'Master preflight offers conservative trial cleanup and clone identity preparation'
+Assert ($master.FindName('CleanOfficeTrial').IsChecked -and $master.FindName('PrepareUltra').IsChecked -and -not $master.FindName('CleanWindowsSetupKey').IsChecked) 'Master preflight offers conservative trial cleanup and clone identity preparation'
 $master.Close()
 $windowsKeyView= . (Join-Path $root 'FixClone/Windows-SetupKey.ps1') -ValidateOnly
 Assert ($windowsKeyView -is [Windows.Window] -and -not $windowsKeyView.FindName('Clean').IsEnabled -and -not $windowsKeyView.FindName('Restore').IsEnabled) 'Windows setup-key review requires inspection before any cleanup or undo is enabled'

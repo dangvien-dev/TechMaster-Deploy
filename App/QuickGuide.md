@@ -25,7 +25,7 @@
 - Trong TechMaster, chọn Windows hoặc Office để kiểm tra và kích hoạt bằng key hợp lệ. Nếu online chưa thành công, công cụ hướng dẫn dùng portal Microsoft.
 - Quét QR 1 bằng điện thoại cùng Wi-Fi/LAN, bấm Sao chép Installation ID rồi Mở portal Microsoft. Lấy Confirmation ID 48 số trên portal.
 - Quay lại trang điện thoại hoặc quét QR 2, dán mã rồi bấm Gửi về máy tính. Cửa sổ QR trên máy tính sẽ đóng sau khi nhận mã.
-- Key cài đặt chung Windows mở cửa sổ kiểm tra / dọn riêng; chỉ dọn key Pro …3V66T chưa kích hoạt đã xác minh. Có biên nhận và nút Hoàn tác; không ghi đè key mới đã nhập.
+- Key cài đặt chung Windows mở cửa sổ kiểm tra / dọn riêng; lựa chọn dọn trong Sysprep mặc định tắt, chỉ bật sau khi đã kiểm tra; chỉ dọn key Pro …3V66T chưa kích hoạt đã xác minh. Có biên nhận và nút Hoàn tác; không ghi đè key mới đã nhập.
 - Trước khi lấy Installation ID, đối chiếu 5 ký tự cuối key trong hộp xác nhận. App ưu tiên key riêng, đọc lại IID và kiểm tra lần nữa trước khi nạp CID. Thay key hoặc IID sẽ dừng mã cũ; chạy lại để lấy QR mới. Key chung chỉ được thử online để nhận bản quyền số, không dùng để lấy QR offline.
 - Office chưa nhập key hoặc chỉ có SKU Grace / Trial sẽ hiện hướng dẫn nhập key trong Word hoặc đăng nhập Microsoft 365.
 - Kiểm tra lại màn hình Activation hoặc Product Activated của Microsoft trước khi bàn giao. Trạng thái kích hoạt không tự chứng minh nguồn gốc giấy phép.

@@ -146,8 +146,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 8674,
-      "sha": "8399898b1d5be1e65971b63ce224bae97a80a3ad"
+      "size": 8765,
+      "sha": "e0b872e5f7bf3fcc885d6e755092f998cc18f750"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -284,8 +284,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 20106,
-      "sha": "4f04be68dbacb63f20401d72d9f5487db886a156"
+      "size": 20111,
+      "sha": "f8855b358e8052b39be072887b93f683feeb6d7e"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -386,8 +386,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 10660,
-      "sha": "30cb9008c96b3f00e9fd84bf574949b0978e96a3"
+      "size": 10693,
+      "sha": "46c0761ec08329df128a4fb1fd83fb9a33d19482"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -464,8 +464,8 @@
     {
       "path": "FixClone/Master-Preflight.xml",
       "mode": "100644",
-      "size": 4268,
-      "sha": "19e1392a5be332e9e11b1276dee712be66092c8a"
+      "size": 4269,
+      "sha": "0a44662cd790289d25ba589913ad59de8cba1504"
     },
     {
       "path": "FixClone/Master.Deployment.Core.ps1",
