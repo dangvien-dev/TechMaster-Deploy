@@ -122,6 +122,7 @@ if (Test-Path -LiteralPath $cfgFile) {
 function Update-LogoPreview {
     $logoBox.Source = $null
     $file = Get-ChildItem -LiteralPath $DirBB -File | Where-Object { $_.BaseName -eq 'Logo' -and $_.Extension -in '.svg','.png','.jpg','.jpeg' } | Select-Object -First 1
+    $btnRemoveLogo.IsEnabled = [bool]$file
     if (-not $file) { $lblLogo.Text = 'Chưa có logo'; return }
     $lblLogo.Text = $file.Name
     try { $logoBox.Source = Get-DeployLogoPreview $file.FullName }
@@ -137,6 +138,22 @@ Bind-Click 'btnLogo' {
     }
     Update-LogoPreview; Set-Status 'Đã lưu logo.'
 }
+Bind-Click 'btnRemoveLogo' {
+    try {
+        Remove-DeployReportLogo $DirBB
+        Update-LogoPreview
+        Set-Status 'Đã xoá logo. Thông tin đơn vị đã lưu và các biên bản đã xuất được giữ nguyên.'
+    } catch { Show-DeployMessage $_.Exception.GetBaseException().Message 'Xoá logo' 'Error' }
+}
+function Save-ReportInfo {
+    Save-DeployReportIdentity -Directory $DirBB -Company $Company.Text -Address $Address.Text -Phone $Phone.Text -Technician $Technician.Text
+}
+Bind-Click 'btnSaveIdentity' {
+    try {
+        $null=Save-ReportInfo
+        Set-Status 'Đã lưu thông tin đơn vị và kỹ thuật viên. Các trường để trống cũng đã được lưu.'
+    } catch { Show-DeployMessage $_.Exception.GetBaseException().Message 'Lưu thông tin biên bản' 'Error' }
+}
 Bind-Click 'btnResetIdentity' {
     if(-not (Confirm-Box 'Xoá thông tin đơn vị, kỹ thuật viên và logo đang lưu trong bộ công cụ này?' 'Xoá thông tin đơn vị' -ConfirmText 'Xoá thông tin / logo' -Danger -Owner $form)){return}
     Reset-DeployReportIdentity $DirBB
@@ -146,8 +163,7 @@ Bind-Click 'btnResetIdentity' {
     Set-Status 'Đã xoá thông tin đơn vị và logo. Có thể nhập thông tin đơn vị mới.'
 }
 Bind-Click 'btnExport' {
-    $cfg = [pscustomobject]@{ Company = $Company.Text.Trim(); Address = $Address.Text.Trim(); Phone = $Phone.Text.Trim(); Technician = $Technician.Text.Trim() }
-    try { $cfg | ConvertTo-Json | Set-Content -LiteralPath $cfgFile -Encoding UTF8 }
+    try { $cfg=Save-ReportInfo }
     catch { Show-DeployMessage $_.Exception.Message 'Lưu biên bản' 'Error'; return }
     Set-Status 'Đang đọc bản quyền và xuất biên bản…'
     Start-UiWork @'
@@ -162,9 +178,8 @@ $ErrorActionPreference = 'Stop'
 }
 function Start-DeployConfirmation([string]$template) {
     if($script:uiWork){Set-Status 'Chờ thao tác hiện tại hoàn tất.';return}
-    $cfg=[pscustomobject]@{Company=$Company.Text.Trim();Address=$Address.Text.Trim();Phone=$Phone.Text.Trim();Technician=$Technician.Text.Trim()}
-    if(-not $cfg.Company){Show-DeployMessage 'Nhập tên đơn vị cung cấp tại phần Thông tin biên bản.' 'Xác nhận bàn giao';return}
-    try{$cfg|ConvertTo-Json|Set-Content -LiteralPath $cfgFile -Encoding UTF8}catch{Show-DeployMessage $_.Exception.Message 'Lưu thông tin đơn vị' 'Error';return}
+    if(-not $Company.Text.Trim()){Show-DeployMessage 'Nhập tên đơn vị cung cấp tại phần Thông tin biên bản.' 'Xác nhận bàn giao';return}
+    try{$cfg=Save-ReportInfo}catch{Show-DeployMessage $_.Exception.Message 'Lưu thông tin đơn vị' 'Error';return}
     $logo=Get-ChildItem -LiteralPath $DirBB -File|Where-Object {$_.BaseName -eq 'Logo' -and $_.Extension -in '.svg','.png','.jpg','.jpeg'}|Select-Object -First 1
     $cfg|Add-Member NoteProperty LogoPath $(if($logo){$logo.FullName}else{''})
     $script:confirmationRequest=@{Template=$template;Supplier=$cfg;Customer=$tbCustomer.Text.Trim()}

@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.9.0",
+  "version": "2.1.10.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -140,14 +140,14 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 24197,
-      "sha": "d77bb70a37f97f76386d75edc368d207695faa17"
+      "size": 24418,
+      "sha": "f2250b9c3629ddbdef6874bdc4fefe49b4c4df9b"
     },
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 7385,
-      "sha": "70e200b22207822c2b9472d469c0f2d8ff68b20b"
+      "size": 7604,
+      "sha": "f1bb46f6c4c1de7d6424feb0428cbda206810d21"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -158,8 +158,8 @@
     {
       "path": "App/Report.Identity.ps1",
       "mode": "100644",
-      "size": 404,
-      "sha": "d6d4cd4aa9b3d9982380de1f9f1b2aaab8331116"
+      "size": 1129,
+      "sha": "cddabedfddece28bdf47c724b93a567a782bf730"
     },
     {
       "path": "App/Startup.UI.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 18308,
-      "sha": "3ef22e996292a0a7c2c5243c8353fd9bdc60a9fb"
+      "size": 18769,
+      "sha": "d8288b6a4093932afe3fdde0c23c58336338924d"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -212,8 +212,8 @@
     {
       "path": "App/Test-Info.ps1",
       "mode": "100644",
-      "size": 2685,
-      "sha": "0a713e507f5b90fac5489d0d59345bc0eba1f931"
+      "size": 4125,
+      "sha": "ff124becdf36786007eba77739d8112b0a40dbb0"
     },
     {
       "path": "App/Test-InfoEntryPoints.ps1",
@@ -284,8 +284,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 17311,
-      "sha": "68f5f8dad640c183e3de3124092c9c1fa7e60e72"
+      "size": 19681,
+      "sha": "9957549f0339855ec3549f52122c3f09a4a92a85"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -386,8 +386,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 9255,
-      "sha": "e73103d9d84e3dbaa9673868ab8bc9810b8196dd"
+      "size": 9607,
+      "sha": "f36d8c8c2e99ef3ebb0be827563aa7610fd66f2f"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -746,8 +746,8 @@
     {
       "path": "version.txt",
       "mode": "100644",
-      "size": 8,
-      "sha": "e211f58da4ae15792b4ee8db133270d98d6dfc1d"
+      "size": 9,
+      "sha": "2be968261e3689bc653e4d122045045ca17b8851"
     }
   ]
 }

@@ -1,5 +1,10 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.10.0 — 18/11/2026
+
+- Thêm nút Lưu thông tin tại Biên bản bản quyền: lưu riêng thông tin đơn vị / kỹ thuật viên sau khi sửa hoặc xoá trắng, không cần xuất biên bản.
+- Thêm nút Xoá logo riêng, giữ thông tin đơn vị và các biên bản đã xuất; xoá xong cập nhật ngay ô xem trước.
+
 ## 2.1.9.0 — 18/11/2026
 
 - Sửa logo SVG đè lên header khi cuộn: xem trước bằng ảnh WPF để được cắt theo vùng cuộn. Giữ nguyên tệp logo gốc khi xuất biên bản và xác nhận.
