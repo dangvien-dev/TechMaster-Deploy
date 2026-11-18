@@ -1,5 +1,10 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.1.12.0 — 18/11/2026
+
+- Căn Hướng dẫn nhanh và Liên hệ / góp ý cùng lề trái, cỡ chữ và chiều rộng trong thanh bên. Bỏ nền chọn cố định của Hướng dẫn nhanh; hai mục có cùng kiểu rê chuột / bàn phím.
+- Tách vùng menu cuộn và vùng trợ giúp cuối thanh bên, giữ chân trang trong đúng khung khi cửa sổ thấp hoặc tăng tỷ lệ hiển thị. Thanh cuộn menu gọn và cùng nền tối, tránh cảm giác chân trang nhô ra.
+
 ## 2.1.11.0 — 18/11/2026
 
 - Thêm kiểm tra / dọn riêng key cài đặt chung Windows Pro …3V66T: chỉ dọn khi chưa kích hoạt, khớp SKU / kênh và xác minh đầy đủ từ hệ thống. Giữ giấy phép đang kích hoạt và key khác; có biên nhận, hoàn tác và khôi phục khi Sysprep lỗi. Thêm lựa chọn mặc định tắt vào chuẩn bị Sysprep; chỉ xử lý sau clone khi đã bật và lưu lựa chọn.
