@@ -41,7 +41,7 @@ try{
     $profile=Get-DriverFixBuiltinProfileJson|ConvertFrom-Json;Assert-DriverFixProfile $profile
     $sourceJson=Join-Path $PSScriptRoot 'DriverFix.SingPC.json'
     if(Test-Path -LiteralPath $sourceJson){
-        $json=Get-Content -LiteralPath $sourceJson -Raw|ConvertFrom-Json
+        $json=Get-Content -LiteralPath $sourceJson -Raw -Encoding UTF8|ConvertFrom-Json
         Assert (($json|ConvertTo-Json -Depth 15 -Compress) -ceq ($profile|ConvertTo-Json -Depth 15 -Compress)) 'Source JSON and updater-compatible built-in JSON are identical'
     }
     $machine=[pscustomobject]@{ComputerName='TEST-PC';Manufacturer='SingPC';Model='I5-12450H';Bios='5.32';CPU='Test CPU';RamGB=16;Board='Test <board>';BiosVendor='AMI';OS='Windows Test'}
