@@ -39,8 +39,8 @@ function Assert-RoundedCornerPixels($frame) {
 }
 $main = . (Join-Path $PSScriptRoot 'TechMaster-Deploy.ps1') -ValidateOnly
 Assert ($main -is [Windows.Window]) 'Main shell is a native WPF Window'
-Assert ($main.FindName('Navigation').Items.Count -eq 8 -and $main.FindName('tabs').Items.Count -eq 8) 'All eight sections are present'
-for ($i = 0; $i -lt 8; $i++) {
+Assert ($main.FindName('Navigation').Items.Count -eq 9 -and $main.FindName('tabs').Items.Count -eq 9) 'All nine sections are present'
+for ($i = 0; $i -lt 9; $i++) {
     $main.FindName('Navigation').SelectedIndex = $i
     Assert ($main.FindName('tabs').SelectedIndex -eq $i) "Navigation $i selects its content"
 }
@@ -48,7 +48,7 @@ foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
+    foreach ($button in 'btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
@@ -227,4 +227,4 @@ Assert (-not $script:session.OpenApplication) 'Completion remains visible withou
 $updater.FindName('Primary').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
 Assert ($script:updateCompletionClosed -and $script:session.OpenApplication) 'Completion button closes the updater before requesting application launch'
 $main.Close()
-Write-Host "PASS: $checks native WPF assertions; eight tabs, control binding, layout, Office defaults and updater states."
+Write-Host "PASS: $checks native WPF assertions; nine tabs, control binding, layout, Office defaults and updater states."

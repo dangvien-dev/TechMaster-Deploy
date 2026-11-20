@@ -144,3 +144,7 @@ Bản này là công cụ tạm dùng trước. Bản chính thức sẽ nằm t
 ## Build launcher từ mã nguồn
 
 Trên Windows, chạy `powershell.exe -NoProfile -ExecutionPolicy Bypass -File App\Build-Launcher.ps1` trong thư mục dự án. File `TechMaster Deploy.exe` sẽ được tạo cạnh README.
+
+### Fix Driver (dùng chung mọi máy / mainboard)
+
+Vào **Fix Driver → Mở Fix Driver** để quét thiết bị báo lỗi, lấy Hardware ID / link Catalog, cài CAB hoặc thư mục INF đã tải, và cài từ kho USB / NAS tối đa 4 vòng. Không cần profile để dùng các chức năng này; không có driver được đóng gói hoặc tải tự động. Profile JSON chỉ bổ sung khuyến nghị riêng khi khớp model, mẫu đầu là SingPC I5-12450H BIOS 5.32. Xem [thiết kế và hướng dẫn test](FixClone/DriverFix.md), [JSON profile mẫu](FixClone/DriverFix.SingPC.json). Mọi cài / disable / chỉnh nguồn đều cần Admin và ghi log local.

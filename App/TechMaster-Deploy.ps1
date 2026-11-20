@@ -108,6 +108,12 @@ Bind-Click 'btnDesktopPreflight' {
     $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
     $script:desktopProcess = Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand ' + $encoded) -WindowStyle Hidden -PassThru
 }
+Bind-Click 'btnDriverFix' {
+    $entry=Join-Path $DirClone 'DriverFix.ps1'
+    $command="& '{0}'" -f $entry.Replace("'","''")
+    Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))) -WindowStyle Hidden|Out-Null
+}
+Bind-Click 'btnDriverGuide' { Show-DeployQuickGuide $Root $form -Section 'Fix Driver' }
 Bind-Click 'btnActivateWindows' { Start-Tool (Join-Path $DirKH 'Kich-Hoat-Windows.bat') 'Kích hoạt Windows' }
 Bind-Click 'btnWindowsSetupKey' {
     $entry=Join-Path $DirClone 'Windows-SetupKey.ps1'

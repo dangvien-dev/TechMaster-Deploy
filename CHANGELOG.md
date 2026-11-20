@@ -1,5 +1,13 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.0.0 — 20/11/2026
+
+- Thêm Fix Driver dùng chung cho mọi máy / mainboard: quét thiết bị có mã lỗi, hiện đầy đủ Hardware ID / InstanceId và tạo link Microsoft Update Catalog đã URL-encode để kỹ thuật viên tự tải driver.
+- Cài từ CAB / thư mục INF đã chọn, dò phần cứng rồi quét lại; kho driver USB / NAS đối chiếu ID từ cụ thể đến chung, cài tối đa 4 vòng để xử lý driver cha / con. Không tải tự động, không đóng gói driver vào app.
+- Profile JSON cục bộ chỉ bổ sung khuyến nghị theo model khi nhận diện khớp. Có mẫu SingPC I5-12450H BIOS 5.32 với Serial IO, SST OED / thiết bị con nhánh 10.29.0.x; không áp cấu hình này lên máy khác.
+- Disable thiết bị con và chỉnh nguồn là tuỳ chọn riêng, xem và xác nhận bằng nút bấm; kiểm tra Admin, ghi log, đọc lại trạng thái. Giữ bảo vệ bus cha, không tự restart hoặc thay BIOS.
+- Xuất HTML có thông tin máy, trước / sau, lệnh đã chạy, thiết bị còn lỗi và link. Tách Code 0, thiết bị biến mất và Code 22; không báo hết lỗi chỉ vì pnputil trả thành công. Dữ liệu driver/profile/log của kỹ thuật viên lưu local.
+
 ## 2.1.12.0 — 18/11/2026
 
 - Căn Hướng dẫn nhanh và Liên hệ / góp ý cùng lề trái, cỡ chữ và chiều rộng trong thanh bên. Bỏ nền chọn cố định của Hướng dẫn nhanh; hai mục có cùng kiểu rê chuột / bàn phím.

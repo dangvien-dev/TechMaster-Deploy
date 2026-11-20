@@ -19,6 +19,7 @@ jobs:
             & App/Test-Wpf.ps1
             & App/Test-UpdateProbe.ps1
             & App/Test-LogoPreview.ps1
+            & FixClone/Test-DriverFixWpf.ps1
           }
           catch {
             $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)
@@ -46,6 +47,7 @@ jobs:
           & FixClone/Test-UltraViewerLifecycle.ps1
           & FixClone/Test-MasterDeployment.ps1
           & FixClone/Test-WindowsLicense.ps1
+          & FixClone/Test-DriverFix.ps1
           & FixClone/Test-WordSettings.ps1
           & FixClone/Test-DinhDang.ps1
           & FixClone/Test-BanPhim.ps1

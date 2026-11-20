@@ -1,0 +1,118 @@
+﻿# Built-in metadata travels through the existing PS1 updater allowlist.
+# Keep the JSON equal to DriverFix.SingPC.json; test verifies both.
+function Get-DriverFixBuiltinProfileJson {
+@'
+{
+  "schema": 1,
+  "id": "singpc-i5-12450h-bios532",
+  "name": "SingPC I5-12450H · BIOS 5.32",
+  "verification": "Thông tin do kỹ thuật viên xác minh trên máy thực tế; không bao gồm tệp driver.",
+  "match": {
+    "anyOf": [
+      {
+        "manufacturer": "SingPC",
+        "model": "I5-12450H",
+        "bios": "5.32"
+      }
+    ]
+  },
+  "notes": [
+    "AMI Aptio, board OEM Trung Quốc, Alder Lake-P/H; SUBSYS mặc định 72708086.",
+    "Đối chiếu phiên bản SST BUS thực tế trước khi cài OED. Máy đã kiểm tra dùng BUS 10.29.0.12181.",
+    "BT LE Sideband device và Detection Verification: chưa có Hardware ID được xác minh. Chỉ ghi chú; không tự disable theo tên.",
+    "Nếu vẫn không dùng được audio: kỹ thuật viên có thể xem tùy chọn tắt Audio DSP trong BIOS. Tool không đổi BIOS."
+  ],
+  "installOrder": [
+    {
+      "order": 1,
+      "name": "Intel Serial IO GPIO (kèm I2C/SPI/UART 51xx)",
+      "hardwarePatterns": [
+        "ACPI\\INTC1055*"
+      ],
+      "recommendedVersion": "",
+      "queries": [
+        "INTC1055",
+        "Intel Serial IO GPIO Alder Lake"
+      ],
+      "links": [
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=INTC1055",
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=Intel%20Serial%20IO%20GPIO%20Alder%20Lake"
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Intel Smart Sound Technology OED / High Definition DSP",
+      "hardwarePatterns": [
+        "INTELAUDIO\\DSP_CTLR_DEV_51C8&VEN_8086&DEV_0222*"
+      ],
+      "recommendedVersion": "10.29.0.*",
+      "queries": [
+        "INTELAUDIO\\DSP_CTLR_DEV_51C8&VEN_8086&DEV_0222",
+        "Intel Smart Sound Technology OED 10.29.0"
+      ],
+      "links": [
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=INTELAUDIO%5CDSP_CTLR_DEV_51C8%26VEN_8086%26DEV_0222",
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=Intel%20Smart%20Sound%20Technology%20OED%2010.29.0"
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Intel SST for USB Audio / thiết bị con SST",
+      "hardwarePatterns": [
+        "INTELAUDIO\\CTLR_DEV_51C8&LINKTYPE_06&DEVTYPE_06&VEN_8086&DEV_AE50*",
+        "INTELAUDIO\\CTLR_DEV_51C8&LINKTYPE_03&DEVTYPE_03&VEN_8086&DEV_AE33*"
+      ],
+      "recommendedVersion": "10.29.0.*",
+      "queries": [
+        "CTLR_DEV_51C8&LINKTYPE_06",
+        "CTLR_DEV_51C8&LINKTYPE_03",
+        "Intel Smart Sound Technology 10.29.0"
+      ],
+      "links": [
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=CTLR_DEV_51C8%26LINKTYPE_06",
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=CTLR_DEV_51C8%26LINKTYPE_03",
+        "https://www.catalog.update.microsoft.com/Search.aspx?q=Intel%20Smart%20Sound%20Technology%2010.29.0"
+      ]
+    }
+  ],
+  "disable": [
+    {
+      "name": "Intel SST for USB Audio (AE50)",
+      "hardwarePatterns": [
+        "INTELAUDIO\\CTLR_DEV_51C8&LINKTYPE_06&DEVTYPE_06&VEN_8086&DEV_AE50*"
+      ],
+      "reason": "Chỉ cân nhắc trên máy bàn không dùng tính năng này, sau khi đã thử driver phù hợp 10.29.0.x."
+    },
+    {
+      "name": "Thiết bị con SST (AE33)",
+      "hardwarePatterns": [
+        "INTELAUDIO\\CTLR_DEV_51C8&LINKTYPE_03&DEVTYPE_03&VEN_8086&DEV_AE33*"
+      ],
+      "reason": "Chỉ cân nhắc trên máy bàn không dùng tính năng này, sau khi đã thử driver phù hợp 10.29.0.x."
+    }
+  ],
+  "powerActions": [
+    {
+      "id": "UsbSelectiveSuspendAc",
+      "name": "Tắt USB selective suspend (nguồn AC)"
+    },
+    {
+      "id": "PcieLinkStateAc",
+      "name": "Tắt PCIe Link State Power Management (nguồn AC)"
+    },
+    {
+      "id": "UsbHidDevicePower",
+      "name": "Bỏ cho phép tắt nguồn thiết bị USB/HID (WMI nếu hỗ trợ)"
+    },
+    {
+      "id": "SleepNeverAc",
+      "name": "Sleep = Never (nguồn AC)"
+    }
+  ],
+  "knownFailures": [
+    "Không ép High Definition Audio Controller (hdaudbus.inf) lên SST BUS: BIOS đang ở chế độ DSP, Windows không chấp nhận.",
+    "Resume từ S3: quạt quay nhưng không có tín hiệu, nghi lỗi BIOS. Đề xuất Sleep = Never khi dùng nguồn AC."
+  ]
+}
+'@
+}

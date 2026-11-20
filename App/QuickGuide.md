@@ -69,3 +69,14 @@
 - Zalo: 0976852096. Email: vienkendo@gmail.com. Dùng liên kết ở cuối cửa sổ để mở hoặc bấm Sao chép liên hệ.
 - Khi góp ý / báo lỗi, ghi phiên bản app, phiên bản Windows và bước vừa thao tác; kèm ảnh hoặc nhật ký nếu có.
 - Che key đầy đủ và thông tin riêng tư của khách trước khi gửi ảnh / nhật ký. Không cần gửi mật khẩu máy khách.
+
+## Fix Driver
+- Dùng chung cho mọi máy / mainboard, không cần profile. Quét, Catalog, cài CAB / INF và kho USB / NAS hoạt động độc lập với profile; chỉ áp gợi ý và tinh chỉnh riêng nếu nhận diện khớp.
+- Mở Fix Driver ở menu bên trái. Quét liệt kê toàn bộ thiết bị có mã lỗi, toàn bộ Hardware ID và InstanceId. Chọn thiết bị rồi mở từng link Catalog hoặc Copy Hardware ID.
+- Tải CAB bằng trình duyệt từ nguồn chính thức, chọn Chọn CAB và cài. Hoặc giải nén trước và chọn thư mục INF. Xác nhận bằng nút bấm; log ghi đầy đủ kết quả expand / pnputil. Sau cài tự dò phần cứng và đợi 3 giây rồi quét lại; nếu có thiết bị con mới, tiếp tục tải gói phù hợp.
+- Cài từ kho USB / NAS tìm INF chứa Hardware ID khớp, ưu tiên thứ tự và phiên bản trong profile, tối đa 4 vòng. Không đưa driver vào thư mục chương trình để phát hành. Nút dừng chỉ dừng giữa các gói; không ngắt cài đang chạy.
+- Profile SingPC chỉ khớp Manufacturer SingPC, Model I5-12450H, BIOS 5.32. Cài Serial IO trước OED, rồi thiết bị con SST; giữ nhánh SST 10.29.0.x khớp BUS. Không ép hdaudbus lên SST BUS.
+- Disable chỉ bật cho thiết bị lỗi có Hardware ID được khai báo và khớp profile. Chọn thiết bị, xem cảnh báo mất tính năng, xác nhận riêng. Thiết bị chỉ có tên BT LE Sideband / Detection Verification chưa có ID được xác minh nên không có nút disable theo tên.
+- Chỉnh nguồn là bước tuỳ chọn: chọn từng mục, xem và xác nhận. Chỉ thay power scheme nguồn AC; USB/HID dùng WMI nếu hỗ trợ. Lỗi hoặc trường hợp không hỗ trợ được ghi rõ, không tính là thành công.
+- Xuất báo cáo HTML để xem thông tin máy, trước / sau, lệnh đã chạy và các thiết bị còn lỗi kèm link. Dữ liệu nằm trong %LOCALAPPDATA%\TechMaster Deploy\DriverFix. Profile JSON nằm ở Profiles; sửa / thêm rồi mở lại module để nạp.
+- Test trên máy lỗi: ghi nhận danh sách trước, cài một gói đúng ID, kiểm tra Device Manager và thiết bị con sau quét, xuất báo cáo, kiểm tra âm thanh / USB và khởi động lại chủ động nếu pnputil yêu cầu. Hướng dẫn đầy đủ ở FixClone/DriverFix.md.
