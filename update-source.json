@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.1.12.0",
+  "version": "2.2.0.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -140,14 +140,14 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 26631,
-      "sha": "fb9bb03881cf41bb5e5310f7d23690b9877b8ae9"
+      "size": 27751,
+      "sha": "f8e401ed11071a1e707e33a91b463df6750b0dbe"
     },
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 8765,
-      "sha": "e0b872e5f7bf3fcc885d6e755092f998cc18f750"
+      "size": 11233,
+      "sha": "c5d711171c344b044603473c7195df26bf3c2c13"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 19119,
-      "sha": "1241f7b925a240a5b1d88d75672b3e38c957f4b6"
+      "size": 19543,
+      "sha": "712b68ed433787734f09eb5d4af8a6489df27612"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -212,8 +212,8 @@
     {
       "path": "App/Test-Info.ps1",
       "mode": "100644",
-      "size": 4125,
-      "sha": "ff124becdf36786007eba77739d8112b0a40dbb0"
+      "size": 4138,
+      "sha": "621b864c60bcbd2313a66e2881ccf7bec0577d7c"
     },
     {
       "path": "App/Test-InfoEntryPoints.ps1",
@@ -284,8 +284,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 20111,
-      "sha": "f8855b358e8052b39be072887b93f683feeb6d7e"
+      "size": 20141,
+      "sha": "ae1abd663268c6949537fcaa1ae45bc10b83dd59"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -386,8 +386,50 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 11203,
-      "sha": "221de6acc241139b0dbe2d441aeb445e9bab63cb"
+      "size": 12497,
+      "sha": "4398c213c057c67e3c671e8e54c258cd2d6624e5"
+    },
+    {
+      "path": "FixClone/DriverFix.Core.ps1",
+      "mode": "100644",
+      "size": 12210,
+      "sha": "96b7efbbcb05dc21f8b789f785a8d4689ba44e79"
+    },
+    {
+      "path": "FixClone/DriverFix.Engine.ps1",
+      "mode": "100644",
+      "size": 18716,
+      "sha": "35f71782ca7861ba66d2aec5783424be058fa39a"
+    },
+    {
+      "path": "FixClone/DriverFix.md",
+      "mode": "100644",
+      "size": 12252,
+      "sha": "0d3dd3c0c1be005a962066daec1b7c074429bde1"
+    },
+    {
+      "path": "FixClone/DriverFix.Profiles.ps1",
+      "mode": "100644",
+      "size": 4415,
+      "sha": "1ce24cb09c6618c5bd92ac173a5cb2ccd6567d10"
+    },
+    {
+      "path": "FixClone/DriverFix.ps1",
+      "mode": "100644",
+      "size": 13825,
+      "sha": "ef8fed5e5f90316c47c415733bf887527998b618"
+    },
+    {
+      "path": "FixClone/DriverFix.Report.ps1",
+      "mode": "100644",
+      "size": 4786,
+      "sha": "4498775bc7218956adb12559afd7da4e5ca8c84a"
+    },
+    {
+      "path": "FixClone/DriverFix.xml",
+      "mode": "100644",
+      "size": 7020,
+      "sha": "21a6973a61ac0a6ff7ffb5984ddbb89bf7ebb850"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -520,6 +562,18 @@
       "mode": "100644",
       "size": 2251,
       "sha": "78349f70cbec28c678ac0228daefe786af0e8416"
+    },
+    {
+      "path": "FixClone/Test-DriverFix.ps1",
+      "mode": "100644",
+      "size": 19633,
+      "sha": "82120bd9cd14295d62ef874b9a2f7bdaa675b9f6"
+    },
+    {
+      "path": "FixClone/Test-DriverFixWpf.ps1",
+      "mode": "100644",
+      "size": 3032,
+      "sha": "06557859141f5ff292cfc3ba544a997862f36acd"
     },
     {
       "path": "FixClone/Test-MasterDeployment.ps1",
@@ -758,8 +812,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 16834,
-      "sha": "b12eb194c6a4f0e1615825957d4dbde54f53dc0e"
+      "size": 17525,
+      "sha": "510648c76b9c641babf94bb7b95383eb83046ca4"
     },
     {
       "path": "RELEASING.md",
@@ -770,8 +824,8 @@
     {
       "path": "version.txt",
       "mode": "100644",
-      "size": 9,
-      "sha": "9a3cd428335c13b9d95feffb27b2488798972ea8"
+      "size": 8,
+      "sha": "0d04db054743d79d62af3b153f2503e4da4c1784"
     }
   ]
 }
