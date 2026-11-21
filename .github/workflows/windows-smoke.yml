@@ -39,6 +39,8 @@ jobs:
           & App/Test-WpfRuntime.ps1
           & App/Test-DeployActions.ps1
           & App/Test-UltraInstall.ps1
+          & App/Test-WinRARStartup.ps1
+          & App/Test-PdfPrinter.ps1
           & App/Test-Info.ps1
           & App/Test-CustomApps.ps1
           & App/Test-UpdateNotification.ps1

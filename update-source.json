@@ -3,13 +3,13 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.1.0",
+  "version": "2.2.2.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
       "mode": "100644",
-      "size": 7620,
-      "sha": "4692406eb0eab0df81fd5797daf0253b9abbf395"
+      "size": 8926,
+      "sha": "2517f3ea024fd1fd141c2645e450ac2411e3ebe6"
     },
     {
       "path": "App/Build-Launcher.ps1",
@@ -144,10 +144,16 @@
       "sha": "f8e401ed11071a1e707e33a91b463df6750b0dbe"
     },
     {
+      "path": "App/Pdf.Printer.ps1",
+      "mode": "100644",
+      "size": 2133,
+      "sha": "5665d3db6980c98f9ef283ce242daeb2469510a9"
+    },
+    {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 11233,
-      "sha": "c5d711171c344b044603473c7195df26bf3c2c13"
+      "size": 12283,
+      "sha": "f7d47c254c455b839b66a51118911acca4eda559"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -228,6 +234,12 @@
       "sha": "969ed0d647de7b6b23abd129c50091d57d63764a"
     },
     {
+      "path": "App/Test-PdfPrinter.ps1",
+      "mode": "100644",
+      "size": 2723,
+      "sha": "b2a41769fd32bd9ddb829af3451b39d9f91cdd18"
+    },
+    {
       "path": "App/Test-PublicUpdate.ps1",
       "mode": "100644",
       "size": 7074,
@@ -282,6 +294,12 @@
       "sha": "c653707b698a8b885fcbe3a34214c539085071c9"
     },
     {
+      "path": "App/Test-WinRARStartup.ps1",
+      "mode": "100644",
+      "size": 6242,
+      "sha": "c46e1c4458e404eff7188369fdd254d2b2f1ab3b"
+    },
+    {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
       "size": 20141,
@@ -290,8 +308,8 @@
     {
       "path": "App/Test-WpfRuntime.ps1",
       "mode": "100644",
-      "size": 1225,
-      "sha": "b048502e7b6526a25d4b5d6b05b9ec4b6a3a8137"
+      "size": 2122,
+      "sha": "5941c059b1f937f1fde5890cb005db092f4794f5"
     },
     {
       "path": "App/UltraViewer.Install.ps1",
@@ -348,10 +366,16 @@
       "sha": "2aa9718b906aa806ee6836d49c8617ec434450f1"
     },
     {
+      "path": "App/WinRAR.Startup.ps1",
+      "mode": "100644",
+      "size": 3614,
+      "sha": "93921d801ab07cd4fbc773169b65dc90602f58cb"
+    },
+    {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 11453,
-      "sha": "f81d493c50a88e10440f37879439e365d1aa8b3e"
+      "size": 11653,
+      "sha": "5bcfda479d5806f72a407d21d71277bd22ce888c"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -386,8 +410,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 13152,
-      "sha": "5265dcb2dbef04ebb968abf460623a095c601a84"
+      "size": 14156,
+      "sha": "ed89c1b9b0092b9399da37329477362719c23e17"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -812,8 +836,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 17525,
-      "sha": "510648c76b9c641babf94bb7b95383eb83046ca4"
+      "size": 18012,
+      "sha": "e702b2cdf43f73fa5992edec2f4e22024f40dea1"
     },
     {
       "path": "RELEASING.md",
@@ -825,7 +849,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "a89d5a39320649ca5568f38d2ad439f4cd944ed3"
+      "sha": "f0cda329549ed90fb94ebb6a9dd53d3fb36231b9"
     }
   ]
 }

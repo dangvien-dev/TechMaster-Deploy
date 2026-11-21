@@ -139,7 +139,9 @@ function Receive-DeployWork($work) {
     if (-not $work.Async.IsCompleted) { throw 'Background operation has not completed.' }
     try {
         $output = @($work.Pipeline.EndInvoke($work.Async))
-        if ($work.Pipeline.HadErrors) { throw $work.Pipeline.Streams.Error[0].Exception }
+        # Caught/suppressed cmdlet errors can set HadErrors without emitting an
+        # error record. EndInvoke already throws terminating pipeline failures.
+        if ($work.Pipeline.HadErrors -and $work.Pipeline.Streams.Error.Count) { throw $work.Pipeline.Streams.Error[0].Exception }
         return $output
     } finally { $work.Pipeline.Dispose(); $work.Space.Dispose() }
 }

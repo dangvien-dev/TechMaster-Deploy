@@ -9,6 +9,16 @@ while (-not $job.Async.IsCompleted) { Start-Sleep -Milliseconds 10 }
 $caught = ''
 try { Receive-DeployWork $job } catch { $caught = $_.Exception.Message }
 if ($caught -notmatch 'worker failure') { throw 'Worker error not surfaced.' }
+# A provider failure may be handled by a worker and intentionally returned as data.
+$job = Start-DeployWork 'try { Get-Process -Name __TechMasterNonexistentFixture -ErrorAction Stop } catch { [pscustomobject]@{Readable=$false;Message="Expected inspection failure"} }'
+while (-not $job.Async.IsCompleted) { Start-Sleep -Milliseconds 10 }
+$result = @(Receive-DeployWork $job)
+if ($result[-1].Readable -ne $false -or $result[-1].Message -ne 'Expected inspection failure') { throw 'Handled inspection result was incorrectly discarded.' }
+$job = Start-DeployWork 'Write-Error "unhandled nonterminating error"; "partial output"'
+while (-not $job.Async.IsCompleted) { Start-Sleep -Milliseconds 10 }
+$caught = ''
+try { Receive-DeployWork $job } catch { $caught = $_.Exception.Message }
+if ($caught -notmatch 'unhandled nonterminating error') { throw 'Nonterminating error record was silently accepted.' }
 $job = Start-DeployWork 'Start-Sleep -Seconds 15'
 Request-DeployWorkCancel $job
 $deadline = [DateTime]::UtcNow.AddSeconds(5)

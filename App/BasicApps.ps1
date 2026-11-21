@@ -136,7 +136,7 @@ $basicAppTimer.Add_Tick({
         if(-not $run.Job.Async.IsCompleted){return}
         $job=$run.Job;$run.Job=$null
         try{$result=@(Receive-DeployWork $job)[-1];Finish-BasicApp $run $result $result.Details}
-        catch{Finish-BasicApp $run @{Status='Cài UltraViewer chưa hoàn tất';Group='Failed'} $_.Exception.GetBaseException().Message}
+        catch{Finish-BasicApp $run @{Status=($run.Items[$run.Index].Name+' chưa hoàn tất');Group='Failed'} $_.Exception.GetBaseException().Message}
         Start-NextBasicApp $run
         return
     }
@@ -148,6 +148,30 @@ $basicAppTimer.Add_Tick({
     $run.Process = $null
     $result=Get-BasicAppResult $code
     if($run.Items[$run.Index].Source -eq 'Local' -and $code -eq 0){$result.Status='Đã kết thúc bộ cài'}
+    if($run.Items[$run.Index].Id -eq 'RARLab.WinRAR' -and $result.Group -in 'Installed','Skipped','Restart'){
+        try{
+            $run.Job=Start-DeployWork @'
+param($module,$result,$details,$log)
+$ErrorActionPreference='Stop'
+. $module
+Complete-DeployWinRarStartup $result $details $log
+'@ @((Join-Path $PSScriptRoot 'WinRAR.Startup.ps1'),$result,$details,$script:basicAppLog)
+            $lblBasicAppStatus.Text='Đang mở WinRAR để hoàn tất thiết lập lần đầu…'
+        }catch{Finish-BasicApp $run @{Status='Chưa mở được WinRAR';Group='Failed'} $_.Exception.GetBaseException().Message;Start-NextBasicApp $run}
+        return
+    }
+    if($run.Items[$run.Index].Id -eq 'Foxit.FoxitReader' -and $result.Group -in 'Installed','Skipped','Restart'){
+        try{
+            $run.Job=Start-DeployWork @'
+param($module,$result,$details)
+$ErrorActionPreference='Stop'
+. $module
+Complete-DeployFoxitReader $result $details
+'@ @((Join-Path $PSScriptRoot 'Pdf.Printer.ps1'),$result,$details)
+            $lblBasicAppStatus.Text='Đang kiểm tra máy in PDF sau cài Foxit Reader…'
+        }catch{Finish-BasicApp $run $result ($details+"`r`nChưa kiểm tra được máy in PDF: "+$_.Exception.GetBaseException().Message);Start-NextBasicApp $run}
+        return
+    }
     Finish-BasicApp $run $result $details
     Start-NextBasicApp $run
 })
