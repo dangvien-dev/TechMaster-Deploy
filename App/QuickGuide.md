@@ -57,6 +57,10 @@
 - Các ứng dụng khác dùng WinGet. Nếu thiếu WinGet, mở Hướng dẫn WinGet để cài App Installer.
 - Bảng Kết quả và nút Xem nhật ký giúp xác định ứng dụng đã cài, đã có sẵn hoặc đang gặp lỗi.
 
+- Với WinRAR, sau cài hoặc khi WinGet báo đã có, app mở WinRAR lần đầu để hoàn tất thiết lập theo tài khoản. Hoàn tất thông báo trong WinRAR nếu có, rồi thử lại menu chuột phải trên tệp / thư mục. App không tự khẳng định menu đã xuất hiện chỉ vì mở ứng dụng thành công.
+- Nếu menu WinRAR vẫn thiếu: mở WinRAR bằng quyền Administrator → Options → Settings → Integration, bật Integrate WinRAR into shell và chọn các mục trong Context menu items. App giữ nguyên WinRAR đang chạy và không ép cài lại phần mềm đã có.
+- Foxit Reader bản mới không kèm máy in ảo Foxit PDF Printer như bản Reader cũ. App kiểm tra riêng các hàng đợi máy in PDF sau cài Reader và ghi tên / driver / cổng in vào nhật ký; báo đã cài Reader không có nghĩa đã cài máy in PDF. Microsoft Print to PDF là tính năng riêng của Windows; Foxit PDF Printer cần bộ Foxit có thành phần tạo PDF tương ứng.
+
 ## Cập nhật / khôi phục
 - Chấm đỏ trên nút Cập nhật báo có bản mới. App đọc số phiên bản trong nền khi mở và định kỳ, không tự tải hoặc chen thông báo. Nếu mạng lỗi sẽ thử lại sau 1 phút; bấm Làm mới để yêu cầu kiểm tra ngay.
 - Bấm Kiểm tra cập nhật, Tải bản cập nhật rồi Cài đặt bản cập nhật. Nút Cập nhật trên đầu app gọi lại cửa sổ đang bị khuất.

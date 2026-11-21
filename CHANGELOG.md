@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.2.0 — 21/11/2026
+
+- Sau khi cài WinRAR hoặc khi WinGet báo đã có, mở WinRAR lần đầu để hoàn tất thiết lập theo tài khoản và kiểm tra lại menu chuột phải. Giữ WinRAR đang chạy, không ép cài lại hoặc tự sửa registry Explorer. Ghi kết quả mở ứng dụng vào nhật ký.
+- Sau cài Foxit Reader, kiểm tra riêng các hàng đợi máy in PDF và ghi tên / driver / cổng in. Phân biệt đã cài Reader với có máy in PDF; lỗi đọc danh sách máy in không bị báo nhầm là thiếu máy in.
+- Bổ sung hướng dẫn: Foxit Reader bản mới không kèm máy in ảo như Reader cũ; Microsoft Print to PDF là tính năng riêng của Windows. Bước kiểm tra không tự cài thêm máy in hoặc driver.
+
 ## 2.2.1.0 — 21/11/2026
 
 - Rà soát bo góc các cửa sổ phụ: nút trong Định danh UltraViewer, Bàn phím, Chuẩn bị Sysprep, Chẩn đoán và Gỡ / dọn Office dùng template chung khi chưa có style riêng.

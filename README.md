@@ -122,6 +122,8 @@ powershell.exe -NoProfile -File Office\Test-OfficeCleanup.ps1
 1. Mở tab **Cài ứng dụng**, chọn Chrome, 7-Zip, VLC, SumatraPDF, Foxit PDF Reader, ONLYOFFICE Desktop Editors, LibreOffice, Notepad++, Zalo, WinRAR, UltraViewer hoặc EVKey rồi bấm **Cài ứng dụng đã chọn**.
 2. Giữ TechMaster mở trong lúc WinGet tải và cài lần lượt. Tiến trình đếm số ứng dụng đã xử lý. WinGet bỏ qua phiên bản đã cài và tab hiển thị kết quả cho từng ứng dụng.
 3. UltraViewer dùng bộ cài tiếng Việt **6.6.133** từ link chính thức; kiểm tra chữ ký nhà phát hành và phiên bản trước khi chạy, rồi đọc lại phiên bản sau cài. Bản đã cài / đang chạy được giữ để tránh ngắt hỗ trợ. Các app còn lại dùng WinGet.
+4. WinRAR: sau cài hoặc khi đã có sẵn, app mở WinRAR lần đầu để hoàn tất thiết lập theo tài khoản; thử lại menu chuột phải. WinRAR đang chạy được giữ nguyên.
+5. Foxit Reader: app kiểm tra riêng máy in PDF sau cài. Reader bản mới không kèm máy in ảo Foxit như bản Reader cũ; Microsoft Print to PDF là tính năng riêng của Windows. Kết quả có hàng đợi không thay thế việc thử in một trang thực tế.
 4. Bấm **Xem nhật ký** để xem kết quả cài. Nếu máy chưa có WinGet, bấm **Hướng dẫn WinGet** để cài hoặc cập nhật App Installer.
 
 ## Chi tiết từng bộ
