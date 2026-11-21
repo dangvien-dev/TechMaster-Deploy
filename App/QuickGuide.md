@@ -27,6 +27,7 @@
 - Quay lại trang điện thoại hoặc quét QR 2, dán mã rồi bấm Gửi về máy tính. Cửa sổ QR trên máy tính sẽ đóng sau khi nhận mã.
 - Key cài đặt chung Windows mở cửa sổ kiểm tra / dọn riêng; lựa chọn dọn trong Sysprep mặc định tắt, chỉ bật sau khi đã kiểm tra; chỉ dọn key Pro …3V66T chưa kích hoạt đã xác minh. Có biên nhận và nút Hoàn tác; không ghi đè key mới đã nhập.
 - Trước khi lấy Installation ID, đối chiếu 5 ký tự cuối key trong hộp xác nhận. App ưu tiên key riêng, đọc lại IID và kiểm tra lần nữa trước khi nạp CID. Thay key hoặc IID sẽ dừng mã cũ; chạy lại để lấy QR mới. Key chung chỉ được thử online để nhận bản quyền số, không dùng để lấy QR offline.
+- Key dùng tạm Office nằm ngay trong mục Kích hoạt → Kích hoạt Office, cạnh nút kích hoạt và portal. Mở để xem danh sách, bấm Chọn key dùng thử, kiểm tra các key được đánh dấu rồi Xoá key đã chọn. Mặc định không chọn key nào; key không chọn được giữ. Cửa sổ này chỉ xử lý key và không có nút gỡ bộ Office.
 - Office chưa nhập key hoặc chỉ có SKU Grace / Trial sẽ hiện hướng dẫn nhập key trong Word hoặc đăng nhập Microsoft 365.
 - Kiểm tra lại màn hình Activation hoặc Product Activated của Microsoft trước khi bàn giao. Trạng thái kích hoạt không tự chứng minh nguồn gốc giấy phép.
 
@@ -42,8 +43,8 @@
 ## Tải / cài Office
 - Chọn đúng sản phẩm, ngôn ngữ và 32 / 64-bit. Có thể bỏ trống key để nhập sau trong Word.
 - Tải về kho một lần rồi dùng Cài từ kho cho các máy khác, hoặc chọn Cài trực tiếp khi có mạng.
-- Gỡ / dọn Office có bảng chọn từng key. Mặc định không chọn gì; key không chọn được giữ lại. Lưu tài liệu và đóng Office trước khi xác nhận xoá / gỡ.
-- Nếu cần giữ Retail, không tích key Retail. Chọn key dùng thử chỉ chọn Grace / Trial được nhận diện rõ.
+- Gỡ Office… mở phần gỡ bộ Office có bảng chọn từng key. Mặc định không chọn gì; key không chọn được giữ lại. Lưu tài liệu và đóng Office trước khi xác nhận xoá / gỡ.
+- Phần dọn key dùng tạm đã chuyển sang Kích hoạt → Key dùng tạm Office…. Nếu cần giữ Retail, không tích key Retail. Chọn key dùng thử chỉ chọn Grace / Trial được nhận diện rõ.
 
 ## Cài Windows
 - Trang tải Microsoft mở nơi tải ISO chính thức. Chọn ISO để công cụ kiểm tra và mở Windows Setup.

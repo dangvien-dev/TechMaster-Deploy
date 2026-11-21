@@ -121,6 +121,7 @@ Bind-Click 'btnWindowsSetupKey' {
     Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))) -WindowStyle Hidden|Out-Null
 }
 Bind-Click 'btnActivateOffice'  { Start-Tool (Join-Path $DirKH 'Kich-Hoat-Office.bat') 'Kích hoạt Office' }
+Bind-Click 'bCleanup' { Start-OfficeCleanup -CleanupMode Keys }
 Bind-Click 'btnActivationTest' { Start-Tool (Join-Path $DirKH 'Kich-Hoat-TEST.bat') 'TEST kích hoạt' }
 Bind-Click 'btnPortalWindows' { Start-Process 'https://aka.ms/WindowsActivate' }
 Bind-Click 'btnPortalOffice' { Start-Process 'https://visualsupport.microsoft.com/' }
@@ -233,7 +234,7 @@ $officeTimer = New-DeployTimer 500 {
     $lblOfficeProgress.Text = '{0} · {1:hh\:mm\:ss}' -f $run.Stage, ((Get-Date) - $run.Started)
 }
 Bind-Click 'bDl' { Start-ODT 'Download' }; Bind-Click 'bKho' { Start-ODT 'InstallKho' }; Bind-Click 'bNet' { Start-ODT 'Install' }
-Bind-Click 'bCleanup' { Start-OfficeCleanup }; Bind-Click 'bOpenKho' { Open-DeployFolder $KhoOffice }
+Bind-Click 'bRemoveOffice' { Start-OfficeCleanup }; Bind-Click 'bOpenKho' { Open-DeployFolder $KhoOffice }
 $bOfficeLog.IsEnabled = $false
 Bind-Click 'bOfficeLog' { if ($script:officeLog) { Start-Process notepad.exe ('"{0}"' -f $script:officeLog) } }
 Update-OffInfo

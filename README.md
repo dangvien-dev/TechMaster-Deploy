@@ -89,7 +89,7 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 
 ## Gỡ / dọn Office
 
-Trong tab **Tải / cài Office**, bấm **Gỡ / dọn Office…**. Bảng hiện loại license, trạng thái và 5 ký tự cuối key; mặc định không chọn key nào:
+Trong tab **Kích hoạt**, tại **Kích hoạt Office**, bấm **Key dùng tạm Office…** để kiểm tra / xoá key, tương tự mục key Windows. Phần này không có nút gỡ ứng dụng. Nếu cần gỡ bộ Office, vào **Tải / cài Office → Gỡ Office…**. Bảng hiện loại license, trạng thái và 5 ký tự cuối key; mặc định không chọn key nào:
 
 1. **Kiểm tra**: liệt kê Product ID Click-to-Run và key Office đọc được từ SoftwareLicensingProduct; chỉ hiển thị 5 ký tự cuối.
 2. **Xoá key đã chọn**: tích đúng các key cần xoá rồi bấm nút, kiểm tra danh sách trong hộp xác nhận. Key không chọn được giữ nguyên, gồm Retail bạn cần dùng. Nút chọn key dùng thử chỉ chọn Grace/Trial được nhận diện rõ; không gỡ ứng dụng.

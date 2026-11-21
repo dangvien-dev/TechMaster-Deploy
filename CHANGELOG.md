@@ -1,5 +1,10 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.3.0 — 21/11/2026
+
+- Đưa Key dùng tạm Office… vào mục Kích hoạt, cạnh Kích hoạt Office và Mở portal, tương tự phần key Windows. Cửa sổ từ nút này chỉ kiểm tra / chọn / xoá key, không có nút gỡ bộ Office.
+- Giữ thao tác Gỡ Office… ở mục Tải / cài Office. Mặc định không chọn key để xoá; nút Chọn key dùng thử đánh dấu Grace / Trial đã nhận diện, xoá vẫn cần kiểm tra và xác nhận.
+
 ## 2.2.2.0 — 21/11/2026
 
 - Sau khi cài WinRAR hoặc khi WinGet báo đã có, mở WinRAR lần đầu để hoàn tất thiết lập theo tài khoản và kiểm tra lại menu chuột phải. Giữ WinRAR đang chạy, không ép cài lại hoặc tự sửa registry Explorer. Ghi kết quả mở ứng dụng vào nhật ký.
