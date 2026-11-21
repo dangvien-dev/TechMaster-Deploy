@@ -308,8 +308,8 @@
     {
       "path": "App/Test-WpfRuntime.ps1",
       "mode": "100644",
-      "size": 1225,
-      "sha": "b048502e7b6526a25d4b5d6b05b9ec4b6a3a8137"
+      "size": 2122,
+      "sha": "5941c059b1f937f1fde5890cb005db092f4794f5"
     },
     {
       "path": "App/UltraViewer.Install.ps1",
@@ -374,8 +374,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 11453,
-      "sha": "f81d493c50a88e10440f37879439e365d1aa8b3e"
+      "size": 11653,
+      "sha": "5bcfda479d5806f72a407d21d71277bd22ce888c"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -410,8 +410,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 13948,
-      "sha": "70467d390a15bbe9c528418586aa330e31c5781d"
+      "size": 14156,
+      "sha": "ed89c1b9b0092b9399da37329477362719c23e17"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
