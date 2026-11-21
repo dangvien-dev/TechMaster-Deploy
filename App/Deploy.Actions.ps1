@@ -230,7 +230,7 @@ try{Set-DeployExplorerMenu $mode $log}catch{Write-DeployWindowsToolsLog $log 'fa
         param($result)
         $r=$result[-1];Set-Status ($r.Message+' Nhật ký: '+$r.Log) 'Attention'
         if($r.Changed -and (Confirm-Box 'Khởi động lại Explorer để áp dụng ngay? Các cửa sổ thư mục của tài khoản này có thể đóng. Tác vụ chép tệp đang chạy cần hoàn tất trước.' 'Áp dụng menu chuột phải' -ConfirmText 'Khởi động lại Explorer' -CancelText 'Để sau' -Owner $form)){
-            try{. (Join-Path $PSScriptRoot 'Windows.Tools.ps1');Restart-DeployCurrentExplorer $r.Log;Set-Status 'Đã yêu cầu khởi động lại Explorer. Thử lại menu chuột phải; nếu chưa đổi, đăng xuất / đăng nhập lại.' 'Info'}catch{Set-Status ('Đã lưu cấu hình nhưng chưa khởi động lại được Explorer: '+$_.Exception.Message) 'Attention'}
+            try{. (Join-Path $PSScriptRoot 'Windows.Tools.ps1');Restart-DeployCurrentExplorer $r.Log;Set-Status (Get-DeployExplorerMenuRestartMessage $r) $(if($r.Mode -eq 'Legacy' -and $r.Compatibility.MayIgnore){'Attention'}else{'Info'})}catch{Set-Status ($r.Message+' Chưa khởi động lại được Explorer: '+$_.Exception.Message+' Nhật ký: '+$r.Log) 'Attention'}
         }
     }
 }
