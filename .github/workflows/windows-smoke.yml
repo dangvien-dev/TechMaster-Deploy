@@ -17,6 +17,7 @@ jobs:
           try {
             & App/Test-InfoEntryPoints.ps1
             & App/Test-Wpf.ps1
+            & App/Test-DefaultsWpf.ps1
             & App/Test-UpdateProbe.ps1
             & App/Test-LogoPreview.ps1
             & FixClone/Test-DriverFixWpf.ps1
@@ -42,6 +43,7 @@ jobs:
           & App/Test-WinRARStartup.ps1
           & App/Test-PdfPrinter.ps1
           & App/Test-WindowsTools.ps1
+          & App/Test-Defaults.ps1
           & App/Test-Info.ps1
           & App/Test-CustomApps.ps1
           & App/Test-UpdateNotification.ps1

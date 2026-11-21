@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.6.0",
+  "version": "2.2.7.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -70,6 +70,30 @@
       "mode": "100644",
       "size": 4573,
       "sha": "bf8cc45b7b9ff42fca757c61766911e58bb360be"
+    },
+    {
+      "path": "App/Defaults.Core.ps1",
+      "mode": "100644",
+      "size": 11323,
+      "sha": "59bf856801b4ddfbaae371a162f2098008b12465"
+    },
+    {
+      "path": "App/Defaults.Native.cs",
+      "mode": "100644",
+      "size": 2396,
+      "sha": "a4be47ffed672ec87b7e52b1a9ef00f582849c46"
+    },
+    {
+      "path": "App/Defaults.UI.ps1",
+      "mode": "100644",
+      "size": 8533,
+      "sha": "36d358a95080f87953c283af3e0d9ffbd758fb2a"
+    },
+    {
+      "path": "App/DefaultsWindow.xml",
+      "mode": "100644",
+      "size": 5158,
+      "sha": "a30b47e3b58bd82a823638c36c78bd8ffc7e89a2"
     },
     {
       "path": "App/Deploy.Actions.ps1",
@@ -140,8 +164,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 29681,
-      "sha": "bf1109bfc405d7a03af522e44a2a179bc6ab0cb1"
+      "size": 30138,
+      "sha": "da77b7cff6669020e927539caf5ef8215dda4a5a"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -152,8 +176,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 15071,
-      "sha": "c51ae3da80fb846898258248d12154fe75b14d4b"
+      "size": 16069,
+      "sha": "fe51ae58587a3026caa0896e8395fa93dbe4f3cd"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -188,8 +212,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 20620,
-      "sha": "0a8bef984062dd042f1160584a65a9e44c8e4132"
+      "size": 20767,
+      "sha": "74414922e5fffdbd8c6036685b7e719c5951471b"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -208,6 +232,18 @@
       "mode": "100644",
       "size": 3416,
       "sha": "2dd33f42c0c110f1246036806847dfaf2cbc3525"
+    },
+    {
+      "path": "App/Test-Defaults.ps1",
+      "mode": "100644",
+      "size": 8626,
+      "sha": "4892e2d2e4e1d3c1d98332422878aab6bc07f942"
+    },
+    {
+      "path": "App/Test-DefaultsWpf.ps1",
+      "mode": "100644",
+      "size": 3808,
+      "sha": "9656bdbed7e25f25e83a6b0bace8219023c1a106"
     },
     {
       "path": "App/Test-DeployActions.ps1",
@@ -308,8 +344,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 20157,
-      "sha": "0b6878379964643c60f6c8ed235b119141c85c84"
+      "size": 20171,
+      "sha": "037938afc9a6765376c19969f0f542808377e0bd"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -422,8 +458,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 17547,
-      "sha": "f895c8b2b2931f8c2b6f142d27ff15fb3c87cba1"
+      "size": 18565,
+      "sha": "de292563a24060232348890a3ad3529e81cc6bc4"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -842,14 +878,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 10034,
-      "sha": "78c7aa7645c7950f8e8faa904aa37ddfe314104e"
+      "size": 10770,
+      "sha": "ef6eb1eabd5976b6d8810c1799ae9f33e3df366b"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 18936,
-      "sha": "abd61ae76328289b4c5990f0588a800a65cf12ef"
+      "size": 20144,
+      "sha": "5cf7e0b6191ec895167f9d904585fa8d317384d6"
     },
     {
       "path": "RELEASING.md",
@@ -861,7 +897,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "d9c7106d3fd9339aa4aa50b5a1b2a0510f1c5670"
+      "sha": "08f6e029a18706b6faf377bbfd8e001487f9322c"
     }
   ]
 }

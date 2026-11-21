@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.7.0 — 21/11/2026
+
+- Thêm Sau khi clone → Thiết lập mặc định: chọn một máy in đã cài, đặt A4 và / hoặc đặt máy in mặc định cho tài khoản đang chạy app. Tắt Windows tự quản lý máy in khi chọn mặc định; ghi lại trạng thái trước / sau và đọc lại kết quả từ hệ thống. Báo riêng nếu driver chưa hỗ trợ / nhận A4 hoặc một phần thao tác thất bại.
+- Chọn trình duyệt web và ứng dụng đọc PDF từ các đăng ký thực tế trên máy; mở trang Ứng dụng mặc định của Windows để người dùng xác nhận. Kiểm tra lại HTTP, HTTPS và .pdf; không sửa / sao chép UserChoice hash, không báo thành công chỉ vì đã mở Cài đặt.
+- Cửa sổ WPF dùng khung và ô chọn bo góc, thông báo màu, tác vụ nền và nhật ký local. Hiện rõ tài khoản áp dụng; khổ A4 của hàng đợi và khổ giấy lưu riêng trong tài liệu có thể khác nhau.
+
 ## 2.2.6.0 — 21/11/2026
 
 - UltraViewer tự tìm lại lịch sử reset đúng máy khi mở lại cửa sổ / app hoặc sau khởi động lại Windows, gồm bản sao lưu tạo bởi phiên bản cũ. Hiện thời gian và trạng thái reset, chờ ID, xác minh hoặc khôi phục cùng đường dẫn sao lưu; không reset tự động khi mở cửa sổ.
