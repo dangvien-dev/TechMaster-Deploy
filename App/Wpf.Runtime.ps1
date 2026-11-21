@@ -109,6 +109,44 @@ function Initialize-DeployTables([Windows.Window]$window) {
     $style.Setters.Add([Windows.Setter]::new([Windows.Controls.DataGrid]::RowHeightProperty,[double]::NaN))
     $window.Resources[[Windows.Controls.DataGrid]]=$style
 }
+function Set-DeployNoticeKind($control,[ValidateSet('Info','Working','Attention','Success','Error')][string]$Kind='Info') {
+    $view=$control.Tag
+    if($view -isnot [Collections.IDictionary] -or -not $view.Contains('NoticeFrame')){return}
+    $palette=switch($Kind){
+        'Success' {@('#F0FDF4','#BBF7D0','#166534','#DCFCE7','✓')}
+        'Attention' {@('#FFFBEB','#FDE68A','#92400E','#FEF3C7','!')}
+        'Error' {@('#FEF2F2','#FECACA','#991B1B','#FEE2E2','!')}
+        'Working' {@('#EFF6FF','#BFDBFE','#1E40AF','#DBEAFE','…')}
+        default {@('#EFF6FF','#BFDBFE','#1E40AF','#DBEAFE','i')}
+    }
+    $view.NoticeFrame.Background=$palette[0];$view.NoticeFrame.BorderBrush=$palette[1]
+    $control.Foreground=$palette[2];$view.Icon.Foreground=$palette[2]
+    $view.Badge.Background=$palette[3];$view.Icon.Text=$palette[4];$view.Kind=$Kind
+}
+function Set-DeployNotice($control,[string]$Text,[ValidateSet('Info','Working','Attention','Success','Error')][string]$Kind='Info') {
+    $control.Text=$Text
+    Set-DeployNoticeKind $control $Kind
+}
+function Initialize-DeployNotice([Windows.Controls.Border]$frame) {
+    $text=$frame.Child
+    if($text -isnot [Windows.Controls.TextBlock]){throw 'Notice must contain a TextBlock.'}
+    $frame.Child=$null;$frame.CornerRadius='10';$frame.BorderThickness='1';$frame.Padding='12,10'
+    $grid=[Windows.Controls.Grid]::new()
+    $column=[Windows.Controls.ColumnDefinition]::new();$column.Width=[Windows.GridLength]::new(34);[void]$grid.ColumnDefinitions.Add($column)
+    [void]$grid.ColumnDefinitions.Add([Windows.Controls.ColumnDefinition]::new())
+    $badge=[Windows.Controls.Border]::new();$badge.Width=24;$badge.Height=24;$badge.CornerRadius='12';$badge.VerticalAlignment='Top';$badge.HorizontalAlignment='Left'
+    $icon=[Windows.Controls.TextBlock]::new();$icon.FontFamily='Segoe UI Symbol';$icon.FontSize=15;$icon.FontWeight='Bold';$icon.HorizontalAlignment='Center';$icon.VerticalAlignment='Center';$badge.Child=$icon
+    $text.TextWrapping='Wrap';$text.FontWeight='SemiBold';$text.FontSize=13
+    $scroll=[Windows.Controls.ScrollViewer]::new();$scroll.MaxHeight=160;$scroll.VerticalScrollBarVisibility='Auto';$scroll.HorizontalScrollBarVisibility='Disabled';$scroll.Content=$text
+    [Windows.Controls.Grid]::SetColumn($scroll,1)
+    [void]$grid.Children.Add($badge);[void]$grid.Children.Add($scroll);$frame.Child=$grid
+    # Empty validation / status text should not reserve a blank coloured box.
+    $style=[Windows.Style]::new([Windows.Controls.Border])
+    $trigger=[Windows.DataTrigger]::new();$binding=[Windows.Data.Binding]::new('Text');$binding.Source=$text;$trigger.Binding=$binding;$trigger.Value=''
+    $trigger.Setters.Add([Windows.Setter]::new([Windows.UIElement]::VisibilityProperty,[Windows.Visibility]::Collapsed));$style.Triggers.Add($trigger);$frame.Style=$style
+    $text.Tag=@{NoticeFrame=$frame;Badge=$badge;Icon=$icon;Kind='Info'}
+    Set-DeployNoticeKind $text 'Info'
+}
 function Import-DeployWindow([string]$path) {
     Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
     if (-not ('TechMaster.DesktopIdentity' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'DesktopIdentity.cs') }
@@ -142,6 +180,9 @@ function Import-DeployWindow([string]$path) {
         $element=$pending.Dequeue()
         if($element -is [Windows.Controls.Border] -and $element.Tag -ceq 'RoundedClip'){
             Initialize-DeployRoundedBorder $element
+        }
+        if($element -is [Windows.Controls.Border] -and $element.Tag -ceq 'Notice'){
+            Initialize-DeployNotice $element
         }
         foreach($child in [Windows.LogicalTreeHelper]::GetChildren($element)){
             if($child -is [Windows.DependencyObject]){$pending.Enqueue($child)}
@@ -192,7 +233,7 @@ function Receive-DeployWork($work) {
 function New-DeployConfirmWindow([string]$message, [string]$title='Xác nhận', [string]$confirmText='Xác nhận', [string]$cancelText='Huỷ', [switch]$Danger, [switch]$Information, $Owner=$null) {
     $dialog = Import-DeployWindow (Join-Path $PSScriptRoot 'ConfirmWindow.xml')
     $dialog.Title = $title; $dialog.FindName('Heading').Text = $title
-    $dialog.FindName('Message').Text = $message
+    Set-DeployNotice ($dialog.FindName('Message')) $message $(if($Danger){if($Information){'Error'}else{'Attention'}}else{'Info'})
     $dialog.FindName('Confirm').Content = $confirmText; $dialog.FindName('Cancel').Content = $cancelText
     $dialog.Tag = $false
     if ($Danger) { $dialog.FindName('Confirm').Background = '#B91C1C' }
@@ -204,6 +245,7 @@ function New-DeployConfirmWindow([string]$message, [string]$title='Xác nhận',
 }
 function Show-DeployMessage([string]$message, [string]$title='TechMaster Deploy', [string]$icon='Information') {
     $dialog=New-DeployConfirmWindow $message $title 'Đóng' -Information -Danger:($icon -eq 'Error')
+    if($icon -eq 'Warning'){Set-DeployNoticeKind ($dialog.FindName('Message')) 'Attention'}
     [void]$dialog.ShowDialog()
 }
 function Confirm-Box([string]$message, [string]$title='Xác nhận', [string]$ConfirmText='Xác nhận', [string]$CancelText='Huỷ', [switch]$Danger, $Owner=$null) {

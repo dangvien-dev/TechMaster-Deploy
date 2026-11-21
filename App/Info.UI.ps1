@@ -55,8 +55,8 @@ function New-DeployInfoWindow {
     }
     $window.FindName('CopyContact').Add_Click({param($sender,$event)
         $view=[Windows.Window]::GetWindow($sender)
-        try{[Windows.Clipboard]::SetText("Zalo: 0976852096`r`nEmail: vienkendo@gmail.com");$view.FindName('ContactStatus').Text='Đã sao chép thông tin liên hệ.'}
-        catch{$view.FindName('ContactStatus').Text='Chưa sao chép được. Vui lòng thử lại.'}
+        try{[Windows.Clipboard]::SetText("Zalo: 0976852096`r`nEmail: vienkendo@gmail.com");Set-DeployNotice ($view.FindName('ContactStatus')) 'Đã sao chép thông tin liên hệ.' 'Success'}
+        catch{Set-DeployNotice ($view.FindName('ContactStatus')) 'Chưa sao chép được. Vui lòng thử lại.' 'Error'}
     })
     $window.FindName('Close').Add_Click({param($sender,$event)[Windows.Window]::GetWindow($sender).Close()})
     if($Owner -and $Owner.IsVisible){$window.Owner=$Owner;$window.WindowStartupLocation='CenterOwner'}

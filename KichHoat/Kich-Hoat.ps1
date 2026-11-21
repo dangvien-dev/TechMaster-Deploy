@@ -288,7 +288,7 @@ foreach ($p in $todo) {
   Trên trang web vừa mở:
     1. Đăng nhập tài khoản Microsoft, giải captcha
     2. Chọn Office / dán Installation ID (Ctrl+V)
-    3. Nhập số máy đã cài: 1 -> Gửi -> Tiếp
+    3. Nhập đúng số máy thực tế đã cài theo giấy phép -> Gửi -> Tiếp
     4. Bấm "Sao chép ID xác nhận" rồi quay lại cửa sổ này
 "@
     } else {

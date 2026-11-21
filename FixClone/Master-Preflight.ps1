@@ -11,7 +11,7 @@ function Refresh-Preflight {
         $lines = @($script:preflight.Plan | ForEach-Object { $_.App + ': ' + @($_.Remove).Count + ' shortcut trùng; ' + $(if ($_.Create) { 'sẽ tạo 1 icon dùng chung.' } else { 'đã có icon dùng chung.' }) })
         $window.FindName('DesktopStatus').Text = if ($lines.Count) { $lines -join "`n" } else { 'Không tìm thấy shortcut Word / Excel hợp lệ.' }
         $window.FindName('CleanDesktop').IsEnabled = @($script:preflight.Plan | Where-Object { $_.Create -or @($_.Remove).Count }).Count -gt 0
-    } catch { $script:preflight.Plan=@(); $window.FindName('DesktopStatus').Text=$_.Exception.Message; $window.FindName('CleanDesktop').IsEnabled=$false }
+    } catch { $script:preflight.Plan=@(); Set-DeployNotice ($window.FindName('DesktopStatus')) $_.Exception.Message 'Error'; $window.FindName('CleanDesktop').IsEnabled=$false }
     $window.FindName('ScreenStatus').Text = if (Get-ScreenClipChoice) { 'Đã có lựa chọn mặc định. Kiểm tra đúng Screen Snipping; lựa chọn này sẽ được xuất cho user mới.' } else { 'Chưa có lựa chọn mặc định; chọn Screen Snipping và Always trước khi Sysprep.' }
 }
 $script:officeReview=$null;$script:windowsReview=$null
@@ -59,7 +59,7 @@ $trialTimer=New-DeployTimer 200 {
     if(-not $script:trialCheck -or -not $script:trialCheck.Async.IsCompleted){return}
     $trialTimer.Stop();$job=$script:trialCheck;$script:trialCheck=$null
     try{$result=@(Receive-DeployWork $job)[-1];$window.FindName('TrialStatus').Text=$result}
-    catch{$window.FindName('TrialStatus').Text='Chưa đọc được đầy đủ Windows / Office. Bước cuối sẽ kiểm tra lại và dừng nếu không xác minh được.'}
+    catch{Set-DeployNotice ($window.FindName('TrialStatus')) 'Chưa đọc được đầy đủ Windows / Office. Bước cuối sẽ kiểm tra lại và dừng nếu không xác minh được.' 'Attention'}
 }
 $window.Add_ContentRendered({
     if(-not $AfterClone){

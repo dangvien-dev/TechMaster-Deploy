@@ -1,5 +1,6 @@
 ﻿# File/cache transactions are real; network, installer and Windows registry/processes are mocked.
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'UltraViewer.Install.ps1')
 $checks=0
 function Assert($condition,$message){if(-not $condition){throw "FAIL: $message"};$script:checks++}

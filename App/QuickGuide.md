@@ -1,6 +1,7 @@
 # Hướng dẫn nhanh TechMaster Deploy
 
 ## Bắt đầu
+- Khung thông báo xanh lam là thông tin / đang xử lý; vàng là bước cần kiểm tra tiếp; xanh lá là thao tác đã được xác nhận; đỏ là lỗi. Với UltraViewer, đã reset vẫn cần mở UltraViewer và bấm Kiểm tra ID mới để xác nhận.
 - Giữ nguyên cả thư mục TechMaster-Deploy, mở TechMaster Deploy.exe và chấp nhận yêu cầu quản trị.
 - Chọn nhóm tính năng ở menu bên trái. Nút Làm mới đọc lại trạng thái Windows / Office.
 - Với máy gốc, chuẩn bị cấu hình trước Sysprep. Với máy khách đã clone, dùng Sau khi clone để kiểm tra và xử lý.
@@ -14,6 +15,7 @@
 - Sau khi Sysprep tắt máy, dùng USB để clone ổ. Không bật lại máy gốc trước khi tạo ảnh.
 
 ## Sau khi clone
+- Menu chuột phải có hai lựa chọn Kiểu Windows 10 và Khôi phục Windows 11. Cấu hình theo tài khoản đang chạy app; kiểm tra đúng tài khoản nếu mở bằng thông tin quản trị khác. App lưu trạng thái trước thay đổi, hỏi riêng trước khi khởi động lại Explorer; có thể chọn Để sau và đăng nhập lại. Các bản Windows mới có thể không áp dụng tuỳ chỉnh menu truyền thống.
 - Ảnh được chuẩn bị bằng công cụ mới sẽ tự chạy xử lý lần đăng nhập đầu. Có thể mở Xử lý trùng lặp để xem và chọn lại các thao tác khi cần.
 - Chỉnh ngày / số đặt ngày ngắn dd/MM/yyyy, thập phân dấu phẩy và phân nhóm dấu chấm; giữ vùng và bàn phím.
 - Bàn phím / EVKey cho phép chỉ dùng kiểu nhập US, có sao lưu và khôi phục.
@@ -34,6 +36,7 @@
 ## Biên bản bản quyền
 - Bản chia sẻ mới để trống thông tin đơn vị và không kèm logo công ty. Xoá thông tin đơn vị / logo giúp dọn cấu hình đang lưu trước khi chuyển cho bên khác; biên bản đã xuất vẫn được giữ.
 - Nhập hoặc sửa thông tin đơn vị / kỹ thuật viên rồi bấm Lưu thông tin để dùng cho lần sau; trường xoá trắng cũng được lưu. Tên khách hàng dùng cho biên bản đang lập.
+- Nhập riêng Khách hàng / người nhận, Đơn vị / công ty khách hàng và Địa chỉ khách hàng. Các trường khách được đưa vào biên bản và điền sẵn trong mẫu xác nhận; nút Lưu thông tin vẫn lưu thông tin bên cung cấp, không lưu hồ sơ khách vào cấu hình dùng chung.
 - Chọn logo được lưu ngay. Xoá logo chỉ xoá ảnh logo đang lưu, giữ thông tin đơn vị và biên bản đã xuất.
 - Bấm Xuất biên bản. Trang HTML mở trong trình duyệt; chọn In / Lưu PDF để giao cho khách.
 - Biên bản phản ánh trạng thái kiểm tra tại thời điểm xuất, chỉ hiện 5 ký tự cuối key. Sau khi kích hoạt hoặc cập nhật mẫu, hãy xuất lại biên bản.
@@ -49,7 +52,7 @@
 ## Cài Windows
 - Trang tải Microsoft mở nơi tải ISO chính thức. Chọn ISO để công cụ kiểm tra và mở Windows Setup.
 - Tạo USB Windows mở Media Creation Tool để bạn chọn USB. Dữ liệu trên USB được chọn sẽ bị xoá.
-- Chỉ dọn Windows.old sau khi đã kiểm tra máy và dữ liệu; xoá thư mục này sẽ bỏ khả năng quay lại bản Windows cũ.
+- Dọn Windows.old… kiểm tra thư mục trên ổ cài Windows rồi mở Disk Cleanup với quyền quản trị. Chọn Clean up system files / Dọn tệp hệ thống → Previous Windows installation(s); kiểm tra các mục khác như Downloads trước khi xoá. Chỉ dọn sau khi đã giữ dữ liệu cần thiết; xoá sẽ bỏ khả năng quay lại bản Windows cũ. Đóng công cụ để app kiểm tra Windows.old còn hay đã mất. Nếu công cụ không liệt kê bản cài trước, Windows chưa nhận diện thư mục theo mục dọn này.
 
 ## Cài ứng dụng
 - Quản lý ứng dụng cho phép thêm / sửa / xoá mục bổ sung: nhập ID WinGet hoặc chọn bộ cài EXE / MSI và tham số tuỳ chọn. Chỉ lưu ở tài khoản Windows trên máy này, không đồng bộ hoặc đẩy lên repo.

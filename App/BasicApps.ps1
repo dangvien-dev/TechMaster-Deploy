@@ -84,6 +84,7 @@ Install-DeployUltraViewer $cache
     $lblBasicAppStatus.Text = "$($run.Counts.Installed) đã cài · $($run.Counts.Skipped) đã có · $($run.Counts.Failed) lỗi"
     if ($run.Counts.Restart) { $lblBasicAppStatus.Text += " · $($run.Counts.Restart) cần khởi động lại" }
     if ($run.LogFailed) { $lblBasicAppStatus.Text += ' · Nhật ký ghi chưa đủ' }
+    Set-DeployNoticeKind $lblBasicAppStatus $(if($run.Counts.Failed){'Error'}elseif($run.Counts.Restart -or $run.LogFailed){'Attention'}else{'Success'})
     Set-Status $lblBasicAppStatus.Text
 }
 
@@ -91,12 +92,12 @@ function Start-BasicApps {
     if ($script:basicAppRun) { return }
     $items = @($basicAppChoices | Where-Object IsChecked | ForEach-Object { $_.Tag })
     if (-not $items.Count) {
-        $lblBasicAppStatus.Text = 'Chọn ít nhất một ứng dụng.'
+        Set-DeployNotice $lblBasicAppStatus 'Chọn ít nhất một ứng dụng.' 'Attention'
         return
     }
     $winget = Get-Command 'winget.exe' -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if (-not $winget -and @($items|Where-Object {$_.Source -notin 'Official','Local'}).Count) {
-        $lblBasicAppStatus.Text = 'Máy chưa có WinGet. Mở Hướng dẫn WinGet để cài App Installer.'
+        Set-DeployNotice $lblBasicAppStatus 'Máy chưa có WinGet. Mở Hướng dẫn WinGet để cài App Installer.' 'Attention'
         return
     }
 
@@ -108,7 +109,7 @@ function Start-BasicApps {
         $logFile = Join-Path $logDir ('WinGet-{0:yyyyMMdd-HHmmssfff}-{1}.log' -f (Get-Date), $PID)
         [IO.File]::WriteAllText($logFile, "WinGet · $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`r`n")
     } catch {
-        $lblBasicAppStatus.Text = "Không tạo được nhật ký. $($_.Exception.Message)"
+        Set-DeployNotice $lblBasicAppStatus "Không tạo được nhật ký. $($_.Exception.Message)" 'Error'
         return
     }
     $script:basicAppLog = $logFile
@@ -124,6 +125,7 @@ function Start-BasicApps {
     $btnBasicAppInstall.IsEnabled = $false
     $btnManageApps.IsEnabled = $false
     $btnBasicAppLog.IsEnabled = $true
+    Set-DeployNoticeKind $lblBasicAppStatus 'Working'
     $script:basicAppRun = $run
     $basicAppTimer.Start()
     Start-NextBasicApp $run

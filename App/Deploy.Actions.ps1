@@ -68,6 +68,7 @@ function Finish-ODT([Nullable[int]]$exitCode) {
         }
         $lblOfficeProgress.Foreground = $cDanger
     }
+    Set-DeployNoticeKind $lblOfficeProgress $(if($null -ne $exitCode -and $exitCode -eq 0){'Success'}else{'Error'})
     Set-Status $lblOfficeProgress.Text
     $bDl.IsEnabled = $true
     $bKho.IsEnabled = $true
@@ -111,6 +112,7 @@ function Start-ODT([string]$mode) {
         $officeBar.Value = 0
         $lblOfficeProgress.Text = "Không mở được Office Deployment Tool. $($_.Exception.Message)"
         $lblOfficeProgress.Foreground = $cDanger
+        Set-DeployNoticeKind $lblOfficeProgress 'Error'
         Set-Status 'Không khởi chạy được Office Deployment Tool.'
         return
     }
@@ -126,6 +128,7 @@ function Start-ODT([string]$mode) {
     $bCleanup.IsEnabled = $false
     if($bRemoveOffice){$bRemoveOffice.IsEnabled=$false}
     $bOfficeLog.IsEnabled = $false
+    Set-DeployNoticeKind $lblOfficeProgress 'Working'
     $lblOfficeProgress.Text = $script:officeRun.Stage
     $lblOfficeProgress.Foreground = $cPrimary
     $officeBar.Value = 0
@@ -156,6 +159,7 @@ function Start-OfficeCleanup([ValidateSet('Menu','Keys')][string]$CleanupMode='M
     $bDl.IsEnabled = $false; $bKho.IsEnabled = $false; $bNet.IsEnabled = $false; $bCleanup.IsEnabled = $false
     if($bRemoveOffice){$bRemoveOffice.IsEnabled=$false}
     $bOfficeLog.IsEnabled = $false
+    Set-DeployNoticeKind $lblOfficeProgress 'Working'
     $lblOfficeProgress.Text = $script:officeRun.Stage
     $lblOfficeProgress.Foreground = $cPrimary
     $officeBar.Value = 0; $officeBar.IsIndeterminate = $true
@@ -199,16 +203,35 @@ function Complete-MediaCreationTool($download) {
 }
 
 function Open-WindowsOldCleanup {
-    $oldInstall = Join-Path ($env:SystemDrive + '\') 'Windows.old'
-    if (-not (Test-Path -LiteralPath $oldInstall -PathType Container)) {
-        Set-Status 'Không tìm thấy Windows.old trên ổ cài Windows.'
-        return
+    if($script:uiWork){Set-Status 'Chờ thao tác hiện tại hoàn tất.';return}
+    if(-not (Test-Path -LiteralPath (Join-Path ($env:SystemDrive+'\') 'Windows.old') -PathType Container)){Set-Status 'Không tìm thấy Windows.old trên ổ cài Windows.';return}
+    if(-not (Confirm-Box 'Mở Disk Cleanup để dọn Windows.old? Kiểm tra dữ liệu cần giữ trong Windows.old trước. Xoá bản cài trước sẽ mất lựa chọn quay lại. Trong công cụ chỉ chọn Previous Windows installation(s), kiểm tra các mục khác như Downloads trước khi xác nhận.' 'Dọn Windows.old' -ConfirmText 'Mở Disk Cleanup' -Danger -Owner $form)){return}
+    Start-UiWork @'
+param($core)
+. $core
+$log=Get-DeployWindowsToolsLog 'WindowsOld'
+try{Invoke-DeployWindowsOldCleanup $log}catch{Write-DeployWindowsToolsLog $log 'failed' $_.Exception.Message;throw}
+'@ @((Join-Path $PSScriptRoot 'Windows.Tools.ps1')) {
+        param($result)
+        $r=$result[-1];Set-Status ($r.Message+' Nhật ký: '+$r.Log) $(if($r.Remaining){'Attention'}elseif($r.Missing){'Info'}else{'Success'})
     }
-    try {
-        Start-Process 'ms-settings:storagesense' -ErrorAction Stop
-        Set-Status 'Chọn Tệp tạm thời → Bản cài đặt Windows trước đây → Xóa tệp.'
-    } catch {
-        Set-Status 'Mở Cài đặt → Hệ thống → Lưu trữ → Tệp tạm thời để dọn Windows.old.'
+    Set-Status 'Trong Disk Cleanup: chọn Dọn tệp hệ thống → Bản cài đặt Windows trước đây. Đóng công cụ để app kiểm tra lại.' 'Working'
+}
+function Set-ExplorerMenuChoice([ValidateSet('Legacy','Default')][string]$Mode) {
+    if($script:uiWork){Set-Status 'Chờ thao tác hiện tại hoàn tất.';return}
+    $label=if($Mode -eq 'Legacy'){'menu truyền thống kiểu Windows 10'}else{'menu mặc định Windows 11'}
+    if(-not (Confirm-Box ('Lưu lựa chọn '+$label+' cho tài khoản Windows đang chạy app? Nếu mở app bằng tài khoản quản trị khác, cấu hình sẽ thuộc tài khoản đó. App sẽ hỏi riêng trước khi khởi động lại Explorer.') 'Menu chuột phải' -ConfirmText 'Lưu lựa chọn' -Owner $form)){return}
+    Start-UiWork @'
+param($core,$mode)
+. $core
+$log=Get-DeployWindowsToolsLog 'ExplorerMenu'
+try{Set-DeployExplorerMenu $mode $log}catch{Write-DeployWindowsToolsLog $log 'failed' $_.Exception.Message;throw}
+'@ @((Join-Path $PSScriptRoot 'Windows.Tools.ps1'),$Mode) {
+        param($result)
+        $r=$result[-1];Set-Status ($r.Message+' Nhật ký: '+$r.Log) 'Attention'
+        if($r.Changed -and (Confirm-Box 'Khởi động lại Explorer để áp dụng ngay? Các cửa sổ thư mục của tài khoản này có thể đóng. Tác vụ chép tệp đang chạy cần hoàn tất trước.' 'Áp dụng menu chuột phải' -ConfirmText 'Khởi động lại Explorer' -CancelText 'Để sau' -Owner $form)){
+            try{. (Join-Path $PSScriptRoot 'Windows.Tools.ps1');Restart-DeployCurrentExplorer $r.Log;Set-Status 'Đã yêu cầu khởi động lại Explorer. Thử lại menu chuột phải; nếu chưa đổi, đăng xuất / đăng nhập lại.' 'Info'}catch{Set-Status ('Đã lưu cấu hình nhưng chưa khởi động lại được Explorer: '+$_.Exception.Message) 'Attention'}
+        }
     }
 }
 
