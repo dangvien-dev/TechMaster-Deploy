@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.0.0",
+  "version": "2.2.1.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -38,8 +38,8 @@
     {
       "path": "App/ConfirmWindow.xml",
       "mode": "100644",
-      "size": 2413,
-      "sha": "3d4c253f8785c4d336802f65220e846ee6c5f6af"
+      "size": 2610,
+      "sha": "9af13f7d8e7310aa7fa1d20fdbc4322ad6c34e3f"
     },
     {
       "path": "App/Console.ps1",
@@ -68,8 +68,8 @@
     {
       "path": "App/CustomAppsWindow.xml",
       "mode": "100644",
-      "size": 4388,
-      "sha": "8f21390cfbaec92de6de0114311f091731434790"
+      "size": 4532,
+      "sha": "bbf4157eef85d5ec8cf063a1961b624e521d2f90"
     },
     {
       "path": "App/Deploy.Actions.ps1",
@@ -86,8 +86,8 @@
     {
       "path": "App/DiagnosticsWindow.xml",
       "mode": "100644",
-      "size": 996,
-      "sha": "b1cfb9898e8fca267d48c529bff779b2fdec405d"
+      "size": 1140,
+      "sha": "c2b6e3dcbf51561862be414aca724f57b0020574"
     },
     {
       "path": "App/Info.UI.ps1",
@@ -344,14 +344,14 @@
     {
       "path": "App/UpdaterWindow.xml",
       "mode": "100644",
-      "size": 4720,
-      "sha": "41605ca3b636363ae3bddfd40b76c826708ee670"
+      "size": 5355,
+      "sha": "2aa9718b906aa806ee6836d49c8617ec434450f1"
     },
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 8391,
-      "sha": "dc0ac86b7705cd4d251ceecffe68c3925d09298a"
+      "size": 11453,
+      "sha": "f81d493c50a88e10440f37879439e365d1aa8b3e"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -386,8 +386,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 12497,
-      "sha": "4398c213c057c67e3c671e8e54c258cd2d6624e5"
+      "size": 13152,
+      "sha": "5265dcb2dbef04ebb968abf460623a095c601a84"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -428,8 +428,8 @@
     {
       "path": "FixClone/DriverFix.xml",
       "mode": "100644",
-      "size": 7020,
-      "sha": "21a6973a61ac0a6ff7ffb5984ddbb89bf7ebb850"
+      "size": 7610,
+      "sha": "acd75316eff5c71fdae44532c04d2ba2a4d521a7"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -626,8 +626,8 @@
     {
       "path": "FixClone/UltraViewer-Reset.xml",
       "mode": "100644",
-      "size": 1729,
-      "sha": "bf2715557be964bf803f57c5b0852956f78d7e88"
+      "size": 1873,
+      "sha": "d1f769f58c736c305005337d778f701fdb45b738"
     },
     {
       "path": "FixClone/UltraViewer.Core.ps1",
@@ -782,8 +782,8 @@
     {
       "path": "Office/Office-Cleanup.xml",
       "mode": "100644",
-      "size": 3003,
-      "sha": "7a6d9aa4b28db0b995cbb57a5d5fea1b8f98ad9b"
+      "size": 3291,
+      "sha": "d94bd418523c8d1262d78644445ffc280a59436f"
     },
     {
       "path": "Office/Office-ODT.ps1",
@@ -825,7 +825,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "0d04db054743d79d62af3b153f2503e4da4c1784"
+      "sha": "a89d5a39320649ca5568f38d2ad439f4cd944ed3"
     }
   ]
 }
