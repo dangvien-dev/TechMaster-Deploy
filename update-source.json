@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.2.0",
+  "version": "2.2.4.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -74,8 +74,8 @@
     {
       "path": "App/Deploy.Actions.ps1",
       "mode": "100644",
-      "size": 12254,
-      "sha": "777671414a9fe92f6b78165101363bc814c7b009"
+      "size": 12760,
+      "sha": "64404e035a74a4240808d45325220ff82adf0307"
     },
     {
       "path": "App/DesktopIdentity.cs",
@@ -140,8 +140,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 27751,
-      "sha": "f8e401ed11071a1e707e33a91b463df6750b0dbe"
+      "size": 27846,
+      "sha": "0d2e4fae5e1a0fe700839dd3984a5e55d757180f"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -152,8 +152,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 12283,
-      "sha": "f7d47c254c455b839b66a51118911acca4eda559"
+      "size": 12794,
+      "sha": "bac5d90f939e9063b32c2abcf932f9d22c5e6429"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -188,8 +188,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 19543,
-      "sha": "712b68ed433787734f09eb5d4af8a6489df27612"
+      "size": 19612,
+      "sha": "cfb087419349d9bfb9a830078653eba873aa1049"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -374,8 +374,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 11653,
-      "sha": "5bcfda479d5806f72a407d21d71277bd22ce888c"
+      "size": 15462,
+      "sha": "c9a517013d590d6cdcdf5611403ee4d7fbf52e00"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -410,8 +410,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 14156,
-      "sha": "ed89c1b9b0092b9399da37329477362719c23e17"
+      "size": 15187,
+      "sha": "168d547bfc576c264635f7e2c808cb901948e8e9"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -800,14 +800,14 @@
     {
       "path": "Office/Office-Cleanup.ps1",
       "mode": "100644",
-      "size": 5412,
-      "sha": "d36f63538f7421cb3540912c565cfb93b8151f43"
+      "size": 6138,
+      "sha": "7092a99afd3458915f96b7f96019e4fa9b7ef264"
     },
     {
       "path": "Office/Office-Cleanup.xml",
       "mode": "100644",
-      "size": 3291,
-      "sha": "d94bd418523c8d1262d78644445ffc280a59436f"
+      "size": 4020,
+      "sha": "6388888998e2b8ad4a998725fb6a113412164d1e"
     },
     {
       "path": "Office/Office-ODT.ps1",
@@ -836,8 +836,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 18012,
-      "sha": "e702b2cdf43f73fa5992edec2f4e22024f40dea1"
+      "size": 18225,
+      "sha": "226636059c432e86ebcf63fceef7fa01aad1fed3"
     },
     {
       "path": "RELEASING.md",
@@ -849,7 +849,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "f0cda329549ed90fb94ebb6a9dd53d3fb36231b9"
+      "sha": "95c95b8a4634f2599e9a7754818e006aa0377097"
     }
   ]
 }

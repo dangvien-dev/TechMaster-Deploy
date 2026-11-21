@@ -3,6 +3,13 @@ $ErrorActionPreference='Stop'
 . (Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'Office-Cleanup.Core.ps1')
 $cleanupWindow=Import-DeployWindow (Join-Path $PSScriptRoot 'Office-Cleanup.xml')
+if($Mode -eq 'Keys'){
+    $cleanupWindow.Title='Key Office / dùng tạm'
+    $cleanupWindow.FindName('Heading').Text='Key Office / dùng tạm'
+    $cleanupWindow.FindName('Instructions').Text='Bấm Chọn key dùng thử để đánh dấu các key Grace / Trial chưa kích hoạt đã nhận diện. Kiểm tra danh sách rồi xác nhận xoá. Key không chọn được giữ, gồm Retail; các thiết lập Word được giữ.'
+    $cleanupWindow.FindName('RemoveOffice').Visibility='Collapsed'
+}
+
 $script:cleanup=@{ Job=$null; Inventory=$null; Rows=@(); ExitCode=0; Log=$LogPath }
 if (-not $script:cleanup.Log) { $script:cleanup.Log=Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Office Logs/'+[guid]::NewGuid().ToString('N')+'/Cleanup.log') }
 function Set-CleanupBusy([bool]$busy) {
@@ -37,12 +44,13 @@ $cleanupTimer=New-DeployTimer 200 {
     $cleanupTimer.Stop();$script:cleanup.Job=$null
     try {
         $result=@(Receive-DeployWork $job)[-1]
-        if ($script:cleanup.Operation -eq 'Inspect') { Set-CleanupInventory $result; $cleanupWindow.FindName('Status').Text='Chọn key cần xoá hoặc chỉ kiểm tra danh sách.' }
+        if ($script:cleanup.Operation -eq 'Inspect') { Set-CleanupInventory $result; $cleanupWindow.FindName('Status').Text=$(if($Mode -eq 'Keys'){'Chọn key dùng thử hoặc kiểm tra từng key trước khi xoá. Chưa có key nào được chọn tự động.'}else{'Chọn key cần xoá hoặc chỉ kiểm tra danh sách.'}) }
         else { Set-CleanupInventory $result.Inventory; $cleanupWindow.FindName('Status').Text=$result.Message; $script:cleanup.ExitCode=0 }
     } catch { $script:cleanup.ExitCode=1; $cleanupWindow.FindName('Status').Text=$_.Exception.GetBaseException().Message; Show-DeployMessage $_.Exception.GetBaseException().Message 'Gỡ / dọn Office' 'Error' }
     finally { Set-CleanupBusy $false }
 }
 function Confirm-CleanupOperation([string]$operation) {
+    if ($Mode -eq 'Keys' -and $operation -ne 'Keys') { return }
     if (-not $script:cleanup.Inventory -or $script:cleanup.Job) { return }
     $cleanupWindow.FindName('Keys').CommitEdit() | Out-Null
     $ids=@($script:cleanup.Rows | Where-Object Selected | ForEach-Object ID)

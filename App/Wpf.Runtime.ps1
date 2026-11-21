@@ -67,6 +67,48 @@ function Initialize-DeployRoundedButtons([Windows.Window]$window) {
         $window.Resources[$key] = $replacement
     }
 }
+function Initialize-DeployTables([Windows.Window]$window) {
+    # Visual settings only. Preserve each window's editability and column bindings.
+    $theme = [Windows.Markup.XamlReader]::Parse(@'
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <Style x:Key="Header" TargetType="DataGridColumnHeader">
+  <Setter Property="Background" Value="#E7EEF8"/><Setter Property="Foreground" Value="#183655"/><Setter Property="FontWeight" Value="SemiBold"/>
+  <Setter Property="Padding" Value="12,10"/><Setter Property="BorderBrush" Value="#DFE7F1"/><Setter Property="BorderThickness" Value="0,0,0,1"/>
+  <Setter Property="HorizontalContentAlignment" Value="Left"/><Setter Property="VerticalContentAlignment" Value="Center"/>
+ </Style>
+ <Style x:Key="Row" TargetType="DataGridRow">
+  <Setter Property="MinHeight" Value="44"/><Setter Property="Foreground" Value="#10223F"/>
+  <Style.Triggers>
+   <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#F0F5FB"/></Trigger>
+   <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#DBEAFE"/><Setter Property="Foreground" Value="#10223F"/></Trigger>
+  </Style.Triggers>
+ </Style>
+ <Style x:Key="Cell" TargetType="DataGridCell">
+  <Setter Property="Padding" Value="12,8"/><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#10223F"/>
+  <Setter Property="BorderThickness" Value="0"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+  <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridCell">
+   <Grid><Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/></Border>
+    <Border x:Name="FocusOutline" BorderBrush="Transparent" BorderThickness="1" IsHitTestVisible="False"/>
+   </Grid><ControlTemplate.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="FocusOutline" Property="BorderBrush" Value="#38BDF8"/></Trigger></ControlTemplate.Triggers>
+  </ControlTemplate></Setter.Value></Setter>
+  <Style.Triggers><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#10223F"/></Trigger></Style.Triggers>
+ </Style>
+ <Style x:Key="Table" TargetType="DataGrid">
+  <Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#10223F"/><Setter Property="FontSize" Value="13"/>
+  <Setter Property="RowBackground" Value="White"/><Setter Property="AlternatingRowBackground" Value="#F8FAFD"/>
+  <Setter Property="GridLinesVisibility" Value="Horizontal"/><Setter Property="HorizontalGridLinesBrush" Value="#E7EDF5"/>
+  <Setter Property="ColumnHeaderHeight" Value="44"/><Setter Property="MinRowHeight" Value="44"/><Setter Property="RowHeaderWidth" Value="0"/>
+  <Setter Property="SnapsToDevicePixels" Value="True"/><Setter Property="UseLayoutRounding" Value="True"/>
+  <Setter Property="ColumnHeaderStyle" Value="{StaticResource Header}"/><Setter Property="RowStyle" Value="{StaticResource Row}"/><Setter Property="CellStyle" Value="{StaticResource Cell}"/>
+ </Style>
+</ResourceDictionary>
+'@)
+    $base = $window.Resources[[Windows.Controls.DataGrid]]
+    $style = if($base -is [Windows.Style]){[Windows.Style]::new([Windows.Controls.DataGrid],$base)}else{[Windows.Style]::new([Windows.Controls.DataGrid])}
+    foreach($setter in $theme['Table'].Setters){$style.Setters.Add([Windows.Setter]::new($setter.Property,$setter.Value))}
+    $style.Setters.Add([Windows.Setter]::new([Windows.Controls.DataGrid]::RowHeightProperty,[double]::NaN))
+    $window.Resources[[Windows.Controls.DataGrid]]=$style
+}
 function Import-DeployWindow([string]$path) {
     Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
     if (-not ('TechMaster.DesktopIdentity' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'DesktopIdentity.cs') }
@@ -74,6 +116,7 @@ function Import-DeployWindow([string]$path) {
     $reader = [Xml.XmlReader]::Create($path, [Xml.XmlReaderSettings]@{ DtdProcessing = 'Prohibit'; XmlResolver = $null })
     try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Dispose() }
     Initialize-DeployRoundedButtons $window
+    Initialize-DeployTables $window
     $stream = [IO.File]::OpenRead((Join-Path $PSScriptRoot 'TechMaster.ico'))
     try {
         $icon = New-Object Windows.Media.Imaging.BitmapImage

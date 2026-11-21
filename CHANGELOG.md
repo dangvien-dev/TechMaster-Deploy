@@ -1,5 +1,15 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.4.0 — 21/11/2026
+
+- Đồng bộ giao diện bảng: tiêu đề nền xanh nhạt, dòng cao thoáng hơn, nền xen kẽ và màu chọn dễ đọc; viền focus không làm dịch nội dung. Áp cùng kiểu bảng cho key Office, kết quả cài ứng dụng, lịch sử cập nhật và Fix Driver.
+- Bảng key Office có cột tiếng Việt, ô chọn dễ bấm, 5 ký tự cuối dùng chữ đều và tên giấy phép tự xuống dòng / xem đầy đủ qua tooltip. Giữ cách chọn key và xác nhận xoá.
+
+## 2.2.3.0 — 21/11/2026
+
+- Đưa Key dùng tạm Office… vào mục Kích hoạt, cạnh Kích hoạt Office và Mở portal, tương tự phần key Windows. Cửa sổ từ nút này chỉ kiểm tra / chọn / xoá key, không có nút gỡ bộ Office.
+- Giữ thao tác Gỡ Office… ở mục Tải / cài Office. Mặc định không chọn key để xoá; nút Chọn key dùng thử đánh dấu Grace / Trial đã nhận diện, xoá vẫn cần kiểm tra và xác nhận.
+
 ## 2.2.2.0 — 21/11/2026
 
 - Sau khi cài WinRAR hoặc khi WinGet báo đã có, mở WinRAR lần đầu để hoàn tất thiết lập theo tài khoản và kiểm tra lại menu chuột phải. Giữ WinRAR đang chạy, không ép cài lại hoặc tự sửa registry Explorer. Ghi kết quả mở ứng dụng vào nhật ký.

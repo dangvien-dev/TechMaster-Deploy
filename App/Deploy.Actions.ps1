@@ -58,7 +58,7 @@ function Finish-ODT([Nullable[int]]$exitCode) {
     $officeBar.Value = 0
     if ($exitCode -eq 0) {
         $officeBar.Value = 100
-        $lblOfficeProgress.Text = if ($run.Mode -eq 'Download') { 'Đã tải bộ cài về kho.' } elseif ($run.Mode -eq 'Cleanup') { 'Đã kết thúc công cụ gỡ / dọn. Xem nhật ký để biết kết quả.' } else { 'Đã cài Office.' }
+        $lblOfficeProgress.Text = if ($run.Mode -eq 'Download') { 'Đã tải bộ cài về kho.' } elseif ($run.Mode -eq 'Cleanup') { if($run.CleanupMode -eq 'Keys'){'Đã đóng cửa sổ key Office. Xem nhật ký nếu đã thực hiện xoá key.'}else{'Đã kết thúc công cụ gỡ / dọn. Xem nhật ký để biết kết quả.'} } else { 'Đã cài Office.' }
         $lblOfficeProgress.Foreground = $cPrimary
     } else {
         $lblOfficeProgress.Text = if ($null -eq $exitCode) {
@@ -73,6 +73,7 @@ function Finish-ODT([Nullable[int]]$exitCode) {
     $bKho.IsEnabled = $true
     $bNet.IsEnabled = $true
     $bCleanup.IsEnabled = $true
+    if($bRemoveOffice){$bRemoveOffice.IsEnabled=$true}
     Update-OffInfo
 }
 
@@ -123,6 +124,7 @@ function Start-ODT([string]$mode) {
     $bKho.IsEnabled = $false
     $bNet.IsEnabled = $false
     $bCleanup.IsEnabled = $false
+    if($bRemoveOffice){$bRemoveOffice.IsEnabled=$false}
     $bOfficeLog.IsEnabled = $false
     $lblOfficeProgress.Text = $script:officeRun.Stage
     $lblOfficeProgress.Foreground = $cPrimary
@@ -133,12 +135,12 @@ function Start-ODT([string]$mode) {
     $officeTimer.Start()
 }
 
-function Start-OfficeCleanup {
+function Start-OfficeCleanup([ValidateSet('Menu','Keys')][string]$CleanupMode='Menu') {
     if ($script:officeRun) { return }
     $runDir = Join-Path $env:LOCALAPPDATA ('TechMaster Deploy\Office Logs\Cleanup_' + [guid]::NewGuid().ToString('N'))
     $log = Join-Path $runDir 'Cleanup.log'
     $progress = Join-Path $runDir 'Progress.txt'
-    $cleanupArgs = '-NoLogo -NoProfile -STA -ExecutionPolicy Bypass -File "{0}" -LogPath "{1}" -ProgressPath "{2}"' -f (Join-Path $DirOffice 'Office-Cleanup.ps1'), $log, $progress
+    $cleanupArgs = '-NoLogo -NoProfile -STA -ExecutionPolicy Bypass -File "{0}" -LogPath "{1}" -ProgressPath "{2}" -Mode {3}' -f (Join-Path $DirOffice 'Office-Cleanup.ps1'), $log, $progress, $CleanupMode
     try {
         New-Item -ItemType Directory -Path $runDir -Force -ErrorAction Stop | Out-Null
         $process = Start-Process powershell.exe -ArgumentList $cleanupArgs -WorkingDirectory $DirOffice -WindowStyle Hidden -PassThru -ErrorAction Stop
@@ -148,10 +150,11 @@ function Start-OfficeCleanup {
     }
     try { $null = $process.Handle } catch [InvalidOperationException] {}
     $script:officeRun = @{
-        Process = $process; Mode = 'Cleanup'; Log = $log; ErrorLog = (Join-Path $runDir 'unused.log')
-        Progress = $progress; Started = Get-Date; Stage = 'Chọn thao tác và xác nhận trong cửa sổ gỡ / dọn Office.'
+        Process = $process; Mode = 'Cleanup'; CleanupMode=$CleanupMode; Log = $log; ErrorLog = (Join-Path $runDir 'unused.log')
+        Progress = $progress; Started = Get-Date; Stage = $(if($CleanupMode -eq 'Keys'){'Chọn key dùng tạm và xác nhận trong cửa sổ key Office.'}else{'Chọn thao tác và xác nhận trong cửa sổ gỡ / dọn Office.'})
     }
     $bDl.IsEnabled = $false; $bKho.IsEnabled = $false; $bNet.IsEnabled = $false; $bCleanup.IsEnabled = $false
+    if($bRemoveOffice){$bRemoveOffice.IsEnabled=$false}
     $bOfficeLog.IsEnabled = $false
     $lblOfficeProgress.Text = $script:officeRun.Stage
     $lblOfficeProgress.Foreground = $cPrimary
