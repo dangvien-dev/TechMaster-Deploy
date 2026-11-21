@@ -9,7 +9,37 @@ function Write-DeployWindowsToolsLog([string]$Path,[string]$Event,$Data) {
 }
 function Get-DeployWindowsToolsIdentity {
     $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
-    [pscustomobject]@{Build=[int](Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name CurrentBuildNumber -ErrorAction Stop).CurrentBuildNumber;Sid=$identity.User.Value;User=$identity.Name;Session=[Diagnostics.Process]::GetCurrentProcess().SessionId}
+    $windows=Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction Stop
+    $revision=$null;$parsed=0
+    if([int]::TryParse([string]$windows.UBR,[ref]$parsed) -and $parsed -ge 0){$revision=$parsed}
+    [pscustomobject]@{Build=[int]$windows.CurrentBuildNumber;Ubr=$revision;Sid=$identity.User.Value;User=$identity.Name;Session=[Diagnostics.Process]::GetCurrentProcess().SessionId}
+}
+# Build is a warning threshold, never proof that a staged Explorer rollout is active.
+function Get-DeployExplorerMenuCompatibility($Identity) {
+    $build=[int]$Identity.Build;$ubr=$null;$parsed=0
+    if($null -ne $Identity.Ubr -and [int]::TryParse([string]$Identity.Ubr,[ref]$parsed) -and $parsed -ge 0){$ubr=$parsed}
+    $mayIgnore=$build -gt 26200 -or ($build -eq 26200 -and ($null -eq $ubr -or $ubr -ge 9974))
+    $label=[string]$build
+    if($null -ne $ubr){$label+='.'+[string]$ubr}else{$label+=' (chưa đọc được UBR)'}
+    $guidance=if($mayIgnore){'Windows bản 11/2026 trở đi có thể bỏ qua tuỳ chỉnh này. Giữ Shift + chuột phải để mở menu đầy đủ; nếu Customize menu có Arrange primary actions inline, có thể bật lựa chọn đó. Menu mới được triển khai dần, nên cùng build vẫn có thể khác nhau.'}else{''}
+    [pscustomobject]@{Build=$build;Ubr=$ubr;BuildLabel=$label;MayIgnore=$mayIgnore;Guidance=$guidance}
+}
+function New-DeployExplorerMenuResult($Identity,[string]$Mode,[bool]$Changed,[string]$LogPath) {
+    $compatibility=Get-DeployExplorerMenuCompatibility $Identity
+    $message=if($Changed){'Đã lưu cấu hình '+$(if($Mode -eq 'Legacy'){'menu truyền thống kiểu Windows 10'}else{'menu mặc định Windows 11'})+' cho '+$Identity.User+'.'}else{'Cấu hình đã ở lựa chọn này; không ghi lại.'}
+    $message+=' Windows '+$compatibility.BuildLabel+'. Chưa xác nhận giao diện menu đã đổi.'
+    if($Mode -eq 'Legacy' -and $compatibility.MayIgnore){$message+=' '+$compatibility.Guidance}
+    else{$message+=' Khởi động lại Explorer hoặc đăng xuất / đăng nhập lại để kiểm tra.'}
+    Write-DeployWindowsToolsLog $LogPath 'menu-display-unverified' @{Mode=$Mode;Compatibility=$compatibility;DisplayVerified=$false;RegistryChanged=$Changed}
+    [pscustomobject]@{Changed=$Changed;Message=$message;Log=$LogPath;Compatibility=$compatibility;DisplayVerified=$false;Mode=$Mode}
+}
+function Get-DeployExplorerMenuRestartMessage($Result) {
+    $message='Đã yêu cầu khởi động lại Explorer. Chưa xác nhận giao diện menu đã đổi; thử lại menu chuột phải.'
+    # Keep the compatibility warning visible after the restart action completes.
+    if($Result.Mode -eq 'Legacy' -and $Result.Compatibility.MayIgnore){$message+=' '+$Result.Compatibility.Guidance}
+    else{$message+=' Nếu chưa đổi, có thể cần đăng xuất / đăng nhập lại.'}
+    $message+=' Nhật ký: '+$Result.Log
+    return $message
 }
 function Open-DeployMenuRegistry {
     $view=if([Environment]::Is64BitOperatingSystem){[Microsoft.Win32.RegistryView]::Registry64}else{[Microsoft.Win32.RegistryView]::Registry32}
@@ -50,14 +80,14 @@ function Set-DeployExplorerMenu([ValidateSet('Legacy','Default')][string]$Mode,[
     Write-DeployWindowsToolsLog $LogPath 'backup-before' $before
     if($before.DefaultPresent -and ($before.Kind -ne 'String' -or [string]$before.Value -ne '')){throw 'Nhánh menu đang có cấu hình khác. Đã lưu trạng thái, chưa ghi đè cấu hình này.'}
     $wantLegacy=$Mode -eq 'Legacy';$wasLegacy=$before.DefaultPresent -and $before.Kind -eq 'String' -and [string]$before.Value -eq ''
-    if($wantLegacy -eq $wasLegacy){return [pscustomobject]@{Changed=$false;Message='Cấu hình registry đã ở lựa chọn này. Nếu menu chưa đổi, khởi động lại Explorer hoặc đăng xuất / đăng nhập lại.';Log=$LogPath}}
+    if($wantLegacy -eq $wasLegacy){return (New-DeployExplorerMenuResult $who $Mode $false $LogPath)}
     try{
         Write-DeployExplorerMenuOverride $wantLegacy
         $after=Get-DeployExplorerMenuSnapshot
         $isLegacy=$after.DefaultPresent -and $after.Kind -eq 'String' -and [string]$after.Value -eq ''
         if($isLegacy -ne $wantLegacy){throw 'Chưa xác nhận được cấu hình sau thay đổi.'}
         Write-DeployWindowsToolsLog $LogPath 'verified-after' $after
-        [pscustomobject]@{Changed=$true;Message=('Đã lưu lựa chọn '+$(if($wantLegacy){'menu truyền thống kiểu Windows 10'}else{'menu mặc định Windows 11'})+' cho '+$who.User+'. Áp dụng sau khi khởi động lại Explorer hoặc đăng nhập lại. Một số bản Windows mới có thể không áp dụng tuỳ chỉnh menu truyền thống.');Log=$LogPath}
+        New-DeployExplorerMenuResult $who $Mode $true $LogPath
     }catch{Write-DeployWindowsToolsLog $LogPath 'failed' $_.Exception.Message;throw}
 }
 function Restart-DeployCurrentExplorer([string]$LogPath) {

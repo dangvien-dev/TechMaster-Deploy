@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.7.0",
+  "version": "2.2.8.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -98,8 +98,8 @@
     {
       "path": "App/Deploy.Actions.ps1",
       "mode": "100644",
-      "size": 15509,
-      "sha": "ef838ae27c7b2f209e8b477ff7d55e6796fed10e"
+      "size": 15496,
+      "sha": "fa0ff8961d7dbf225145a9f9b5bc987aef73d2d7"
     },
     {
       "path": "App/DesktopIdentity.cs",
@@ -164,8 +164,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 30138,
-      "sha": "da77b7cff6669020e927539caf5ef8215dda4a5a"
+      "size": 30239,
+      "sha": "ed77f8bbc540b1ce4c12b407bd7625f48f8d61f2"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -176,8 +176,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 16069,
-      "sha": "fe51ae58587a3026caa0896e8395fa93dbe4f3cd"
+      "size": 16699,
+      "sha": "1d4ce423bcb8a7e2d4b81ea029b8cf01679a7536"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -332,8 +332,8 @@
     {
       "path": "App/Test-WindowsTools.ps1",
       "mode": "100644",
-      "size": 5586,
-      "sha": "dd6e105d9df34e00f2c9d129c029215fa2623e9c"
+      "size": 8634,
+      "sha": "6e9fb425bf07fce618c4c6fcce657cacdeb25027"
     },
     {
       "path": "App/Test-WinRARStartup.ps1",
@@ -410,8 +410,8 @@
     {
       "path": "App/Windows.Tools.ps1",
       "mode": "100644",
-      "size": 7834,
-      "sha": "bb6e5a4f67270e157276115a84bbbb739bb93943"
+      "size": 10064,
+      "sha": "90c5883c3c692e863dd69f24e4f51022af74281c"
     },
     {
       "path": "App/WinRAR.Startup.ps1",
@@ -458,8 +458,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 18565,
-      "sha": "de292563a24060232348890a3ad3529e81cc6bc4"
+      "size": 19561,
+      "sha": "5f23aef2a67e8e2c5a7adcfdddf356fcc204cfd1"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -878,14 +878,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 10770,
-      "sha": "ef6eb1eabd5976b6d8810c1799ae9f33e3df366b"
+      "size": 11596,
+      "sha": "ae0258667073bdd88548a0627563d7a85191c67f"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 20144,
-      "sha": "5cf7e0b6191ec895167f9d904585fa8d317384d6"
+      "size": 20999,
+      "sha": "12df9e6eea859592a40c18a645d7ba3fe8f8f1f7"
     },
     {
       "path": "RELEASING.md",
@@ -897,7 +897,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "08f6e029a18706b6faf377bbfd8e001487f9322c"
+      "sha": "a59d8260e230bd696813606fcd0c590e843b2f74"
     }
   ]
 }

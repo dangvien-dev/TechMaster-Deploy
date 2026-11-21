@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.8.0 — 21/11/2026
+
+- Menu chuột phải đọc đầy đủ build và UBR. Từ mốc 26200.9974 trở lên vẫn lưu / kiểm tra key menu truyền thống, nhưng cảnh báo Windows có thể bỏ qua tuỳ chỉnh; không suy ra menu mới đã bật chỉ từ số build vì tính năng được triển khai dần. Nếu thiếu UBR ở build 26200, hiển thị chưa xác định và cảnh báo thận trọng.
+- Giữ cảnh báo khi key đã tồn tại và sau khi yêu cầu khởi động lại Explorer. Phân biệt xác nhận cấu hình với xác nhận giao diện menu; log lưu build, UBR và trạng thái chưa xác minh hiển thị. Khôi phục menu Windows 11 vẫn hoạt động như trước.
+- Hướng dẫn Shift + chuột phải để mở menu đầy đủ; nếu Customize menu có Arrange primary actions inline thì có thể bật thủ công. Chưa tự ghi registry của toggle khi chưa xác định / kiểm thử giá trị thực tế.
+
 ## 2.2.7.0 — 21/11/2026
 
 - Thêm Sau khi clone → Thiết lập mặc định: chọn một máy in đã cài, đặt A4 và / hoặc đặt máy in mặc định cho tài khoản đang chạy app. Tắt Windows tự quản lý máy in khi chọn mặc định; ghi lại trạng thái trước / sau và đọc lại kết quả từ hệ thống. Báo riêng nếu driver chưa hỗ trợ / nhận A4 hoặc một phần thao tác thất bại.

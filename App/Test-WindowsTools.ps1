@@ -6,8 +6,8 @@ function Assert($c,$m){if(-not $c){throw "FAIL: $m"};$script:checks++}
 function Throws([scriptblock]$code,$m){$caught=$false;try{&$code|Out-Null}catch{$caught=$true};Assert $caught $m}
 $dir=Join-Path ([IO.Path]::GetTempPath()) ('tm-win-tools-'+[guid]::NewGuid().ToString('N'));New-Item -ItemType Directory -Path $dir|Out-Null
 try{
-    $script:build=26100;$script:state=[pscustomobject]@{KeyExists=$false;DefaultPresent=$false;Value=$null;Kind=''};$script:writes=0
-    function Get-DeployWindowsToolsIdentity {[pscustomobject]@{Build=$script:build;Sid='current';User='Test user';Session=8}}
+    $script:build=26100;$script:ubr=0;$script:state=[pscustomobject]@{KeyExists=$false;DefaultPresent=$false;Value=$null;Kind=''};$script:writes=0
+    function Get-DeployWindowsToolsIdentity {[pscustomobject]@{Build=$script:build;Ubr=$script:ubr;Sid='current';User='Test user';Session=8}}
     function Get-DeployExplorerMenuSnapshot {$script:state.PSObject.Copy()}
     function Write-DeployExplorerMenuOverride([bool]$Legacy){$script:writes++;$script:state=[pscustomobject]@{KeyExists=$Legacy;DefaultPresent=$Legacy;Value=$(if($Legacy){''}else{$null});Kind=$(if($Legacy){'String'}else{''})}}
     $log=Join-Path $dir 'menu.jsonl'
@@ -18,6 +18,39 @@ try{
     Assert (-not $r.Changed -and $script:writes -eq 1) 'Applying the same preference is idempotent'
     $r=Set-DeployExplorerMenu Default $log
     Assert ($r.Changed -and -not $script:state.DefaultPresent) 'Windows 11 default removes the classic override'
+    foreach($case in @(
+        @{Build=26100;Ubr=99999;Warn=$false},
+        @{Build=26200;Ubr=9973;Warn=$false},
+        @{Build=26200;Ubr=9974;Warn=$true},
+        @{Build=26200;Ubr=10000;Warn=$true},
+        @{Build=26300;Ubr=0;Warn=$true},
+        @{Build=26200;Ubr=$null;Warn=$true}
+    )){
+        $script:build=$case.Build;$script:ubr=$case.Ubr
+        $script:state=[pscustomobject]@{KeyExists=$false;DefaultPresent=$false;Value=$null;Kind=''}
+        $before=$script:writes;$r=Set-DeployExplorerMenu Legacy $log
+        Assert ($r.Changed -and $script:writes -eq $before+1 -and $script:state.DefaultPresent) 'All build/revision ranges still write and verify the empty classic key'
+        Assert ($r.Compatibility.MayIgnore -eq $case.Warn -and -not $r.DisplayVerified) "Compatibility warning uses build plus UBR, not build alone: $($case.Build).$($case.Ubr)"
+        if($case.Warn){
+            Assert ($r.Message -match 'Shift' -and $r.Message -match 'Arrange primary actions inline' -and $r.Message -match 'triển khai dần') 'New builds receive alternatives without assuming the rollout is active'
+            Assert ((Get-DeployExplorerMenuRestartMessage $r) -match 'Arrange primary actions inline') 'Restart completion retains warning and alternatives'
+        }else{
+            Assert ($r.Message -notmatch 'Arrange primary actions inline') 'Older builds retain ordinary apply/restart guidance'
+        }
+        $before=$script:writes;$again=Set-DeployExplorerMenu Legacy $log
+        Assert (-not $again.Changed -and $script:writes -eq $before -and $again.Compatibility.MayIgnore -eq $case.Warn) 'An already-present key preserves compatibility warning without rewriting'
+        $restored=Set-DeployExplorerMenu Default $log
+        Assert ($restored.Changed -and -not $script:state.DefaultPresent -and $restored.Message -notmatch 'Arrange primary actions inline') 'Windows 11 restore remains available on new builds'
+        Assert ((Get-DeployExplorerMenuRestartMessage $restored) -notmatch 'Arrange primary actions inline') 'Restore completion does not suggest re-enabling a classic-menu alternative'
+    }
+    $entries=@(Get-Content -LiteralPath $log | ForEach-Object {$_ | ConvertFrom-Json})
+    $record=$entries | Where-Object Event -eq 'menu-display-unverified' | Select-Object -Last 1
+    Assert ($record.Data.Compatibility.Build -eq 26200 -and $null -eq $record.Data.Compatibility.Ubr -and -not $record.Data.DisplayVerified) 'Persistent log distinguishes registry verification from unknown visual result'
+    $unknown=Get-DeployExplorerMenuCompatibility ([pscustomobject]@{Build=26200})
+    Assert ($unknown.MayIgnore -and $unknown.BuildLabel -match 'UBR') 'Missing UBR is marked unknown, not silently treated as revision zero'
+    $invalid=Get-DeployExplorerMenuCompatibility ([pscustomobject]@{Build=26200;Ubr='bad'})
+    Assert ($invalid.MayIgnore -and $null -eq $invalid.Ubr) 'Invalid UBR conservatively warns without a hard unsupported verdict'
+    $script:build=26100;$script:ubr=0
     $script:state=[pscustomobject]@{KeyExists=$true;DefaultPresent=$true;Value='other-extension.dll';Kind='String'};$before=$script:writes
     Throws {Set-DeployExplorerMenu Default $log} 'Unknown existing COM configuration is not overwritten or removed'
     Assert ($script:writes -eq $before) 'Refused configuration change makes no registry write'
