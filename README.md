@@ -48,7 +48,7 @@ Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiệ
 
 **Nâng cấp bằng giao diện:** đóng app cũ, mở `TechMaster-Update.exe` trong Downloads của repo, chọn file `TechMaster Deploy.exe` đang dùng hoặc nhập thư mục app. Bấm **Tiếp tục → Tải bản cập nhật → Cài đặt bản cập nhật → Đóng và mở ứng dụng**. Cập nhật xong giữ nguyên màn hình kết quả; chỉ mở app sau khi bấm **Đóng và mở ứng dụng**. Nút X chỉ đóng updater. Có nút chọn ZIP nếu cần cập nhật offline. Từ bản 2.0 dùng nút cập nhật trong app; không nhập `y` hoặc `CAP NHAT` nữa. Khi nâng cấp từ bản cũ, cửa sổ updater đang chạy vẫn mang giao diện cũ đến khi đóng; mở lại từ app mới để dùng giao diện / icon mới. Từ 2.1.1, nút Cập nhật trên đầu app gọi lại cửa sổ cập nhật nếu bị khuất hoặc thu nhỏ, và thanh trạng thái chính hiện tiến trình tải.
 
-**UltraViewer trùng ID:** vào **Sau khi clone → Reset ID UltraViewer** để sao lưu rồi reset hai trường UID / PreferID của bản **6.6.133** đã kiểm tra. Thao tác ngắt UltraViewer, nên chạy tại máy hoặc qua remote khác. Có nút kiểm tra và khôi phục. Khi tạo ảnh mới, bật tuỳ chọn chuẩn bị UltraViewer trong cửa sổ trước Sysprep; dịch vụ được giữ tắt trên ảnh gốc và bật lại sau clone để nhận ID riêng một lần. Chẩn đoán UltraViewer vẫn chỉ đọc.
+**UltraViewer trùng ID:** vào **Sau khi clone → Reset ID UltraViewer** để sao lưu rồi reset hai trường UID / PreferID của bản **6.6.133** đã kiểm tra. Thao tác ngắt UltraViewer, nên chạy tại máy hoặc qua remote khác. Có nút kiểm tra và khôi phục. Khi tạo ảnh mới, bật tuỳ chọn chuẩn bị UltraViewer trong cửa sổ trước Sysprep; dịch vụ được giữ tắt trên ảnh gốc và bật lại sau clone để nhận ID riêng một lần. Chẩn đoán UltraViewer vẫn chỉ đọc. Lịch sử reset / xác minh / khôi phục và bản sao lưu được giữ trong `%ProgramData%\TechMaster Deploy\UltraViewer Backups`; mở lại cửa sổ sẽ tìm lại lịch sử đúng máy, gồm biên nhận từ bản cũ. Không cần reset lần nữa chỉ để kiểm tra ID. Nếu cài lại / reset Windows hoặc xoá ProgramData thì lịch sử có thể mất; đây không phải sao lưu bên ngoài ổ Windows.
 
 Trước Sysprep có cửa sổ nhắc chọn **Screen Snipping → Always** cho Windows + Shift + S, kiểm tra và sao lưu / dọn icon Word / Excel trùng. Chỉ dọn shortcut cùng đích, giữ các thiết lập Word. Máy đã clone mở chức năng này ở **Sau khi clone → Kiểm tra Desktop và phím chụp**.
 
@@ -65,7 +65,7 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 1. Mở tab **Cài Windows**, bấm **Trang tải Microsoft** ở dòng Windows 11 hoặc Windows 10 để mở trang tải chính thức trong trình duyệt.
 2. Sau khi tải ISO, bấm **Chọn ISO…**. Ứng dụng gắn ISO, kiểm tra chữ ký Microsoft của `setup.exe` và mở Windows Setup. Các lựa chọn giữ dữ liệu và bước xác nhận cài đặt nằm trong Windows Setup.
 3. Để cài mới từ USB, bấm **Tạo USB Windows 11** hoặc **Tạo USB Windows 10**. TechMaster tải và kiểm tra chữ ký của Media Creation Tool, sau đó mở công cụ để bạn chọn USB trống từ 8 GB. Dữ liệu trên USB được chọn sẽ bị xóa.
-4. Sau khi cài trực tiếp và kiểm tra dữ liệu, mở lại app, bấm **Dọn Windows.old**. Trong **Lưu trữ → Tệp tạm thời**, chọn **Bản cài đặt Windows trước đây** rồi xác nhận **Xóa tệp**. Xóa Windows.old sẽ bỏ khả năng quay lại bản Windows cũ.
+4. Sau khi cài trực tiếp và kiểm tra dữ liệu, mở lại app, bấm **Dọn Windows.old**. Trong **Disk Cleanup**, chọn **Dọn tệp hệ thống → Bản cài đặt Windows trước đây**, kiểm tra các mục khác rồi xác nhận xoá. Xóa Windows.old sẽ bỏ khả năng quay lại bản Windows cũ.
 
 ## Biên bản bản quyền
 
@@ -150,3 +150,5 @@ Trên Windows, chạy `powershell.exe -NoProfile -ExecutionPolicy Bypass -File A
 ### Fix Driver (dùng chung mọi máy / mainboard)
 
 Vào **Fix Driver → Mở Fix Driver** để quét thiết bị báo lỗi, lấy Hardware ID / link Catalog, cài CAB hoặc thư mục INF đã tải, và cài từ kho USB / NAS tối đa 4 vòng. Không cần profile để dùng các chức năng này; không có driver được đóng gói hoặc tải tự động. Profile JSON chỉ bổ sung khuyến nghị riêng khi khớp model, mẫu đầu là SingPC I5-12450H BIOS 5.32. Xem [thiết kế và hướng dẫn test](FixClone/DriverFix.md), [JSON profile mẫu](FixClone/DriverFix.SingPC.json). Mọi cài / disable / chỉnh nguồn đều cần Admin và ghi log local.
+
+**Thiếu Paint:** vào **Cài Windows → Paint trên Microsoft Store**, bấm **Get / Cài đặt** trên trang Paint chính thức của Microsoft. App chỉ mở trang Store, không tự cài hoặc báo hoàn tất khi chưa kiểm tra.

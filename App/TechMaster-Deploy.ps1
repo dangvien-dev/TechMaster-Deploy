@@ -249,6 +249,11 @@ $mediaTimer = New-DeployTimer 350 {
 Bind-Click 'btnIso11' { Start-Process 'https://www.microsoft.com/vi-vn/software-download/windows11' }
 Bind-Click 'btnIso10' { Start-Process 'https://www.microsoft.com/vi-vn/software-download/windows10' }
 Bind-Click 'btnUsb11' { Start-MediaCreationTool '11' }; Bind-Click 'btnUsb10' { Start-MediaCreationTool '10' }
+Bind-Click 'btnPaintStore' {
+    try{Start-Process 'ms-windows-store://pdp/?ProductId=9PCFS5B6T72H' -ErrorAction Stop}
+    catch{Start-Process 'https://apps.microsoft.com/detail/9PCFS5B6T72H' -ErrorAction Stop}
+    Set-Status 'Đã mở trang Paint chính thức. Bấm Get / Cài đặt trong Microsoft Store; app chưa xác nhận Paint đã được cài.' 'Info'
+}
 Bind-Click 'btnWindowsOld' { Open-WindowsOldCleanup }
 Bind-Click 'btnMenuClassic' { Set-ExplorerMenuChoice Legacy }
 Bind-Click 'btnMenuDefault' { Set-ExplorerMenuChoice Default }

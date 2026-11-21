@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.6.0 — 21/11/2026
+
+- UltraViewer tự tìm lại lịch sử reset đúng máy khi mở lại cửa sổ / app hoặc sau khởi động lại Windows, gồm bản sao lưu tạo bởi phiên bản cũ. Hiện thời gian và trạng thái reset, chờ ID, xác minh hoặc khôi phục cùng đường dẫn sao lưu; không reset tự động khi mở cửa sổ.
+- Lưu trạng thái và nhật ký thao tác cùng biên nhận trong ProgramData. Kiểm tra ID dựa trên bản sao lưu; không báo đã tạo ID mới sau khi khôi phục ID cũ, không nhận lịch sử từ máy khác hoặc nhầm bản sao lưu chuẩn bị ảnh gốc là reset máy khách.
+- Thêm nút Paint trên Microsoft Store trong Cài Windows, mở trang Paint chính thức để kỹ thuật viên bấm Get / Cài đặt.
+
 ## 2.2.5.0 — 21/11/2026
 
 - Thông báo có khung màu và biểu tượng dùng chung: xanh lam cho thông tin / đang xử lý, vàng cho bước chờ kiểm tra, xanh lá cho thao tác đã xác nhận và đỏ cho lỗi. Áp dụng ở UltraViewer, key Windows / Office, hộp thoại và các cửa sổ tác vụ. Thông báo dài có thể cuộn, thông báo trống tự ẩn.

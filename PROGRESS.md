@@ -1,6 +1,8 @@
 # Tiến độ TechMaster Deploy
 
-Cập nhật ngày 17/11/2026.
+Cập nhật ngày 21/11/2026.
+
+**2.2.6.0:** tự nạp lại lịch sử UltraViewer trên đúng máy từ biên nhận ProgramData, lưu nhật ký trạng thái cùng thời gian; mở cửa sổ chỉ đọc, không tự reset / ngắt kết nối. Khôi phục ID cũ được phân biệt với xác minh ID mới. Đã qua 43 kiểm tra lifecycle với tệp thật và registry / dịch vụ mô phỏng, gồm lịch sử bản cũ, sai máy, tệp hỏng, chỉ đổi một trường và lỗi reset có hoàn tác; 12 kiểm tra phối hợp triển khai vẫn qua. Thêm nút mở Paint chính thức trong Microsoft Store tại Cài Windows. Cần thử đóng / mở app và khởi động lại trên máy Windows đã reset UltraViewer; không chạy reset thật trên máy khách trong môi trường kiểm thử.
 
 **2.0.0.0:** chuyển shell 8 mục và updater sang WPF; giữ xử lý Office, WinGet, Windows Setup, bản quyền và biên bản. Tiến trình nền dùng runspace riêng, kết quả được DispatcherTimer đọc trên UI thread. Đã kiểm tra runspace thật (tham số Unicode, kết quả, lỗi và huỷ), 18 kiểm tra engine cập nhật với file / ZIP thật và 6 kiểm tra lựa chọn Office / khởi chạy ẩn. Workflow Windows WPF validation [#4](https://github.com/dangvien-dev/TechMaster-Deploy/actions/runs/44084065962) đã qua: nạp WPF / kiểm tra bố cục thật, 63 kiểm tra updater, các kiểm tra engine / repo / preflight và build EXE + ZIP trên Windows PowerShell 5.1. Đã sửa khác biệt ZIP Windows legacy và kiểm tra index độc lập định dạng JSON của PowerShell 5.1 / 7. Chưa chạy Sysprep, cài Office hoặc kích hoạt thật trên máy khách.
 
