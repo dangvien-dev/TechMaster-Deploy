@@ -26,12 +26,54 @@ function Initialize-DeployRoundedBorder([Windows.Controls.Border]$frame) {
     [void]$layers.Children.Add($inside);[void]$layers.Children.Add($outline)
     $frame.Child=$layers
 }
+function Initialize-DeployRoundedButtons([Windows.Window]$window) {
+    # Share the fallback template with the self-contained update helper too.
+    # Existing window templates (including the main header) keep their styles.
+    $rounded = [Windows.Markup.XamlReader]::Parse(@'
+<Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Button">
+ <Setter Property="Background" Value="#214674"/><Setter Property="Foreground" Value="White"/>
+ <Setter Property="Padding" Value="16,10"/><Setter Property="Margin" Value="0,0,10,8"/>
+ <Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Cursor" Value="Hand"/>
+ <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+ <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+  <Grid><Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+   <ContentPresenter x:Name="ButtonContent" HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+  </Border><Border x:Name="FocusOutline" BorderBrush="Transparent" BorderThickness="2" CornerRadius="8" IsHitTestVisible="False"/></Grid>
+  <ControlTemplate.Triggers>
+   <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.85"/></Trigger>
+   <Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.7"/></Trigger>
+   <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.45"/></Trigger>
+   <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="FocusOutline" Property="BorderBrush" Value="#38BDF8"/></Trigger>
+  </ControlTemplate.Triggers>
+ </ControlTemplate></Setter.Value></Setter>
+</Style>
+'@)
+    $template = @($rounded.Setters | Where-Object Property -eq ([Windows.Controls.Control]::TemplateProperty))[0].Value
+    if (-not $window.Resources.Contains([Windows.Controls.Button])) { $window.Resources[[Windows.Controls.Button]] = $rounded }
+    foreach ($key in @($window.Resources.Keys)) {
+        $style = $window.Resources[$key]
+        if ($style -isnot [Windows.Style] -or $style.TargetType -ne [Windows.Controls.Button]) { continue }
+        $base = $style; $hasTemplate = $false
+        while ($base) {
+            foreach ($setter in $base.Setters) {
+                if ($setter -is [Windows.Setter] -and $setter.Property -eq [Windows.Controls.Control]::TemplateProperty) { $hasTemplate = $true }
+            }
+            $base = $base.BasedOn
+        }
+        if ($hasTemplate) { continue }
+        $replacement = [Windows.Style]::new([Windows.Controls.Button], $style)
+        $replacement.Setters.Add([Windows.Setter]::new([Windows.Controls.Control]::TemplateProperty, $template))
+        $replacement.Setters.Add([Windows.Setter]::new([Windows.FrameworkElement]::FocusVisualStyleProperty, $null))
+        $window.Resources[$key] = $replacement
+    }
+}
 function Import-DeployWindow([string]$path) {
     Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
     if (-not ('TechMaster.DesktopIdentity' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'DesktopIdentity.cs') }
     [TechMaster.DesktopIdentity]::Initialize()
     $reader = [Xml.XmlReader]::Create($path, [Xml.XmlReaderSettings]@{ DtdProcessing = 'Prohibit'; XmlResolver = $null })
     try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Dispose() }
+    Initialize-DeployRoundedButtons $window
     $stream = [IO.File]::OpenRead((Join-Path $PSScriptRoot 'TechMaster.ico'))
     try {
         $icon = New-Object Windows.Media.Imaging.BitmapImage

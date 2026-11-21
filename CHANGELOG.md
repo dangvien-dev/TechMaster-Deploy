@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.1.0 — 21/11/2026
+
+- Rà soát bo góc các cửa sổ phụ: nút trong Định danh UltraViewer, Bàn phím, Chuẩn bị Sysprep, Chẩn đoán và Gỡ / dọn Office dùng template chung khi chưa có style riêng.
+- Bo thêm ô nhập, ô mật khẩu, danh sách, bảng và thanh tiến trình còn vuông trong Cập nhật, Chẩn đoán, Quản lý ứng dụng, Gỡ Office và Fix Driver. Giữ control gốc để nhập liệu, chọn, cuộn và chạy tác vụ như trước.
+- Giữ nét viền bo góc ở lớp trên, đồng bộ ẩn / hiện khung với control và giữ viền focus của nút không làm dịch chữ.
+
 ## 2.2.0.0 — 20/11/2026
 
 - Thêm Fix Driver dùng chung cho mọi máy / mainboard: quét thiết bị có mã lỗi, hiện đầy đủ Hardware ID / InstanceId và tạo link Microsoft Update Catalog đã URL-encode để kỹ thuật viên tự tải driver.
