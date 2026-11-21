@@ -296,8 +296,8 @@
     {
       "path": "App/Test-WinRARStartup.ps1",
       "mode": "100644",
-      "size": 5637,
-      "sha": "4bc0c2bead9ac083de804973dc023d209388e7c6"
+      "size": 6242,
+      "sha": "c46e1c4458e404eff7188369fdd254d2b2f1ab3b"
     },
     {
       "path": "App/Test-Wpf.ps1",
@@ -368,8 +368,8 @@
     {
       "path": "App/WinRAR.Startup.ps1",
       "mode": "100644",
-      "size": 3322,
-      "sha": "9a05fc10725a4374c955cba2a3982a9139fb6df3"
+      "size": 3614,
+      "sha": "93921d801ab07cd4fbc773169b65dc90602f58cb"
     },
     {
       "path": "App/Wpf.Runtime.ps1",

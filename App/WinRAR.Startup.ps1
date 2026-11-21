@@ -19,10 +19,15 @@ function Get-DeployWinRarPath {
     return ''
 }
 function Get-DeployWinRarRunning([string]$Path) {
-    foreach($process in Get-Process -Name WinRAR -ErrorAction SilentlyContinue){
-        try{if($process.Path -ieq $Path -and -not $process.HasExited){return $true}}catch{}
-    }
-    return $false
+    # Get-Process -Name with SilentlyContinue still sets PowerShell.HadErrors
+    # when no process exists, which would invalidate an otherwise successful worker.
+    $processes=[Diagnostics.Process]::GetProcessesByName('WinRAR')
+    try{
+        foreach($process in $processes){
+            try{if($process.MainModule.FileName -ieq $Path -and -not $process.HasExited){return $true}}catch{}
+        }
+        return $false
+    }finally{foreach($process in $processes){$process.Dispose()}}
 }
 function Complete-DeployWinRarStartup($Result,[string]$Details,[string]$LogPath) {
     if($Result.Group -notin 'Installed','Skipped','Restart'){return [pscustomobject]@{Status=$Result.Status;Group=$Result.Group;Details=$Details}}

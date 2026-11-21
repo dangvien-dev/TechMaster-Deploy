@@ -6,6 +6,12 @@ function Assert($Condition,[string]$Message){if(-not $Condition){throw "FAIL: $M
 $dir=Join-Path ([IO.Path]::GetTempPath()) ('tm-rar-start-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $dir|Out-Null
 try{
+    . (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
+    $read=Start-DeployWork 'param($module,$path) . $module; [pscustomobject]@{Running=(Get-DeployWinRarRunning $path)}' @((Join-Path $PSScriptRoot 'WinRAR.Startup.ps1'),(Join-Path $dir 'no-installed-WinRAR.exe'))
+    while(-not $read.Async.IsCompleted){Start-Sleep -Milliseconds 10}
+    Assert (-not $read.Pipeline.HadErrors) 'No running WinRAR does not poison the worker error state'
+    $readResult=@(Receive-DeployWork $read)[-1]
+    Assert (-not $readResult.Running) 'The real background process lookup returns a clean false without requiring WinRAR'
     $log=Join-Path $dir 'launch.log';$script:rarPath=Join-Path $dir "WinRAR user's app/WinRAR.exe";$script:running=$false;$script:starts=0;$script:throwStart=$false
     function Get-DeployWinRarPath {return $script:rarPath}
     function Get-DeployWinRarRunning($Path){return $script:running}
