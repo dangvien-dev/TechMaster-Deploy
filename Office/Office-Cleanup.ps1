@@ -20,7 +20,7 @@ function Set-CleanupBusy([bool]$busy) {
 function Start-CleanupOperation([string]$operation,[string[]]$ids=@()) {
     if ($script:cleanup.Job) { return }
     Set-CleanupBusy $true
-    $cleanupWindow.FindName('Status').Text=if($operation -eq 'Inspect'){'Đang đọc Office…'}else{'Đang xử lý các mục đã chọn…'}
+    Set-DeployNotice ($cleanupWindow.FindName('Status')) $(if($operation -eq 'Inspect'){'Đang đọc Office…'}else{'Đang xử lý các mục đã chọn…'}) 'Working'
     $script:cleanup.Job=Start-DeployWork @'
 param($directory,$operation,$inventory,$ids,$log,$progress)
 $ErrorActionPreference='Stop'
@@ -44,9 +44,9 @@ $cleanupTimer=New-DeployTimer 200 {
     $cleanupTimer.Stop();$script:cleanup.Job=$null
     try {
         $result=@(Receive-DeployWork $job)[-1]
-        if ($script:cleanup.Operation -eq 'Inspect') { Set-CleanupInventory $result; $cleanupWindow.FindName('Status').Text=$(if($Mode -eq 'Keys'){'Chọn key dùng thử hoặc kiểm tra từng key trước khi xoá. Chưa có key nào được chọn tự động.'}else{'Chọn key cần xoá hoặc chỉ kiểm tra danh sách.'}) }
-        else { Set-CleanupInventory $result.Inventory; $cleanupWindow.FindName('Status').Text=$result.Message; $script:cleanup.ExitCode=0 }
-    } catch { $script:cleanup.ExitCode=1; $cleanupWindow.FindName('Status').Text=$_.Exception.GetBaseException().Message; Show-DeployMessage $_.Exception.GetBaseException().Message 'Gỡ / dọn Office' 'Error' }
+        if ($script:cleanup.Operation -eq 'Inspect') { Set-CleanupInventory $result; Set-DeployNoticeKind ($cleanupWindow.FindName('Status')) 'Info'; $cleanupWindow.FindName('Status').Text=$(if($Mode -eq 'Keys'){'Chọn key dùng thử hoặc kiểm tra từng key trước khi xoá. Chưa có key nào được chọn tự động.'}else{'Chọn key cần xoá hoặc chỉ kiểm tra danh sách.'}) }
+        else { Set-CleanupInventory $result.Inventory; Set-DeployNotice ($cleanupWindow.FindName('Status')) $result.Message $(if($result.Outcome -eq 'NoChange'){'Info'}else{'Success'}); $script:cleanup.ExitCode=0 }
+    } catch { $script:cleanup.ExitCode=1; Set-DeployNotice ($cleanupWindow.FindName('Status')) $_.Exception.GetBaseException().Message 'Error'; Show-DeployMessage $_.Exception.GetBaseException().Message 'Gỡ / dọn Office' 'Error' }
     finally { Set-CleanupBusy $false }
 }
 function Confirm-CleanupOperation([string]$operation) {

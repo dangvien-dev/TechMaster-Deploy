@@ -11,7 +11,9 @@
 param(
     [string]$Customer,
     [string]$Technician,
-    [switch]$NoPrompt      # GUI gọi: không hỏi, không pause
+    [switch]$NoPrompt,     # GUI gọi: không hỏi, không pause
+    [string]$CustomerCompany,
+    [string]$CustomerAddress
 )
 $ErrorActionPreference = 'Stop'
 $consoleInit = Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Console.ps1'
@@ -44,6 +46,8 @@ if ($NoPrompt) {
     if (-not [string]::IsNullOrWhiteSpace($Technician)) { $cfg.Technician = $Technician }
 } else {
     $customer = Read-Host "  Tên khách hàng / đơn vị (Enter để bỏ trống)"
+    $CustomerCompany = Read-Host "  Đơn vị / công ty khách hàng (Enter để bỏ trống)"
+    $CustomerAddress = Read-Host "  Địa chỉ khách hàng (Enter để bỏ trống)"
     $techIn   = Read-Host "  Kỹ thuật viên (Enter = $($cfg.Technician))"
     if (-not [string]::IsNullOrWhiteSpace($techIn)) { $cfg.Technician = $techIn }
 }
@@ -178,7 +182,9 @@ $html = @'
 
  <h2>1. Thông tin chung</h2>
  <table class="kv">
-  <tr><td>Khách hàng</td><td>{{CUSTOMER}}</td></tr>
+  <tr><td>Khách hàng / người nhận</td><td>{{CUSTOMER}}</td></tr>
+  <tr><td>Đơn vị / công ty khách hàng</td><td>{{CUSTOMER_COMPANY}}</td></tr>
+  <tr><td>Địa chỉ khách hàng</td><td>{{CUSTOMER_ADDRESS}}</td></tr>
   <tr><td>Kỹ thuật viên</td><td>{{TECH}}</td></tr>
  </table>
 
@@ -238,21 +244,22 @@ foreach ($ext in 'svg', 'png', 'jpg', 'jpeg') {
         break
     }
 }
-$html = $html.Replace('{{LOGO}}', $logoTag)
-$html = $html.Replace('{{COMPANY}}',  (OrDash $cfg.Company)).Replace('{{ADDRESS}}', (OrDash $cfg.Address))
-$html = $html.Replace('{{PHONE}}',    (OrDash $cfg.Phone)).Replace('{{TECH}}', (OrDash $cfg.Technician))
-$html = $html.Replace('{{DOCNO}}',    ("BB-{0:yyyyMMdd-HHmm}-{1}" -f $now, $env:COMPUTERNAME))
-$html = $html.Replace('{{DATETIME}}', ("{0:HH:mm}, ngày {0:dd/MM/yyyy}" -f $now))
-$html = $html.Replace('{{CUSTOMER}}', (OrDash $customer))
-$html = $html.Replace('{{CUSTOMER_SIGN}}', $(if ($customer) { HtmlEnc $customer } else { '' }))
-$html = $html.Replace('{{PC}}',       (HtmlEnc $env:COMPUTERNAME))
-$html = $html.Replace('{{MODEL}}',    (OrDash ("{0} {1}" -f $cs.Manufacturer, $cs.Model).Trim()))
-$html = $html.Replace('{{SERIAL}}',   (OrDash $serial))
-$html = $html.Replace('{{OS}}',       (OrDash ("{0} (build {1})" -f $os.Caption, $os.BuildNumber)))
-$html = $html.Replace('{{SUMMARY}}',  $summary)
-$html = $html.Replace('{{WINROWS}}',  (New-ProductRows $win 'Không đọc được thông tin Windows' -Windows))
 $officeEmptyText = if ($offReadFailed) { 'Không đọc được thông tin Office; chưa xác định trạng thái kích hoạt.' } else { 'Không phát hiện Office (hoặc Office không dùng key, ví dụ Microsoft 365 đăng nhập tài khoản)' }
-$html = $html.Replace('{{OFFROWS}}',  (New-ProductRows $off $officeEmptyText))
+$values=@{
+    LOGO=$logoTag; COMPANY=(OrDash $cfg.Company); ADDRESS=(OrDash $cfg.Address)
+    PHONE=(OrDash $cfg.Phone); TECH=(OrDash $cfg.Technician)
+    DOCNO=("BB-{0:yyyyMMdd-HHmm}-{1}" -f $now,$env:COMPUTERNAME)
+    DATETIME=("{0:HH:mm}, ngày {0:dd/MM/yyyy}" -f $now)
+    CUSTOMER=(OrDash $customer); CUSTOMER_COMPANY=(OrDash $CustomerCompany); CUSTOMER_ADDRESS=(OrDash $CustomerAddress)
+    CUSTOMER_SIGN=$(if($customer){HtmlEnc $customer}elseif($CustomerCompany){HtmlEnc $CustomerCompany}else{''})
+    PC=(HtmlEnc $env:COMPUTERNAME); MODEL=(OrDash ("{0} {1}" -f $cs.Manufacturer,$cs.Model).Trim())
+    SERIAL=(OrDash $serial); OS=(OrDash ("{0} (build {1})" -f $os.Caption,$os.BuildNumber))
+    SUMMARY=$summary; WINROWS=(New-ProductRows $win 'Không đọc được thông tin Windows' -Windows)
+    OFFROWS=(New-ProductRows $off $officeEmptyText)
+}
+# Render once so placeholder-like customer text remains literal, already HTML escaped.
+$render=[Text.RegularExpressions.MatchEvaluator]{param($match)[string]$values[$match.Groups[1].Value]}
+$html=[regex]::Replace($html,'\{\{([A-Z_]+)\}\}',$render)
 
 # ---------- Ghi file + mở ----------
 $outDir = Join-Path $here 'BienBan'

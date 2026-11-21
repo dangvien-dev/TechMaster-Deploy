@@ -1,4 +1,5 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'Deploy.Actions.ps1')
 $checks=0
 function Assert($condition,$message) { if (-not $condition) { throw "FAIL: $message" }; $script:checks++ }

@@ -19,12 +19,13 @@ function Get-DeployConfirmationSnapshot {
 }
 function New-DeployLicenseConfirmationHtml {
     param([ValidateSet('Retail','Company')][string]$Template,$Supplier,$Customer,$Snapshot,[object[]]$Products,[string]$Reference='')
-    if([string]::IsNullOrWhiteSpace([string]$Supplier.Company) -or [string]::IsNullOrWhiteSpace([string]$Customer.Name)){throw 'Nhập tên đơn vị cung cấp và khách hàng trước khi xuất xác nhận.'}
+    if([string]::IsNullOrWhiteSpace([string]$Supplier.Company) -or ([string]::IsNullOrWhiteSpace([string]$Customer.Name) -and ($Template -eq 'Retail' -or [string]::IsNullOrWhiteSpace([string]$Customer.Company)))){throw 'Nhập tên đơn vị cung cấp và khách hàng trước khi xuất xác nhận.'}
     if(-not $Products.Count){throw 'Chọn ít nhất một sản phẩm đã bàn giao.'}
     function Enc($value){[Net.WebUtility]::HtmlEncode([string]$value)}
     $kind=if($Template -eq 'Company'){'KHÁCH HÀNG CÔNG TY'}else{'KHÁCH HÀNG CÁ NHÂN'}
     $evidence=if($Template -eq 'Company'){'Đơn vị cung cấp đã cấp và bàn giao hóa đơn / chứng từ mua bán cho khách hàng. Xác nhận này được dùng kèm hồ sơ đó.'}else{'Xác nhận việc cung cấp và bàn giao phần mềm cho khách hàng cá nhân theo giao dịch mua bán giữa hai bên.'}
     $refRow=if($Template -eq 'Company' -and -not [string]::IsNullOrWhiteSpace($Reference)){'<tr><th>Hóa đơn / chứng từ tham chiếu</th><td>'+ (Enc $Reference)+'</td></tr>'}else{''}
+    $customerCompanyRow=if(-not [string]::IsNullOrWhiteSpace([string]$Customer.Company)){'<tr><th>Đơn vị / công ty khách hàng</th><td>'+(Enc $Customer.Company)+'</td></tr>'}else{''}
     $taxRow=if($Template -eq 'Company' -and -not [string]::IsNullOrWhiteSpace([string]$Customer.TaxCode)){'<tr><th>Mã số thuế khách hàng</th><td>'+(Enc $Customer.TaxCode)+'</td></tr>'}else{''}
     $rows=foreach($p in $Products){
         if([string]::IsNullOrWhiteSpace([string]$p.Name)){throw 'Nhập tên đầy đủ của từng sản phẩm bàn giao.'}
@@ -46,13 +47,13 @@ function New-DeployLicenseConfirmationHtml {
 </style></head><body><div class="bar"><button onclick="window.print()">In / Lưu PDF</button></div><main class="page">
 <div class="brand" style="display:flex;align-items:center">{{LOGO}}<div><strong>{{SUPPLIER}}</strong><div>{{ADDRESS}}</div><div>Điện thoại: {{PHONE}}</div></div></div>
 <h1>XÁC NHẬN CUNG CẤP VÀ BÀN GIAO<br>BẢN QUYỀN PHẦN MỀM</h1><div class="subtitle">{{KIND}} · Số: {{DOC}} · Ngày {{DATE}}</div>
-<h2>1. Thông tin bàn giao</h2><table class="info"><tr><th>Khách hàng</th><td>{{CUSTOMER}}</td></tr><tr><th>Địa chỉ khách hàng</th><td>{{CUSTOMER_ADDRESS}}</td></tr>{{TAX}}{{REFERENCE}}<tr><th>Thiết bị</th><td>{{COMPUTER}} · {{MODEL}}<br>Serial: {{SERIAL}}</td></tr><tr><th>Kỹ thuật viên thực hiện</th><td>{{TECH}}</td></tr></table>
+<h2>1. Thông tin bàn giao</h2><table class="info"><tr><th>Khách hàng</th><td>{{CUSTOMER}}</td></tr>{{CUSTOMER_COMPANY_ROW}}<tr><th>Địa chỉ khách hàng</th><td>{{CUSTOMER_ADDRESS}}</td></tr>{{TAX}}{{REFERENCE}}<tr><th>Thiết bị</th><td>{{COMPUTER}} · {{MODEL}}<br>Serial: {{SERIAL}}</td></tr><tr><th>Kỹ thuật viên thực hiện</th><td>{{TECH}}</td></tr></table>
 <h2>2. Phần mềm đã cung cấp và bàn giao</h2><table><thead><tr><th style="width:40%">Sản phẩm / phiên bản</th><th style="width:8%">SL</th><th style="width:23%">Key (5 ký tự cuối)</th><th>Trạng thái khi kiểm tra</th></tr></thead><tbody>{{PRODUCTS}}</tbody></table><div class="muted">Trạng thái do máy báo lúc {{CHECKED}}. Mỗi dòng tương ứng một giấy phép bàn giao cho thiết bị nêu trên.</div>
 <h2>3. Xác nhận của đơn vị cung cấp</h2><p>Đơn vị cung cấp xác nhận đã cung cấp và bàn giao các sản phẩm phần mềm tại mục 2 cho khách hàng nêu trên; chịu trách nhiệm về thông tin cung cấp và hồ sơ mua bán thuộc phạm vi giao dịch của mình.</p><p>{{EVIDENCE}}</p><p>Khách hàng sử dụng phần mềm theo điều khoản giấy phép của nhà sản xuất. Tài liệu / thẻ key / thông tin tài khoản liên quan được bàn giao riêng theo hình thức cấp phép của từng sản phẩm.</p>
 <div class="sign"><div><b>ĐƠN VỊ CUNG CẤP</b><div class="muted">Đại diện ký, ghi rõ họ tên; đóng dấu nếu có</div><div class="space"></div></div><div><b>KHÁCH HÀNG / ĐẠI DIỆN BÊN NHẬN</b><div class="muted">Ký, ghi rõ họ tên</div><div class="space"></div></div></div>
 <p class="foot muted">Văn bản do đơn vị cung cấp lập và ký. Quyền sử dụng phần mềm căn cứ điều khoản giấy phép và hồ sơ mua bán kèm theo. Trạng thái kích hoạt là thông tin kỹ thuật tại thời điểm kiểm tra. Key đầy đủ không được ghi trong file này.</p></main></body></html>
 '@
-    $values=@{LOGO=$logo;SUPPLIER=(Enc $Supplier.Company);ADDRESS=(Enc $Supplier.Address);PHONE=(Enc $Supplier.Phone);TECH=(Enc $Supplier.Technician);KIND=$kind;DOC=$doc;DATE=([datetime]::Now.ToString('dd/MM/yyyy'));CUSTOMER=(Enc $Customer.Name);CUSTOMER_ADDRESS=(Enc $Customer.Address);TAX=$taxRow;REFERENCE=$refRow;COMPUTER=(Enc $Snapshot.Computer);MODEL=(Enc $Snapshot.Model);SERIAL=(Enc $Snapshot.Serial);PRODUCTS=($rows -join "`n");CHECKED=$stamp;EVIDENCE=$evidence}
+    $values=@{LOGO=$logo;SUPPLIER=(Enc $Supplier.Company);ADDRESS=(Enc $Supplier.Address);PHONE=(Enc $Supplier.Phone);TECH=(Enc $Supplier.Technician);KIND=$kind;DOC=$doc;DATE=([datetime]::Now.ToString('dd/MM/yyyy'));CUSTOMER=$(if([string]::IsNullOrWhiteSpace([string]$Customer.Name)){'—'}else{Enc $Customer.Name});CUSTOMER_COMPANY_ROW=$customerCompanyRow;CUSTOMER_ADDRESS=(Enc $Customer.Address);TAX=$taxRow;REFERENCE=$refRow;COMPUTER=(Enc $Snapshot.Computer);MODEL=(Enc $Snapshot.Model);SERIAL=(Enc $Snapshot.Serial);PRODUCTS=($rows -join "`n");CHECKED=$stamp;EVIDENCE=$evidence}
     # One pass: input containing placeholder-like text must stay literal.
     $render=[Text.RegularExpressions.MatchEvaluator]{param($match)[string]$values[$match.Groups[1].Value]}
     return [regex]::Replace($html,'\{\{([A-Z_]+)\}\}',$render)

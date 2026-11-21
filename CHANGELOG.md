@@ -1,5 +1,14 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.5.0 — 21/11/2026
+
+- Thông báo có khung màu và biểu tượng dùng chung: xanh lam cho thông tin / đang xử lý, vàng cho bước chờ kiểm tra, xanh lá cho thao tác đã xác nhận và đỏ cho lỗi. Áp dụng ở UltraViewer, key Windows / Office, hộp thoại và các cửa sổ tác vụ. Thông báo dài có thể cuộn, thông báo trống tự ẩn.
+- Sau reset UltraViewer hiển thị vàng và làm nổi nút Kiểm tra ID mới; chỉ hiển thị xanh lá khi kiểm tra xác nhận thành công. Bản sao lưu có khung riêng dễ nhận biết.
+- Thêm Đơn vị / công ty khách hàng và Địa chỉ khách hàng ở Biên bản. Đưa sang HTML và điền sẵn trong mẫu xác nhận bàn giao, phân biệt với thông tin bên cung cấp. Dữ liệu khách không ghi vào cấu hình thông tin đơn vị dùng chung.
+- Thêm hai nút đổi menu chuột phải kiểu Windows 10 / khôi phục Windows 11 trong Sau khi clone. Lưu trạng thái trước thay đổi theo tài khoản hiện tại; hỏi riêng trước khi khởi động lại Explorer.
+- Dọn Windows.old mở Disk Cleanup với quyền quản trị, hướng dẫn chọn Dọn tệp hệ thống và kiểm tra lại thư mục sau khi đóng công cụ. Không báo đã dọn khi thư mục vẫn còn.
+- Giữ dữ liệu khách hàng chứa ký tự HTML hoặc giống placeholder dưới dạng văn bản; hướng dẫn portal yêu cầu nhập số máy cài thực tế theo giấy phép.
+
 ## 2.2.4.0 — 21/11/2026
 
 - Đồng bộ giao diện bảng: tiêu đề nền xanh nhạt, dòng cao thoáng hơn, nền xen kẽ và màu chọn dễ đọc; viền focus không làm dịch nội dung. Áp cùng kiểu bảng cho key Office, kết quả cài ứng dụng, lịch sử cập nhật và Fix Driver.

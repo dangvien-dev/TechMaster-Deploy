@@ -32,7 +32,7 @@ $lblTitle.Text = 'TechMaster Deploy v' + ([IO.File]::ReadAllText((Join-Path $Roo
 $cPrimary = '#10223F'; $cMuted = '#526880'; $cDanger = '#B91C1C'
 $script:officeRun = $null; $script:mediaDownload = $null; $script:uiWork = $null
 $script:officeLog = $null; $script:updateClosing = $false
-function Set-Status([string]$message) { $status.Text = $message }
+function Set-Status([string]$message,[ValidateSet('Info','Working','Attention','Success','Error')][string]$Kind='Info') { Set-DeployNotice $status $message $Kind }
 function Bind-Click([string]$name, [scriptblock]$handler) { $form.FindName($name).Add_Click($handler) }
 function Open-DeployFolder([string]$path) {
     New-Item -ItemType Directory -Path $path -Force | Out-Null
@@ -53,7 +53,7 @@ $uiTimer = New-DeployTimer 200 {
     if (-not $job -or -not $job.Async.IsCompleted) { return }
     $uiTimer.Stop(); $script:uiWork = $null
     try { $result = @(Receive-DeployWork $job); & $job.Complete $result }
-    catch { Set-Status 'Thao tác chưa hoàn tất.'; Show-DeployMessage $_.Exception.GetBaseException().Message 'TechMaster Deploy' 'Error' }
+    catch { Set-Status 'Thao tác chưa hoàn tất.' 'Error'; Show-DeployMessage $_.Exception.GetBaseException().Message 'TechMaster Deploy' 'Error' }
     finally { $btnRefresh.IsEnabled = $true; $btnExport.IsEnabled = $true; $btnConfirmRetail.IsEnabled=$true; $btnConfirmCompany.IsEnabled=$true }
 }
 function Update-MachineInfo {
@@ -170,7 +170,7 @@ Bind-Click 'btnResetIdentity' {
     if(-not (Confirm-Box 'Xoá thông tin đơn vị, kỹ thuật viên và logo đang lưu trong bộ công cụ này?' 'Xoá thông tin đơn vị' -ConfirmText 'Xoá thông tin / logo' -Danger -Owner $form)){return}
     Reset-DeployReportIdentity $DirBB
     foreach($name in 'Company','Address','Phone','Technician'){$form.FindName($name).Text=''}
-    $tbCustomer.Text=''
+    $tbCustomer.Text='';$tbCustomerCompany.Text='';$tbCustomerAddress.Text=''
     Update-LogoPreview
     Set-Status 'Đã xoá thông tin đơn vị và logo. Có thể nhập thông tin đơn vị mới.'
 }
@@ -179,10 +179,10 @@ Bind-Click 'btnExport' {
     catch { Show-DeployMessage $_.Exception.Message 'Lưu biên bản' 'Error'; return }
     Set-Status 'Đang đọc bản quyền và xuất biên bản…'
     Start-UiWork @'
-param($script, $customer, $technician)
+param($script, $customer, $technician, $customerCompany, $customerAddress)
 $ErrorActionPreference = 'Stop'
-& $script -NoPrompt -Customer $customer -Technician $technician 6>$null
-'@ @((Join-Path $DirBB 'Bien-Ban-Ban-Quyen.ps1'), $tbCustomer.Text.Trim(), $cfg.Technician) {
+& $script -NoPrompt -Customer $customer -CustomerCompany $customerCompany -CustomerAddress $customerAddress -Technician $technician 6>$null
+'@ @((Join-Path $DirBB 'Bien-Ban-Ban-Quyen.ps1'), $tbCustomer.Text.Trim(), $cfg.Technician, $tbCustomerCompany.Text.Trim(), $tbCustomerAddress.Text.Trim()) {
         param($result)
         $files = @($result | Where-Object { $_ -is [string] -and $_ -like '*.html' })
         if ($files.Count) { Set-Status ('Đã xuất: ' + $files[-1]) } else { Set-Status 'Đã xuất biên bản; xem thư mục biên bản.' }
@@ -194,7 +194,7 @@ function Start-DeployConfirmation([string]$template) {
     try{$cfg=Save-ReportInfo}catch{Show-DeployMessage $_.Exception.Message 'Lưu thông tin đơn vị' 'Error';return}
     $logo=Get-ChildItem -LiteralPath $DirBB -File|Where-Object {$_.BaseName -eq 'Logo' -and $_.Extension -in '.svg','.png','.jpg','.jpeg'}|Select-Object -First 1
     $cfg|Add-Member NoteProperty LogoPath $(if($logo){$logo.FullName}else{''})
-    $script:confirmationRequest=@{Template=$template;Supplier=$cfg;Customer=$tbCustomer.Text.Trim()}
+    $script:confirmationRequest=@{Template=$template;Supplier=$cfg;Customer=$tbCustomer.Text.Trim();CustomerCompany=$tbCustomerCompany.Text.Trim();CustomerAddress=$tbCustomerAddress.Text.Trim()}
     Set-Status 'Đang đọc thông tin máy và phần mềm bàn giao…'
     Start-UiWork @'
 param($core)
@@ -203,7 +203,7 @@ Get-DeployConfirmationSnapshot
 '@ @((Join-Path $DirBB 'LicenseConfirmation.Core.ps1')) {
         param($result)
         $request=$script:confirmationRequest
-        $dialog=New-DeployLicenseConfirmationWindow -Template $request.Template -Supplier $request.Supplier -CustomerName $request.Customer -Snapshot $result[-1] -OutputDirectory (Join-Path $DirBB 'BienBan') -Owner $form
+        $dialog=New-DeployLicenseConfirmationWindow -Template $request.Template -Supplier $request.Supplier -CustomerName $request.Customer -CustomerCompany $request.CustomerCompany -CustomerAddress $request.CustomerAddress -Snapshot $result[-1] -OutputDirectory (Join-Path $DirBB 'BienBan') -Owner $form
         [void]$dialog.ShowDialog()
         if($dialog.Tag.Path){Set-Status ('Đã xuất: '+$dialog.Tag.Path)}else{Set-Status 'Đã đóng mẫu xác nhận bàn giao.'}
     }
@@ -250,6 +250,8 @@ Bind-Click 'btnIso11' { Start-Process 'https://www.microsoft.com/vi-vn/software-
 Bind-Click 'btnIso10' { Start-Process 'https://www.microsoft.com/vi-vn/software-download/windows10' }
 Bind-Click 'btnUsb11' { Start-MediaCreationTool '11' }; Bind-Click 'btnUsb10' { Start-MediaCreationTool '10' }
 Bind-Click 'btnWindowsOld' { Open-WindowsOldCleanup }
+Bind-Click 'btnMenuClassic' { Set-ExplorerMenuChoice Legacy }
+Bind-Click 'btnMenuDefault' { Set-ExplorerMenuChoice Default }
 Bind-Click 'btnWindowsIso' {
     $path = Select-DeployFile 'Chọn ISO Windows' 'Windows ISO (*.iso)|*.iso'
     if (-not $path) { return }
@@ -291,7 +293,7 @@ if (-not $ValidateOnly) {
 $form.Dispatcher.Add_UnhandledException({
     param($sender, $event)
     $event.Handled = $true
-    Set-Status 'Thao tác gặp lỗi; có thể thử lại.'
+    Set-Status 'Thao tác gặp lỗi; có thể thử lại.' 'Error'
     Show-DeployMessage $event.Exception.GetBaseException().Message 'TechMaster Deploy' 'Error'
 })
 }

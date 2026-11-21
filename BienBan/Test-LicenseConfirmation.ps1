@@ -20,7 +20,7 @@ try{
     Assert ($snapshot.Products.Count -eq 2 -and $snapshot.Products[0].KeyTail -eq '12345') 'Snapshot excludes all but the last five key characters'
     Assert ($snapshot.Products[1].Status -match 'dùng thử' -and -not $snapshot.Products[0].Selected) 'Trial state is preserved and no product is preselected'
     $supplier=[pscustomobject]@{Company='Đơn vị <script> & {{CUSTOMER}}';Address='Địa chỉ mẫu';Phone='000';Technician='KTV'}
-    $customer=[pscustomobject]@{Name='Khách <script>alert(1)</script>';Address='Địa chỉ khách';TaxCode='TAX-TEST'}
+    $customer=[pscustomobject]@{Name='Khách <script>alert(1)</script>';Company='Đơn vị khách <b> & {{CUSTOMER}}';Address='Địa chỉ khách';TaxCode='TAX-TEST'}
     $retail=Export-DeployLicenseConfirmation -Template Retail -Supplier $supplier -Customer $customer -Snapshot $snapshot -Products @($snapshot.Products[0]) -Reference 'HĐ-PRIVATE' -OutputDirectory $temp
     $html=[IO.File]::ReadAllText($retail)
     Assert ($html -match 'KHÁCH HÀNG CÁ NHÂN' -and $html -notmatch 'đã cấp và bàn giao hóa đơn|HĐ-PRIVATE|TAX-TEST') 'Retail template does not claim an invoice or leak company-only fields'
@@ -30,6 +30,9 @@ try{
     Assert ($html -match '\{\{CUSTOMER\}\}') 'Placeholder-like user input remains literal rather than being expanded'
     $company=Export-DeployLicenseConfirmation -Template Company -Supplier $supplier -Customer $customer -Snapshot $snapshot -Products $snapshot.Products -OutputDirectory $temp
     $html=[IO.File]::ReadAllText($company)
+    Assert ($html.Contains([Net.WebUtility]::HtmlEncode($customer.Company)) -and $html.Contains([Net.WebUtility]::HtmlEncode($customer.Address))) 'Customer company and address remain escaped, separate from the supplier'
+    $companyOnly=New-DeployLicenseConfirmationHtml -Template Company -Supplier $supplier -Customer ([pscustomobject]@{Name='';Company='Công ty không có người nhận';Address='Địa chỉ riêng'}) -Snapshot $snapshot -Products $snapshot.Products
+    Assert ($companyOnly.Contains([Net.WebUtility]::HtmlEncode('Công ty không có người nhận')) -and $companyOnly.Contains([Net.WebUtility]::HtmlEncode('Địa chỉ riêng'))) 'Company handover allows a named company without inventing a contact person'
     Assert ($html -match 'KHÁCH HÀNG CÔNG TY' -and $html -match 'đã cấp và bàn giao hóa đơn / chứng từ') 'Company template refers to the evidence already issued'
     Assert ($html -notmatch 'Hóa đơn / chứng từ tham chiếu' -and $html -match 'TAX-TEST') 'An unknown invoice number can be omitted without inventing a reference'
     Assert ([Net.WebUtility]::HtmlDecode($html) -match 'Chưa kích hoạt \(dùng thử\)' -and $html -notmatch 'Tất cả.*Đã kích hoạt') 'Company confirmation does not turn a trial into an activated product'

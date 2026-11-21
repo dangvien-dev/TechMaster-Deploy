@@ -21,22 +21,24 @@ function Start-WindowsKeyReview([ValidateSet('Inspect','Clean','Restore')][strin
     }
     if($Operation -eq 'Restore' -and -not (Confirm-Box 'Khôi phục key cài đặt chung Pro của lần dọn này? Nếu Windows đã có key mới, công cụ sẽ giữ nguyên key mới.' 'Hoàn tác key chung' -ConfirmText 'Hoàn tác' -Owner $keyWindow)){return}
     foreach($name in 'Refresh','Clean','Restore','Close'){$keyWindow.FindName($name).IsEnabled=$false}
-    $keyWindow.FindName('Status').Text='Đang kiểm tra / xử lý key Windows…'
+    Set-DeployNotice ($keyWindow.FindName('Status')) 'Đang kiểm tra / xử lý key Windows…' 'Working'
     try {
     $script:keyReview.Work=Start-DeployWork @'
 param($core,$operation,$inventory,$receipt)
 $ErrorActionPreference='Stop'
 . $core
-$message='';$path=''
-if($operation -eq 'Clean'){$result=Invoke-WindowsSetupKeyCleanup -ReceiptPath $receipt -Inventory $inventory;$message=$result.Message;$path=$result.ReceiptPath}
-elseif($operation -eq 'Restore'){$message=(Restore-WindowsSetupKeyCleanup $receipt).Message}
-[pscustomobject]@{Inventory=(Get-WindowsSetupKeyInventory);Message=$message;Receipt=$path}
+$message='';$path='';$kind='Info'
+if($operation -eq 'Clean'){$result=Invoke-WindowsSetupKeyCleanup -ReceiptPath $receipt -Inventory $inventory;$message=$result.Message;$path=$result.ReceiptPath;if($result.Changed){$kind='Success'}}
+elseif($operation -eq 'Restore'){$r=Restore-WindowsSetupKeyCleanup $receipt;$message=$r.Message;if($r.Restored){$kind='Success'}}
+$read=Get-WindowsSetupKeyInventory
+if(-not $message){$message=if($read.Items.Count){'Đã kiểm tra các key Windows đang dùng. Chỉ dọn key chung chưa kích hoạt đủ điều kiện.'}else{'Không tìm thấy key Windows đang dùng trên máy.'}}
+[pscustomobject]@{Inventory=$read;Message=$message;Receipt=$path;UiKind=$kind}
 '@ @((Join-Path $PSScriptRoot 'Windows.License.Core.ps1'),$Operation,$script:keyReview.Inventory,$script:keyReview.Receipt)
     $keyTimer.Start()
     }catch{
         $script:keyReview.Work=$null
         $keyWindow.FindName('Refresh').IsEnabled=$true;$keyWindow.FindName('Close').IsEnabled=$true
-        $keyWindow.FindName('Status').Text=$_.Exception.GetBaseException().Message
+        Set-DeployNotice ($keyWindow.FindName('Status')) $_.Exception.GetBaseException().Message 'Error'
     }
 }
 $keyTimer=New-DeployTimer 200 {
@@ -46,10 +48,10 @@ $keyTimer=New-DeployTimer 200 {
         $result=@(Receive-DeployWork $job)[-1];$script:keyReview.Inventory=$result.Inventory
         $lines=@($result.Inventory.Items|ForEach-Object {$_.Name+' · *****-'+$_.KeyTail+"`n"+$_.State+' · '+$_.Channel+"`n"+$_.Reason})
         $keyWindow.FindName('Inventory').Text=if($lines.Count){$lines -join "`n`n"}else{'Không tìm thấy giấy phép Windows đang dùng key trên máy.'}
-        $keyWindow.FindName('Status').Text=$result.Message
+        Set-DeployNotice ($keyWindow.FindName('Status')) $result.Message $result.UiKind
         if($result.Receipt){$script:keyReview.Receipt=$result.Receipt}
         $keyWindow.FindName('Clean').IsEnabled=@($result.Inventory.Items|Where-Object Eligible).Count -gt 0
-    }catch{$script:keyReview.Inventory=$null;$keyWindow.FindName('Status').Text=$_.Exception.GetBaseException().Message}
+    }catch{$script:keyReview.Inventory=$null;Set-DeployNotice ($keyWindow.FindName('Status')) $_.Exception.GetBaseException().Message 'Error'}
     finally{
         $keyWindow.FindName('Refresh').IsEnabled=$true;$keyWindow.FindName('Close').IsEnabled=$true
         $keyWindow.FindName('Restore').IsEnabled=[bool]($script:keyReview.Receipt -and (Test-Path -LiteralPath $script:keyReview.Receipt))

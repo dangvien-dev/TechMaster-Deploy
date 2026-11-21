@@ -11,7 +11,7 @@ if(-not $ValidateOnly -and -not (Test-DriverFixAdmin)){
 }
 $driverWindow=Import-DeployWindow (Join-Path $PSScriptRoot 'DriverFix.xml')
 $script:driverFix=@{Session=$null;Work=$null;PowerBoxes=@();Closing=$false}
-function Set-DriverFixStatus([string]$Text){$driverWindow.FindName('Status').Text=$Text}
+function Set-DriverFixStatus([string]$Text,[ValidateSet('Info','Working','Attention','Success','Error')][string]$Kind='Info'){Set-DeployNotice ($driverWindow.FindName('Status')) $Text $Kind}
 function Select-DriverFixFolder([string]$Title){
     Add-Type -AssemblyName System.Windows.Forms
     $picker=New-Object Windows.Forms.FolderBrowserDialog;$picker.Description=$Title;$picker.ShowNewFolderButton=$false
@@ -54,7 +54,7 @@ function Start-DriverFixOperation([ValidateSet('Init','Scan','Rescan','Source','
     if($Operation -ne 'Init' -and -not $script:driverFix.Session){Set-DriverFixStatus 'Chưa đọc được thiết bị. Bấm Quét lại để thử lại.';return}
     if($script:driverFix.Session -and (Test-Path -LiteralPath $script:driverFix.Session.CancelPath)){Remove-Item -LiteralPath $script:driverFix.Session.CancelPath -Force}
     $script:driverFix.ActionStart=if($script:driverFix.Session){$script:driverFix.Session.Actions.Count}else{0}
-    Set-DriverFixBusy $true;Set-DriverFixStatus 'Đang xử lý… Nhật ký được ghi trong phiên. Chờ lệnh hiện tại hoàn tất trước khi đóng.'
+    Set-DriverFixBusy $true;Set-DriverFixStatus 'Đang xử lý… Nhật ký được ghi trong phiên. Chờ lệnh hiện tại hoàn tất trước khi đóng.' 'Working'
     try{
         $script:driverFix.Work=Start-DeployWork @'
 param($engine,$report,$operation,$session,$payload)
@@ -82,7 +82,7 @@ try{
 [pscustomobject]@{Session=$session;Result=$result;Operation=$operation;Error=$errorText}
 '@ @((Join-Path $PSScriptRoot 'DriverFix.Engine.ps1'),(Join-Path $PSScriptRoot 'DriverFix.Report.ps1'),$Operation,$script:driverFix.Session,$Payload)
         $driverTimer.Start()
-    }catch{$script:driverFix.Work=$null;Set-DriverFixBusy $false;Set-DriverFixStatus $_.Exception.Message}
+    }catch{$script:driverFix.Work=$null;Set-DriverFixBusy $false;Set-DriverFixStatus $_.Exception.Message 'Error'}
 }
 $driverTimer=New-DeployTimer 200 {
     if(-not $script:driverFix.Work -or -not $script:driverFix.Work.Async.IsCompleted){return}
@@ -90,7 +90,7 @@ $driverTimer=New-DeployTimer 200 {
     try{
         $response=@(Receive-DeployWork $work)[-1];$script:driverFix.Session=$response.Session
         if($response.Error){throw $response.Error}
-        if($response.Operation -eq 'Report'){Set-DriverFixStatus ('Đã xuất: '+$response.Result);Start-Process -FilePath $response.Result|Out-Null}
+        if($response.Operation -eq 'Report'){Set-DriverFixStatus ('Đã xuất: '+$response.Result) 'Success';Start-Process -FilePath $response.Result|Out-Null}
         else{
             $s=$response.Session;$delta=Compare-DriverFixSnapshot $s.Before $s.Current
             $message='Còn '+$s.Current.Problems.Count+' thiết bị có mã lỗi · Đã xác nhận Code 0: '+$delta.Resolved.Count
@@ -100,9 +100,9 @@ $driverTimer=New-DeployTimer 200 {
             if($failedActions.Count){$message+=' · Có '+$failedActions.Count+' thao tác không thành công; xem nhật ký. '+(@($failedActions|ForEach-Object {$_.Kind+': Exit '+$_.ExitCode+' '+$_.Message}) -join ' | ')}
             if(@($s.Actions|Where-Object RebootRequired).Count){$message+=' Có lệnh yêu cầu khởi động lại; hãy chủ động lưu công việc rồi restart.'}
             if($response.Operation -eq 'Power'){$message+=' · '+(@($s.Actions|Where-Object Kind -eq 'Power'|ForEach-Object {$_.Source+': '+$_.Message}) -join ' | ')}
-            Set-DriverFixStatus $message
+            Set-DriverFixStatus $message $(if($failedActions.Count){'Attention'}else{'Info'})
         }
-    }catch{Set-DriverFixStatus ('Chưa hoàn tất: '+$_.Exception.GetBaseException().Message)}
+    }catch{Set-DriverFixStatus ('Chưa hoàn tất: '+$_.Exception.GetBaseException().Message) 'Error'}
     finally{Set-DriverFixBusy $false}
 }
 $driverWindow.FindName('Devices').Add_SelectionChanged({Update-DriverFixSelection})
@@ -113,7 +113,7 @@ $driverWindow.FindName('Scan').Add_Click({if($script:driverFix.Session){Start-Dr
 $driverWindow.FindName('Rescan').Add_Click({Start-DriverFixOperation Rescan})
 $driverWindow.FindName('CopyIds').Add_Click({
     $d=$driverWindow.FindName('Devices').SelectedItem
-    if($d){try{[Windows.Clipboard]::SetText(($d.HardwareIds -join "`r`n"));Set-DriverFixStatus 'Đã copy toàn bộ Hardware ID của thiết bị đang chọn.'}catch{Set-DriverFixStatus 'Không copy được; có thể chọn và copy trong ô chi tiết.'}}
+    if($d){try{[Windows.Clipboard]::SetText(($d.HardwareIds -join "`r`n"));Set-DriverFixStatus 'Đã copy toàn bộ Hardware ID của thiết bị đang chọn.'}catch{Set-DriverFixStatus 'Không copy được; có thể chọn và copy trong ô chi tiết.' 'Error'}}
 })
 $driverWindow.FindName('InstallCab').Add_Click({
     $path=Select-DeployFile 'Chọn CAB driver đã tải' 'Driver CAB (*.cab)|*.cab'
@@ -134,7 +134,7 @@ $driverWindow.FindName('Disable').Add_Click({
 })
 $driverWindow.FindName('ApplyPower').Add_Click({
     $chosen=@($script:driverFix.PowerBoxes|Where-Object IsChecked)
-    if(-not $chosen.Count){Set-DriverFixStatus 'Chọn ít nhất một tinh chỉnh nguồn trong profile.';return}
+    if(-not $chosen.Count){Set-DriverFixStatus 'Chọn ít nhất một tinh chỉnh nguồn trong profile.' 'Attention';return}
     if(Confirm-Box ((@($chosen|ForEach-Object Content)-join "`r`n")+"`r`nThiết lập power scheme chỉ đổi nguồn AC; WMI đổi quyền tắt nguồn USB/HID nếu thiết bị hỗ trợ. Giá trị cũ được ghi log.") 'Tinh chỉnh nguồn' -ConfirmText 'Áp dụng mục đã chọn' -Owner $driverWindow){Start-DriverFixOperation Power @($chosen|ForEach-Object Tag)}
 })
 $driverWindow.FindName('OpenProfiles').Add_Click({
@@ -149,7 +149,7 @@ $driverWindow.FindName('Help').Add_Click({
     [void]$view.ShowDialog()
 })
 $driverWindow.FindName('Cancel').Add_Click({
-    if($script:driverFix.Session){[IO.File]::WriteAllText($script:driverFix.Session.CancelPath,'cancel');$driverWindow.FindName('Cancel').IsEnabled=$false;Set-DriverFixStatus 'Đã yêu cầu dừng. Chờ lệnh đang chạy hoàn tất; không ngắt pnputil giữa chừng.'}
+    if($script:driverFix.Session){[IO.File]::WriteAllText($script:driverFix.Session.CancelPath,'cancel');$driverWindow.FindName('Cancel').IsEnabled=$false;Set-DriverFixStatus 'Đã yêu cầu dừng. Chờ lệnh đang chạy hoàn tất; không ngắt pnputil giữa chừng.' 'Attention'}
 })
 $driverWindow.FindName('Close').Add_Click({$driverWindow.Close()})
 $driverWindow.Add_Closing({param($sender,$event)if($script:driverFix.Work){$event.Cancel=$true;Set-DriverFixStatus 'Đang xử lý. Có thể yêu cầu dừng sau gói hiện tại rồi đóng.'}})

@@ -11,7 +11,7 @@ function Invoke-OfficeCleanupTask {
         if ($Inventory) { Assert-OfficeInventoryUnchanged $Inventory $fresh }
         if ($Operation -eq 'Temporary') { $plan=Get-OfficeTemporaryPlan $fresh }
         else { $plan=New-OfficeSelectedPlan $fresh $SelectedIds $Operation }
-        if (-not @($plan.Keys).Count -and -not @($plan.Products).Count) { return [pscustomobject]@{ Message='Không có key phù hợp để xoá.'; Inventory=$fresh } }
+        if (-not @($plan.Keys).Count -and -not @($plan.Products).Count) { return [pscustomobject]@{ Message='Không có key phù hợp để xoá.'; Inventory=$fresh;Outcome='NoChange' } }
         Assert-OfficeCleanupAppsClosed
         if (-not $LogPath) { $LogPath=Join-Path $env:LOCALAPPDATA ('TechMaster Deploy/Office Logs/'+[guid]::NewGuid().ToString('N')+'/Cleanup.log') }
         $directory=Split-Path -Parent $LogPath
@@ -22,6 +22,6 @@ function Invoke-OfficeCleanupTask {
         try { & { Invoke-OfficeCleanupPlan $plan $setup $directory } *> $LogPath }
         catch { [IO.File]::AppendAllText($LogPath, "`nLỖI: " + $_.Exception.Message); throw }
         $after=Get-OfficeCleanupInventory
-        return [pscustomobject]@{ Message='Đã kiểm tra: hoàn tất thao tác đã chọn, các key giữ lại vẫn còn.'; Inventory=$after }
+        return [pscustomobject]@{ Message='Đã kiểm tra: hoàn tất thao tác đã chọn, các key giữ lại vẫn còn.'; Inventory=$after;Outcome='Complete' }
     } finally { if ($owned) { $mutex.ReleaseMutex() }; $mutex.Dispose() }
 }

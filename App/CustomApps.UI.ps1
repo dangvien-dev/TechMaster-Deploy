@@ -35,7 +35,7 @@ function New-DeployCustomAppsWindow([string]$path,$builtIn,$Owner=$null) {
             Save-DeployCustomApps $state.Path $next
             $state.Items.Clear();foreach($record in $next){[void]$state.Items.Add($record)}
             $view.FindName('Apps').Items.Refresh();$view.FindName('Apps').SelectedItem=$item
-            $state.Key=$item.Key;$state.Changed=$true;$view.FindName('Status').Text='Đã lưu trên máy này. Cập nhật app vẫn giữ danh sách bổ sung.'
+            $state.Key=$item.Key;$state.Changed=$true;Set-DeployNotice ($view.FindName('Status')) 'Đã lưu trên máy này. Cập nhật app vẫn giữ danh sách bổ sung.' 'Success'
         }catch{Show-DeployMessage $_.Exception.Message 'Chưa lưu được ứng dụng' 'Error'}
     })
     $window.FindName('Delete').Add_Click({param($sender,$event)
@@ -45,7 +45,7 @@ function New-DeployCustomAppsWindow([string]$path,$builtIn,$Owner=$null) {
         try{
             $next=@($state.Items|Where-Object Key -ne $state.Key);Save-DeployCustomApps $state.Path $next
             $state.Items.Clear();foreach($record in $next){[void]$state.Items.Add($record)}
-            $view.FindName('Apps').Items.Refresh();Set-DeployCustomAppFields $view;$state.Changed=$true;$view.FindName('Status').Text='Đã xoá mục khỏi danh sách trên máy này.'
+            $view.FindName('Apps').Items.Refresh();Set-DeployCustomAppFields $view;$state.Changed=$true;Set-DeployNotice ($view.FindName('Status')) 'Đã xoá mục khỏi danh sách trên máy này.' 'Success'
         }catch{Show-DeployMessage $_.Exception.Message 'Chưa xoá được mục' 'Error'}
     })
     $window.FindName('Close').Add_Click({param($sender,$event)[Windows.Window]::GetWindow($sender).Close()})

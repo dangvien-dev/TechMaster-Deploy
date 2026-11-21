@@ -36,7 +36,7 @@ $env:COMPUTERNAME = 'TMReportTest_' + [guid]::NewGuid().ToString('N')
 $ownReport = $null
 function Run-Report([string]$expectedClass) {
     $global:TMReportTestFixture.Opened = ''
-    $path = & (Join-Path $PSScriptRoot 'Bien-Ban-Ban-Quyen.ps1') -NoPrompt -Customer 'Khách hàng mẫu' -Technician 'Kỹ thuật viên mẫu'
+    $path = & (Join-Path $PSScriptRoot 'Bien-Ban-Ban-Quyen.ps1') -NoPrompt -Customer 'Khách hàng mẫu' -CustomerCompany 'Đơn vị khách mẫu' -CustomerAddress '123 Đường khách mẫu' -Technician 'Kỹ thuật viên mẫu'
     $script:ownReport = $path
     $html = [Net.WebUtility]::HtmlDecode([IO.File]::ReadAllText($path))
     Assert ($global:TMReportTestFixture.Opened -eq $path) 'Exporter opens the generated report path'
@@ -50,9 +50,14 @@ try {
     $global:TMReportTestFixture.Office = @(New-License 'Office24 Retail' 1)
     $html = Run-Report 'ok'
     Assert ($html -notmatch 'hóa đơn|hoá đơn|nguồn mua key|INVOICE') 'Report omits purchase evidence fields and obsolete references'
+    Assert ($html -match 'Đơn vị khách mẫu' -and $html -match '123 Đường khách mẫu') 'Customer company and address are exported independently from supplier fields'
     Assert ($html -match 'Khách hàng mẫu' -and $html -match 'Kỹ thuật viên mẫu') 'Customer and technician remain in the report'
     Assert ($html -notmatch 'Có sản phẩm <b>chưa kích hoạt') 'Single active Windows + single active Office never produce a red summary'
     Assert ([regex]::Matches($html, "class='ok'>Đã kích hoạt").Count -eq 2) 'Both actual product rows are active'
+
+    $rawPath=& (Join-Path $PSScriptRoot 'Bien-Ban-Ban-Quyen.ps1') -NoPrompt -Customer 'Người nhận {{PC}}' -CustomerCompany 'Công ty <script> {{CUSTOMER_ADDRESS}}' -CustomerAddress 'Địa chỉ <b> {{CUSTOMER}}'
+    $script:ownReport=$rawPath;$rawHtml=[IO.File]::ReadAllText($rawPath)
+    Assert ($rawHtml.Contains([Net.WebUtility]::HtmlEncode('Công ty <script> {{CUSTOMER_ADDRESS}}')) -and $rawHtml.Contains([Net.WebUtility]::HtmlEncode('Địa chỉ <b> {{CUSTOMER}}'))) 'Customer company/address markup is escaped and placeholder-like input remains literal'
 
     $global:TMReportTestFixture.Office = @()
     $html = Run-Report 'ok'
