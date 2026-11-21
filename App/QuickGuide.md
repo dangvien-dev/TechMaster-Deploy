@@ -20,6 +20,8 @@
 - Chỉnh ngày / số đặt ngày ngắn dd/MM/yyyy, thập phân dấu phẩy và phân nhóm dấu chấm; giữ vùng và bàn phím.
 - Bàn phím / EVKey cho phép chỉ dùng kiểu nhập US, có sao lưu và khôi phục.
 - Lịch sử reset UltraViewer tự đọc lại khi mở cửa sổ, kể cả bản sao lưu từ phiên bản cũ trên đúng máy. Xem thời gian reset / kiểm tra / khôi phục và đường dẫn sao lưu; không reset lại chỉ vì đã đóng app. Lịch sử nằm trong `%ProgramData%\TechMaster Deploy\UltraViewer Backups`, cùng bản sao lưu có giới hạn quyền truy cập. Sao chép app sang máy khác không mang theo lịch sử này.
+- Thiết lập mặc định: chọn một máy in, tích Đặt A4 / Đặt máy in mặc định rồi bấm Áp dụng máy in. Mặc định thuộc tài khoản đang chạy app; nếu nâng quyền bằng tài khoản quản trị khác thì thuộc tài khoản đó. Khi đặt mặc định, app tắt Windows tự chọn máy in dùng gần nhất. A4 là thiết lập của hàng đợi, có thể ảnh hưởng người cùng dùng máy in; tài liệu Word / Excel cũ có thể giữ khổ riêng.
+- Trình duyệt / PDF: chọn ứng dụng đã cài → Chọn làm mặc định → xác nhận Set default trong Cài đặt Windows (PDF chọn .pdf) → quay lại Kiểm tra lại. Với trình duyệt, app kiểm tra cả HTTP và HTTPS. Windows 10 / bản cũ có thể mở trang chung; tìm ứng dụng trong Ứng dụng mặc định. Nếu thiếu app trong danh sách, cài app rồi kiểm tra lại; không tự cài thêm trình duyệt hoặc trình đọc PDF.
 - Reset ID UltraViewer có sao lưu. Chỉ reset khi cần, sau đó mở UltraViewer và Kiểm tra ID mới; thao tác này ngắt kết nối hỗ trợ.
 - Kiểm tra Desktop và phím chụp để giữ một icon Word / Excel dùng chung và chọn Screen Snipping cho Windows + Shift + S.
 

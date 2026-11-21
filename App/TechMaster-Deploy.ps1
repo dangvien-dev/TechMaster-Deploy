@@ -13,6 +13,8 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'Wpf.Runtime.ps1')
 . (Join-Path $PSScriptRoot 'Info.UI.ps1')
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
+. (Join-Path $PSScriptRoot 'Defaults.Core.ps1')
+. (Join-Path $PSScriptRoot 'Defaults.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
 . (Join-Path $PSScriptRoot 'Logo.Preview.ps1')
 . (Join-Path $PSScriptRoot 'LicenseConfirmation.UI.ps1')
@@ -82,6 +84,7 @@ Bind-Click 'btnReinstall' { Open-DeployFolder (Join-Path $DirClone 'Reinstall') 
 Bind-Click 'btnCloneHelp' { Show-DeployQuickGuide $Root $form -Section 'Máy gốc / Sysprep' }
 Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' }
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
+Bind-Click 'btnDefaults' {Show-DeployDefaults $form}
 Bind-Click 'btnKeyboard' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím / EVKey' }
 Bind-Click 'btnUltraReset' {
     $script = Join-Path $DirClone 'UltraViewer-Reset.ps1'

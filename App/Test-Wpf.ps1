@@ -48,7 +48,7 @@ foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'btnPaintStore','btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
+    foreach ($button in 'btnDefaults','btnPaintStore','btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
