@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.3.0",
+  "version": "2.2.4.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -374,8 +374,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 11653,
-      "sha": "5bcfda479d5806f72a407d21d71277bd22ce888c"
+      "size": 15462,
+      "sha": "c9a517013d590d6cdcdf5611403ee4d7fbf52e00"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -410,8 +410,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 14646,
-      "sha": "20cf7e6e7e59fc2435506cf1228aadd595cb2b52"
+      "size": 15187,
+      "sha": "168d547bfc576c264635f7e2c808cb901948e8e9"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -806,8 +806,8 @@
     {
       "path": "Office/Office-Cleanup.xml",
       "mode": "100644",
-      "size": 3330,
-      "sha": "e9c1a2112d8d969cc03c61472ac74e9bb1c9c701"
+      "size": 4020,
+      "sha": "6388888998e2b8ad4a998725fb6a113412164d1e"
     },
     {
       "path": "Office/Office-ODT.ps1",
@@ -849,7 +849,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "84c8442d6b936ea080f4e63f2fb1bf54a09bc1cc"
+      "sha": "95c95b8a4634f2599e9a7754818e006aa0377097"
     }
   ]
 }
