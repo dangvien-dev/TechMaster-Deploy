@@ -59,5 +59,70 @@ try {
     $done=Complete-UltraAfterClone $marker $backups
     Assert ($done.State -eq 'Complete' -and $script:stops -eq $stops) 'Pending retry finishes registration without clearing identity again, including after an adapter change'
     Assert ($script:fields.LastHR -ceq 'keep-this') 'Every workflow leaves LastHR unchanged'
+
+    # Reopen/reboot simulation: no in-memory receipt path, disk is the only history.
+    $localBackups=Join-Path $temp 'manual-history';$noMarker=Join-Path $temp 'absent.json'
+    $script:offline=$true
+    $manual=Invoke-UltraReset $localBackups
+    $stops=$script:stops;$starts=$script:starts
+    $loaded=Get-UltraHistoryStatus $localBackups $noMarker
+    Assert ($loaded.Receipt -eq $manual.Receipt -and $loaded.UiKind -eq 'Attention') 'Reopen recovers pending reset from old-format receipt storage'
+    Assert ($script:stops -eq $stops -and $script:starts -eq $starts) 'Loading history never stops or starts UltraViewer'
+    $checked=Get-UltraHistoryStatus $localBackups $noMarker -Check
+    Assert ($checked.UiKind -eq 'Attention') 'Missing current identity cannot be marked verified'
+    $script:offline=$false;Start-UltraRuntime @(Get-UltraServices)
+    $checked=Get-UltraHistoryStatus $localBackups $noMarker -Check
+    Assert ($checked.UiKind -eq 'Success') 'Check verifies both identities against saved receipt without another reset'
+    $saved=Read-UltraReceipt $manual.Receipt
+    Assert ($saved.Phase -eq 'Verified' -and @($saved.Events).Count -ge 3) 'Verification and timestamped event journal persist on disk'
+    Assert ((Get-UltraHistoryStatus $localBackups $noMarker).UiKind -eq 'Success') 'Fresh read recovers previously verified state'
+    Assert ($script:stops -eq $stops) 'Repeated verification does not reset identity'
+    Restore-UltraReceipt $manual.Receipt
+    Assert ((Read-UltraReceipt $manual.Receipt).Phase -eq 'Restored') 'Restore records completion only after both values are verified'
+    Assert ((Get-UltraHistoryStatus $localBackups $noMarker -Check).UiKind -eq 'Info') 'Restored receipt is not reported as a new identity'
+    $script:fields.UID='partially-changed';$script:fields.PreferID=(Read-UltraReceipt $manual.Receipt).Identity.PreferID.Value
+    Set-UltraReceiptState $manual.Receipt 'AwaitingIdentity'
+    Assert ((Get-UltraHistoryStatus $localBackups $noMarker -Check).UiKind -eq 'Attention') 'Changing just one identity value cannot pass verification'
+    Restore-UltraReceipt $manual.Receipt
+    $normalSetter=${function:Set-UltraIdentity}
+    function Set-UltraIdentity($identity,[switch]$Clear){if($Clear){throw 'simulated registry failure'};& $normalSetter $identity}
+    $failureRoot=Join-Path $temp 'failed-reset'
+    try{Expect-Failure {Invoke-UltraReset $failureRoot} 'simulated registry failure'}finally{Set-Item Function:Set-UltraIdentity $normalSetter}
+    $failedHistory=Get-UltraResetHistory $failureRoot $noMarker
+    Assert ($failedHistory.Phase -eq 'ResetFailed') 'Failed reset rollback persists a distinct failure state'
+    Assert ((Get-UltraHistoryStatus $failureRoot $noMarker -Check).UiKind -eq 'Attention') 'Failed reset is never reported as verified on reopen/check'
+    $events=@((Read-UltraReceipt $failedHistory.Receipt).Events)
+    Assert (@($events[0].PSObject.Properties.Name).Count -eq 2) 'Journal records timestamps and phases without identity/password values'
+    $script:device='f'*64
+    Assert (-not (Get-UltraResetHistory $localBackups $noMarker).Receipt) 'History copied to a different machine is ignored'
+    $script:device='e'*64
+    # Legacy v2.2.5 manual reset: no Updated or Events properties.
+    $legacy=New-UltraReceipt $localBackups 'Manual' @(Get-UltraServices)
+    $legacy.Data.Phase='AwaitingIdentity';$legacy.Data.Date=(Get-Date).AddMinutes(1).ToString('o');Write-UltraJson $legacy.Data $legacy.Path
+    Assert ((Get-UltraResetHistory $localBackups $noMarker).Receipt -eq $legacy.Path) 'Previous release receipts are recovered without migration/reset'
+    $unused=New-UltraReceipt $localBackups 'Manual' @(Get-UltraServices)
+    Assert ((Get-UltraResetHistory $localBackups $noMarker).Receipt -eq $legacy.Path) 'Backup-only receipt is not mistaken for a completed reset'
+    $prepared=New-UltraReceipt $localBackups 'Prepare' @(Get-UltraServices)
+    $prepared.Data.Phase='Prepared';Write-UltraJson $prepared.Data $prepared.Path
+    Assert ((Get-UltraResetHistory $localBackups $noMarker).Receipt -eq $legacy.Path) 'Master preparation is not mistaken for a client reset'
+    $bad=Join-Path $localBackups 'bad';New-Item -ItemType Directory $bad | Out-Null
+    [IO.File]::WriteAllText((Join-Path $bad 'identity.json'),'{broken')
+    $damaged=Get-UltraHistoryStatus $localBackups $noMarker
+    Assert ($damaged.Receipt -eq $legacy.Path -and $damaged.UiKind -eq 'Attention') 'Corrupt unrelated receipt warns while retaining valid same-machine history'
+    $onlyBad=Join-Path $temp 'only-bad';New-Item -ItemType Directory (Join-Path $onlyBad 'bad') -Force | Out-Null
+    [IO.File]::WriteAllText((Join-Path $onlyBad 'bad/identity.json'),'{broken')
+    Assert ((Get-UltraHistoryStatus $onlyBad $noMarker).UiKind -eq 'Attention') 'Only corrupt history reports unreadable data instead of no reset'
+    # Legacy AfterClone receipt must use master baseline and a same-machine marker.
+    $cloneRoot=Join-Path $temp 'clone-history'
+    $clone=New-UltraReceipt $cloneRoot 'AfterClone' @(Get-UltraServices)
+    $cloneMarker=Join-Path $temp 'history-clone.json'
+    Write-UltraJson ([pscustomobject]@{Schema=1;Phase='Complete';Receipt=$receipt;Device=$script:device;LocalReceipt=$clone.Path}) $cloneMarker
+    Assert ((Get-UltraHistoryStatus $cloneRoot $cloneMarker).UiKind -eq 'Success') 'Legacy completed clone marker recovers local receipt'
+    Assert (-not (Get-UltraResetHistory $cloneRoot $noMarker).Receipt) 'Orphan backup-only clone receipt is not presented as reset history'
+    $cloneMeta=Get-Content -LiteralPath $cloneMarker -Raw | ConvertFrom-Json
+    $cloneMeta.Device='a'*64;Write-UltraJson $cloneMeta $cloneMarker
+    Assert (-not (Get-UltraResetHistory $cloneRoot $cloneMarker).Receipt) 'Clone marker from another machine cannot authorize local history'
+    Restore-UltraReceipt $clone.Path
+    Assert ((Get-UltraHistoryStatus $cloneRoot $noMarker).UiKind -eq 'Info') 'Restored clone receipt remains discoverable after marker removal'
 }finally{if(Test-Path $temp){Remove-Item $temp -Recurse -Force}}
 Write-Host "PASS: $checks UltraViewer lifecycle assertions; sealed master, new clone identity, idempotence, pending retry, rollback scope and preserved cache."

@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.5.0",
+  "version": "2.2.6.0",
   "files": [
     {
       "path": "App/BasicApps.ps1",
@@ -140,8 +140,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 29233,
-      "sha": "bf9f8419321b30cdfc1430f9c59fbd89a8c07c2a"
+      "size": 29681,
+      "sha": "bf1109bfc405d7a03af522e44a2a179bc6ab0cb1"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -152,8 +152,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 14301,
-      "sha": "d2b6053351518b4b85517b98dec2c7e691c18978"
+      "size": 15071,
+      "sha": "c51ae3da80fb846898258248d12154fe75b14d4b"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -188,8 +188,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 20251,
-      "sha": "559d8382d557f3f460dfe53e29a017ca2a5d7f9f"
+      "size": 20620,
+      "sha": "0a8bef984062dd042f1160584a65a9e44c8e4132"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -308,8 +308,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 20141,
-      "sha": "ae1abd663268c6949537fcaa1ae45bc10b83dd59"
+      "size": 20157,
+      "sha": "0b6878379964643c60f6c8ed235b119141c85c84"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -422,8 +422,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 16724,
-      "sha": "e39f63db1f7bd73ecb636159cfa77fcc969dd058"
+      "size": 17547,
+      "sha": "f895c8b2b2931f8c2b6f142d27ff15fb3c87cba1"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -632,8 +632,8 @@
     {
       "path": "FixClone/Test-UltraViewerLifecycle.ps1",
       "mode": "100644",
-      "size": 5407,
-      "sha": "0652715fe00c1125289d3b0d38cc61ba3950f5c9"
+      "size": 11440,
+      "sha": "ad699c029efe308cbcd23c8bf3058953140025a7"
     },
     {
       "path": "FixClone/Test-Unattend.ps1",
@@ -656,20 +656,20 @@
     {
       "path": "FixClone/UltraViewer-Reset.ps1",
       "mode": "100644",
-      "size": 4768,
-      "sha": "7378a35b601df2cc20a92cc8f8c2ad70db35ca51"
+      "size": 4590,
+      "sha": "3b7364ff734f3c1697fa0a44786d81947d89eaaf"
     },
     {
       "path": "FixClone/UltraViewer-Reset.xml",
       "mode": "100644",
-      "size": 2421,
-      "sha": "74c6be436d41d37266ea4046f817b1995b434c7d"
+      "size": 2570,
+      "sha": "fe249b702225e9f6164ea27b2819de087d5b8735"
     },
     {
       "path": "FixClone/UltraViewer.Core.ps1",
       "mode": "100644",
-      "size": 12568,
-      "sha": "1e2c30e0157415b513ce35adcba1282a96e8392d"
+      "size": 19062,
+      "sha": "e17b7ef2cf400b61ffca1fef0a089673ffba7595"
     },
     {
       "path": "FixClone/UltraViewer.Diagnostics.ps1",
@@ -842,14 +842,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 9230,
-      "sha": "d2cdb0e7b2b1e9da0186982374b48ae2e923d6a9"
+      "size": 10034,
+      "sha": "78c7aa7645c7950f8e8faa904aa37ddfe314104e"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 18225,
-      "sha": "226636059c432e86ebcf63fceef7fa01aad1fed3"
+      "size": 18936,
+      "sha": "abd61ae76328289b4c5990f0588a800a65cf12ef"
     },
     {
       "path": "RELEASING.md",
@@ -861,7 +861,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 8,
-      "sha": "186f9fe984049ab9ee2e290e7a802b49ae1e13ea"
+      "sha": "d9c7106d3fd9339aa4aa50b5a1b2a0510f1c5670"
     }
   ]
 }

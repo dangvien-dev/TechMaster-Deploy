@@ -17,18 +17,23 @@ param($core,$operation,$backupRoot,$marker,$receipt)
 $ErrorActionPreference='Stop'
 . $core
 switch($operation) {
- 'Reset' {$r=Invoke-UltraReset $backupRoot;[pscustomobject]@{Message=$r.Message;Receipt=$r.Receipt;UiKind='Attention'}}
+ 'Reset' {$null=Invoke-UltraReset $backupRoot;Get-UltraHistoryStatus $backupRoot $marker}
  'Restore' {
     Restore-UltraReceipt $receipt
-    if(Test-Path -LiteralPath $marker){$m=Get-Content $marker -Raw|ConvertFrom-Json;if($m.Receipt -eq $receipt){Remove-Item -LiteralPath $marker -Force}}
-    [pscustomobject]@{Message='Đã khôi phục hai giá trị đã sao lưu. Mở UltraViewer để kiểm tra.';Receipt=$receipt;UiKind='Info'}
+    if(Test-Path -LiteralPath $marker){$m=Get-Content $marker -Raw|ConvertFrom-Json;if($m.Receipt -eq $receipt -or $m.LocalReceipt -eq $receipt){Remove-Item -LiteralPath $marker -Force}}
+    Get-UltraHistoryStatus $backupRoot $marker
  }
+ 'Load' {Get-UltraHistoryStatus $backupRoot $marker}
  'Check' {
-    if($receipt){$old=Read-UltraReceipt $receipt;$now=Get-UltraIdentity;$ok=Test-UltraNewIdentity $old.Identity $now
-        [pscustomobject]@{Message=$(if($ok){'Đã xác minh UID và PreferID khác bản sao lưu. ID hiện tại: '+$now.PreferID.Value}else{'Chưa xác nhận ID mới. Mở UltraViewer và đợi kết nối; không reset lặp.'});Receipt=$receipt;UiKind=$(if($ok){'Success'}else{'Attention'})}
-    }elseif(Test-Path -LiteralPath $marker){$r=Complete-UltraAfterClone $marker $backupRoot;[pscustomobject]@{Message=$r.Message;UiKind=$(if($r.State -eq 'Complete'){'Success'}elseif($r.State -eq 'Pending'){'Attention'}else{'Info'})}}
-    else{[pscustomobject]@{Message='Chưa có lần reset để đối chiếu. Chọn Sao lưu và reset ID khi cần.';UiKind='Info'}}
+    $history=Get-UltraResetHistory $backupRoot $marker
+    if($history.Receipt){Get-UltraHistoryStatus $backupRoot $marker -Check}
+    elseif(Test-Path -LiteralPath $marker){
+        $r=Complete-UltraAfterClone $marker $backupRoot
+        $saved=Get-UltraHistoryStatus $backupRoot $marker
+        [pscustomobject]@{Message=$r.Message;Receipt=$saved.Receipt;History=$saved.History;UiKind=$(if($r.State -eq 'Complete'){'Success'}elseif($r.State -eq 'Pending'){'Attention'}else{'Info'})}
+    }else{Get-UltraHistoryStatus $backupRoot $marker}
  }
+
 }
 '@ @((Join-Path $PSScriptRoot 'UltraViewer.Core.ps1'),$operation,$backupRoot,$markerPath,$receipt)
     $ultraTimer.Start()
@@ -47,7 +52,7 @@ $ultraTimer=New-DeployTimer 200 {
         $result=@(Receive-DeployWork $job)[-1]
         Set-DeployNotice ($ultraWindow.FindName('Status')) $result.Message $result.UiKind
         $ultraWindow.FindName('Check').Background=if($result.UiKind -eq 'Attention'){'#2563EB'}else{'#214674'}
-        if($result.Receipt){$script:ultraUi.Receipt=$result.Receipt;$ultraWindow.FindName('Backup').Text=$result.Receipt;$ultraWindow.FindName('BackupPanel').Visibility='Visible'}
+        if($result.Receipt){$script:ultraUi.Receipt=$result.Receipt;$ultraWindow.FindName('Backup').Text=$result.Receipt;$ultraWindow.FindName('BackupPanel').Visibility='Visible';$ultraWindow.FindName('History').Text=$result.History}
     }catch{Set-DeployNotice ($ultraWindow.FindName('Status')) $_.Exception.GetBaseException().Message 'Error';Show-DeployMessage $_.Exception.GetBaseException().Message 'UltraViewer' 'Error'}
     finally{foreach($name in 'Reset','Check','Restore','Close'){$ultraWindow.FindName($name).IsEnabled=$true};$ultraWindow.FindName('Progress').IsIndeterminate=$false}
 }
@@ -57,4 +62,5 @@ $ultraWindow.FindName('Restore').Add_Click({$path=Select-DeployFile 'Chọn iden
 $ultraWindow.FindName('Close').Add_Click({$ultraWindow.Close()})
 $ultraWindow.Add_Closing({param($sender,$event)if($script:ultraUi.Job){$event.Cancel=$true}})
 if($ValidateOnly){return $ultraWindow}
+$ultraWindow.Add_ContentRendered({Start-UltraUiTask 'Load'})
 try{[void]$ultraWindow.ShowDialog()}finally{$ultraTimer.Stop()}

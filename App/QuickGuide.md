@@ -19,6 +19,7 @@
 - Ảnh được chuẩn bị bằng công cụ mới sẽ tự chạy xử lý lần đăng nhập đầu. Có thể mở Xử lý trùng lặp để xem và chọn lại các thao tác khi cần.
 - Chỉnh ngày / số đặt ngày ngắn dd/MM/yyyy, thập phân dấu phẩy và phân nhóm dấu chấm; giữ vùng và bàn phím.
 - Bàn phím / EVKey cho phép chỉ dùng kiểu nhập US, có sao lưu và khôi phục.
+- Lịch sử reset UltraViewer tự đọc lại khi mở cửa sổ, kể cả bản sao lưu từ phiên bản cũ trên đúng máy. Xem thời gian reset / kiểm tra / khôi phục và đường dẫn sao lưu; không reset lại chỉ vì đã đóng app. Lịch sử nằm trong `%ProgramData%\TechMaster Deploy\UltraViewer Backups`, cùng bản sao lưu có giới hạn quyền truy cập. Sao chép app sang máy khác không mang theo lịch sử này.
 - Reset ID UltraViewer có sao lưu. Chỉ reset khi cần, sau đó mở UltraViewer và Kiểm tra ID mới; thao tác này ngắt kết nối hỗ trợ.
 - Kiểm tra Desktop và phím chụp để giữ một icon Word / Excel dùng chung và chọn Screen Snipping cho Windows + Shift + S.
 
@@ -52,6 +53,7 @@
 ## Cài Windows
 - Trang tải Microsoft mở nơi tải ISO chính thức. Chọn ISO để công cụ kiểm tra và mở Windows Setup.
 - Tạo USB Windows mở Media Creation Tool để bạn chọn USB. Dữ liệu trên USB được chọn sẽ bị xoá.
+- Paint trên Microsoft Store: trong tab Cài Windows, bấm để mở trang Paint chính thức rồi chọn Get / Cài đặt trong Store. Nếu Store đã bị gỡ hoặc chặn bởi chính sách, cần khôi phục Store / dùng bản Windows đầy đủ trước; app không tự báo đã cài.
 - Dọn Windows.old… kiểm tra thư mục trên ổ cài Windows rồi mở Disk Cleanup với quyền quản trị. Chọn Clean up system files / Dọn tệp hệ thống → Previous Windows installation(s); kiểm tra các mục khác như Downloads trước khi xoá. Chỉ dọn sau khi đã giữ dữ liệu cần thiết; xoá sẽ bỏ khả năng quay lại bản Windows cũ. Đóng công cụ để app kiểm tra Windows.old còn hay đã mất. Nếu công cụ không liệt kê bản cài trước, Windows chưa nhận diện thư mục theo mục dọn này.
 
 ## Cài ứng dụng

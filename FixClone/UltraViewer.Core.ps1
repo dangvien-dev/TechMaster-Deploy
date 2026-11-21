@@ -110,6 +110,7 @@ function Restore-UltraReceipt([string]$path) {
     try {Set-UltraIdentity $data.Identity} finally {Start-UltraRuntime $data.Services}
     $after=Get-UltraIdentity
     foreach($name in 'UID','PreferID'){if($after.$name.Exists -ne $data.Identity.$name.Exists -or $after.$name.Value -cne $data.Identity.$name.Value){throw 'Chưa xác minh được hai giá trị đã khôi phục.'}}
+    Set-UltraReceiptState $path 'Restored'
 }
 function Assert-UltraSupported {
     $version=Get-UltraVersion
@@ -126,10 +127,17 @@ function Test-UltraNewIdentity($before,$after) {
 function Invoke-UltraReset([string]$backupRoot) {
     if(-not (Assert-UltraSupported)){throw 'Không tìm thấy UltraViewer đã cài.'}
     $receipt=New-UltraReceipt $backupRoot 'Manual' @(Get-UltraServices)
-    try {Stop-UltraRuntime $receipt.Data.Services;Set-UltraIdentity $null -Clear}
-    catch {try {Set-UltraIdentity $receipt.Data.Identity} finally {Start-UltraRuntime $receipt.Data.Services};throw}
+    try {
+        Stop-UltraRuntime $receipt.Data.Services;Set-UltraIdentity $null -Clear
+        Set-UltraReceiptState $receipt.Path 'AwaitingIdentity'
+    }
+    catch {
+        $failure=$_
+        try {Set-UltraIdentity $receipt.Data.Identity} finally {Start-UltraRuntime $receipt.Data.Services}
+        Set-UltraReceiptState $receipt.Path 'ResetFailed'
+        throw $failure
+    }
     Start-UltraRuntime $receipt.Data.Services
-    $receipt.Data.Phase='AwaitingIdentity';Write-UltraJson $receipt.Data $receipt.Path
     return [pscustomobject]@{Receipt=$receipt.Path;Message='Đã reset UID / PreferID. Mở UltraViewer, đợi kết nối rồi bấm Kiểm tra ID mới.'}
 }
 function Prepare-UltraForClone([string]$markerPath,[string]$backupRoot) {
@@ -175,11 +183,99 @@ function Complete-UltraAfterClone([string]$markerPath,[string]$backupRoot) {
         Write-UltraJson $marker $markerPath
         $local=$receipt.Data
     }
+    if($local.Device -ceq $device){Set-UltraReceiptState $marker.LocalReceipt 'AwaitingIdentity'}
     Start-UltraRuntime $master.Services
     $after=Get-UltraIdentity
     if(Test-UltraNewIdentity $master.Identity $after) {
         $marker.Phase='Complete';Write-UltraJson $marker $markerPath
+        if($local.Device -ceq $device){Set-UltraReceiptState $marker.LocalReceipt 'Verified'}
         return [pscustomobject]@{State='Complete';Message='UltraViewer đã có định danh mới cho máy này.'}
     }
     return [pscustomobject]@{State='Pending';Message='Đã bỏ định danh từ ảnh gốc. Mở UltraViewer, đợi kết nối rồi Kiểm tra ID mới; không reset lặp.'}
+}
+
+# Phase + journal live with the protected receipt, outside the app/update folder.
+# Opening history never starts/stops UltraViewer or changes its identity.
+function Set-UltraReceiptState([string]$path,[ValidateSet('AwaitingIdentity','Verified','Restored','ResetFailed')][string]$phase) {
+    $data=Read-UltraReceipt $path
+    if($data.Device -cne (Get-UltraDeviceHash)){throw 'Lịch sử UltraViewer thuộc máy khác; chưa ghi thay đổi.'}
+    $stamp=(Get-Date).ToString('o')
+    $events=@($data.Events | Where-Object {$_})
+    $events+=[pscustomobject]@{Date=$stamp;Phase=$phase}
+    $data | Add-Member NoteProperty Phase $phase -Force
+    $data | Add-Member NoteProperty Updated $stamp -Force
+    $data | Add-Member NoteProperty Events $events -Force
+    Write-UltraJson $data $path
+}
+function Get-UltraResetHistory([string]$backupRoot,[string]$markerPath) {
+    $device=Get-UltraDeviceHash
+    $marker=$null;$issues=0
+    if($markerPath -and (Test-Path -LiteralPath $markerPath)) {
+        try {
+            $m=Get-Content -LiteralPath $markerPath -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json
+            if($m.Schema -ne 1 -or $m.Phase -notin 'Prepared','AwaitingIdentity','Complete'){throw 'Invalid marker'}
+            $marker=$m
+        }catch{$issues++}
+    }
+    $candidates=@(if(Test-Path -LiteralPath $backupRoot) {
+        foreach($dir in @(Get-ChildItem -LiteralPath $backupRoot -Directory -ErrorAction Stop)) {
+            $path=Join-Path $dir.FullName 'identity.json'
+            if(-not (Test-Path -LiteralPath $path -PathType Leaf)){continue}
+            try {
+                $data=Read-UltraReceipt $path
+                if($data.Device -cne $device -or $data.Mode -eq 'Prepare'){continue}
+                $phase=[string]$data.Phase;$baseline=$path
+                if($data.Mode -eq 'AfterClone' -and $phase -ne 'Restored') {
+                    # Legacy clone receipts were left at BackedUp; only a matching
+                    # local marker proves that this receipt belongs to that reset.
+                    if(-not $marker -or $marker.LocalReceipt -ne $path -or $marker.Device -cne $device){continue}
+                    $baseline=[string]$marker.Receipt
+                    if($phase -eq 'BackedUp'){$phase=if($marker.Phase -eq 'Complete'){'Verified'}else{'AwaitingIdentity'}}
+                }
+                if($phase -notin 'AwaitingIdentity','Verified','Restored','ResetFailed'){continue}
+                $stamp=if($data.Updated){[string]$data.Updated}else{[string]$data.Date}
+                $when=[DateTimeOffset]::MinValue
+                if(-not [DateTimeOffset]::TryParse($stamp,[ref]$when)){throw 'Invalid receipt date'}
+                [pscustomobject]@{Receipt=$path;Baseline=$baseline;Phase=$phase;When=$when;Issues=0}
+            }catch{$issues++}
+        }
+    })
+    $latest=$candidates | Sort-Object When -Descending | Select-Object -First 1
+    if($latest){$latest.Issues=$issues;return $latest}
+    return [pscustomobject]@{Receipt='';Baseline='';Phase='';When=$null;Issues=$issues}
+}
+function Get-UltraHistoryStatus([string]$backupRoot,[string]$markerPath,[switch]$Check) {
+    $history=Get-UltraResetHistory $backupRoot $markerPath
+    if(-not $history.Receipt) {
+        $message=if($history.Issues){'Có tệp lịch sử không đọc được. Kiểm tra thư mục sao lưu hoặc chọn Khôi phục để tìm bản sao lưu của máy này; không reset lặp.'}
+                 elseif($markerPath -and (Test-Path -LiteralPath $markerPath)){'Có lịch chuẩn bị UltraViewer sau clone. Bấm Kiểm tra ID mới để tiếp tục quy trình đã chuẩn bị.'}
+                 else{'Chưa tìm thấy lịch sử reset của máy này trong thư mục sao lưu. Nếu đã reset, giữ nguyên ID và kiểm tra lại vị trí bản sao lưu.'}
+        return [pscustomobject]@{Receipt='';Message=$message;UiKind=$(if($history.Issues){'Attention'}else{'Info'})}
+    }
+    $phase=$history.Phase
+    if($Check -and $phase -in 'AwaitingIdentity','Verified') {
+        $before=Read-UltraReceipt $history.Baseline
+        $ok=Test-UltraNewIdentity $before.Identity (Get-UltraIdentity)
+        $phase=if($ok){'Verified'}else{'AwaitingIdentity'}
+        Set-UltraReceiptState $history.Receipt $phase
+    }
+    $date=$history.When.ToLocalTime().ToString('dd/MM/yyyy HH:mm')
+    $message=switch($phase) {
+        'Verified' {if($Check){'Đã xác minh UID và PreferID khác bản sao lưu.'}else{'Lần kiểm tra trước đã xác minh ID mới. Bấm Kiểm tra ID mới để đối chiếu hiện tại.'}}
+        'AwaitingIdentity' {'Đã reset, đang chờ xác minh ID mới. Mở UltraViewer, đợi kết nối rồi bấm Kiểm tra ID mới; không reset lặp.'}
+        'Restored' {'Đã khôi phục định danh cũ từ bản sao lưu. Đây không phải trạng thái đã tạo ID mới.'}
+        'ResetFailed' {'Lần reset trước không hoàn tất; đã hoàn tác định danh. Kiểm tra UltraViewer trước khi thao tác tiếp.'}
+    }
+    $message+=' Lịch sử: '+$date+'.'
+    if($history.Issues){$message+=' Có tệp lịch sử khác không đọc được trong thư mục sao lưu.'}
+    $receipt=Read-UltraReceipt $history.Receipt
+    $labels=@{AwaitingIdentity='Đã reset, chờ ID mới';Verified='Đã xác minh ID mới';Restored='Đã khôi phục ID cũ';ResetFailed='Reset lỗi, đã hoàn tác'}
+    $journal=@(foreach($event in @($receipt.Events | Select-Object -Last 6)) {
+        $eventDate=[DateTimeOffset]::MinValue
+        if($event -and $labels.ContainsKey([string]$event.Phase) -and [DateTimeOffset]::TryParse([string]$event.Date,[ref]$eventDate)){
+            $eventDate.ToLocalTime().ToString('dd/MM/yyyy HH:mm')+' — '+$labels[[string]$event.Phase]
+        }
+    }) -join "`n"
+    if(-not $journal){$journal=$date+' — '+$labels[$history.Phase]+' (lịch sử từ bản cũ)'}
+    [pscustomobject]@{Receipt=$history.Receipt;Message=$message;History=$journal;UiKind=$(if($history.Issues){'Attention'}elseif($phase -eq 'Verified'){'Success'}elseif($phase -in 'AwaitingIdentity','ResetFailed'){'Attention'}else{'Info'})}
 }
