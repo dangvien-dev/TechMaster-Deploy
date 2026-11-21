@@ -21,7 +21,8 @@ switch($operation) {
  'Restore' {
     Restore-UltraReceipt $receipt
     if(Test-Path -LiteralPath $marker){$m=Get-Content $marker -Raw|ConvertFrom-Json;if($m.Receipt -eq $receipt -or $m.LocalReceipt -eq $receipt){Remove-Item -LiteralPath $marker -Force}}
-    Get-UltraHistoryStatus $backupRoot $marker
+    $saved=Get-UltraHistoryStatus $backupRoot $marker
+    [pscustomobject]@{Receipt=$receipt;Message='Đã khôi phục định danh cũ từ bản sao lưu. Mở UltraViewer để kiểm tra; đây không phải trạng thái đã tạo ID mới.';UiKind='Info';History=$(if($saved.Receipt -eq $receipt){$saved.History}else{(Get-Date).ToString('dd/MM/yyyy HH:mm')+' — Đã khôi phục ID cũ từ tệp đã chọn'})}
  }
  'Load' {Get-UltraHistoryStatus $backupRoot $marker}
  'Check' {

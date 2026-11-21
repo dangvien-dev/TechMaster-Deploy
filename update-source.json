@@ -656,8 +656,8 @@
     {
       "path": "FixClone/UltraViewer-Reset.ps1",
       "mode": "100644",
-      "size": 4590,
-      "sha": "3b7364ff734f3c1697fa0a44786d81947d89eaaf"
+      "size": 4966,
+      "sha": "79caeed0a5c0cde2de63b5003dc20043c07db533"
     },
     {
       "path": "FixClone/UltraViewer-Reset.xml",
@@ -668,8 +668,8 @@
     {
       "path": "FixClone/UltraViewer.Core.ps1",
       "mode": "100644",
-      "size": 19062,
-      "sha": "e17b7ef2cf400b61ffca1fef0a089673ffba7595"
+      "size": 19096,
+      "sha": "b0b20c3ced0a88ed90796f28d755ab9128218c6b"
     },
     {
       "path": "FixClone/UltraViewer.Diagnostics.ps1",

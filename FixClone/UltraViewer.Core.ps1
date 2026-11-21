@@ -223,7 +223,7 @@ function Get-UltraResetHistory([string]$backupRoot,[string]$markerPath) {
             if(-not (Test-Path -LiteralPath $path -PathType Leaf)){continue}
             try {
                 $data=Read-UltraReceipt $path
-                if($data.Device -cne $device -or $data.Mode -eq 'Prepare'){continue}
+                if($data.Device -cne $device -or ($data.Mode -eq 'Prepare' -and $data.Phase -ne 'Restored')){continue}
                 $phase=[string]$data.Phase;$baseline=$path
                 if($data.Mode -eq 'AfterClone' -and $phase -ne 'Restored') {
                     # Legacy clone receipts were left at BackedUp; only a matching
