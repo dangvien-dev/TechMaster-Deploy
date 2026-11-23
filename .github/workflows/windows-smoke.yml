@@ -53,6 +53,7 @@ jobs:
           & FixClone/Test-MasterDeployment.ps1
           & FixClone/Test-WindowsLicense.ps1
           & FixClone/Test-DriverFix.ps1
+          & FixClone/Test-DriverFixInventory.ps1
           & FixClone/Test-WordSettings.ps1
           & FixClone/Test-DinhDang.ps1
           & FixClone/Test-BanPhim.ps1

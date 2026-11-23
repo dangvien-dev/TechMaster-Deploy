@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.9.0 — 23/11/2026
+
+- Fix Driver hiện tổng số thiết bị đã đọc, số Windows báo Code 0, số có mã lỗi và số chưa đọc được trạng thái. Không còn dùng dòng “Đã xác nhận Code 0: 0” để hiển thị lần quét đầu khiến dễ nhầm chưa quét; số chuyển sang Code 0 chỉ tính các thiết bị đã có lỗi xác định đầu phiên.
+- CIM không trả thiết bị sẽ báo chưa đọc được dữ liệu, không kết luận máy đủ driver. Giá trị ConfigManagerErrorCode thiếu / không hợp lệ hiện “?” và cảnh báo, không ép thành Code 0; thiết bị chưa rõ trạng thái không được disable theo profile. Đặt OperationTimeoutSec cho truy vấn PnP.
+- Thêm Hiện tất cả thiết bị để đối chiếu danh sách và nút Mở Device Manager. Mặc định giữ danh sách cần kiểm tra; đây không phải tính năng tìm phiên bản driver mới hơn cho thiết bị đang hoạt động.
+- Ghi log ngay khi bắt đầu phiên, kể cả lỗi khởi tạo; Mở nhật ký vẫn dùng được khi chưa tạo xong phiên. Báo cáo HTML có số thiết bị đọc được và phân biệt trạng thái chưa rõ với hoạt động.
+
 ## 2.2.8.0 — 21/11/2026
 
 - Menu chuột phải đọc đầy đủ build và UBR. Từ mốc 26200.9974 trở lên vẫn lưu / kiểm tra key menu truyền thống, nhưng cảnh báo Windows có thể bỏ qua tuỳ chỉnh; không suy ra menu mới đã bật chỉ từ số build vì tính năng được triển khai dần. Nếu thiếu UBR ở build 26200, hiển thị chưa xác định và cảnh báo thận trọng.

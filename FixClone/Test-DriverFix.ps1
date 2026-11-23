@@ -163,6 +163,11 @@ try{
     $parent=Device 'bus' @('PCI\VEN_8086&DEV_51C8');$parent.PnpClass='System'
     Assert (-not (Get-DriverFixDisableRule $parent $profile)) 'Parent SST bus is never disabled'
     Assert (-not (Get-DriverFixDisableRule (Device 'name-only' @('ACPI\UNKNOWN') 28 'Detection Verification') $profile)) 'Names alone never authorize disable'
+    $unknownEndpoint=$audioDev.PSObject.Copy();$unknownEndpoint.ErrorCode=-1
+    $script:fixture=Snapshot @($unknownEndpoint);$nativeBefore=$script:nativeCalls.Count
+    Throws {Invoke-DriverFixDisable $specificSession $unknownEndpoint.InstanceId $unknownEndpoint.HardwareIds} 'Unknown device status cannot authorize disabling even a matching profile endpoint'
+    Assert ($script:nativeCalls.Count -eq $nativeBefore) 'Unknown-status disable refusal executes no native command'
+    $script:fixture=Snapshot @($audioDev)
     Throws {Invoke-DriverFixDisable $specificSession $audioDev.InstanceId @('WRONG')} 'Disable revalidates IDs after user confirmation'
     Invoke-DriverFixDisable $specificSession $audioDev.InstanceId $audioDev.HardwareIds
     Assert ($specificSession.Actions[-1].Success -and $specificSession.Current.Problems[0].ErrorCode -eq 22) 'Disable is successful only after Code22 readback'

@@ -21,17 +21,18 @@ function Update-DriverFixSelection {
     $device=$driverWindow.FindName('Devices').SelectedItem
     $driverWindow.FindName('Disable').IsEnabled=$false
     if(-not $device){$driverWindow.FindName('DeviceDetails').Text='Chọn thiết bị để xem toàn bộ Hardware ID, InstanceId và link Catalog.';$driverWindow.FindName('CatalogLinks').ItemsSource=@();return}
-    $driverWindow.FindName('DeviceDetails').Text=$device.Name+"`r`nCode "+$device.ErrorCode+' · '+$device.Description+"`r`nInstanceId: "+$device.InstanceId+"`r`nHardware ID:`r`n"+($device.HardwareIds -join "`r`n")
+    $driverWindow.FindName('DeviceDetails').Text=$device.Name+"`r`nCode "+(Get-DriverFixCodeText $device.ErrorCode)+' · '+$device.Description+"`r`nInstanceId: "+$device.InstanceId+"`r`nHardware ID:`r`n"+($device.HardwareIds -join "`r`n")
     $driverWindow.FindName('CatalogLinks').ItemsSource=@(Get-DriverFixCatalogLinks $device.HardwareIds)
-    if($script:driverFix.Session.Profile -and -not $script:driverFix.Work){$driverWindow.FindName('Disable').IsEnabled=($device.ErrorCode -ne 22 -and [bool](Get-DriverFixDisableRule $device $script:driverFix.Session.Profile))}
+    if($script:driverFix.Session.Profile -and -not $script:driverFix.Work){$driverWindow.FindName('Disable').IsEnabled=($device.ErrorCode -gt 0 -and $device.ErrorCode -ne 22 -and [bool](Get-DriverFixDisableRule $device $script:driverFix.Session.Profile))}
 }
 function Update-DriverFixView {
     $s=$script:driverFix.Session;if(-not $s){return}
-    $driverWindow.FindName('MachineInfo').Text=$s.Machine.ComputerName+' · '+$s.Machine.Manufacturer+' '+$s.Machine.Model+' · BIOS '+$s.Machine.Bios+' · '+$s.Current.Problems.Count+' thiết bị có mã lỗi'
+    $driverWindow.FindName('MachineInfo').Text=$s.Machine.ComputerName+' · '+$s.Machine.Manufacturer+' '+$s.Machine.Model+' · BIOS '+$s.Machine.Bios+' · '+(Get-DriverFixScanSummary $s.Current).Message
     $selected=$driverWindow.FindName('Devices').SelectedItem;$selectedId=if($selected){$selected.InstanceId}else{''}
-    $driverWindow.FindName('Devices').ItemsSource=@($s.Current.Problems)
-    $same=@($s.Current.Problems|Where-Object InstanceId -eq $selectedId)
-    if($same.Count){$driverWindow.FindName('Devices').SelectedItem=$same[0]}elseif($s.Current.Problems.Count){$driverWindow.FindName('Devices').SelectedIndex=0}
+    $visible=@(Get-DriverFixVisibleDevices $s.Current ([bool]$driverWindow.FindName('ShowAll').IsChecked))
+    $driverWindow.FindName('Devices').ItemsSource=$visible
+    $same=@($visible|Where-Object InstanceId -eq $selectedId)
+    if($same.Count){$driverWindow.FindName('Devices').SelectedItem=$same[0]}elseif($visible.Count){$driverWindow.FindName('Devices').SelectedIndex=0}
     $text=Get-DriverFixProfileText $s.Profile
     if($s.MatchedCount -gt 1){$text='Nhiều profile cùng khớp: không bật disable / chỉnh nguồn. Sửa điều kiện JSON để chỉ khớp một profile.'+"`r`n"+$text}
     if($s.Profiles.Errors.Count){$text+="`r`n`r`nProfile bị bỏ qua:`r`n"+($s.Profiles.Errors -join "`r`n")}
@@ -93,18 +94,22 @@ $driverTimer=New-DeployTimer 200 {
         if($response.Operation -eq 'Report'){Set-DriverFixStatus ('Đã xuất: '+$response.Result) 'Success';Start-Process -FilePath $response.Result|Out-Null}
         else{
             $s=$response.Session;$delta=Compare-DriverFixSnapshot $s.Before $s.Current
-            $message='Còn '+$s.Current.Problems.Count+' thiết bị có mã lỗi · Đã xác nhận Code 0: '+$delta.Resolved.Count
-            if($s.LastDelta -and $s.LastDelta.NewProblems.Count){$message+=' · Phát hiện '+$s.LastDelta.NewProblems.Count+' thiết bị lỗi mới: '+(@($s.LastDelta.NewProblems|ForEach-Object Name)-join ', ')+'. Mở Catalog để tải gói tiếp.'}
+            $summary=Get-DriverFixScanSummary $s.Current;$message=$summary.Message
+            if($response.Operation -ne 'Init' -and @($s.Before.Problems).Count){$message+=' Thiết bị lỗi đầu phiên đã chuyển sang Code 0: '+$delta.Resolved.Count+'.'}
+            if($s.LastDelta -and $s.LastDelta.NewProblems.Count){$message+=' · Phát hiện '+$s.LastDelta.NewProblems.Count+' thiết bị cần kiểm tra mới: '+(@($s.LastDelta.NewProblems|ForEach-Object Name)-join ', ')+'. Mở Catalog để tải gói tiếp.'}
             if($response.Operation -in 'Source','Repository'){$message+=' · Đã chạy '+$response.Result.Attempts+' lượt cài.';if($response.Result.Cancelled){$message+=' Đã dừng theo yêu cầu.'}}
             $failedActions=@($s.Actions|Select-Object -Skip $script:driverFix.ActionStart|Where-Object {-not $_.Success})
             if($failedActions.Count){$message+=' · Có '+$failedActions.Count+' thao tác không thành công; xem nhật ký. '+(@($failedActions|ForEach-Object {$_.Kind+': Exit '+$_.ExitCode+' '+$_.Message}) -join ' | ')}
             if(@($s.Actions|Where-Object RebootRequired).Count){$message+=' Có lệnh yêu cầu khởi động lại; hãy chủ động lưu công việc rồi restart.'}
             if($response.Operation -eq 'Power'){$message+=' · '+(@($s.Actions|Where-Object Kind -eq 'Power'|ForEach-Object {$_.Source+': '+$_.Message}) -join ' | ')}
-            Set-DriverFixStatus $message $(if($failedActions.Count){'Attention'}else{'Info'})
+            Set-DriverFixStatus $message $(if($failedActions.Count){'Attention'}else{$summary.Kind})
         }
-    }catch{Set-DriverFixStatus ('Chưa hoàn tất: '+$_.Exception.GetBaseException().Message) 'Error'}
+    }catch{if(-not $script:driverFix.Session){$driverWindow.FindName('MachineInfo').Text='Chưa khởi tạo được phiên quét. Xem thông báo và Mở nhật ký để kiểm tra.'};Set-DriverFixStatus ('Chưa hoàn tất: '+$_.Exception.GetBaseException().Message) 'Error'}
     finally{Set-DriverFixBusy $false}
 }
+$driverWindow.FindName('ShowAll').Add_Checked({Update-DriverFixView})
+$driverWindow.FindName('ShowAll').Add_Unchecked({Update-DriverFixView})
+$driverWindow.FindName('DeviceManager').Add_Click({Start-Process -FilePath (Join-Path $env:WINDIR 'System32/mmc.exe') -ArgumentList 'devmgmt.msc' -ErrorAction Stop|Out-Null})
 $driverWindow.FindName('Devices').Add_SelectionChanged({Update-DriverFixSelection})
 $driverWindow.FindName('CatalogLinks').AddHandler([Windows.Documents.Hyperlink]::RequestNavigateEvent,[Windows.Navigation.RequestNavigateEventHandler]{param($sender,$event)
     if($event.Uri.Scheme -eq 'https' -and $event.Uri.Host -eq 'www.catalog.update.microsoft.com' -and $event.Uri.AbsolutePath -eq '/Search.aspx'){Start-Process -FilePath $event.Uri.AbsoluteUri|Out-Null};$event.Handled=$true
@@ -141,7 +146,13 @@ $driverWindow.FindName('OpenProfiles').Add_Click({
     $path=Join-Path (Get-DriverFixHome) 'Profiles';New-Item -ItemType Directory -Path $path -Force|Out-Null
     Start-Process explorer.exe ('"'+$path+'"')|Out-Null;Set-DriverFixStatus 'Sau khi sửa / thêm JSON, đóng và mở lại Fix Driver để nạp profile.'
 })
-$driverWindow.FindName('OpenLogs').Add_Click({if($script:driverFix.Session){Start-Process explorer.exe ('"'+$script:driverFix.Session.Directory+'"')|Out-Null}})
+$driverWindow.FindName('OpenLogs').Add_Click({
+    try{
+        $path=if($script:driverFix.Session){$script:driverFix.Session.Directory}else{Join-Path (Get-DriverFixHome) 'Sessions'}
+        New-Item -ItemType Directory -Path $path -Force|Out-Null
+        Start-Process explorer.exe ('"'+$path+'"')|Out-Null
+    }catch{Set-DriverFixStatus ('Chưa mở được nhật ký: '+$_.Exception.Message) 'Error'}
+})
 $driverWindow.FindName('Report').Add_Click({Start-DriverFixOperation Report})
 $driverWindow.FindName('Help').Add_Click({
     . (Join-Path (Split-Path -Parent $PSScriptRoot) 'App/Info.UI.ps1')
