@@ -5,7 +5,7 @@ function Get-DriverFixHome {
     Join-Path $env:LOCALAPPDATA 'TechMaster Deploy/DriverFix'
 }
 function Get-DriverFixErrorDescription([int]$Code) {
-    $descriptions=@{0='Hoạt động';1='Cấu hình chưa đúng';3='Driver hỏng / thiếu tài nguyên';10='Thiết bị không khởi động được';12='Không đủ tài nguyên';14='Cần khởi động lại';18='Cần cài lại driver';19='Cấu hình registry lỗi';21='Đang gỡ thiết bị';22='Đã disable';24='Thiết bị không có / lỗi driver';28='Chưa có driver';29='Bị tắt bởi firmware';31='Windows không tải được driver';32='Dịch vụ driver bị tắt';37='Không khởi tạo được driver';39='Không tải được driver';40='Thông tin driver thiếu / sai';41='Không tìm thấy phần cứng';42='Thiết bị trùng lặp';43='Thiết bị báo lỗi (USB có thể lỗi descriptor)';44='Thiết bị đã dừng';45='Không kết nối';47='Đã chuẩn bị tháo an toàn';48='Driver bị Windows chặn';49='Registry vượt giới hạn';50='Không áp dụng được thuộc tính';51='Đang chờ thiết bị khác';52='Không xác minh được chữ ký driver';53='Dành riêng cho kernel debugger';54='Đang reset'}
+    $descriptions=@{-1='Chưa đọc được mã trạng thái; kiểm tra Device Manager';0='Hoạt động';1='Cấu hình chưa đúng';3='Driver hỏng / thiếu tài nguyên';10='Thiết bị không khởi động được';12='Không đủ tài nguyên';14='Cần khởi động lại';18='Cần cài lại driver';19='Cấu hình registry lỗi';21='Đang gỡ thiết bị';22='Đã disable';24='Thiết bị không có / lỗi driver';28='Chưa có driver';29='Bị tắt bởi firmware';31='Windows không tải được driver';32='Dịch vụ driver bị tắt';37='Không khởi tạo được driver';39='Không tải được driver';40='Thông tin driver thiếu / sai';41='Không tìm thấy phần cứng';42='Thiết bị trùng lặp';43='Thiết bị báo lỗi (USB có thể lỗi descriptor)';44='Thiết bị đã dừng';45='Không kết nối';47='Đã chuẩn bị tháo an toàn';48='Driver bị Windows chặn';49='Registry vượt giới hạn';50='Không áp dụng được thuộc tính';51='Đang chờ thiết bị khác';52='Không xác minh được chữ ký driver';53='Dành riêng cho kernel debugger';54='Đang reset'}
     if($descriptions.ContainsKey($Code)){return $descriptions[$Code]}
     return 'Lỗi cấu hình thiết bị; xem Device Manager'
 }
@@ -14,13 +14,36 @@ function ConvertTo-DriverFixDevice($Device) {
     if(-not $instance){$instance=[string]$Device.DeviceID}
     if(-not $instance){throw 'Thiết bị không có InstanceId.'}
     $name=[string]$Device.Name;if(-not $name){$name=$instance}
-    $code=[int]$Device.ConfigManagerErrorCode
-    [pscustomobject]@{Name=$name;ErrorCode=$code;Description=(Get-DriverFixErrorDescription $code);HardwareIds=@($Device.HardwareID|Where-Object {$_}|Select-Object -Unique);InstanceId=$instance;Service=[string]$Device.Service;PnpClass=[string]$Device.PNPClass}
+    $code=-1;$parsed=0
+    if($null -ne $Device.ConfigManagerErrorCode -and [int]::TryParse([string]$Device.ConfigManagerErrorCode,[ref]$parsed) -and $parsed -ge 0){$code=$parsed}
+    [pscustomobject]@{Name=$name;ErrorCode=$code;ErrorCodeText=(Get-DriverFixCodeText $code);Description=(Get-DriverFixErrorDescription $code);HardwareIds=@($Device.HardwareID|Where-Object {$_}|Select-Object -Unique);InstanceId=$instance;Service=[string]$Device.Service;PnpClass=[string]$Device.PNPClass}
 }
 function Get-DriverFixSnapshot {
     # Keep healthy devices too, so disappearing hardware is not called repaired.
-    $all=@(Get-CimInstance Win32_PnPEntity -ErrorAction Stop|ForEach-Object {ConvertTo-DriverFixDevice $_})
-    [pscustomobject]@{Time=(Get-Date).ToString('o');All=$all;Problems=@($all|Where-Object ErrorCode -ne 0)}
+    $all=@(Get-CimInstance Win32_PnPEntity -OperationTimeoutSec 30 -ErrorAction Stop|ForEach-Object {ConvertTo-DriverFixDevice $_})
+    if(-not $all.Count){throw 'Windows không trả về thiết bị PnP nào. Chưa thể kết luận máy không thiếu driver. Bấm Mở Device Manager để đối chiếu, rồi Quét lại.'}
+    [pscustomobject]@{Time=(Get-Date).ToString('o');Source='CIM Win32_PnPEntity';All=$all;Problems=@($all|Where-Object ErrorCode -ne 0)}
+}
+function Get-DriverFixCodeText($Code){
+    $parsed=0
+    if($null -eq $Code -or -not [int]::TryParse([string]$Code,[ref]$parsed) -or $parsed -lt 0){return '?'}
+    return [string]$parsed
+}
+function Get-DriverFixVisibleDevices($Snapshot,[bool]$ShowAll) {
+    if($ShowAll){return @($Snapshot.All)}
+    return @($Snapshot.Problems)
+}
+function Get-DriverFixScanSummary($Snapshot) {
+    $all=@($Snapshot.All | Where-Object {$_})
+    $healthy=@($all | Where-Object {$null -ne $_.ErrorCode -and $_.ErrorCode -eq 0}).Count
+    $problems=@($all | Where-Object {$null -ne $_.ErrorCode -and $_.ErrorCode -gt 0}).Count
+    $unknown=$all.Count-$healthy-$problems
+    $message=if(-not $all.Count){'Chưa đọc được danh sách thiết bị. Không thể kết luận máy không thiếu driver.'}
+        else{'Đã đọc '+$all.Count+' thiết bị · '+$healthy+' báo Code 0 · '+$problems+' có mã lỗi'+$(if($unknown){' · '+$unknown+' chưa đọc được trạng thái'}else{''})+'.'}
+    $countsText=$message
+    if($all.Count -and -not $problems -and -not $unknown){$message+=' Windows chưa báo thiết bị lỗi / thiếu driver trong lần quét này. Có thể bật Hiện tất cả thiết bị để xem danh sách đã đọc.'}
+    if($unknown){$message+=' Các thiết bị có mã ? cần đối chiếu trong Device Manager; không được tính là hoạt động.'}
+    [pscustomobject]@{Total=$all.Count;Healthy=$healthy;Problems=$problems;Unknown=$unknown;CountsText=$countsText;Message=$message;Kind=$(if(-not $all.Count){'Error'}elseif($unknown){'Attention'}else{'Info'})}
 }
 function Get-DriverFixMachine {
     $cs=Get-CimInstance Win32_ComputerSystem -ErrorAction Stop
@@ -31,7 +54,7 @@ function Get-DriverFixMachine {
 function Compare-DriverFixSnapshot($Before,$After) {
     $old=@{};$now=@{};foreach($d in $Before.All){$old[$d.InstanceId]=$d};foreach($d in $After.All){$now[$d.InstanceId]=$d}
     [pscustomobject]@{
-        Resolved=@($Before.Problems|Where-Object {$now.ContainsKey($_.InstanceId) -and $now[$_.InstanceId].ErrorCode -eq 0})
+        Resolved=@($Before.Problems|Where-Object {$_.ErrorCode -gt 0 -and $now.ContainsKey($_.InstanceId) -and $now[$_.InstanceId].ErrorCode -eq 0})
         Disappeared=@($Before.Problems|Where-Object {-not $now.ContainsKey($_.InstanceId)})
         Disabled=@($After.Problems|Where-Object ErrorCode -eq 22)
         NewProblems=@($After.Problems|Where-Object {-not $old.ContainsKey($_.InstanceId)})

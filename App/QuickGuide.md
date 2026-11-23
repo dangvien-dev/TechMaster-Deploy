@@ -84,6 +84,7 @@
 - Che key đầy đủ và thông tin riêng tư của khách trước khi gửi ảnh / nhật ký. Không cần gửi mật khẩu máy khách.
 
 ## Fix Driver
+- Kết quả quét hiện tổng thiết bị, Code 0, lỗi và trạng thái chưa rõ. Danh sách trống kèm số đã đọc lớn hơn 0 / 0 lỗi nghĩa là Windows chưa báo thiết bị lỗi trong lần quét đó. Bật Hiện tất cả thiết bị để xem danh sách đã đọc và đối chiếu bằng Mở Device Manager. Nếu Windows không trả thiết bị nào, app báo lỗi đọc dữ liệu; mã ? chưa được tính là hoạt động. Module không tìm bản driver mới hơn cho thiết bị đang hoạt động.
 - Dùng chung cho mọi máy / mainboard, không cần profile. Quét, Catalog, cài CAB / INF và kho USB / NAS hoạt động độc lập với profile; chỉ áp gợi ý và tinh chỉnh riêng nếu nhận diện khớp.
 - Mở Fix Driver ở menu bên trái. Quét liệt kê toàn bộ thiết bị có mã lỗi, toàn bộ Hardware ID và InstanceId. Chọn thiết bị rồi mở từng link Catalog hoặc Copy Hardware ID.
 - Tải CAB bằng trình duyệt từ nguồn chính thức, chọn Chọn CAB và cài. Hoặc giải nén trước và chọn thư mục INF. Xác nhận bằng nút bấm; log ghi đầy đủ kết quả expand / pnputil. Sau cài tự dò phần cứng và đợi 3 giây rồi quét lại; nếu có thiết bị con mới, tiếp tục tải gói phù hợp.

@@ -22,9 +22,13 @@ Dữ liệu cục bộ tại `%LOCALAPPDATA%\TechMaster Deploy\DriverFix`:
 
 ## Quét và link Catalog
 
-CIM `Win32_PnPEntity` được đọc một lần; danh sách lỗi lọc `ConfigManagerErrorCode -ne 0`. Mỗi hàng giữ Name, Code và mô tả, toàn bộ HardwareID, InstanceId, Service và PNPClass. Code 43 là thiết bị báo lỗi; descriptor chỉ là một khả năng ở USB.
+CIM `Win32_PnPEntity` được đọc một lần với `OperationTimeoutSec=30`; danh sách cần kiểm tra gồm mã lỗi khác 0 và trường hợp chưa đọc được mã. Nếu truy vấn không trả thiết bị nào, app báo lỗi đọc dữ liệu thay vì kết luận không thiếu driver. Mã thiếu / không hợp lệ dùng giá trị nội bộ -1, giao diện và HTML hiện `?`, không ép thành Code 0. Tổng số thiết bị, Code 0, lỗi xác định và trạng thái chưa rõ được hiển thị riêng. Số thiết bị đã sửa chỉ tính lỗi xác định ban đầu chuyển sang Code 0, không tính lần đầu đọc được trạng thái từ chưa rõ. Mỗi hàng giữ Name, Code và mô tả, toàn bộ HardwareID, InstanceId, Service và PNPClass. Code 43 là thiết bị báo lỗi; descriptor chỉ là một khả năng ở USB.
 
 Link Catalog được tạo bằng `Uri.EscapeDataString`, không ghép `&` chưa encode. PCI / HDAUDIO dùng VEN/DEV, USB / HID dùng VID/PID, ACPI lấy ID (kể cả dạng VEN/DEV), INTELAUDIO tách controller/linktype và endpoint DEV. Tối đa 3 link, loại trùng và bỏ SUBSYS trong các query chính. Catalog có thể không có driver phù hợp; kỹ thuật viên xem kiến trúc OS, ngày / phiên bản, danh sách Hardware ID và nhà phát hành trên Catalog trước khi tải.
+
+Bật **Hiện tất cả thiết bị** để xem cả thiết bị Windows báo Code 0 và đối chiếu danh sách đã quét; nút **Mở Device Manager** mở công cụ của Windows. Mặc định vẫn chỉ hiện thiết bị có lỗi / chưa rõ trạng thái. Chế độ xem tất cả không bật disable cho thiết bị tốt hoặc chưa đọc được trạng thái. Module không dò phiên bản driver mới hơn cho thiết bị đang hoạt động, không suy ra driver mới nhất chỉ từ Code 0.
+
+Log bắt đầu trước khi đọc CIM / thông tin máy / profile. Khi khởi tạo thất bại, thông báo giữ nguyên lỗi và chỉ đường dẫn `events.jsonl`; **Mở nhật ký** mở thư mục Sessions ngay cả khi cửa sổ chưa nhận được phiên quét hoàn chỉnh. Quét lại thất bại không thay snapshot cũ bằng danh sách rỗng.
 
 ## Cài CAB / thư mục INF và kho cục bộ
 
@@ -63,6 +67,7 @@ Từ checkout mã nguồn, chạy trong Windows PowerShell 5.1:
 
 ```powershell
 powershell.exe -NoProfile -File FixClone\Test-DriverFix.ps1
+powershell.exe -NoProfile -File FixClone\Test-DriverFixInventory.ps1
 powershell.exe -NoProfile -STA -File FixClone\Test-DriverFixWpf.ps1
 powershell.exe -NoProfile -STA -File App\Test-Wpf.ps1
 ```
@@ -71,7 +76,7 @@ Test engine mock CIM / pnputil / powercfg / WMI, kiểm tra URL encoding, profil
 
 ## Hướng dẫn test trên máy có lỗi
 
-1. Dùng một máy test / bản sao ổ có thể phục hồi. Ghi nhận Device Manager, phiên bản Windows và thiết bị không hoạt động trước xử lý. Mở app bằng quyền Admin.
+1. Trước hết thử một máy không có dấu chấm than: số đã đọc phải lớn hơn 0, Code 0 lớn hơn 0 và 0 lỗi; bật Hiện tất cả thiết bị phải có danh sách. Nếu Device Manager vẫn có dấu chấm than mà app báo 0 lỗi, giữ log và ảnh của cả hai để đối chiếu. Dùng một máy test / bản sao ổ có thể phục hồi. Ghi nhận Device Manager, phiên bản Windows và thiết bị không hoạt động trước xử lý. Mở app bằng quyền Admin.
 2. Vào Fix Driver, chọn Code 28. Đối chiếu Name, Code, **toàn bộ** Hardware ID và InstanceId với Device Manager → Details. Thử thêm Code 10/43 nếu có; chúng có thể do phần cứng / BIOS chứ không chỉ driver.
 3. Trên một máy **không phải SingPC**, xác nhận không áp profile SingPC nhưng link Catalog và các nút cài vẫn hoạt động. PCI/USB/ACPI/audio phải tạo query đúng, link mở trình duyệt mặc định và Copy lấy đủ ID.
 4. Tải một CAB đúng Hardware ID và OS/kiến trúc từ Catalog. Chọn CAB, xem xác nhận, cài. Khi pnputil không chọn driver do rank hoặc lỗi chữ ký, xem log và danh sách lỗi; app không báo đã sửa nếu thiết bị còn mã lỗi.

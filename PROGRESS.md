@@ -1,6 +1,8 @@
 # Tiến độ TechMaster Deploy
 
-Cập nhật ngày 21/11/2026.
+Cập nhật ngày 23/11/2026.
+
+**2.2.9.0:** làm rõ số thiết bị đã đọc trong Fix Driver và thêm bộ lọc xem tất cả / mở Device Manager. Tái hiện hai lỗi: CIM rỗng bị trình bày như 0 lỗi, trạng thái thiếu bị ép về Code 0; đã chặn dữ liệu rỗng, giữ trạng thái chưa rõ là `?`, không tính nó là hoạt động / đã sửa hoặc cho disable. Log được tạo trước khởi tạo phiên để còn dữ liệu khi thất bại. Đã qua 79 kiểm tra engine và 23 kiểm tra inventory / session / HTML với tệp thật và CIM / native mô phỏng; không cài / disable driver thật trong môi trường thử. Cần đối chiếu tổng thiết bị / mã lỗi với Device Manager trên máy người dùng; ảnh cũ chỉ thể hiện 0 lỗi, chưa cho biết số thiết bị đã đọc.
 
 **2.2.8.0:** cảnh báo tương thích menu truyền thống theo build + UBR, dùng mốc 26200.9974 theo yêu cầu; không dùng số build để kết luận tính năng triển khai dần đã bật. Vẫn ghi key trên mọi bản Windows 11, giữ đường khôi phục và phân biệt cấu hình đã lưu với giao diện chưa xác minh. Đã qua 57 kiểm tra Windows Tools với registry / tiến trình mô phỏng, gồm hai phía ngưỡng UBR, build mới hơn, thiếu / sai UBR, key tồn tại và thông báo sau restart; 33 kiểm tra thiết lập mặc định vẫn qua. Chưa xác minh KB hoặc registry của Arrange primary actions inline; chỉ hướng dẫn thủ công khi tuỳ chọn xuất hiện. Cần kiểm tra menu thật trên máy đang được triển khai tính năng mới.
 

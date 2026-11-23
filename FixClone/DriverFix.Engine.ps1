@@ -15,12 +15,22 @@ function New-DriverFixSession([string]$DataRoot) {
     if(-not $DataRoot){$DataRoot=Get-DriverFixHome}
     $dir=Join-Path $DataRoot ('Sessions/'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8))
     New-Item -ItemType Directory -Path $dir -Force|Out-Null
-    $snapshot=Get-DriverFixSnapshot;$machine=Get-DriverFixMachine;$profiles=Get-DriverFixProfiles (Join-Path $DataRoot 'Profiles')
-    $matched=@($profiles.Items|Where-Object {Test-DriverFixProfileMatch $_ $machine $snapshot})
-    # Ambiguous profiles never enable automatic model-specific actions.
-    $profile=$null;if($matched.Count -eq 1){$profile=$matched[0]}
-    $session=[pscustomobject]@{Home=$DataRoot;Directory=$dir;LogPath=(Join-Path $dir 'events.jsonl');CancelPath=(Join-Path $dir 'cancel');Machine=$machine;Before=$snapshot;Current=$snapshot;Profile=$profile;Profiles=$profiles;MatchedCount=$matched.Count;Actions=(New-Object Collections.ArrayList);LastDelta=$null}
-    Write-DriverFixLog $session 'session' @{machine=$machine;before=$snapshot;profile=$profile;profileErrors=$profiles.Errors;matchedCount=$matched.Count}
+    # Persist an initialization log before querying WMI, including failures that
+    # happen before a full session can be returned to the window.
+    $session=[pscustomobject]@{Home=$DataRoot;Directory=$dir;LogPath=(Join-Path $dir 'events.jsonl');CancelPath=(Join-Path $dir 'cancel');Machine=$null;Before=$null;Current=$null;Profile=$null;Profiles=$null;MatchedCount=0;Actions=(New-Object Collections.ArrayList);LastDelta=$null}
+    Write-DriverFixLog $session 'session-start' @{computer=$env:COMPUTERNAME}
+    try{
+        $snapshot=Get-DriverFixSnapshot;$machine=Get-DriverFixMachine;$profiles=Get-DriverFixProfiles (Join-Path $DataRoot 'Profiles')
+        $matched=@($profiles.Items|Where-Object {Test-DriverFixProfileMatch $_ $machine $snapshot})
+        # Ambiguous profiles never enable automatic model-specific actions.
+        $profile=$null;if($matched.Count -eq 1){$profile=$matched[0]}
+        $session.Machine=$machine;$session.Before=$snapshot;$session.Current=$snapshot;$session.Profile=$profile;$session.Profiles=$profiles;$session.MatchedCount=$matched.Count
+        Write-DriverFixLog $session 'session' @{machine=$machine;before=$snapshot;summary=(Get-DriverFixScanSummary $snapshot);profile=$profile;profileErrors=$profiles.Errors;matchedCount=$matched.Count}
+    }catch{
+        $failure=$_.Exception.GetBaseException().Message
+        Write-DriverFixLog $session 'session-init-failed' @{error=$failure}
+        throw ($failure+' Nhật ký: '+$session.LogPath)
+    }
     return $session
 }
 function Add-DriverFixAction($Session,$Action) {
@@ -30,7 +40,7 @@ function Add-DriverFixAction($Session,$Action) {
 function Update-DriverFixSession($Session) {
     $previous=$Session.Current;$snapshot=Get-DriverFixSnapshot
     $Session.LastDelta=Compare-DriverFixSnapshot $previous $snapshot;$Session.Current=$snapshot
-    Write-DriverFixLog $Session 'scan' @{snapshot=$snapshot;delta=$Session.LastDelta}
+    Write-DriverFixLog $Session 'scan' @{snapshot=$snapshot;summary=(Get-DriverFixScanSummary $snapshot);delta=$Session.LastDelta}
     return $Session.LastDelta
 }
 function ConvertTo-DriverFixNativeArgument([string]$Value) {
@@ -185,7 +195,7 @@ function Invoke-DriverFixDisable($Session,[string]$InstanceId,[string[]]$Expecte
     Assert-DriverFixAdmin $Session 'disable-device'
     $snapshot=Assert-DriverFixCurrentProfile $Session
     $device=@($snapshot.Problems|Where-Object InstanceId -eq $InstanceId)
-    if($device.Count -ne 1 -or $device[0].ErrorCode -eq 22 -or -not (Get-DriverFixDisableRule $device[0] $Session.Profile)){throw 'Thiết bị không còn lỗi hoặc không nằm trong danh sách disable an toàn của profile.'}
+    if($device.Count -ne 1 -or $device[0].ErrorCode -le 0 -or $device[0].ErrorCode -eq 22 -or -not (Get-DriverFixDisableRule $device[0] $Session.Profile)){throw 'Thiết bị chưa được xác nhận đang báo lỗi hoặc không nằm trong danh sách disable an toàn của profile.'}
     if(@(Compare-Object @($device[0].HardwareIds|Sort-Object) @($ExpectedHardwareIds|Sort-Object)).Count){throw 'Hardware ID thay đổi sau khi xác nhận; quét và chọn lại.'}
     $native=Invoke-DriverFixNative $Session pnputil @('/disable-device',$InstanceId)
     Start-Sleep -Seconds 1
