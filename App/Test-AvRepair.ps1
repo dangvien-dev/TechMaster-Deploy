@@ -17,6 +17,10 @@ function Remove-MpPreference { [CmdletBinding()] param($ThreatIDDefaultAction_Id
 function Start-MpScan { [CmdletBinding()] param($ScanType, $ScanPath) $script:calls.Add('Scan:' + $ScanType + ':' + $ScanPath) }
 function Get-MpThreatDetection { [CmdletBinding()] param() $script:newDetections }
 function Start-MpWDOScan { [CmdletBinding()] param() $script:calls.Add('Offline') }
+$script:boot = (Get-Date).AddHours(-2); $script:events = @()
+function Get-CimInstance { [CmdletBinding()] param($ClassName, $OperationTimeoutSec) if ($ClassName -eq 'Win32_OperatingSystem') { [pscustomobject]@{ LastBootUpTime = $script:boot } } }
+function Get-WinEvent { [CmdletBinding()] param($FilterHashtable, $MaxEvents) @($script:events | Where-Object { $_.TimeCreated -ge $FilterHashtable.StartTime }) }
+function New-ScanEvent([int]$id, [datetime]$time, [string]$guid, [string]$params) { [pscustomobject]@{ Id = $id; TimeCreated = $time; Message = "Microsoft Defender Antivirus scan event.`n Scan ID: {$guid}`n Scan Type: Antimalware`n Scan Parameters: $params" } }
 $script:regPaths = @('HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Windows')
 function Get-ItemProperty { [CmdletBinding()] param($LiteralPath) if ($LiteralPath -in $script:regPaths) { [pscustomobject]@{ AppInit_DLLs = 'C:\PROGRA~2\COMMON~1\System\symsrv.dll'; LoadAppInit_DLLs = $script:load } } else { throw 'unexpected registry read' } }
 function Set-ItemProperty { [CmdletBinding()] param($LiteralPath, $Name, $Value, $Type) if ($Name -ne 'LoadAppInit_DLLs' -or $Value -ne 0) { throw 'Only LoadAppInit_DLLs = 0 may be written' }; $script:calls.Add('AppInit:' + $LiteralPath); $script:load = 0 }
@@ -40,7 +44,7 @@ try {
         Infector = @('AppInit_DLLs đang nạp: C:\PROGRA~2\COMMON~1\System\symsrv.dll')
         Detections = @([pscustomobject]@{ Threat = 'Virus:Win32/Floxif.H'; Files = @([pscustomobject]@{ Path = $a; Present = $true }, [pscustomobject]@{ Path = $missing; Present = $false }) },
                        [pscustomobject]@{ Threat = 'Trojan:Win32/Malgent!pz'; Files = @([pscustomobject]@{ Path = $b; Present = $true }) })
-        Drives = @([pscustomobject]@{ Drive = 'C:' }, [pscustomobject]@{ Drive = 'G:' })
+        Drives = @([pscustomobject]@{ Drive = 'C:' }, [pscustomobject]@{ Drive = 'D:'; UsedGB = 612 }, [pscustomobject]@{ Drive = 'G:' })
     }
     $plan = @(Get-AvRepairPlan $report)
     $ids = @($plan | ForEach-Object Id)
@@ -49,7 +53,9 @@ try {
     Assert (-not ($plan | Where-Object Id -eq 'OfflineScan').Recommended -and ($plan | Where-Object Id -eq 'OfflineScan').Danger) 'Offline scan is never pre-selected and is marked dangerous'
     Assert (-not ($plan | Where-Object Id -eq 'FullScan').Recommended) 'Full scan is not pre-selected'
     Assert (@(($plan | Where-Object Id -eq 'Quarantine').Data).Count -eq 2) 'Quarantine covers only files still present'
-    Assert (($plan | Where-Object Id -eq 'CustomScan').Data -eq 'G:\') 'Each non-system drive with detections gets its own scan'
+    $custom = @($plan | Where-Object Id -eq 'CustomScan')
+    Assert ($custom.Count -eq 2 -and ($custom | Where-Object Data -eq 'G:\')) 'Each non-system drive with detections gets its own scan'
+    Assert (-not @($custom | Where-Object Recommended).Count -and ($custom | Where-Object Data -eq 'D:\').Detail -match '612 GB' -and $custom[0].Detail -match 'không dùng máy') 'Per-drive scans are never pre-selected and show the size / HDD warning'
     $passivePlan = @(Get-AvRepairPlan ([pscustomobject]@{ Defender = [pscustomobject]@{ Mode = 'Passive Mode' }; AllowedIds = @(); Exclusions = @(); Infector = @(); Detections = @(); Drives = @() }))
     Assert (-not @($passivePlan | Where-Object Recommended).Count -and ($passivePlan[0].Detail -match 'Passive')) 'Passive Defender: nothing pre-selected, reason shown'
 
@@ -72,6 +78,18 @@ try {
     Assert ($progress.Percent -eq 100 -and $progress.Lines.Count -eq $selected.Count) 'Progress reports every action'
     Assert ((Get-Content -LiteralPath $log -Raw) -match 'XONG') 'Log records each result'
     Assert (($results | Where-Object Title -like 'Cập nhật*').Message -match '1\.400\.200\.0') 'Signature update is verified by version'
+
+    # Running-scan detection from the Defender log: custom scans are seen, scans cut by a hard reset are not.
+    $a1 = [guid]::NewGuid().ToString(); $b1 = [guid]::NewGuid().ToString(); $c1 = [guid]::NewGuid().ToString()
+    $script:events = @((New-ScanEvent 1000 (Get-Date).AddMinutes(-60) $a1 'Quick Scan'), (New-ScanEvent 1001 (Get-Date).AddMinutes(-55) $a1 'Quick Scan'),
+        (New-ScanEvent 1000 (Get-Date).AddMinutes(-54) $b1 'Custom Scan'), (New-ScanEvent 1000 (Get-Date).AddHours(-5) $c1 'Full Scan'))
+    $running = Get-AvRunningScan
+    Assert ($running -and $running.Name -match 'riêng' -and [int]((Get-Date) - $running.Started).TotalMinutes -eq 54) 'A per-drive scan with no end event is reported as running'
+    $script:events = @($script:events | Where-Object { $_.Message -notmatch $b1 })
+    Assert ($null -eq (Get-AvRunningScan)) 'A scan started before the last boot (hard reset) is not treated as running'
+    $script:events = @((New-ScanEvent 1000 (Get-Date).AddMinutes(-3) $b1 'Custom Scan'), (New-ScanEvent 1002 (Get-Date).AddMinutes(-1) $b1 'Custom Scan'))
+    Assert ($null -eq (Get-AvRunningScan)) 'A stopped scan (1002) is finished'
+    $script:events = @()
 
     # Edge cases: name collision, unplugged drive, scan with new detections, offline scan.
     [IO.File]::WriteAllText($a, 'again');

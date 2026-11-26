@@ -93,7 +93,7 @@ ${env:ProgramFiles(x86)} = 'C:\Program Files (x86)'
 $script:Case.Existing = @($floxDll, $epPlus, $adj, $usb)
 $script:Case.AppInit = 'C:\PROGRA~2\COMMON~1\System\symsrv.dll'
 $script:Case.ActionIds = @(2147909550); $script:Case.Actions = @(6)
-$script:Case.Disks = @([pscustomobject]@{ DeviceID = 'C:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'D:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'G:'; DriveType = 2 })
+$script:Case.Disks = @([pscustomobject]@{ DeviceID = 'C:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'D:'; DriveType = 3; Size = 1000GB; FreeSpace = 388GB }, [pscustomobject]@{ DeviceID = 'G:'; DriveType = 2 })
 $script:Case.Threats = @([pscustomobject]@{ ThreatID = 2147909550; ThreatName = 'Virus:Win32/Floxif.EC!MTB'; DidThreatExecute = $false },
     [pscustomobject]@{ ThreatID = 2147890900; ThreatName = 'Trojan:Win32/Malgent!pz'; DidThreatExecute = $true },
     [pscustomobject]@{ ThreatID = 2147684851; ThreatName = 'Virus:Win32/Floxif.H'; DidThreatExecute = $false })
@@ -112,6 +112,7 @@ if (-not $report.Detections[0].Allowed) { throw 'Allowed ThreatID (action 6) mus
 if (-not ($report.Detections | Where-Object StatusId -eq 5).Allowed) { throw 'Status 5 with the ID still in the allow list stays allowed.' }
 if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object Present).Count -ne 3) { throw 'Present-on-disk check wrong.' }
 if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object { $_.Path -like 'pid:*' }).Count) { throw 'Process resources are not files.' }
+if (($report.Drives | Where-Object Drive -eq 'D:').UsedGB -ne 612 -or -not ($report.Drives | Where-Object Drive -eq 'D:').Fixed) { throw 'Drive summary must carry used space / fixed flag for the repair plan.' }
 $g = $report.Drives | Where-Object Drive -eq 'G:'
 if (-not $g -or -not $g.Removable -or ($report.Drives | Where-Object Drive -eq 'D:').Removable) { throw 'Drive grouping / removable detection wrong.' }
 foreach ($needle in 'ĐÃ CHẠY','\[CÒN TRÊN Ổ\]','Theo ổ:','ổ di động','ĐANG ĐƯỢC CHO PHÉP','\[KIỂM TRA GẤP\]','Floxif\): ') { if ($text -notmatch $needle) { throw "Missing in report: $needle" } }

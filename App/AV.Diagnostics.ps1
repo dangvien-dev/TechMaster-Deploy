@@ -34,8 +34,15 @@ function Get-AvThreatStatusText([int]$id) {
 
 function Get-AvDriveTypes {
     # One bounded query. Disconnected network drives can otherwise block for minutes.
-    $types = @{}
-    try { foreach ($disk in @(Get-CimInstance -ClassName Win32_LogicalDisk -OperationTimeoutSec 10 -ErrorAction Stop)) { $types[([string]$disk.DeviceID).ToUpperInvariant()] = [int]$disk.DriveType } } catch { }
+    # Returns drive letter -> DriveType; used space is kept in $script:AvDriveUsedGB for the repair plan.
+    $types = @{}; $script:AvDriveUsedGB = @{}
+    try {
+        foreach ($disk in @(Get-CimInstance -ClassName Win32_LogicalDisk -OperationTimeoutSec 10 -ErrorAction Stop)) {
+            $id = ([string]$disk.DeviceID).ToUpperInvariant()
+            $types[$id] = [int]$disk.DriveType
+            if ($disk.Size) { $script:AvDriveUsedGB[$id] = [int](([double]$disk.Size - [double]$disk.FreeSpace) / 1GB) }
+        }
+    } catch { }
     $types
 }
 
@@ -52,7 +59,7 @@ function Get-AvDriveSummary($detections, [hashtable]$types) {
     $paths = @($detections | ForEach-Object { $_.Files } | ForEach-Object { $_.Path } | Where-Object { $_ -match '^[A-Za-z]:' } | Sort-Object -Unique)
     @($paths | Group-Object { $_.Substring(0, 2).ToUpperInvariant() } | Sort-Object Name | ForEach-Object {
         $kind = switch ($types[$_.Name]) { 2 { 'ổ di động / USB' } 3 { 'ổ trong máy' } 4 { 'ổ mạng' } 5 { 'đĩa CD/DVD' } default { 'không rõ loại / đã rút' } }
-        [pscustomobject]@{ Drive = $_.Name; Count = $_.Count; Kind = $kind; Removable = (($types[$_.Name] -eq 2) -or ((-not $types.ContainsKey($_.Name)) -and ($_.Name -ne 'C:'))) }
+        [pscustomobject]@{ Drive = $_.Name; Count = $_.Count; Kind = $kind; Fixed = ($types[$_.Name] -eq 3); UsedGB = $(if ($script:AvDriveUsedGB -and $script:AvDriveUsedGB.ContainsKey($_.Name)) { $script:AvDriveUsedGB[$_.Name] } else { $null }); Removable = (($types[$_.Name] -eq 2) -or ((-not $types.ContainsKey($_.Name)) -and ($_.Name -ne 'C:'))) }
     })
 }
 

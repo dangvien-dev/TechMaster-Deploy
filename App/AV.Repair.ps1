@@ -33,8 +33,10 @@ function Get-AvRepairPlan($report) {
     }
     if ($report.Defender) {
         & $add 'QuickScan' 'Quét nhanh (Defender)' ('Vài phút.' + $passive) $defenderMain $false $null
-        foreach ($drive in @($report.Drives | Where-Object { $_.Drive -ne 'C:' } | ForEach-Object Drive)) {
-            & $add 'CustomScan' ('Quét toàn bộ ổ ' + $drive) ('Ổ này có tệp bị phát hiện. Ổ phải đang cắm.' + $passive) $defenderMain $false ($drive + '\')
+        foreach ($entry in @($report.Drives | Where-Object { $_.Drive -ne 'C:' })) {
+            # Never pre-selected: a per-drive scan of a large HDD can run for hours and stall Explorer.
+            $size = if ($null -ne $entry.UsedGB) { ' Ổ đã dùng khoảng ' + $entry.UsedGB + ' GB.' } else { '' }
+            & $add 'CustomScan' ('Quét toàn bộ ổ ' + $entry.Drive) ('Ổ này có tệp bị phát hiện.' + $size + ' Ổ HDD lớn có thể quét hàng giờ, máy chậm / đơ trong lúc quét: chỉ chạy khi không dùng máy. Ổ phải đang cắm.' + $passive) $false $false ($entry.Drive + '\')
         }
         & $add 'FullScan' 'Quét toàn bộ máy (Defender)' ('Có thể mất 30–90 phút.' + $passive) $false $false $null
         if ($hasVirus) {
@@ -54,11 +56,30 @@ function Get-AvNewDetections([datetime]$since) {
 }
 
 function Get-AvRunningScan {
-    # Defender keeps start/end times per scan type; a start newer than the end means it is still running.
+    # 1) Defender Operational log: 1000 = scan started; 1001 / 1002 / 1005 = finished / stopped / failed, matched by Scan ID.
+    #    This also sees custom (per-drive) scans, which have no start/end time in Get-MpComputerStatus.
+    # 2) Fallback: Quick/FullScanStartTime newer than the end time.
+    # Starts before the last boot are ignored: a hard reset leaves a "started" scan that never ended.
+    $since = (Get-Date).AddHours(-24)
+    try { $boot = [datetime](Get-CimInstance -ClassName Win32_OperatingSystem -OperationTimeoutSec 10 -ErrorAction Stop).LastBootUpTime; if ($boot -gt $since) { $since = $boot } } catch { }
+    try {
+        $events = @(Get-WinEvent -FilterHashtable @{ LogName = 'Microsoft-Windows-Windows Defender/Operational'; Id = 1000, 1001, 1002, 1005; StartTime = $since } -MaxEvents 200 -ErrorAction Stop)
+        $ended = @{}
+        foreach ($event in $events) {
+            if ($event.Id -ne 1000 -and ([string]$event.Message) -match '\{[0-9A-Fa-f-]{36}\}') { $ended[$Matches[0].ToUpperInvariant()] = $true }
+        }
+        foreach ($event in @($events | Where-Object { $_.Id -eq 1000 } | Sort-Object TimeCreated -Descending)) {
+            $text = [string]$event.Message
+            if ($text -notmatch '\{[0-9A-Fa-f-]{36}\}') { continue }
+            if ($ended.ContainsKey($Matches[0].ToUpperInvariant())) { continue }
+            $name = if ($text -match '(?i)Custom\s*Scan') { 'Quét riêng ổ / thư mục' } elseif ($text -match '(?i)Full\s*Scan') { 'Quét toàn bộ' } elseif ($text -match '(?i)Quick\s*Scan') { 'Quét nhanh' } else { 'Lượt quét' }
+            return [pscustomobject]@{ Name = $name; Started = [datetime]$event.TimeCreated }
+        }
+    } catch { }
     try { $status = Get-MpComputerStatus -ErrorAction Stop } catch { return $null }
     foreach ($kind in @(@('Full', 'Quét toàn bộ'), @('Quick', 'Quét nhanh'))) {
-        $started = $status.($kind[0] + 'ScanStartTime'); $ended = $status.($kind[0] + 'ScanEndTime')
-        if ($started -and (-not $ended -or [datetime]$started -gt [datetime]$ended)) {
+        $started = $status.($kind[0] + 'ScanStartTime'); $endedAt = $status.($kind[0] + 'ScanEndTime')
+        if ($started -and [datetime]$started -ge $since -and (-not $endedAt -or [datetime]$started -gt [datetime]$endedAt)) {
             return [pscustomobject]@{ Name = $kind[1]; Started = [datetime]$started }
         }
     }

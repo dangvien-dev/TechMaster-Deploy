@@ -2,6 +2,8 @@
 
 Cập nhật ngày 26/11/2026.
 
+**2.2.18.0:** xác định nguyên nhân Explorer đơ trên KY-THUAT từ nhật ký Windows: Sửa lỗi 2.2.14 chạy quét nhanh 09:51–09:57 rồi tự chạy “Quét toàn bộ ổ D:” (HDD Toshiba MQ04 1 TB, 5400 rpm) lúc 09:57:16, lượt này không kết thúc; 10:39:41 Explorer sập (Application 1002), 10:42:41 tắt cứng (Kernel-Power 41). Ổ đĩa Healthy, không có lỗi disk/Ntfs. Đã bỏ chọn sẵn quét theo ổ, thêm cảnh báo dung lượng, và phát hiện lượt quét đang chạy bằng Defender Operational 1000/1001/1002/1005 (MpComputerStatus không có mốc cho Custom Scan), bỏ qua lượt bắt đầu trước lần khởi động gần nhất. 31 kiểm thử repair (thêm phát hiện quét riêng, lượt bị cắt bởi tắt cứng, lượt đã dừng, plan không chọn sẵn quét ổ).
+
 **2.2.17.0:** trên KY-THUAT, bấm Chẩn đoán trong lúc lượt quét toàn bộ Defender (từ 08:44) còn chạy làm Explorer đơ, phải tắt cứng. Chưa xác định được nguyên nhân duy nhất (có thể thêm yếu tố ổ cứng); giảm mọi tải phía công cụ: mặc định chỉ .exe, luồng BelowNormal, hỏi trước khi chạy khi Defender đang quét, không Test-Path trên ổ mạng / ổ không còn, Win32_LogicalDisk có OperationTimeoutSec. Thêm kiểm thử chế độ nhẹ và kiểm thử không chạm ổ mạng / ổ đã rút. Cần thử lại trên máy thật khi Defender không quét và khi đang quét.
 
 **2.2.16.0:** lần chạy Sửa lỗi thật đầu tiên trên KY-THUAT: cập nhật định nghĩa đúng (đọc lại phiên bản 1.463.471.0), hai mục quét lỗi “A scan is already in progress” do lượt quét toàn bộ mở tay trước đó. Nhận biết lượt quét đang chạy bằng Quick/FullScanStartTime > EndTime của Get-MpComputerStatus, chờ và thử lại cả khi chỉ có thông báo bận (quét định kỳ / tuỳ chỉnh không có mốc thời gian). Thêm 5 kiểm thử (chờ rồi chạy, hết giờ, bận không có mốc, lỗi khác không thử lại).

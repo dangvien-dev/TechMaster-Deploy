@@ -1,5 +1,10 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.18.0 — 26/11/2026
+
+- Sửa lỗi báo virus **không còn chọn sẵn “Quét toàn bộ ổ D: / USB”**. Mục này ghi dung lượng đã dùng của ổ và cảnh báo ổ HDD lớn có thể quét hàng giờ, máy chậm / đơ: chỉ chạy khi không dùng máy.
+- Nhận biết mọi lượt quét Defender đang chạy, kể cả quét riêng một ổ (trước đây chỉ thấy quét nhanh / toàn bộ), qua nhật ký Defender (bắt đầu / xong / dừng / lỗi theo Scan ID). Lượt quét bị cắt do tắt máy đột ngột không bị coi là đang chạy. Chẩn đoán và Sửa lỗi đều hỏi trước khi chạy chồng lên lượt quét đó.
+
 ## 2.2.17.0 — 26/11/2026
 
 - Chẩn đoán báo virus mặc định chạy **chế độ nhẹ**: chỉ kiểm tra chữ ký .exe, không đọc hàng trăm .dll (mỗi lần đọc Defender lại quét tệp đó). Tích **Quét sâu** để kiểm tra cả .dll khi máy rảnh.

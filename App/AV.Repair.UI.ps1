@@ -88,6 +88,12 @@ function New-DeployAvRepairWindow($report, $Owner = $null) {
         $selected = @($s.Boxes | Where-Object { $_.IsChecked } | ForEach-Object Tag)
         if (-not $selected.Count) { Show-DeployMessage 'Chưa chọn thao tác nào.' 'Sửa lỗi báo virus' 'Warning'; return }
         $names = ($selected | ForEach-Object { '• ' + $_.Title }) -join "`n"
+        $running = $null
+        try { $running = Get-AvRunningScan } catch { }
+        if ($running) {
+            $wait = "Defender đang {0} (từ {1:HH:mm}). Các mục quét sẽ chờ tối đa 15 phút cho lượt đó xong; trong lúc này máy có thể chậm.`n`nTiếp tục?" -f $running.Name.ToLower(), $running.Started
+            if (-not (Confirm-Box $wait 'Defender đang quét' 'Tiếp tục' 'Để sau' -Owner $win)) { return }
+        }
         if (-not (Confirm-Box ("Chạy các thao tác sau trên máy này?`n`n" + $names) 'Sửa lỗi báo virus' 'Chạy' -Owner $win)) { return }
         if (@($selected | Where-Object Id -eq 'OfflineScan').Count) {
             if (-not (Confirm-Box "Quét offline sẽ KHỞI ĐỘNG LẠI máy ngay sau khi các mục khác chạy xong.`n`nLưu và đóng mọi tài liệu đang mở, ngắt phiên điều khiển từ xa nếu cần, rồi mới xác nhận." 'Khởi động lại để quét offline' 'Khởi động lại khi xong' -Danger -Owner $win)) { return }

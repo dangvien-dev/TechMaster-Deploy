@@ -15,6 +15,7 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
 . (Join-Path $PSScriptRoot 'Defaults.Core.ps1')
 . (Join-Path $PSScriptRoot 'Defaults.UI.ps1')
+. (Join-Path $PSScriptRoot 'AV.Repair.ps1')
 . (Join-Path $PSScriptRoot 'AV.Repair.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
 . (Join-Path $PSScriptRoot 'Logo.Preview.ps1')
@@ -156,20 +157,16 @@ $script:avTimer = New-DeployTimer 300 {
 Bind-Click 'btnAvDiagnostic' {
     if ($script:uiWork) { Set-Status 'Chờ thao tác hiện tại hoàn tất.'; return }
     $deep = [bool]$form.FindName('chkAvDeep').IsChecked
-    # A Defender full / quick scan already saturates the disk; adding our reads can freeze Explorer on HDD machines.
-    try {
-        $mp = Get-MpComputerStatus -ErrorAction Stop
-        foreach ($kind in @(@('Full', 'quét toàn bộ'), @('Quick', 'quét nhanh'))) {
-            $begin = $mp.($kind[0] + 'ScanStartTime'); $end = $mp.($kind[0] + 'ScanEndTime')
-            if ($begin -and (-not $end -or [datetime]$begin -gt [datetime]$end)) {
-                $message = 'Defender đang {0} (từ {1:HH:mm}). Chạy chẩn đoán lúc này làm ổ đĩa bận gấp đôi, máy có thể đơ.{2}' -f $kind[1], [datetime]$begin, $(if ($deep) { ' Quét sâu sẽ được tắt cho lần này.' } else { '' })
-                $message += "`n`nNên đợi lượt quét xong (xem Windows Security → Virus & threat protection). Vẫn chạy?"
-                if (-not (Confirm-Box $message 'Defender đang quét' 'Vẫn chạy (chế độ nhẹ)' 'Để sau' -Owner $form)) { Set-Status 'Đã hoãn chẩn đoán vì Defender đang quét.'; return }
-                $deep = $false
-                break
-            }
-        }
-    } catch { }
+    # Any running Defender scan (full, quick or per-drive) already saturates the disk;
+    # adding our reads froze Explorer on an HDD machine (KY-THUAT, 26/11).
+    $running = $null
+    try { $running = Get-AvRunningScan } catch { }
+    if ($running) {
+        $message = 'Defender đang {0} (từ {1:HH:mm}). Chạy chẩn đoán lúc này làm ổ đĩa bận thêm, máy có thể đơ.{2}' -f $running.Name.ToLower(), $running.Started, $(if ($deep) { ' Quét sâu sẽ được tắt cho lần này.' } else { '' })
+        $message += "`n`nNên đợi lượt quét xong (xem Windows Security → Virus & threat protection). Vẫn chạy?"
+        if (-not (Confirm-Box $message 'Defender đang quét' 'Vẫn chạy (chế độ nhẹ)' 'Để sau' -Owner $form)) { Set-Status 'Đã hoãn chẩn đoán vì Defender đang quét.'; return }
+        $deep = $false
+    }
     $progress = [hashtable]::Synchronized(@{ Step = 0; Steps = 6; Percent = 0; Stage = '' })
     $button = $form.FindName('btnAvDiagnostic'); $button.IsEnabled = $false; $button.Content = 'Đang chẩn đoán…'
     $form.FindName('avProgressPanel').Visibility = 'Visible'
