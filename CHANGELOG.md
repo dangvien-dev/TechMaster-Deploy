@@ -1,5 +1,10 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.10.0 — 26/11/2026
+
+- Thêm **Sau khi clone → Chẩn đoán báo virus** cho trường hợp Word, Zalo hoặc ứng dụng khác bị Defender / Kaspersky báo virus và không mở được. Chỉ đọc: giải mã trạng thái AV trong Security Center (bật / tắt, định nghĩa cũ), tên mối đe dọa Defender 30 ngày, nhật ký cảnh báo Kaspersky nếu có, dấu hiệu virus lây file .exe (lệnh mở exefile bị thay, svchost.com / directx.sys trong Windows), chữ ký số Office / Zalo (HashMismatch là tệp bị sửa), phiên bản Office hết hỗ trợ, dấu vết công cụ kích hoạt bên ngoài và ngoại lệ Defender.
+- Kết luận sơ bộ phân biệt nhiễm virus lây file, công cụ kích hoạt bị nhận là HackTool và phát hiện heuristic / máy học có thể báo nhầm. Không khôi phục vùng cách ly, không thêm ngoại lệ, không xoá tệp hoặc tác vụ.
+
 ## 2.2.9.0 — 23/11/2026
 
 - Fix Driver hiện tổng số thiết bị đã đọc, số Windows báo Code 0, số có mã lỗi và số chưa đọc được trạng thái. Không còn dùng dòng “Đã xác nhận Code 0: 0” để hiển thị lần quét đầu khiến dễ nhầm chưa quét; số chuyển sang Code 0 chỉ tính các thiết bị đã có lỗi xác định đầu phiên.

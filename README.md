@@ -7,7 +7,7 @@ Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** t
 | Tab | Công cụ | Thư mục |
 |---|---|---|
 | **Máy gốc (Sysprep)** | Kiểm tra / sửa lỗi Sysprep, chuẩn bị máy gốc và chạy Sysprep, thư mục `Reinstall` | `FixClone\` |
-| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh dấu số, bàn phím US cho EVKey | `FixClone\` |
+| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh dấu số, bàn phím US cho EVKey, chẩn đoán ứng dụng bị báo virus (chỉ đọc) | `FixClone\` |
 | **Kích hoạt bản quyền** | Kích hoạt Windows / Office (online → portal, QR, nhận Confirmation ID qua LAN), chạy TEST | `KichHoat\` |
 | **Biên bản bản quyền** | Nhập thông tin đơn vị, khách hàng, kỹ thuật viên, chọn logo → xuất biên bản HTML (in / lưu PDF) | `BienBan\` |
 | **Tải / cài Office** | Office Deployment Tool: tải bộ cài về kho (cài offline nhiều máy), cài từ kho, cài trực tiếp | `Office\`, kho ở `KhoOffice\` |

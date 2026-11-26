@@ -25,6 +25,7 @@
 - Trình duyệt / PDF: chọn ứng dụng đã cài → Chọn làm mặc định → xác nhận Set default trong Cài đặt Windows (PDF chọn .pdf) → quay lại Kiểm tra lại. Với trình duyệt, app kiểm tra cả HTTP và HTTPS. Windows 10 / bản cũ có thể mở trang chung; tìm ứng dụng trong Ứng dụng mặc định. Nếu thiếu app trong danh sách, cài app rồi kiểm tra lại; không tự cài thêm trình duyệt hoặc trình đọc PDF.
 - Reset ID UltraViewer có sao lưu. Chỉ reset khi cần, sau đó mở UltraViewer và Kiểm tra ID mới; thao tác này ngắt kết nối hỗ trợ.
 - Kiểm tra Desktop và phím chụp để giữ một icon Word / Excel dùng chung và chọn Screen Snipping cho Windows + Shift + S.
+- Chẩn đoán báo virus: dùng khi Word, Zalo… bị AV báo virus và không mở được. Đọc phần KẾT LUẬN SƠ BỘ trước: NGHIÊM TRỌNG là dấu hiệu virus lây file .exe → rút mạng, quét offline, cài lại ứng dụng; KHẢ NĂNG CAO là công cụ kích hoạt bên ngoài bị chặn; CÓ THỂ BÁO NHẦM là phát hiện heuristic trên tệp có chữ ký hợp lệ. Kaspersky không ghi đủ tên mối đe dọa vào nhật ký Windows trên mọi bản; mở Báo cáo / Vùng cách ly của Kaspersky để lấy tên chính xác. Công cụ không khôi phục cách ly, không thêm ngoại lệ.
 
 ## Kích hoạt
 - Khi có khách theo dõi, có thể nhập key trực tiếp trong Windows Settings → System → Activation hoặc Word → File → Account.

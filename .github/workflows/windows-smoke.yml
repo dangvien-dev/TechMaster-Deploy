@@ -45,6 +45,7 @@ jobs:
           & App/Test-WindowsTools.ps1
           & App/Test-Defaults.ps1
           & App/Test-Info.ps1
+          & App/Test-AvDiagnostics.ps1
           & App/Test-CustomApps.ps1
           & App/Test-UpdateNotification.ps1
           & FixClone/Test-UltraViewerDiagnostics.ps1

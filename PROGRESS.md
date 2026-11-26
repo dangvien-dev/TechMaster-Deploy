@@ -1,6 +1,8 @@
 # Tiến độ TechMaster Deploy
 
-Cập nhật ngày 23/11/2026.
+Cập nhật ngày 26/11/2026.
+
+**2.2.10.0:** thêm chẩn đoán ứng dụng bị báo virus (chỉ đọc) ở tab Sau khi clone, dựa trên ca thực tế Word 2010 / Zalo bị chặn: Security Center báo cả Defender (0x060100) lẫn Kaspersky (0x040000) đang tắt bảo vệ thời gian thực, WINWORD.EXE Office14 và Zalo.exe có chữ ký Valid, không có dấu hiệu Neshta. Đã qua 4 ca kiểm thử với cmdlet mô phỏng (máy thực tế, Neshta + HashMismatch, AutoKMS / HackTool + ngoại lệ, phát hiện Wacatac!ml mới và Sality cũ ngoài cửa sổ 30 ngày) và chặn mọi lệnh thay đổi. Chưa chạy trên Windows thật: cần kiểm tra thời gian quét chữ ký Office / Zalo, đọc nhật ký Kaspersky (tên log có thể khác theo phiên bản) và cửa sổ kết quả WPF.
 
 **2.2.9.0:** làm rõ số thiết bị đã đọc trong Fix Driver và thêm bộ lọc xem tất cả / mở Device Manager. Tái hiện hai lỗi: CIM rỗng bị trình bày như 0 lỗi, trạng thái thiếu bị ép về Code 0; đã chặn dữ liệu rỗng, giữ trạng thái chưa rõ là `?`, không tính nó là hoạt động / đã sửa hoặc cho disable. Log được tạo trước khởi tạo phiên để còn dữ liệu khi thất bại. Đã qua 79 kiểm tra engine và 23 kiểm tra inventory / session / HTML với tệp thật và CIM / native mô phỏng; không cài / disable driver thật trong môi trường thử. Cần đối chiếu tổng thiết bị / mã lỗi với Device Manager trên máy người dùng; ảnh cũ chỉ thể hiện 0 lỗi, chưa cho biết số thiết bị đã đọc.
 

@@ -105,6 +105,21 @@ Bind-Click 'btnUltraDiagnostic' {
         Set-Status 'Đã chẩn đoán UltraViewer; so sánh kết quả của hai máy bị trùng ID.'
     }
 }
+Bind-Click 'btnAvDiagnostic' {
+    Set-Status 'Đang đọc trạng thái phần mềm diệt virus và chữ ký số Office / Zalo… (có thể mất 1–2 phút)'
+    Start-UiWork 'param($diagnostics) . $diagnostics; Format-AvDiagnostic (Get-AvDiagnostic)' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1')) {
+        param($result)
+        $script:diagnosticWindow = Import-DeployWindow (Join-Path $PSScriptRoot 'DiagnosticsWindow.xml')
+        $script:diagnosticWindow.Owner = $form
+        $script:diagnosticWindow.Title = 'Chẩn đoán ứng dụng bị báo virus'
+        $script:diagnosticWindow.FindName('Heading').Text = 'Ứng dụng bị báo virus — chỉ đọc'
+        $script:diagnosticWindow.FindName('Details').Text = [string]$result[-1]
+        $script:diagnosticWindow.FindName('Copy').Add_Click({ [Windows.Clipboard]::SetText($script:diagnosticWindow.FindName('Details').Text) })
+        $script:diagnosticWindow.FindName('Close').Add_Click({ $script:diagnosticWindow.Close() })
+        [void]$script:diagnosticWindow.ShowDialog()
+        Set-Status 'Đã chẩn đoán. Xem phần KẾT LUẬN SƠ BỘ; gửi kèm tên mối đe dọa trong Báo cáo của AV nếu chưa rõ.'
+    }
+}
 Bind-Click 'btnDesktopPreflight' {
     $script = Join-Path $DirClone 'Master-Preflight.ps1'
     $command = "& '{0}' -AfterClone" -f $script.Replace("'", "''")
