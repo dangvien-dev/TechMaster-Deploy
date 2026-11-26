@@ -16,7 +16,7 @@ function ConvertTo-DriverFixDevice($Device) {
     $name=[string]$Device.Name;if(-not $name){$name=$instance}
     $code=-1;$parsed=0
     if($null -ne $Device.ConfigManagerErrorCode -and [int]::TryParse([string]$Device.ConfigManagerErrorCode,[ref]$parsed) -and $parsed -ge 0){$code=$parsed}
-    [pscustomobject]@{Name=$name;ErrorCode=$code;ErrorCodeText=(Get-DriverFixCodeText $code);Description=(Get-DriverFixErrorDescription $code);HardwareIds=@($Device.HardwareID|Where-Object {$_}|Select-Object -Unique);InstanceId=$instance;Service=[string]$Device.Service;PnpClass=[string]$Device.PNPClass}
+    [pscustomobject]@{Name=$name;ErrorCode=$code;ErrorCodeText=(Get-DriverFixCodeText $code);Description=(Get-DriverFixErrorDescription $code);HardwareIds=@($Device.HardwareID|Where-Object {$_}|Select-Object -Unique);CompatibleIds=@($Device.CompatibleID|Where-Object {$_}|Select-Object -Unique);InstanceId=$instance;Service=[string]$Device.Service;PnpClass=[string]$Device.PNPClass}
 }
 function Get-DriverFixSnapshot {
     # Keep healthy devices too, so disappearing hardware is not called repaired.
@@ -84,8 +84,81 @@ function Get-DriverFixCatalogLinks([string[]]$HardwareIds) {
     }
     # IDs arrive specific first. Keep a small, useful list, never raw SUBSYS-only queries.
     foreach($query in @($queries|Select-Object -First 3)){
-        [pscustomobject]@{Query=$query;Url=('https://www.catalog.update.microsoft.com/Search.aspx?q='+[uri]::EscapeDataString($query))}
+        [pscustomobject]@{Kind='Catalog';Vendor='';Query=$query;Label=$query;Url=('https://www.catalog.update.microsoft.com/Search.aspx?q='+[uri]::EscapeDataString($query))}
     }
+}
+# Máy in / MFP: Catalog hiếm khi lập chỉ mục driver theo USB VID/PID (INF khai báo USBPRINT\... hoặc tên model), nên link VID/PID
+# thường trống. Với thiết bị nhận ra là máy in / MFP, mở trang hỗ trợ của hãng theo VID. Thêm một dòng để hỗ trợ hãng khác.
+# Support: trang hỗ trợ chính thức (chỉ host này được mở thêm ngoài Catalog / Google). Site: tên miền dùng cho tìm kiếm site:.
+# PrinterOnly=$false: VID còn dùng cho webcam, bàn phím, điện thoại... nên cần dấu hiệu máy in (class / ID / tên) mới gợi ý hãng.
+function Get-DriverFixPrinterVendors {
+    @(
+        [pscustomobject]@{Vid='04A9';Name='Canon';Support='https://vn.canon/vi/support';Site='vn.canon';PrinterOnly=$false}
+        [pscustomobject]@{Vid='03F0';Name='HP';Support='https://support.hp.com/us-en/drivers';Site='support.hp.com';PrinterOnly=$false}
+        [pscustomobject]@{Vid='04B8';Name='Epson';Support='https://www.epson.com.vn/';Site='epson.com.vn';PrinterOnly=$false}
+        [pscustomobject]@{Vid='04F9';Name='Brother';Support='https://support.brother.com/g/b/productsearch.aspx?c=vn&lang=en';Site='support.brother.com';PrinterOnly=$true}
+        [pscustomobject]@{Vid='0482';Name='Kyocera';Support='https://www.kyoceradocumentsolutions.com/';Site='kyoceradocumentsolutions.com';PrinterOnly=$false}
+        [pscustomobject]@{Vid='05CA';Name='Ricoh';Support='https://www.ricoh.com.vn/';Site='ricoh.com.vn';PrinterOnly=$false}
+        [pscustomobject]@{Vid='0924';Name='Xerox';Support='https://www.support.xerox.com/';Site='support.xerox.com';PrinterOnly=$true}
+        [pscustomobject]@{Vid='043D';Name='Lexmark';Support='https://support.lexmark.com/';Site='support.lexmark.com';PrinterOnly=$true}
+        [pscustomobject]@{Vid='06BC';Name='OKI';Support='https://www.oki.com/';Site='oki.com';PrinterOnly=$true}
+    )
+}
+function Get-DriverFixUsbVid($Device) {
+    foreach($id in (@($Device.HardwareIds)+@([string]$Device.InstanceId))){
+        $m=[regex]::Match(([string]$id).ToUpperInvariant(),'^(?:USB|HID)\\VID_([0-9A-F]{4})')
+        if($m.Success){return $m.Groups[1].Value}
+    }
+    return ''
+}
+function Test-DriverFixPrinterDevice($Device) {
+    if(-not $Device){return $false}
+    if([string]$Device.PnpClass -in 'Printer','PrintQueue'){return $true}
+    foreach($id in (@($Device.HardwareIds)+@($Device.CompatibleIds))){
+        if($id -and ([string]$id).ToUpperInvariant() -match '^(?:USBPRINT|WSDPRINT|PRINTENUM|LPTENUM|DOT4PRT)\\|^USB\\CLASS_07(?:&|$)'){return $true}
+    }
+    # Canon MF240 Code 28 không có class và ID USB chỉ là VID/PID, nên cần thêm nhận diện theo tên.
+    return ([string]$Device.Name) -match '(?i)\b(?:printers?|mfp|mfc|scanner|laserjet|deskjet|officejet|inkjet|pixma|imageclass|i-sensys|ufr\s?ii|ecotank|workforce|ecosys|taskalfa|bizhub|phaser|versalink|altalink|workcentre)\b|\b(?:lbp|mf)\d{3,4}'
+}
+function Get-DriverFixPrinterVendor($Device) {
+    $vid=Get-DriverFixUsbVid $Device
+    if(-not $vid){return $null}
+    $vendor=@(Get-DriverFixPrinterVendors|Where-Object Vid -eq $vid)|Select-Object -First 1
+    if(-not $vendor){return $null}
+    if($vendor.PrinterOnly -or (Test-DriverFixPrinterDevice $Device)){return $vendor}
+    return $null
+}
+function Get-DriverFixPrinterModel($Device) {
+    $name=([string]$Device.Name -replace '[\x00-\x1F\x7F"]',' ' -replace '\s+',' ').Trim()
+    # Tên rỗng, bằng InstanceId hoặc chung chung (USB Printing Support...) không giúp tìm đúng model.
+    if(-not $name -or $name -ceq [string]$Device.InstanceId -or $name.Contains('\') -or $name -match '(?i)^(?:USB |Unknown |Generic |Microsoft |WSD )'){return ''}
+    if($name.Length -gt 80){$name=$name.Substring(0,80).Trim()}
+    return $name
+}
+function Get-DriverFixVendorLinks($Device,$Vendor) {
+    $model=Get-DriverFixPrinterModel $Device
+    if($model){
+        $subject=if($model -match ('(?i)^'+[regex]::Escape($Vendor.Name))){$model}else{$Vendor.Name+' '+$model}
+        $search=$subject+' driver site:'+$Vendor.Site
+        [pscustomobject]@{Kind='Vendor';Vendor=$Vendor.Name;Query=$search;Label=('Tìm driver "'+$model+'" trên '+$Vendor.Site);Url=('https://www.google.com/search?hl=vi&q='+[uri]::EscapeDataString($search))}
+    }
+    [pscustomobject]@{Kind='Vendor';Vendor=$Vendor.Name;Query=$Vendor.Support;Label=('Trang hỗ trợ '+$Vendor.Name+' ('+([uri]$Vendor.Support).Host+')');Url=$Vendor.Support}
+}
+# Link mở cho một thiết bị: máy in / MFP của hãng trong bảng → trang hãng; còn lại → Microsoft Update Catalog theo Hardware ID.
+function Get-DriverFixDriverLinks($Device) {
+    $vendor=Get-DriverFixPrinterVendor $Device
+    if($vendor){return @(Get-DriverFixVendorLinks $Device $vendor)}
+    return @(Get-DriverFixCatalogLinks @($Device.HardwareIds))
+}
+# Chỉ mở link do chương trình tạo: Catalog, tìm kiếm Google theo site:, hoặc host hỗ trợ trong bảng hãng; luôn HTTPS, không tài khoản / cổng lạ.
+function Test-DriverFixAllowedLink([string]$Url) {
+    $uri=$null
+    if(-not [uri]::TryCreate($Url,[UriKind]::Absolute,[ref]$uri) -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or -not $uri.IsDefaultPort){return $false}
+    $linkHost=$uri.Host.ToLowerInvariant()
+    if($linkHost -eq 'www.catalog.update.microsoft.com'){return $uri.AbsolutePath -eq '/Search.aspx'}
+    if($linkHost -eq 'www.google.com'){return $uri.AbsolutePath -eq '/search'}
+    foreach($vendor in Get-DriverFixPrinterVendors){if($linkHost -eq ([uri]$vendor.Support).Host.ToLowerInvariant()){return $true}}
+    return $false
 }
 function Test-DriverFixHardwarePattern($Device,[string[]]$Patterns) {
     foreach($id in $Device.HardwareIds){foreach($pattern in $Patterns){if($id -like $pattern){return $true}}};return $false

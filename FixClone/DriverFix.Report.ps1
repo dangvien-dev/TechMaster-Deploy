@@ -4,10 +4,10 @@ function ConvertTo-DriverFixDeviceHtml([object[]]$Devices) {
     if(-not $Devices.Count){return '<p>Không có.</p>'}
     $rows=foreach($d in $Devices){
         $ids=@($d.HardwareIds|ForEach-Object {ConvertTo-DriverFixHtml $_})-join '<br>'
-        $links=@(Get-DriverFixCatalogLinks $d.HardwareIds|ForEach-Object {'<a href="'+(ConvertTo-DriverFixHtml $_.Url)+'">'+(ConvertTo-DriverFixHtml $_.Query)+'</a>'})-join '<br>'
+        $links=@(Get-DriverFixDriverLinks $d|ForEach-Object {'<a href="'+(ConvertTo-DriverFixHtml $_.Url)+'">'+(ConvertTo-DriverFixHtml $_.Label)+'</a>'})-join '<br>'
         '<tr><td>'+(ConvertTo-DriverFixHtml $d.Name)+'</td><td>'+(ConvertTo-DriverFixHtml (Get-DriverFixCodeText $d.ErrorCode))+' — '+(ConvertTo-DriverFixHtml $d.Description)+'</td><td class="id">'+$ids+'<br><small>InstanceId: '+(ConvertTo-DriverFixHtml $d.InstanceId)+'</small></td><td>'+$links+'</td></tr>'
     }
-    return '<table><thead><tr><th>Thiết bị</th><th>Trạng thái</th><th>Hardware ID / InstanceId</th><th>Microsoft Update Catalog</th></tr></thead><tbody>'+($rows -join '')+'</tbody></table>'
+    return '<table><thead><tr><th>Thiết bị</th><th>Trạng thái</th><th>Hardware ID / InstanceId</th><th>Link tải driver (Catalog / trang hãng máy in)</th></tr></thead><tbody>'+($rows -join '')+'</tbody></table>'
 }
 function Export-DriverFixReport($Session) {
     $dir=Join-Path $Session.Home 'Reports';New-Item -ItemType Directory -Path $dir -Force|Out-Null

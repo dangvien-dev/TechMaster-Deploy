@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.18.0",
+  "version": "2.2.19.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -194,8 +194,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 19533,
-      "sha": "561b6c82fbabb04e773d636bfc1363d0af157a4c"
+      "size": 19857,
+      "sha": "1d048c7c717a7b53c9c1c95d8e74f33c05e5fe6b"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -494,14 +494,14 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 28741,
-      "sha": "43234e67ee34b5de61085f2201219dc40caddfb4"
+      "size": 29996,
+      "sha": "a8566db0426c882d50aab9dc9fb236c929b16ad9"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
       "mode": "100644",
-      "size": 14339,
-      "sha": "b58bc923691c7fdf1bea79b85bdf0511e624188d"
+      "size": 20048,
+      "sha": "ac03ffc49c9a54e9c2eed13934e336a4008813e5"
     },
     {
       "path": "FixClone/DriverFix.Engine.ps1",
@@ -512,8 +512,8 @@
     {
       "path": "FixClone/DriverFix.md",
       "mode": "100644",
-      "size": 14147,
-      "sha": "d914947b02d613ceceda4cc36d4daea60dbb81d9"
+      "size": 16157,
+      "sha": "0267bdab889a17db8c345daa0c9faf452619b760"
     },
     {
       "path": "FixClone/DriverFix.Profiles.ps1",
@@ -524,20 +524,20 @@
     {
       "path": "FixClone/DriverFix.ps1",
       "mode": "100644",
-      "size": 15050,
-      "sha": "5e34d22535b1abf80e126abb2688537d2ee091a1"
+      "size": 16318,
+      "sha": "c3d95d6a552d542be8c6aaf460dd084f54dfca3f"
     },
     {
       "path": "FixClone/DriverFix.Report.ps1",
       "mode": "100644",
-      "size": 4954,
-      "sha": "b5b2eda6b705046072c3fdc9e3c01d86589a9255"
+      "size": 4966,
+      "sha": "b8728ce4edcf5f41ca72ba608d14c6e9610c748f"
     },
     {
       "path": "FixClone/DriverFix.xml",
       "mode": "100644",
-      "size": 8121,
-      "sha": "9125ffa4076b7ebabd7557e88f9db822e997f5b2"
+      "size": 8341,
+      "sha": "0321780b127893222477883f6a8f190f565be619"
     },
     {
       "path": "FixClone/Fix-BanPhim.bat",
@@ -674,8 +674,8 @@
     {
       "path": "FixClone/Test-DriverFix.ps1",
       "mode": "100644",
-      "size": 20168,
-      "sha": "8a4c9fb35a4aea9aa0e938d9cff9696fbc3603f3"
+      "size": 26181,
+      "sha": "4be7a75c8900148675a65074735d793f2d03f4a6"
     },
     {
       "path": "FixClone/Test-DriverFixInventory.ps1",
@@ -686,8 +686,8 @@
     {
       "path": "FixClone/Test-DriverFixWpf.ps1",
       "mode": "100644",
-      "size": 4371,
-      "sha": "4e9e0bae877ac4bb41a391ae56eb047adb5f2e8e"
+      "size": 6071,
+      "sha": "0c73fa01ea949c7c8e7c83a72a13707b92eb1cbc"
     },
     {
       "path": "FixClone/Test-MasterDeployment.ps1",
@@ -920,14 +920,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 18761,
-      "sha": "7be9b3072473c97ecb6d64b682d1765a5bc10fea"
+      "size": 19871,
+      "sha": "f310491f698cd28a10b6a4c4302b79db5818dc4c"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 22085,
-      "sha": "66c542bc3170db7ad4918b06cab71f06dc259400"
+      "size": 22200,
+      "sha": "9518d3b9b13e6b75159264bf3253f1ff8659a8fb"
     },
     {
       "path": "RELEASING.md",
@@ -939,7 +939,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "4bc56c486df1b0fadfd9791d2b7d27f9923326ed"
+      "sha": "9902c20ca80516561dfb0cd4e37c9f25809a1cf1"
     }
   ]
 }
