@@ -7,7 +7,7 @@ foreach ($blocked in 'Remove-Item','Set-ItemProperty','New-ItemProperty','Add-Mp
     Set-Item -Path ('Function:' + $blocked) -Value ([scriptblock]::Create("throw 'Diagnostic must never call $blocked'"))
 }
 
-function Get-CimInstance { [CmdletBinding()] param($Namespace, $ClassName, $ListLog) if ($ClassName -eq 'Win32_LogicalDisk') { $script:Case.Disks } else { $script:Case.Products } }
+function Get-CimInstance { [CmdletBinding()] param($Namespace, $ClassName, $ListLog, $OperationTimeoutSec) if ($ClassName -eq 'Win32_LogicalDisk') { $script:Case.Disks } else { $script:Case.Products } }
 function Get-MpComputerStatus { [CmdletBinding()] param($Namespace, $ClassName, $ListLog) [pscustomobject]@{ AMRunningMode = 'Passive Mode'; RealTimeProtectionEnabled = $false; AntivirusSignatureLastUpdated = '2026-11-25' } }
 function Get-MpThreat { [CmdletBinding()] param($Namespace, $ClassName, $ListLog) $script:Case.Threats }
 function Get-MpThreatDetection { [CmdletBinding()] param($Namespace, $ClassName, $ListLog) $script:Case.Detections }
@@ -32,7 +32,9 @@ $script:Case = @{
     Disks = @([pscustomobject]@{ DeviceID = 'C:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'D:'; DriveType = 3 })
     Files = @(@{ Path = $officeWord; Status = 'Valid' }, @{ Path = $zaloExe; Status = 'Valid' }, @{ Path = $zaloDll; Status = 'NotSigned' }, @{ Path = 'C:\Users\Admin\AppData\Local\Programs\Zalo\Zalo-26.9.10\resources\index.d.ts'; Status = 'UnknownError' }, @{ Path = 'C:\Users\Admin\AppData\Local\Programs\Zalo\Zalo-26.9.10\resources\package.json'; Status = 'UnknownError' })
 }
-$report = Get-AvDiagnostic -Roots $roots
+$light = Get-AvDiagnostic -Roots $roots
+if ($light.Scanned -ne 2 -or $light.UnsignedDll -ne 0 -or (Format-AvDiagnostic $light) -notmatch 'chế độ nhẹ') { throw 'Default (light) mode must check .exe only.' }
+$report = Get-AvDiagnostic -Roots $roots -Deep
 $text = Format-AvDiagnostic $report
 if (@($report.Products | Where-Object Enabled).Count -ne 0) { throw 'productState 393472 / 262144 must decode as real-time off.' }
 if ((ConvertFrom-AvProductState 397312).Enabled -ne $true -or (ConvertFrom-AvProductState 397328).UpToDate -ne $false) { throw 'productState decoding is wrong.' }
@@ -117,6 +119,16 @@ if ($text -notmatch [regex]::Escape('[CÒN TRÊN Ổ, ĐÃ DIỆT] ' + $usb) -or
 $script:Case.ActionIds = $null; $script:Case.Actions = $null
 $null = Get-AvDiagnostic -Roots $roots
 if ($text.IndexOf('Floxif.EC!MTB | DI') -gt $text.IndexOf('Malgent!pz | M')) { throw 'Report order must be newest first.' }
+
+# Paths on network or missing drives are never probed (Test-Path could block on a disconnected share).
+$script:probed = New-Object System.Collections.Generic.List[string]
+function Test-Path { [CmdletBinding()] param($LiteralPath) $script:probed.Add($LiteralPath); $script:Case.Existing -contains $LiteralPath }
+$script:Case.Disks = @([pscustomobject]@{ DeviceID = 'C:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'Z:'; DriveType = 4 })
+$script:Case.Detections = @([pscustomobject]@{ ThreatID = 1; ThreatStatusID = 2; InitialDetectionTime = (Get-Date); Resources = @('file:_Z:\share\a.exe', 'file:_G:\usb\b.exe', 'file:_C:\x\c.exe') })
+$null = Get-AvDiagnostic -Roots $roots
+if (@($script:probed | Where-Object { $_ -like 'Z:*' -or $_ -like 'G:*' }).Count -or -not @($script:probed | Where-Object { $_ -eq 'C:\x\c.exe' }).Count) { throw 'Only present local drives may be probed.' }
+function Test-Path { [CmdletBinding()] param($LiteralPath) $script:Case.Existing -contains $LiteralPath }
+$script:Case.Disks = @([pscustomobject]@{ DeviceID = 'C:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'D:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'G:'; DriveType = 2 })
 
 # Case 7: the KY-THUAT re-run - old "allowed" record, file cleaned later, no resident markers.
 $script:Case.Existing = @(); $script:Case.AppInit = ''; $script:Case.ActionIds = @(); $script:Case.Actions = @()

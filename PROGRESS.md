@@ -2,6 +2,8 @@
 
 Cập nhật ngày 26/11/2026.
 
+**2.2.17.0:** trên KY-THUAT, bấm Chẩn đoán trong lúc lượt quét toàn bộ Defender (từ 08:44) còn chạy làm Explorer đơ, phải tắt cứng. Chưa xác định được nguyên nhân duy nhất (có thể thêm yếu tố ổ cứng); giảm mọi tải phía công cụ: mặc định chỉ .exe, luồng BelowNormal, hỏi trước khi chạy khi Defender đang quét, không Test-Path trên ổ mạng / ổ không còn, Win32_LogicalDisk có OperationTimeoutSec. Thêm kiểm thử chế độ nhẹ và kiểm thử không chạm ổ mạng / ổ đã rút. Cần thử lại trên máy thật khi Defender không quét và khi đang quét.
+
 **2.2.16.0:** lần chạy Sửa lỗi thật đầu tiên trên KY-THUAT: cập nhật định nghĩa đúng (đọc lại phiên bản 1.463.471.0), hai mục quét lỗi “A scan is already in progress” do lượt quét toàn bộ mở tay trước đó. Nhận biết lượt quét đang chạy bằng Quick/FullScanStartTime > EndTime của Get-MpComputerStatus, chờ và thử lại cả khi chỉ có thông báo bận (quét định kỳ / tuỳ chỉnh không có mốc thời gian). Thêm 5 kiểm thử (chờ rồi chạy, hết giờ, bận không có mốc, lỗi khác không thử lại).
 
 **2.2.15.0:** sửa nhãn mã 5 theo lần chạy thật thứ ba trên KY-THUAT: dòng 14/11 ghi “đang được cho phép” trong khi kết luận (đúng) là đã xử lý. Trạng thái “đang cho phép” giờ chỉ lấy từ danh sách ThreatIDDefaultAction; thêm kiểm thử cho cả ba trường hợp (còn trong danh sách, chỉ là lịch sử, đã cho phép mà tệp vẫn còn).

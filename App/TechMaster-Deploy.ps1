@@ -155,6 +155,21 @@ $script:avTimer = New-DeployTimer 300 {
 }
 Bind-Click 'btnAvDiagnostic' {
     if ($script:uiWork) { Set-Status 'Chờ thao tác hiện tại hoàn tất.'; return }
+    $deep = [bool]$form.FindName('chkAvDeep').IsChecked
+    # A Defender full / quick scan already saturates the disk; adding our reads can freeze Explorer on HDD machines.
+    try {
+        $mp = Get-MpComputerStatus -ErrorAction Stop
+        foreach ($kind in @(@('Full', 'quét toàn bộ'), @('Quick', 'quét nhanh'))) {
+            $begin = $mp.($kind[0] + 'ScanStartTime'); $end = $mp.($kind[0] + 'ScanEndTime')
+            if ($begin -and (-not $end -or [datetime]$begin -gt [datetime]$end)) {
+                $message = 'Defender đang {0} (từ {1:HH:mm}). Chạy chẩn đoán lúc này làm ổ đĩa bận gấp đôi, máy có thể đơ.{2}' -f $kind[1], [datetime]$begin, $(if ($deep) { ' Quét sâu sẽ được tắt cho lần này.' } else { '' })
+                $message += "`n`nNên đợi lượt quét xong (xem Windows Security → Virus & threat protection). Vẫn chạy?"
+                if (-not (Confirm-Box $message 'Defender đang quét' 'Vẫn chạy (chế độ nhẹ)' 'Để sau' -Owner $form)) { Set-Status 'Đã hoãn chẩn đoán vì Defender đang quét.'; return }
+                $deep = $false
+                break
+            }
+        }
+    } catch { }
     $progress = [hashtable]::Synchronized(@{ Step = 0; Steps = 6; Percent = 0; Stage = '' })
     $button = $form.FindName('btnAvDiagnostic'); $button.IsEnabled = $false; $button.Content = 'Đang chẩn đoán…'
     $form.FindName('avProgressPanel').Visibility = 'Visible'
@@ -163,7 +178,8 @@ Bind-Click 'btnAvDiagnostic' {
     Set-Status 'Đang chẩn đoán báo virus (chỉ đọc). Có thể mất 1–2 phút; theo dõi tiến độ trong thẻ.' 'Working'
     $run = @{ Progress = $progress; Started = Get-Date; Done = $false; Work = $null }
     $script:avRun = $run
-    Start-UiWork 'param($diagnostics, $progress) . $diagnostics; $report = Get-AvDiagnostic -Progress $progress; $report; Format-AvDiagnostic $report' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1'), $progress) {
+    # Background thread at below-normal priority so Explorer and the desktop stay responsive.
+    Start-UiWork 'param($diagnostics, $progress, $deep) [Threading.Thread]::CurrentThread.Priority = ''BelowNormal''; . $diagnostics; $report = Get-AvDiagnostic -Progress $progress -Deep:$deep; $report; Format-AvDiagnostic $report' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1'), $progress, $deep) {
         param($result)
         $text = [string]$result[-1]
         $script:avLastReport = $result[-2]

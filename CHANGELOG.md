@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.17.0 — 26/11/2026
+
+- Chẩn đoán báo virus mặc định chạy **chế độ nhẹ**: chỉ kiểm tra chữ ký .exe, không đọc hàng trăm .dll (mỗi lần đọc Defender lại quét tệp đó). Tích **Quét sâu** để kiểm tra cả .dll khi máy rảnh.
+- Luồng chẩn đoán chạy ở mức ưu tiên thấp để Explorer và màn hình vẫn phản hồi.
+- Trước khi chạy, nếu Defender đang quét nhanh / quét toàn bộ, app hỏi “Vẫn chạy (chế độ nhẹ)” hoặc “Để sau” thay vì chồng thêm tải lên ổ đĩa.
+- Chỉ kiểm tra tệp còn trên ổ ở ổ trong máy / USB đang cắm; không chạm ổ mạng hoặc ổ đã rút (có thể treo chờ). Truy vấn danh sách ổ có giới hạn 10 giây.
+
 ## 2.2.16.0 — 26/11/2026
 
 - Sửa lỗi báo virus: khi Defender đang có lượt quét khác (quét toàn bộ mở tay, quét định kỳ), mục quét chờ tối đa 15 phút rồi tự chạy, cửa sổ ghi rõ đang chờ lượt nào (ví dụ “chờ quét toàn bộ (từ 08:44) chạy xong…”). Quá thời gian thì báo lượt quét nào còn chạy và hướng dẫn chạy lại, thay cho lỗi tiếng Anh “A scan is already in progress”. Lỗi quét khác vẫn báo ngay.

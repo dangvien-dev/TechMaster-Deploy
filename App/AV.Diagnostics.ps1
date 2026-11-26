@@ -32,9 +32,23 @@ function Get-AvThreatStatusText([int]$id) {
     }
 }
 
-function Get-AvDriveSummary($detections) {
+function Get-AvDriveTypes {
+    # One bounded query. Disconnected network drives can otherwise block for minutes.
     $types = @{}
-    try { foreach ($disk in @(Get-CimInstance -ClassName Win32_LogicalDisk -ErrorAction Stop)) { $types[([string]$disk.DeviceID).ToUpperInvariant()] = [int]$disk.DriveType } } catch { }
+    try { foreach ($disk in @(Get-CimInstance -ClassName Win32_LogicalDisk -OperationTimeoutSec 10 -ErrorAction Stop)) { $types[([string]$disk.DeviceID).ToUpperInvariant()] = [int]$disk.DriveType } } catch { }
+    $types
+}
+
+function Test-AvLocalPath([string]$path, [hashtable]$types) {
+    # Only touch fixed (3) and removable (2) drives that are present; never wait on network / missing drives.
+    if ($path -notmatch '^([A-Za-z]:)\\') { return $false }
+    $drive = $Matches[1].ToUpperInvariant()
+    if ($types.Count -and $types[$drive] -notin 2, 3) { return $false }
+    [bool](Test-Path -LiteralPath $path)
+}
+
+function Get-AvDriveSummary($detections, [hashtable]$types) {
+    if (-not $types) { $types = Get-AvDriveTypes }
     $paths = @($detections | ForEach-Object { $_.Files } | ForEach-Object { $_.Path } | Where-Object { $_ -match '^[A-Za-z]:' } | Sort-Object -Unique)
     @($paths | Group-Object { $_.Substring(0, 2).ToUpperInvariant() } | Sort-Object Name | ForEach-Object {
         $kind = switch ($types[$_.Name]) { 2 { 'ổ di động / USB' } 3 { 'ổ trong máy' } 4 { 'ổ mạng' } 5 { 'đĩa CD/DVD' } default { 'không rõ loại / đã rút' } }
@@ -59,7 +73,7 @@ function Set-AvProgress($Progress, [int]$Step, [int]$Percent, [string]$Stage) {
     $Progress.Step = $Step; $Progress.Steps = 6; $Progress.Percent = $Percent; $Progress.Stage = $Stage
 }
 
-function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 30, [hashtable]$Progress) {
+function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 30, [hashtable]$Progress, [switch]$Deep) {
     $notes = New-Object System.Collections.Generic.List[string]
     Set-AvProgress $Progress 1 3 'Đang đọc phần mềm diệt virus trong Security Center…'
 
@@ -100,13 +114,14 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     } catch { }
 
     $since = (Get-Date).AddDays(-$Days)
+    $driveTypes = Get-AvDriveTypes
     $detections = @(try {
         Get-MpThreatDetection -ErrorAction Stop | Where-Object { -not $_.InitialDetectionTime -or [datetime]$_.InitialDetectionTime -ge $since } | ForEach-Object {
             $id = [string]$_.ThreatID
             $statusId = if ($null -ne $_.ThreatStatusID) { [int]$_.ThreatStatusID } else { 0 }
             $files = @($_.Resources | Where-Object { ([string]$_) -match '^(file|containerfile):_' } | ForEach-Object {
                 $path = ([string]$_) -replace '^[a-z]+:_', ''
-                [pscustomobject]@{ Path = $path; Present = [bool](Test-Path -LiteralPath $path) }
+                [pscustomobject]@{ Path = $path; Present = (Test-AvLocalPath $path $driveTypes) }
             })
             [pscustomobject]@{
                 Time = $(if ($_.InitialDetectionTime) { [datetime]$_.InitialDetectionTime } else { [datetime]::MinValue })
@@ -120,7 +135,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
             }
         } | Sort-Object Time -Descending
     } catch { })
-    $drives = @(Get-AvDriveSummary $detections)
+    $drives = @(Get-AvDriveSummary $detections $driveTypes)
 
     # 3. Kaspersky / other vendor event logs (names only from the log, trimmed).
     Set-AvProgress $Progress 3 20 'Đang đọc nhật ký Kaspersky…'
@@ -172,7 +187,9 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     $office = @()
     Set-AvProgress $Progress 5 30 'Đang liệt kê tệp Office / Zalo…'
     # -Include is ignored together with -LiteralPath on Windows PowerShell 5.1; filter the extension here.
-    $binaries = @(foreach ($root in $Roots) { Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in '.exe','.dll' } })
+    # Light mode (default) checks only .exe: reading every .dll makes Defender rescan hundreds of files.
+    $extensions = if ($Deep) { @('.exe', '.dll') } else { @('.exe') }
+    $binaries = @(foreach ($root in $Roots) { Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in $extensions } })
     if ($binaries.Count -gt $MaxFiles) { $truncated = $true; $binaries = @($binaries | Select-Object -First $MaxFiles) }
     $total = [Math]::Max(1, $binaries.Count)
     foreach ($file in $binaries) {
@@ -208,7 +225,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     [pscustomobject]@{
         Computer = $env:COMPUTERNAME; Date = (Get-Date).ToString('yyyy-MM-dd HH:mm'); Days = $Days
         Products = $products; Defender = $defender; Detections = $detections; Drives = $drives; AllowedIds = @($allowedIds.Keys); Exclusions = $exclusions; VendorEvents = $vendorEvents
-        Infector = $infector.ToArray(); Roots = [string[]]@($Roots); Scanned = $scanned; Truncated = $truncated
+        Infector = $infector.ToArray(); Roots = [string[]]@($Roots); Scanned = $scanned; Truncated = $truncated; Deep = [bool]$Deep
         Modified = $modified.ToArray(); Untrusted = $untrusted.ToArray(); UnsignedExe = $unsignedExe.ToArray(); UnsignedDll = $unsignedDll
         Office = @($office); Activation = $activation.ToArray(); Notes = $notes.ToArray()
     }
@@ -311,14 +328,14 @@ function Format-AvDiagnostic($report) {
     foreach ($i in $report.Infector) { & $add ('[!] ' + $i) }
     if (-not @($report.Infector).Count) { & $add 'Không thấy (lệnh mở .exe chuẩn "%1" %*; không có svchost.com / directx.sys; không có symsrv.dll / ffff.dll trong Common Files\System; AppInit_DLLs không nạp).' }
 
-    & $add ''; & $add ('== CHỮ KÝ SỐ OFFICE / ZALO (đã quét {0} tệp{1}) ==' -f $report.Scanned, $(if ($report.Truncated) { ', đã dừng ở giới hạn' } else { '' }))
+    & $add ''; & $add ('== CHỮ KÝ SỐ OFFICE / ZALO ({0}: {1} tệp{2}) ==' -f $(if ($report.Deep) { 'quét sâu .exe + .dll' } else { 'chế độ nhẹ, chỉ .exe' }), $report.Scanned, $(if ($report.Truncated) { ', đã dừng ở giới hạn' } else { '' }))
     foreach ($r in $report.Roots) { & $add ('Thư mục: ' + $r) }
     foreach ($o in $report.Office) { & $add ('Word: ' + $o.Path + ' → ' + $o.Edition) }
     & $add ('Bị sửa (HashMismatch): ' + @($report.Modified).Count)
     foreach ($m in $report.Modified) { & $add ('[!] ' + $m.Path) }
     & $add ('Chữ ký không tin cậy / lỗi: ' + @($report.Untrusted).Count)
     foreach ($u in $report.Untrusted) { & $add ('    ' + $u.Status + ' | ' + $u.Path) }
-    & $add ('EXE không ký: ' + @($report.UnsignedExe).Count + '   DLL không ký: ' + $report.UnsignedDll + ' (DLL thư viện Qt / ffmpeg của Zalo không ký là bình thường)')
+    & $add ('EXE không ký: ' + @($report.UnsignedExe).Count + $(if ($report.Deep) { '   DLL không ký: ' + $report.UnsignedDll + ' (DLL thư viện Qt / ffmpeg của Zalo không ký là bình thường)' } else { '   DLL: không kiểm tra ở chế độ nhẹ (tích Quét sâu khi máy rảnh)' }))
     foreach ($x in $report.UnsignedExe) { & $add ('    ' + $x) }
 
     & $add ''; & $add '== DẤU VẾT CÔNG CỤ KÍCH HOẠT BÊN NGOÀI =='
