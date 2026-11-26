@@ -21,6 +21,27 @@ function Get-AvOfficeEdition([string]$path) {
     }
 }
 
+function Get-AvThreatStatusText([int]$id) {
+    # MPTHREAT_STATUS (MpClient.h): 0-6 normal outcomes, 102-107 failed / abandoned.
+    switch ($id) {
+        0 { 'Không rõ (0)' } 1 { 'Mới phát hiện, chưa xử lý (1)' } 2 { 'Đã diệt (2)' } 3 { 'Đã cách ly (3)' }
+        4 { 'Đã xoá (4)' } 5 { 'ĐANG ĐƯỢC CHO PHÉP (5)' } 6 { 'Đã chặn (6)' }
+        102 { 'DIỆT THẤT BẠI (102)' } 103 { 'CÁCH LY THẤT BẠI (103)' } 104 { 'XOÁ THẤT BẠI (104)' }
+        105 { 'CHO PHÉP THẤT BẠI (105)' } 106 { 'BỎ DỞ (106)' } 107 { 'CHẶN THẤT BẠI (107)' }
+        default { 'Mã ' + $id + ' (không có trong tài liệu Microsoft)' }
+    }
+}
+
+function Get-AvDriveSummary($detections) {
+    $types = @{}
+    try { foreach ($disk in @(Get-CimInstance -ClassName Win32_LogicalDisk -ErrorAction Stop)) { $types[([string]$disk.DeviceID).ToUpperInvariant()] = [int]$disk.DriveType } } catch { }
+    $paths = @($detections | ForEach-Object { $_.Files } | ForEach-Object { $_.Path } | Where-Object { $_ -match '^[A-Za-z]:' } | Sort-Object -Unique)
+    @($paths | Group-Object { $_.Substring(0, 2).ToUpperInvariant() } | Sort-Object Name | ForEach-Object {
+        $kind = switch ($types[$_.Name]) { 2 { 'ổ di động / USB' } 3 { 'ổ trong máy' } 4 { 'ổ mạng' } 5 { 'đĩa CD/DVD' } default { 'không rõ loại / đã rút' } }
+        [pscustomobject]@{ Drive = $_.Name; Count = $_.Count; Kind = $kind; Removable = (($types[$_.Name] -eq 2) -or ((-not $types.ContainsKey($_.Name)) -and ($_.Name -ne 'C:'))) }
+    })
+}
+
 function Get-AvDiagnosticRoots {
     $roots = New-Object System.Collections.Generic.List[string]
     foreach ($base in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
@@ -53,24 +74,44 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
         }
     } catch { $notes.Add('Không đọc được trạng thái Defender (có thể Defender đang bị AV khác thay thế).') }
 
-    $names = @{}
-    try { foreach ($threat in @(Get-MpThreat -ErrorAction Stop)) { $names[[string]$threat.ThreatID] = [string]$threat.ThreatName } } catch { }
+    $names = @{}; $executed = @{}
+    try {
+        foreach ($threat in @(Get-MpThreat -ErrorAction Stop)) {
+            $names[[string]$threat.ThreatID] = [string]$threat.ThreatName
+            if ($threat.DidThreatExecute) { $executed[[string]$threat.ThreatID] = $true }
+        }
+    } catch { }
+
+    $exclusions = @(); $allowedIds = @{}
+    try {
+        $pref = Get-MpPreference -ErrorAction Stop
+        $exclusions = @(@($pref.ExclusionPath) + @($pref.ExclusionProcess) | Where-Object { $_ -and $_ -notmatch '^N/A' })
+        $ids = @($pref.ThreatIDDefaultAction_Ids); $actions = @($pref.ThreatIDDefaultAction_Actions)
+        for ($i = 0; $i -lt $ids.Count; $i++) { if ($i -lt $actions.Count -and [int]$actions[$i] -eq 6) { $allowedIds[[string]$ids[$i]] = $true } }
+    } catch { }
+
     $since = (Get-Date).AddDays(-$Days)
     $detections = @(try {
         Get-MpThreatDetection -ErrorAction Stop | Where-Object { -not $_.InitialDetectionTime -or [datetime]$_.InitialDetectionTime -ge $since } | ForEach-Object {
             $id = [string]$_.ThreatID
+            $statusId = if ($null -ne $_.ThreatStatusID) { [int]$_.ThreatStatusID } else { 0 }
+            $files = @($_.Resources | Where-Object { ([string]$_) -match '^(file|containerfile):_' } | ForEach-Object {
+                $path = ([string]$_) -replace '^[a-z]+:_', ''
+                [pscustomobject]@{ Path = $path; Present = [bool](Test-Path -LiteralPath $path) }
+            })
             [pscustomobject]@{
-                Time = [string]$_.InitialDetectionTime
+                Time = $(if ($_.InitialDetectionTime) { [datetime]$_.InitialDetectionTime } else { [datetime]::MinValue })
+                ThreatID = $id
                 Threat = $(if ($names.ContainsKey($id)) { $names[$id] } else { 'ThreatID ' + $id })
-                Resources = @($_.Resources | ForEach-Object { ([string]$_) -replace '^[a-z]+:_', '' })
+                StatusId = $statusId; Status = (Get-AvThreatStatusText $statusId)
+                Failed = ($statusId -eq 1 -or $statusId -ge 100 -or $statusId -notin 0,1,2,3,4,5,6)
+                Allowed = ($statusId -eq 5 -or $allowedIds.ContainsKey($id))
+                Executed = $executed.ContainsKey($id)
+                Files = $files
             }
-        }
+        } | Sort-Object Time -Descending
     } catch { })
-
-    $exclusions = @(try {
-        $pref = Get-MpPreference -ErrorAction Stop
-        @($pref.ExclusionPath) + @($pref.ExclusionProcess) | Where-Object { $_ -and $_ -notmatch '^N/A' }
-    } catch { })
+    $drives = @(Get-AvDriveSummary $detections)
 
     # 3. Kaspersky / other vendor event logs (names only from the log, trimmed).
     $vendorEvents = @(try {
@@ -94,7 +135,21 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     }
     foreach ($marker in 'svchost.com','directx.sys') {
         $path = '{0}\{1}' -f $env:windir, $marker
-        if (Test-Path -LiteralPath $path) { $infector.Add('Có tệp lạ: ' + $path) }
+        if (Test-Path -LiteralPath $path) { $infector.Add('Có tệp lạ (Neshta): ' + $path) }
+    }
+    # Floxif drops its infection module into Common Files\System and may load it through AppInit_DLLs.
+    foreach ($base in @($env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ } | Sort-Object -Unique) {
+        foreach ($marker in 'symsrv.dll','ffff.dll') {
+            $path = '{0}\Common Files\System\{1}' -f $base, $marker
+            if (Test-Path -LiteralPath $path) { $infector.Add('Có tệp lạ (Floxif): ' + $path) }
+        }
+    }
+    foreach ($key in 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Windows') {
+        try {
+            $item = Get-ItemProperty -LiteralPath $key -ErrorAction Stop
+            $dlls = ([string]$item.AppInit_DLLs).Trim()
+            if ($dlls -and [int]$item.LoadAppInit_DLLs -eq 1) { $infector.Add('AppInit_DLLs đang nạp: ' + $dlls + '  (' + $key + ')') }
+        } catch { }
     }
 
     # 5. Authenticode check of Office / Zalo binaries.
@@ -136,7 +191,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
 
     [pscustomobject]@{
         Computer = $env:COMPUTERNAME; Date = (Get-Date).ToString('yyyy-MM-dd HH:mm'); Days = $Days
-        Products = $products; Defender = $defender; Detections = $detections; Exclusions = $exclusions; VendorEvents = $vendorEvents
+        Products = $products; Defender = $defender; Detections = $detections; Drives = $drives; AllowedIds = @($allowedIds.Keys); Exclusions = $exclusions; VendorEvents = $vendorEvents
         Infector = $infector.ToArray(); Roots = [string[]]@($Roots); Scanned = $scanned; Truncated = $truncated
         Modified = $modified.ToArray(); Untrusted = $untrusted.ToArray(); UnsignedExe = $unsignedExe.ToArray(); UnsignedDll = $unsignedDll
         Office = @($office); Activation = $activation.ToArray(); Notes = $notes.ToArray()
@@ -149,6 +204,22 @@ function Get-AvConclusion($report) {
     $virusNames = @($threats | Where-Object { $_ -match '(?i)\bVirus[:.]|Neshta|Virut|Sality|Ramnit|Expiro' })
     if (@($report.Infector).Count -or @($report.Modified).Count -or $virusNames.Count) {
         $result.Add('[NGHIÊM TRỌNG] Có dấu hiệu virus lây file .exe. Rút mạng, không cắm USB sang máy khác; quét offline (Kaspersky Rescue Disk / Microsoft Defender Offline), sau đó cài lại các ứng dụng bị sửa. Không khôi phục tệp từ vùng cách ly.')
+    }
+    $ran = @($report.Detections | Where-Object Executed | ForEach-Object Threat | Sort-Object -Unique)
+    if ($ran.Count) {
+        $result.Add('[NGHIÊM TRỌNG] Mã độc đã từng CHẠY trên máy (' + ($ran -join ', ') + '). Diệt xong chưa đủ để tin máy sạch: chép dữ liệu (không chép .exe / .dll / bộ cài), cài lại Windows, đổi mật khẩu email / ngân hàng / GitHub từ một máy sạch.')
+    }
+    $allowed = @($report.Detections | Where-Object Allowed | ForEach-Object Threat | Sort-Object -Unique)
+    if ($allowed.Count -or @($report.AllowedIds).Count) {
+        $result.Add('[KIỂM TRA GẤP] Có mối đe dọa đang được "Cho phép"' + $(if ($allowed.Count) { ' (' + ($allowed -join ', ') + ')' } else { '' }) + '. Defender sẽ bỏ qua mọi tệp mang cùng mã này. Vào Windows Security → Protection history / Allowed threats → Don''t allow, rồi xoá tệp.')
+    }
+    $present = @($report.Detections | ForEach-Object { $_.Files } | Where-Object Present | ForEach-Object Path | Sort-Object -Unique)
+    if ($present.Count) {
+        $result.Add('[KIỂM TRA] ' + $present.Count + ' tệp từng bị phát hiện VẪN CÒN trên ổ (đánh dấu [CÒN TRÊN Ổ] bên dưới). Xoá và tải lại bộ cài từ trang hãng, không chạy lại.')
+    }
+    $removable = @($report.Drives | Where-Object Removable | ForEach-Object Drive)
+    if ($removable.Count) {
+        $result.Add('[KIỂM TRA] Có phát hiện trên ổ ngoài / USB (' + ($removable -join ', ') + '). Virus lây file lan qua USB: quét các ổ này và mọi máy đã cắm chúng.')
     }
     $toolNames = @($threats | Where-Object { $_ -match '(?i)HackTool|RiskTool|KMS|AutoKMS|Keygen|Crack|Patch' })
     if (@($report.Activation).Count -or $toolNames.Count) {
@@ -192,17 +263,22 @@ function Format-AvDiagnostic($report) {
     if (-not @($report.Products).Count) { & $add 'Không đọc được danh sách AV.' }
     if ($report.Defender) { & $add ('Defender: chế độ {0}, thời gian thực {1}, định nghĩa {2}' -f $report.Defender.Mode, $(if ($report.Defender.RealTime) { 'bật' } else { 'tắt' }), $report.Defender.Signatures) }
 
-    & $add ''; & $add ('== DEFENDER ĐÃ PHÁT HIỆN ({0} ngày) ==' -f $report.Days)
-    foreach ($d in $report.Detections) { & $add ($d.Time + ' | ' + $d.Threat); foreach ($r in $d.Resources) { & $add ('    ' + $r) } }
+    & $add ''; & $add ('== DEFENDER ĐÃ PHÁT HIỆN ({0} ngày, mới nhất trước) ==' -f $report.Days)
+    if (@($report.Drives).Count) { & $add ('Theo ổ: ' + ((@($report.Drives) | ForEach-Object { '{0} {1} tệp ({2})' -f $_.Drive, $_.Count, $_.Kind }) -join ' | ')) }
+    foreach ($d in $report.Detections) {
+        $flags = @(); if ($d.Executed) { $flags += 'ĐÃ CHẠY' }; if ($d.Allowed -and $d.StatusId -ne 5) { $flags += 'MÃ NÀY ĐANG ĐƯỢC CHO PHÉP' }
+        & $add ('{0} | {1} | {2}{3}' -f $(if ($d.Time -ne [datetime]::MinValue) { $d.Time.ToString('yyyy-MM-dd HH:mm') } else { '?' }), $d.Threat, $d.Status, $(if ($flags.Count) { ' | ' + ($flags -join ', ') } else { '' }))
+        foreach ($f in $d.Files) { & $add ('    {0}{1}' -f $(if ($f.Present) { '[CÒN TRÊN Ổ] ' } else { '' }), $f.Path) }
+    }
     if (-not @($report.Detections).Count) { & $add 'Không có. (Nếu máy dùng Kaspersky / AV khác, xem Báo cáo của AV đó.)' }
 
     & $add ''; & $add '== NHẬT KÝ KASPERSKY (cảnh báo / lỗi) =='
     foreach ($e in $report.VendorEvents) { & $add ($e.Time + ' | ' + $e.Message) }
     if (-not @($report.VendorEvents).Count) { & $add 'Không đọc được hoặc không có. Mở Kaspersky → Báo cáo / Vùng cách ly để xem tên mối đe dọa.' }
 
-    & $add ''; & $add '== DẤU HIỆU VIRUS LÂY FILE .EXE =='
+    & $add ''; & $add '== DẤU HIỆU VIRUS LÂY FILE .EXE (Neshta, Floxif) =='
     foreach ($i in $report.Infector) { & $add ('[!] ' + $i) }
-    if (-not @($report.Infector).Count) { & $add 'Không thấy (lệnh mở .exe chuẩn "%1" %*, không có svchost.com / directx.sys trong Windows).' }
+    if (-not @($report.Infector).Count) { & $add 'Không thấy (lệnh mở .exe chuẩn "%1" %*; không có svchost.com / directx.sys; không có symsrv.dll / ffff.dll trong Common Files\System; AppInit_DLLs không nạp).' }
 
     & $add ''; & $add ('== CHỮ KÝ SỐ OFFICE / ZALO (đã quét {0} tệp{1}) ==' -f $report.Scanned, $(if ($report.Truncated) { ', đã dừng ở giới hạn' } else { '' }))
     foreach ($r in $report.Roots) { & $add ('Thư mục: ' + $r) }

@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.12.0 — 26/11/2026
+
+- Chẩn đoán báo virus nhận dạng thêm Floxif: `symsrv.dll` / `ffff.dll` trong `Common Files\System` (cả Program Files và Program Files (x86)) và `AppInit_DLLs` đang được nạp.
+- Mỗi phát hiện của Defender hiện trạng thái xử lý theo mã Microsoft (đã diệt / cách ly / xoá, **đang được cho phép**, xử lý thất bại); mã không có trong tài liệu được ghi rõ, không đoán nghĩa.
+- Đánh dấu **ĐÃ CHẠY** khi Defender ghi nhận mã độc đã thực thi, **[CÒN TRÊN Ổ]** cho tệp bị phát hiện vẫn còn, và cảnh báo khi một mã mối đe dọa đang được “Cho phép” (Defender bỏ qua mọi tệp cùng mã).
+- Danh sách phát hiện xếp mới nhất trước và có dòng tóm tắt theo ổ (ổ trong máy / USB / ổ mạng / đã rút) để nhận ra kho cài đặt hoặc USB bị lây. Kết luận sơ bộ có thêm hướng xử lý khi mã độc đã chạy (cài lại Windows, đổi mật khẩu từ máy sạch).
+
 ## 2.2.11.0 — 26/11/2026
 
 - Cửa sổ kết quả chẩn đoán (báo virus, UltraViewer) có nút **Xuất file…** lưu kết quả ra .txt (UTF-8, mặc định trong Documents, tên gồm tên máy và thời điểm) rồi mở thư mục chứa tệp. Ba nút Xuất file / Sao chép / Đóng cùng chiều cao.
