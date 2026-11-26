@@ -15,6 +15,7 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
 . (Join-Path $PSScriptRoot 'Defaults.Core.ps1')
 . (Join-Path $PSScriptRoot 'Defaults.UI.ps1')
+. (Join-Path $PSScriptRoot 'AV.Repair.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
 . (Join-Path $PSScriptRoot 'Logo.Preview.ps1')
 . (Join-Path $PSScriptRoot 'LicenseConfirmation.UI.ps1')
@@ -162,9 +163,11 @@ Bind-Click 'btnAvDiagnostic' {
     Set-Status 'Đang chẩn đoán báo virus (chỉ đọc). Có thể mất 1–2 phút; theo dõi tiến độ trong thẻ.' 'Working'
     $run = @{ Progress = $progress; Started = Get-Date; Done = $false; Work = $null }
     $script:avRun = $run
-    Start-UiWork 'param($diagnostics, $progress) . $diagnostics; Format-AvDiagnostic (Get-AvDiagnostic -Progress $progress)' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1'), $progress) {
+    Start-UiWork 'param($diagnostics, $progress) . $diagnostics; $report = Get-AvDiagnostic -Progress $progress; $report; Format-AvDiagnostic $report' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1'), $progress) {
         param($result)
         $text = [string]$result[-1]
+        $script:avLastReport = $result[-2]
+        $form.FindName('btnAvRepair').Visibility = 'Visible'
         $run = $script:avRun
         if ($run) { $run.Done = $true }
         $elapsed = if ($run) { Format-DeployElapsed ((Get-Date) - $run.Started) } else { '' }
@@ -180,6 +183,21 @@ Bind-Click 'btnAvDiagnostic' {
     }
     if ($script:uiWork) { $run.Work = $script:uiWork; $script:avTimer.Start() }
     else { $script:avRun = $null; $form.FindName('avProgressPanel').Visibility = 'Collapsed'; Reset-DeployAvButton; $button.Content = 'Chẩn đoán báo virus' }
+}
+Bind-Click 'btnAvRepair' {
+    if (-not $script:avLastReport) { Show-DeployMessage 'Chạy Chẩn đoán báo virus trước để lập danh sách sửa.' 'Sửa lỗi báo virus' 'Warning'; return }
+    if ($script:avRepairWindow -and $script:avRepairWindow.IsVisible) { $script:avRepairWindow.Activate() | Out-Null; return }
+    try { $script:avRepairWindow = New-DeployAvRepairWindow $script:avLastReport $form }
+    catch { Show-DeployMessage ('Không mở được cửa sổ sửa lỗi: ' + $_.Exception.Message) 'TechMaster Deploy' 'Error'; return }
+    $script:avRepairWindow.Tag.OnFinished = {
+        param($results)
+        $failed = @($results | Where-Object { -not $_.Ok }).Count
+        $kind = if ($failed) { 'Attention' } else { 'Success' }
+        Set-DeployNotice ($form.FindName('lblAvProgress')) ('Đã chạy sửa lỗi lúc {0}: {1} thành công, {2} lỗi. Bấm Chẩn đoán lại để kiểm tra.' -f (Get-Date -Format 'HH:mm'), (@($results).Count - $failed), $failed) $kind
+        $form.FindName('avProgressPanel').Visibility = 'Visible'
+        Set-Status 'Đã chạy sửa lỗi báo virus. Chẩn đoán lại để xác nhận.' $kind
+    }
+    $script:avRepairWindow.Show()
 }
 Bind-Click 'btnAvLastResult' {
     if ($script:avLastResult) { Show-DeployDiagnostic 'Chẩn đoán ứng dụng bị báo virus' 'Ứng dụng bị báo virus — chỉ đọc' $script:avLastResult 'ChanDoan-BaoVirus' }

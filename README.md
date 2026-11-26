@@ -13,7 +13,7 @@ Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** t
 | **Tải / cài Office** | Office Deployment Tool: tải bộ cài về kho (cài offline nhiều máy), cài từ kho, cài trực tiếp | `Office\`, kho ở `KhoOffice\` |
 | **Cài Windows** | Mở trang tải của Microsoft và chạy Windows Setup từ ISO đã tải | ISO do người dùng chọn |
 
-| **Chẩn đoán & sửa lỗi** | Fix Driver; chẩn đoán ứng dụng bị báo virus / không mở được (chỉ đọc) | `FixClone\`, `App\` |
+| **Chẩn đoán & sửa lỗi** | Fix Driver; chẩn đoán ứng dụng bị báo virus / không mở được và sửa lỗi có chọn lọc (cập nhật / quét Defender, gỡ cho phép / ngoại lệ rộng, tắt AppInit_DLLs, cách ly tệp, quét offline) | `FixClone\`, `App\` |
 | **Cài ứng dụng** | Chọn và cài ứng dụng cơ bản qua WinGet | WinGet / App Installer |
 
 ## Cách dùng

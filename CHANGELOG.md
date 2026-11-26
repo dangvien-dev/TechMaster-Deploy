@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.14.0 — 26/11/2026
+
+- Thêm **Sửa lỗi…** sau khi chẩn đoán báo virus. Danh sách lập từ kết quả chẩn đoán, mục khuyến nghị chọn sẵn: cập nhật định nghĩa Defender, gỡ mã mối đe dọa đang “Cho phép”, gỡ ngoại lệ Defender phủ cả ổ / thư mục hệ thống, tắt AppInit_DLLs (sao lưu giá trị cũ vào ProgramData), cách ly tệp còn sót, quét nhanh, quét riêng từng ổ có phát hiện (D:, USB…), quét toàn bộ máy và quét offline Microsoft Defender.
+- Không xoá tệp: tệp còn sót được chuyển vào `<ổ>\_CachLy_Virus\<ngày giờ>`, đổi đuôi `.virus`, kèm `DanhSach.tsv` ghi đường dẫn gốc và SHA256. Thao tác chạy theo thứ tự cố định, mỗi mục kiểm tra lại sau khi chạy (định nghĩa mới, mã / ngoại lệ đã gỡ, AppInit đã tắt, tệp đã rời chỗ cũ) và ghi nhật ký trong `%LOCALAPPDATA%\TechMaster Deploy\AV Repair Logs`.
+- Quét toàn bộ và quét offline không bao giờ chọn sẵn; quét offline (khởi động lại máy) hỏi xác nhận riêng và luôn chạy sau cùng. Khi Defender không phải AV chính, không chọn sẵn mục nào và ghi rõ lý do.
+- Kết luận chẩn đoán tách **ĐANG có** dấu hiệu virus lây file với **ĐÃ TỪNG** nhiễm trong 30 ngày; bản ghi “Cho phép” cũ của tệp đã được xử lý chỉ còn là lưu ý, không báo gấp. Thêm dòng **[ĐÃ XỬ LÝ]** khi không còn tệp nào từng bị phát hiện trên ổ.
+
 ## 2.2.13.0 — 26/11/2026
 
 - Chẩn đoán báo virus hiện tiến độ ngay trong thẻ: thanh tiến trình, bước đang chạy (1/6 → 6/6), số tệp đã kiểm tra chữ ký (ví dụ 120 / 383) và thời gian đã chạy. Nút đổi thành “Đang chẩn đoán…” và bị khoá để tránh bấm hai lần.

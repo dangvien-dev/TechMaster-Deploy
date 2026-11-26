@@ -48,7 +48,7 @@ foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'btnAvDiagnostic','btnAvLastResult','avBar','lblAvProgress','avProgressPanel','btnDefaults','btnPaintStore','btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
+    foreach ($button in 'btnAvDiagnostic','btnAvRepair','btnAvLastResult','avBar','lblAvProgress','avProgressPanel','btnDefaults','btnPaintStore','btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
@@ -186,6 +186,18 @@ $size=New-Object Windows.Size(760,590);$diag.Content.Measure($size);$diag.Conten
 $heights=@('Export','Copy','Close'|ForEach-Object{$diag.FindName($_).ActualHeight})
 Assert ($null -ne $diag.FindName('Heading') -and $heights[0] -gt 0 -and $heights[0] -eq $heights[1] -and $heights[1] -eq $heights[2]) "Diagnostic Export / Copy / Close buttons share one height ($($heights -join '/'))"
 $diag.Close()
+. (Join-Path $PSScriptRoot 'AV.Repair.UI.ps1')
+$fakeReport=[pscustomobject]@{Defender=[pscustomobject]@{Mode='Normal'};AllowedIds=@('1');Exclusions=@('D:\');Infector=@('AppInit_DLLs đang nạp: x');Detections=@([pscustomobject]@{Threat='Virus:Win32/Floxif.H';Files=@([pscustomobject]@{Path='D:\a.exe';Present=$true})});Drives=@([pscustomobject]@{Drive='G:'})}
+$repair=New-DeployAvRepairWindow $fakeReport
+$size=New-Object Windows.Size(860,700);$repair.Content.Measure($size);$repair.Content.Arrange((New-Object Windows.Rect($size)));$repair.UpdateLayout()
+$boxes=@($repair.Tag.Boxes)
+Assert ($boxes.Count -ge 8 -and -not ($boxes|Where-Object{$_.Tag.Id -eq 'OfflineScan'}).IsChecked -and ($boxes|Where-Object{$_.Tag.Id -eq 'Quarantine'}).IsChecked) 'Repair window lists the plan; offline scan unchecked, quarantine pre-selected'
+foreach($b in $boxes){$b.IsChecked=$false}
+$repair.FindName('Recommended').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
+Assert (@($boxes|Where-Object IsChecked).Count -eq @($boxes|Where-Object{$_.Tag.Recommended}).Count) 'Select recommended restores the default selection without running anything'
+$h=@('OpenLog','Recommended','Run','Close'|ForEach-Object{$repair.FindName($_).ActualHeight})
+Assert ($h[0] -gt 0 -and ($h|Sort-Object -Unique).Count -eq 1) "Repair window buttons share one height ($($h -join '/'))"
+$repair.Close()
 $root=Split-Path -Parent $PSScriptRoot
 $office= . (Join-Path $root 'Office/Office-Cleanup.ps1') -Mode Inspect -ValidateOnly
 Assert ($office -is [Windows.Window] -and $office.FindName('Keys').IsReadOnly -and -not $office.FindName('DeleteKeys').IsEnabled) 'Office inventory UI is read-only in Inspect mode'

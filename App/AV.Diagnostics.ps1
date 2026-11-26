@@ -218,16 +218,24 @@ function Get-AvConclusion($report) {
     $result = New-Object System.Collections.Generic.List[string]
     $threats = @($report.Detections | ForEach-Object Threat) + @($report.VendorEvents | ForEach-Object Message)
     $virusNames = @($threats | Where-Object { $_ -match '(?i)\bVirus[:.]|Neshta|Virut|Sality|Ramnit|Expiro' })
-    if (@($report.Infector).Count -or @($report.Modified).Count -or $virusNames.Count) {
-        $result.Add('[NGHIÊM TRỌNG] Có dấu hiệu virus lây file .exe. Rút mạng, không cắm USB sang máy khác; quét offline (Kaspersky Rescue Disk / Microsoft Defender Offline), sau đó cài lại các ứng dụng bị sửa. Không khôi phục tệp từ vùng cách ly.')
+    $current = (@($report.Infector).Count -or @($report.Modified).Count)
+    if ($current) {
+        $result.Add('[NGHIÊM TRỌNG] ĐANG có dấu hiệu virus lây file .exe (xem mục Dấu hiệu virus lây file / tệp bị sửa). Rút mạng, không cắm USB sang máy khác; quét offline (Microsoft Defender Offline / Kaspersky Rescue Disk), sau đó cài lại các ứng dụng bị sửa. Không khôi phục tệp từ vùng cách ly.')
+    } elseif ($virusNames.Count) {
+        $result.Add('[NGHIÊM TRỌNG] Máy ĐÃ TỪNG nhiễm virus lây file trong ' + $report.Days + ' ngày qua (' + (@($virusNames | Sort-Object -Unique) -join ', ') + '). Hiện không thấy module thường trú hay tệp bị sửa ở các vị trí đã kiểm tra; vẫn nên quét toàn bộ / quét offline và quét mọi USB đã cắm vào máy.')
     }
     $ran = @($report.Detections | Where-Object Executed | ForEach-Object Threat | Sort-Object -Unique)
     if ($ran.Count) {
         $result.Add('[NGHIÊM TRỌNG] Mã độc đã từng CHẠY trên máy (' + ($ran -join ', ') + '). Diệt xong chưa đủ để tin máy sạch: chép dữ liệu (không chép .exe / .dll / bộ cài), cài lại Windows, đổi mật khẩu email / ngân hàng / GitHub từ một máy sạch.')
     }
-    $allowed = @($report.Detections | Where-Object Allowed | ForEach-Object Threat | Sort-Object -Unique)
-    if ($allowed.Count -or @($report.AllowedIds).Count) {
-        $result.Add('[KIỂM TRA GẤP] Có mối đe dọa đang được "Cho phép"' + $(if ($allowed.Count) { ' (' + ($allowed -join ', ') + ')' } else { '' }) + '. Defender sẽ bỏ qua mọi tệp mang cùng mã này. Vào Windows Security → Protection history / Allowed threats → Don''t allow, rồi xoá tệp.')
+    # "Allowed" is urgent only while it is still in force: the ID is in Defender's allow list,
+    # or an allowed file is still on disk. An old status-5 record for a file cleaned later is history.
+    $allowedNow = @($report.Detections | Where-Object { ($report.AllowedIds -contains $_.ThreatID) -or ($_.StatusId -eq 5 -and @($_.Files | Where-Object Present).Count) } | ForEach-Object Threat | Sort-Object -Unique)
+    $allowedPast = @($report.Detections | Where-Object { $_.StatusId -eq 5 } | ForEach-Object Threat | Sort-Object -Unique | Where-Object { $_ -notin $allowedNow })
+    if ($allowedNow.Count -or @($report.AllowedIds).Count) {
+        $result.Add('[KIỂM TRA GẤP] Có mối đe dọa đang được "Cho phép"' + $(if ($allowedNow.Count) { ' (' + ($allowedNow -join ', ') + ')' } else { '' }) + '. Defender sẽ bỏ qua mọi tệp mang cùng mã này. Dùng Sửa lỗi… để gỡ, hoặc Windows Security → Protection history → Allowed threats → Don''t allow.')
+    } elseif ($allowedPast.Count) {
+        $result.Add('[LƯU Ý] Từng có lần bấm "Cho phép" (' + ($allowedPast -join ', ') + '), nay tệp đã được xử lý và danh sách cho phép của Defender trống. Nên mở Windows Security → Protection history → Allowed threats một lần để chắc chắn.')
     }
     $present = @($report.Detections | Where-Object { $_.StatusId -ne 2 } | ForEach-Object { $_.Files } | Where-Object Present | ForEach-Object Path | Sort-Object -Unique)
     $cleaned = @($report.Detections | Where-Object { $_.StatusId -eq 2 } | ForEach-Object { $_.Files } | Where-Object Present | ForEach-Object Path | Where-Object { $_ -notin $present } | Sort-Object -Unique)
@@ -236,6 +244,9 @@ function Get-AvConclusion($report) {
     }
     if ($cleaned.Count) {
         $result.Add('[LƯU Ý] ' + $cleaned.Count + ' tệp Defender báo đã diệt nhưng vẫn để lại trên ổ ([CÒN TRÊN Ổ, ĐÃ DIỆT]). Với bộ cài, nên xoá và tải lại từ trang hãng thay vì dùng bản đã diệt.')
+    }
+    if (@($report.Detections).Count -and -not (@($report.Detections | ForEach-Object { $_.Files } | Where-Object Present).Count)) {
+        $result.Add('[ĐÃ XỬ LÝ] Không còn tệp nào từng bị phát hiện trên ổ.')
     }
     $removable = @($report.Drives | Where-Object Removable | ForEach-Object Drive)
     if ($removable.Count) {
@@ -246,7 +257,7 @@ function Get-AvConclusion($report) {
         $result.Add('[KHẢ NĂNG CAO] Có công cụ kích hoạt bên ngoài / bị nhận là HackTool. AV chặn công cụ này có thể làm Office / ứng dụng liên quan không mở được. Gỡ công cụ, quét lại, rồi dùng bản quyền hợp lệ hoặc phần mềm miễn phí thay thế.')
     }
     $mlNames = @($threats | Where-Object { $_ -match '(?i)!ml\b|Wacatac|Heur|PDM:|Generic' })
-    if ($mlNames.Count -and -not $result.Count) {
+    if ($mlNames.Count -and -not @($result | Where-Object { $_ -match '^\[(NGHIÊM|KHẢ)' }).Count) {
         $result.Add('[CÓ THỂ BÁO NHẦM] Tên phát hiện dạng heuristic / máy học. Nếu tệp bị báo có chữ ký số Valid của hãng: cập nhật định nghĩa virus, gửi mẫu báo nhầm cho hãng AV, cài lại ứng dụng từ trang chính thức.')
     }
     if (@($report.Office | Where-Object { $_.Edition -match 'hết hỗ trợ' }).Count) {
