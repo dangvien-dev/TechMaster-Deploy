@@ -124,13 +124,65 @@ Bind-Click 'btnUltraDiagnostic' {
         Set-Status 'Đã chẩn đoán UltraViewer; so sánh kết quả của hai máy bị trùng ID.'
     }
 }
-Bind-Click 'btnAvDiagnostic' {
-    Set-Status 'Đang đọc trạng thái phần mềm diệt virus và chữ ký số Office / Zalo… (có thể mất 1–2 phút)'
-    Start-UiWork 'param($diagnostics) . $diagnostics; Format-AvDiagnostic (Get-AvDiagnostic)' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1')) {
-        param($result)
-        Show-DeployDiagnostic 'Chẩn đoán ứng dụng bị báo virus' 'Ứng dụng bị báo virus — chỉ đọc' ([string]$result[-1]) 'ChanDoan-BaoVirus'
-        Set-Status 'Đã chẩn đoán. Xem phần KẾT LUẬN SƠ BỘ; gửi kèm tên mối đe dọa trong Báo cáo của AV nếu chưa rõ.'
+function Format-DeployElapsed([TimeSpan]$span) { '{0}:{1:00}' -f [int][Math]::Floor($span.TotalMinutes), $span.Seconds }
+function Reset-DeployAvButton {
+    $button = $form.FindName('btnAvDiagnostic')
+    $button.IsEnabled = $true
+    $button.Content = 'Chẩn đoán lại'
+}
+$script:avTimer = New-DeployTimer 300 {
+    $run = $script:avRun
+    if (-not $run) { $script:avTimer.Stop(); return }
+    $bar = $form.FindName('avBar'); $label = $form.FindName('lblAvProgress')
+    $elapsed = Format-DeployElapsed ((Get-Date) - $run.Started)
+    if ($script:uiWork -and $script:uiWork -eq $run.Work) {
+        $p = $run.Progress
+        $bar.IsIndeterminate = -not $p.Percent
+        if ($p.Percent) { $bar.Value = [double]$p.Percent }
+        $step = if ($p.Step) { 'Bước {0}/{1} · ' -f $p.Step, $p.Steps } else { '' }
+        Set-DeployNotice $label ('{0}{1} · {2}' -f $step, $(if ($p.Stage) { $p.Stage } else { 'Đang khởi động…' }), $elapsed) 'Working'
+        return
     }
+    # The worker finished (or failed): the completion handler sets Done before showing results.
+    $script:avTimer.Stop(); $script:avRun = $null
+    $bar.IsIndeterminate = $false
+    if (-not $run.Done) {
+        $bar.Value = 0
+        Set-DeployNotice $label ('Chẩn đoán chưa hoàn tất sau ' + $elapsed + '. Xem thông báo lỗi, rồi bấm Chẩn đoán lại.') 'Error'
+    }
+    Reset-DeployAvButton
+}
+Bind-Click 'btnAvDiagnostic' {
+    if ($script:uiWork) { Set-Status 'Chờ thao tác hiện tại hoàn tất.'; return }
+    $progress = [hashtable]::Synchronized(@{ Step = 0; Steps = 6; Percent = 0; Stage = '' })
+    $button = $form.FindName('btnAvDiagnostic'); $button.IsEnabled = $false; $button.Content = 'Đang chẩn đoán…'
+    $form.FindName('avProgressPanel').Visibility = 'Visible'
+    $bar = $form.FindName('avBar'); $bar.Value = 0; $bar.IsIndeterminate = $true
+    Set-DeployNotice ($form.FindName('lblAvProgress')) 'Đang khởi động… · 0:00' 'Working'
+    Set-Status 'Đang chẩn đoán báo virus (chỉ đọc). Có thể mất 1–2 phút; theo dõi tiến độ trong thẻ.' 'Working'
+    $run = @{ Progress = $progress; Started = Get-Date; Done = $false; Work = $null }
+    $script:avRun = $run
+    Start-UiWork 'param($diagnostics, $progress) . $diagnostics; Format-AvDiagnostic (Get-AvDiagnostic -Progress $progress)' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1'), $progress) {
+        param($result)
+        $text = [string]$result[-1]
+        $run = $script:avRun
+        if ($run) { $run.Done = $true }
+        $elapsed = if ($run) { Format-DeployElapsed ((Get-Date) - $run.Started) } else { '' }
+        $kind = if ($text -match '\[NGHIÊM TRỌNG\]') { 'Error' } elseif ($text -match '\[KIỂM TRA') { 'Attention' } else { 'Success' }
+        $summary = switch ($kind) { 'Error' { 'Có dấu hiệu NGHIÊM TRỌNG' } 'Attention' { 'Có mục cần kiểm tra' } default { 'Chưa thấy dấu hiệu nghiêm trọng' } }
+        $bar = $form.FindName('avBar'); $bar.IsIndeterminate = $false; $bar.Value = 100
+        Set-DeployNotice ($form.FindName('lblAvProgress')) ('Xong lúc {0} (mất {1}). {2} — xem KẾT LUẬN SƠ BỘ.' -f (Get-Date -Format 'HH:mm'), $elapsed, $summary) $kind
+        $script:avLastResult = $text
+        $form.FindName('btnAvLastResult').Visibility = 'Visible'
+        Reset-DeployAvButton
+        Set-Status ('Đã chẩn đoán báo virus: ' + $summary + '.') $kind
+        Show-DeployDiagnostic 'Chẩn đoán ứng dụng bị báo virus' 'Ứng dụng bị báo virus — chỉ đọc' $text 'ChanDoan-BaoVirus'
+    }
+    if ($script:uiWork) { $run.Work = $script:uiWork; $script:avTimer.Start() }
+    else { $script:avRun = $null; $form.FindName('avProgressPanel').Visibility = 'Collapsed'; Reset-DeployAvButton; $button.Content = 'Chẩn đoán báo virus' }
+}
+Bind-Click 'btnAvLastResult' {
+    if ($script:avLastResult) { Show-DeployDiagnostic 'Chẩn đoán ứng dụng bị báo virus' 'Ứng dụng bị báo virus — chỉ đọc' $script:avLastResult 'ChanDoan-BaoVirus' }
 }
 Bind-Click 'btnDesktopPreflight' {
     $script = Join-Path $DirClone 'Master-Preflight.ps1'

@@ -53,8 +53,15 @@ function Get-AvDiagnosticRoots {
     @($roots | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Sort-Object -Unique)
 }
 
-function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 30) {
+function Set-AvProgress($Progress, [int]$Step, [int]$Percent, [string]$Stage) {
+    # $Progress is a synchronized hashtable shared with the UI thread; optional.
+    if ($null -eq $Progress) { return }
+    $Progress.Step = $Step; $Progress.Steps = 6; $Progress.Percent = $Percent; $Progress.Stage = $Stage
+}
+
+function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 30, [hashtable]$Progress) {
     $notes = New-Object System.Collections.Generic.List[string]
+    Set-AvProgress $Progress 1 3 'Đang đọc phần mềm diệt virus trong Security Center…'
 
     # 1. Antivirus registered with Windows Security Center.
     $products = @(try {
@@ -65,6 +72,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     } catch { $notes.Add('Không đọc được Security Center: ' + $_.Exception.Message) })
 
     # 2. Microsoft Defender status, detections and exclusions.
+    Set-AvProgress $Progress 2 10 'Đang đọc lịch sử phát hiện và ngoại lệ của Defender…'
     $defender = $null
     try {
         $status = Get-MpComputerStatus -ErrorAction Stop
@@ -115,6 +123,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     $drives = @(Get-AvDriveSummary $detections)
 
     # 3. Kaspersky / other vendor event logs (names only from the log, trimmed).
+    Set-AvProgress $Progress 3 20 'Đang đọc nhật ký Kaspersky…'
     $vendorEvents = @(try {
         foreach ($log in @(Get-WinEvent -ListLog '*Kaspersky*' -ErrorAction Stop | Where-Object RecordCount)) {
             Get-WinEvent -LogName $log.LogName -MaxEvents 200 -ErrorAction Stop | Where-Object { $_.Level -in 1,2,3 -and $_.TimeCreated -ge $since } |
@@ -127,6 +136,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     } catch { })
 
     # 4. Classic file-infector markers (Neshta and similar change how .exe files open).
+    Set-AvProgress $Progress 4 25 'Đang kiểm tra dấu hiệu virus lây file (Neshta, Floxif)…'
     $infector = New-Object System.Collections.Generic.List[string]
     foreach ($kind in 'exefile','comfile') {
         try {
@@ -160,24 +170,29 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     $unsignedExe = New-Object System.Collections.Generic.List[string]
     $unsignedDll = 0; $scanned = 0; $truncated = $false
     $office = @()
-    foreach ($root in $Roots) {
-        # -Include is ignored together with -LiteralPath on Windows PowerShell 5.1; filter the extension here.
-        foreach ($file in @(Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in '.exe','.dll' })) {
-            if ($scanned -ge $MaxFiles) { $truncated = $true; break }
-            $scanned++
-            if ($file.Name -ieq 'WINWORD.EXE') { $office += [pscustomobject]@{ Path = $file.FullName; Edition = (Get-AvOfficeEdition $file.FullName) } }
-            try { $signature = Get-AuthenticodeSignature -LiteralPath $file.FullName -ErrorAction Stop } catch { continue }
-            $status = [string]$signature.Status
-            switch ($status) {
-                'Valid' { }
-                'HashMismatch' { $modified.Add([pscustomobject]@{ Path = $file.FullName; Status = $status }) }
-                'NotSigned' { if ($file.Extension -ieq '.exe') { $unsignedExe.Add($file.FullName) } else { $unsignedDll++ } }
-                default { $untrusted.Add([pscustomobject]@{ Path = $file.FullName; Status = $status }) }
-            }
+    Set-AvProgress $Progress 5 30 'Đang liệt kê tệp Office / Zalo…'
+    # -Include is ignored together with -LiteralPath on Windows PowerShell 5.1; filter the extension here.
+    $binaries = @(foreach ($root in $Roots) { Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in '.exe','.dll' } })
+    if ($binaries.Count -gt $MaxFiles) { $truncated = $true; $binaries = @($binaries | Select-Object -First $MaxFiles) }
+    $total = [Math]::Max(1, $binaries.Count)
+    foreach ($file in $binaries) {
+        $scanned++
+        if ($scanned -eq 1 -or $scanned % 10 -eq 0 -or $scanned -eq $binaries.Count) {
+            Set-AvProgress $Progress 5 (30 + [int](60 * $scanned / $total)) ('Đang kiểm tra chữ ký số: {0} / {1} tệp' -f $scanned, $binaries.Count)
+        }
+        if ($file.Name -ieq 'WINWORD.EXE') { $office += [pscustomobject]@{ Path = $file.FullName; Edition = (Get-AvOfficeEdition $file.FullName) } }
+        try { $signature = Get-AuthenticodeSignature -LiteralPath $file.FullName -ErrorAction Stop } catch { continue }
+        $status = [string]$signature.Status
+        switch ($status) {
+            'Valid' { }
+            'HashMismatch' { $modified.Add([pscustomobject]@{ Path = $file.FullName; Status = $status }) }
+            'NotSigned' { if ($file.Extension -ieq '.exe') { $unsignedExe.Add($file.FullName) } else { $unsignedDll++ } }
+            default { $untrusted.Add([pscustomobject]@{ Path = $file.FullName; Status = $status }) }
         }
     }
 
     # 6. Traces of external activation tools (reported only; KMS can be a legitimate organisation setup).
+    Set-AvProgress $Progress 6 93 'Đang tìm dấu vết công cụ kích hoạt…'
     $activation = New-Object System.Collections.Generic.List[string]
     $pattern = 'AutoKMS|AutoPico|KMSAuto|KMSpico|KMS_VL|KMSEmulator|Office\s*20\d\d\s*Toolkit|Microsoft Toolkit|AAct'
     try { foreach ($task in @(Get-ScheduledTask -ErrorAction Stop | Where-Object { $_.TaskName -match $pattern -or $_.TaskPath -match $pattern })) { $activation.Add('Tác vụ: ' + $task.TaskPath + $task.TaskName) } } catch { }

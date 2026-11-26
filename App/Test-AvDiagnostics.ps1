@@ -117,4 +117,16 @@ $script:Case.ActionIds = $null; $script:Case.Actions = $null
 $null = Get-AvDiagnostic -Roots $roots
 if ($text.IndexOf('Floxif.EC!MTB | DI') -gt $text.IndexOf('Malgent!pz | M')) { throw 'Report order must be newest first.' }
 
-Write-Host 'PASS: AV diagnostics (6 cases) decode Security Center state, classify signatures, flag Neshta / Floxif / activation tool / ML detections / whole-drive exclusions, map status / executed / allowed / still-on-disk / USB drives, ignore non-binary files, never mutate.'
+# Progress: stages reach the shared hashtable in order, with a signature counter.
+$sync = [hashtable]::Synchronized(@{})
+$script:stages = New-Object System.Collections.Generic.List[string]
+$realProgress = ${function:Set-AvProgress}
+function Set-AvProgress($Progress, [int]$Step, [int]$Percent, [string]$Stage) { $script:stages.Add(('{0}|{1}|{2}' -f $Step, $Percent, $Stage)); & $realProgress $Progress $Step $Percent $Stage }
+$null = Get-AvDiagnostic -Roots $roots -Progress $sync
+$steps = @($script:stages | ForEach-Object { [int]($_ -split '\|')[0] })
+$percents = @($script:stages | ForEach-Object { [int]($_ -split '\|')[1] })
+if ($sync.Step -ne 6 -or $sync.Steps -ne 6 -or -not $sync.Stage) { throw 'Final progress state missing.' }
+for ($i = 1; $i -lt $steps.Count; $i++) { if ($steps[$i] -lt $steps[$i - 1] -or $percents[$i] -lt $percents[$i - 1]) { throw 'Progress must never go backwards.' } }
+if (-not ($script:stages | Where-Object { $_ -match '^5\|\d+\|.*1 / 1' })) { throw 'Signature counter not reported.' }
+$null = Get-AvDiagnostic -Roots $roots
+Write-Host 'PASS: AV diagnostics (6 cases) (+progress) decode Security Center state, classify signatures, flag Neshta / Floxif / activation tool / ML detections / whole-drive exclusions, map status / executed / allowed / still-on-disk / USB drives, ignore non-binary files, never mutate.'

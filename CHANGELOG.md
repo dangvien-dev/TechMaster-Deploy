@@ -1,5 +1,10 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.13.0 — 26/11/2026
+
+- Chẩn đoán báo virus hiện tiến độ ngay trong thẻ: thanh tiến trình, bước đang chạy (1/6 → 6/6), số tệp đã kiểm tra chữ ký (ví dụ 120 / 383) và thời gian đã chạy. Nút đổi thành “Đang chẩn đoán…” và bị khoá để tránh bấm hai lần.
+- Khi xong, thẻ ghi giờ hoàn tất, thời gian chạy và mức kết luận (nghiêm trọng / cần kiểm tra / chưa thấy dấu hiệu) với màu tương ứng; có nút **Xem kết quả gần nhất** để mở lại mà không phải quét lại. Lỗi giữa chừng được báo trong thẻ và nút được mở lại.
+
 ## 2.2.12.0 — 26/11/2026
 
 - Chẩn đoán báo virus nhận dạng thêm Floxif: `symsrv.dll` / `ffff.dll` trong `Common Files\System` (cả Program Files và Program Files (x86)) và `AppInit_DLLs` đang được nạp.

@@ -2,6 +2,8 @@
 
 Cập nhật ngày 26/11/2026.
 
+**2.2.13.0:** hiển thị tiến độ chẩn đoán báo virus trong thẻ thay vì chỉ một dòng trạng thái. Runspace ghi bước / phần trăm / bộ đếm chữ ký vào hashtable đồng bộ, DispatcherTimer 300 ms đọc lại trên UI thread; kết thúc thành công hoặc lỗi đều mở lại nút. Kiểm thử mô phỏng xác nhận 6 bước, phần trăm không lùi và có bộ đếm chữ ký; CI WPF kiểm tra các điều khiển mới. Chưa xem thực tế tốc độ cập nhật thanh tiến trình trên máy Windows.
+
 **2.2.12.0:** bổ sung chẩn đoán báo virus từ ca thực tế máy kỹ thuật nhiễm Floxif (kho bộ cài trên ổ D, USB ổ G, Malgent đã chạy, một mã Floxif bị cho phép). Thêm dấu hiệu Floxif (symsrv.dll / ffff.dll, AppInit_DLLs), trạng thái xử lý theo MPTHREAT_STATUS, DidThreatExecute theo ThreatID, mã đang cho phép (ThreatIDDefaultAction = 6), kiểm tra tệp còn trên ổ, nhóm theo ổ và loại ổ (Win32_LogicalDisk). 6 ca kiểm thử mô phỏng, có ca dựng lại đúng dữ liệu máy thật. Mã trạng thái 7 gặp trên máy thật không có trong tài liệu Microsoft nên chỉ hiển thị nguyên mã. Chưa chạy bản này trên Windows thật.
 
 **2.2.11.0:** sửa theo lần chạy thật đầu tiên của chẩn đoán báo virus: `-Include` bị bỏ qua cùng `-LiteralPath` trên PowerShell 5.1 nên quét cả tệp .ts / .json / .node (UnknownError); nay lọc phần mở rộng trong mã. Ngoại lệ Defender `D:\` trên máy thật được nâng thành cảnh báo gấp. Thêm Xuất file .txt cho cửa sổ chẩn đoán; nút lệch chiều cao do kiểu nút chung có lề dưới 8 px còn nút Sao chép ghi đè lề, nay đặt chiều cao / lề cố định và có kiểm tra WPF so chiều cao ba nút. Hộp thoại lưu tệp chưa được thử trên máy thật.
