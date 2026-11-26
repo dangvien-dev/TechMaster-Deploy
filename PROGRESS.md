@@ -2,6 +2,8 @@
 
 Cập nhật ngày 26/11/2026.
 
+**2.2.15.0:** sửa nhãn mã 5 theo lần chạy thật thứ ba trên KY-THUAT: dòng 14/11 ghi “đang được cho phép” trong khi kết luận (đúng) là đã xử lý. Trạng thái “đang cho phép” giờ chỉ lấy từ danh sách ThreatIDDefaultAction; thêm kiểm thử cho cả ba trường hợp (còn trong danh sách, chỉ là lịch sử, đã cho phép mà tệp vẫn còn).
+
 **2.2.14.0:** thêm phần Sửa lỗi cho chẩn đoán báo virus (engine `App/AV.Repair.ps1`, cửa sổ `App/RepairWindow.xml`, chạy trong runspace riêng, cửa sổ không chặn app chính). 22 kiểm thử engine: di chuyển tệp thật vào thư mục cách ly kèm SHA256, trùng tên, tệp đã mất, ổ đã rút, lỗi mạng khi cập nhật, phát hiện mới sau quét; Defender / registry mô phỏng và chặn mọi lệnh xoá. CI WPF nạp cửa sổ sửa lỗi với kế hoạch mẫu. Sửa kết luận theo lần chạy thật thứ hai trên máy KY-THUAT (bản ghi Cho phép cũ bị báo gấp nhầm; tách đang nhiễm / đã từng nhiễm). Chưa chạy thao tác sửa thật trên Windows: cần thử cập nhật / quét / gỡ ngoại lệ trên máy có Defender là AV chính, và kiểm tra Start-MpWDOScan trên máy thử trước khi dùng cho khách.
 
 **2.2.13.0:** hiển thị tiến độ chẩn đoán báo virus trong thẻ thay vì chỉ một dòng trạng thái. Runspace ghi bước / phần trăm / bộ đếm chữ ký vào hashtable đồng bộ, DispatcherTimer 300 ms đọc lại trên UI thread; kết thúc thành công hoặc lỗi đều mở lại nút. Kiểm thử mô phỏng xác nhận 6 bước, phần trăm không lùi và có bộ đếm chữ ký; CI WPF kiểm tra các điều khiển mới. Chưa xem thực tế tốc độ cập nhật thanh tiến trình trên máy Windows.

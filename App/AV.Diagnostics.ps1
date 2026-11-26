@@ -25,7 +25,7 @@ function Get-AvThreatStatusText([int]$id) {
     # MPTHREAT_STATUS (MpClient.h): 0-6 normal outcomes, 102-107 failed / abandoned.
     switch ($id) {
         0 { 'Không rõ (0)' } 1 { 'Mới phát hiện, chưa xử lý (1)' } 2 { 'Đã diệt (2)' } 3 { 'Đã cách ly (3)' }
-        4 { 'Đã xoá (4)' } 5 { 'ĐANG ĐƯỢC CHO PHÉP (5)' } 6 { 'Đã chặn (6)' }
+        4 { 'Đã xoá (4)' } 5 { 'Đã cho phép lúc phát hiện (5)' } 6 { 'Đã chặn (6)' }
         102 { 'DIỆT THẤT BẠI (102)' } 103 { 'CÁCH LY THẤT BẠI (103)' } 104 { 'XOÁ THẤT BẠI (104)' }
         105 { 'CHO PHÉP THẤT BẠI (105)' } 106 { 'BỎ DỞ (106)' } 107 { 'CHẶN THẤT BẠI (107)' }
         default { 'Mã ' + $id + ' (không có trong tài liệu Microsoft)' }
@@ -114,7 +114,7 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
                 Threat = $(if ($names.ContainsKey($id)) { $names[$id] } else { 'ThreatID ' + $id })
                 StatusId = $statusId; Status = (Get-AvThreatStatusText $statusId)
                 Failed = ($statusId -eq 1 -or $statusId -ge 100 -or $statusId -notin 0,1,2,3,4,5,6)
-                Allowed = ($statusId -eq 5 -or $allowedIds.ContainsKey($id))
+                Allowed = $allowedIds.ContainsKey($id)
                 Executed = $executed.ContainsKey($id)
                 Files = $files
             }
@@ -297,7 +297,7 @@ function Format-AvDiagnostic($report) {
     & $add ''; & $add ('== DEFENDER ĐÃ PHÁT HIỆN ({0} ngày, mới nhất trước) ==' -f $report.Days)
     if (@($report.Drives).Count) { & $add ('Theo ổ: ' + ((@($report.Drives) | ForEach-Object { '{0} {1} tệp ({2})' -f $_.Drive, $_.Count, $_.Kind }) -join ' | ')) }
     foreach ($d in $report.Detections) {
-        $flags = @(); if ($d.Executed) { $flags += 'ĐÃ CHẠY' }; if ($d.Allowed -and $d.StatusId -ne 5) { $flags += 'MÃ NÀY ĐANG ĐƯỢC CHO PHÉP' }
+        $flags = @(); if ($d.Executed) { $flags += 'ĐÃ CHẠY' }; if ($d.Allowed) { $flags += 'ĐANG ĐƯỢC CHO PHÉP' } elseif ($d.StatusId -eq 5 -and @($d.Files | Where-Object Present).Count) { $flags += 'ĐÃ CHO PHÉP, TỆP VẪN CÒN' }
         & $add ('{0} | {1} | {2}{3}' -f $(if ($d.Time -ne [datetime]::MinValue) { $d.Time.ToString('yyyy-MM-dd HH:mm') } else { '?' }), $d.Threat, $d.Status, $(if ($flags.Count) { ' | ' + ($flags -join ', ') } else { '' }))
         foreach ($f in $d.Files) { & $add ('    {0}{1}' -f $(if ($f.Present -and $d.StatusId -eq 2) { '[CÒN TRÊN Ổ, ĐÃ DIỆT] ' } elseif ($f.Present) { '[CÒN TRÊN Ổ] ' } else { '' }), $f.Path) }
     }

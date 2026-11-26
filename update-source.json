@@ -3,13 +3,13 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.14.0",
+  "version": "2.2.15.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
       "mode": "100644",
-      "size": 25527,
-      "sha": "65aa25f780ae6074802e638c92db2619254b6c68"
+      "size": 25603,
+      "sha": "11c7645e4068253fae6cb62d0536268b221e6dc3"
     },
     {
       "path": "App/AV.Repair.ps1",
@@ -254,8 +254,8 @@
     {
       "path": "App/Test-AvDiagnostics.ps1",
       "mode": "100644",
-      "size": 15425,
-      "sha": "d11cdae2289c0f3e8a38a715c29f752646a1f80f"
+      "size": 15864,
+      "sha": "13b0700edbb98471ff16bcf728c0a3019ba84367"
     },
     {
       "path": "App/Test-AvRepair.ps1",
@@ -494,8 +494,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 26297,
-      "sha": "b7d708a0a7b4fa76a22a6ff4b3b6d1645219e83e"
+      "size": 26757,
+      "sha": "89ad69f58e30edf3df38914cd720d11fdf20bc65"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -920,8 +920,8 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 16223,
-      "sha": "fd13512ae74dd08bdb8dc7f9121fd4d321b81d85"
+      "size": 16629,
+      "sha": "1c0e6b3c13144bed538ac3bc06dcfd8ae6b348cb"
     },
     {
       "path": "README.md",
@@ -939,7 +939,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "5d73e6b09d1f41deaeb3eff614523bdf905cb3ec"
+      "sha": "c1015c70fa730d3ddba0369cbadfb9b1855a993d"
     }
   ]
 }

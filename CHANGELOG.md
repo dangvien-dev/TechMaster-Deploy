@@ -1,5 +1,9 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.15.0 — 26/11/2026
+
+- Mã trạng thái 5 trong lịch sử phát hiện ghi **Đã cho phép lúc phát hiện (5)** thay vì “đang được cho phép”. Cờ **ĐANG ĐƯỢC CHO PHÉP** chỉ hiện khi mã mối đe dọa còn trong danh sách cho phép của Defender; tệp từng được cho phép mà vẫn còn trên ổ có cờ **ĐÃ CHO PHÉP, TỆP VẪN CÒN**. Dòng chi tiết không còn mâu thuẫn với phần kết luận.
+
 ## 2.2.14.0 — 26/11/2026
 
 - Thêm **Sửa lỗi…** sau khi chẩn đoán báo virus. Danh sách lập từ kết quả chẩn đoán, mục khuyến nghị chọn sẵn: cập nhật định nghĩa Defender, gỡ mã mối đe dọa đang “Cho phép”, gỡ ngoại lệ Defender phủ cả ổ / thư mục hệ thống, tắt AppInit_DLLs (sao lưu giá trị cũ vào ProgramData), cách ly tệp còn sót, quét nhanh, quét riêng từng ổ có phát hiện (D:, USB…), quét toàn bộ máy và quét offline Microsoft Defender.

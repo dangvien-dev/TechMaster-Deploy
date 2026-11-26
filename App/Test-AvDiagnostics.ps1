@@ -107,6 +107,7 @@ if ($report.Detections[0].StatusId -ne 102 -or $report.Detections[-1].StatusId -
 if ($report.Detections[0].Status -notmatch '102' -or ($report.Detections | Where-Object StatusId -eq 7).Status -notmatch 'Microsoft') { throw 'Status text wrong / undocumented code not labelled.' }
 if (-not ($report.Detections | Where-Object StatusId -eq 7).Executed -or ($report.Detections | Where-Object StatusId -eq 2).Executed) { throw 'DidThreatExecute must be mapped per ThreatID.' }
 if (-not $report.Detections[0].Allowed) { throw 'Allowed ThreatID (action 6) must mark every detection with that ID.' }
+if (-not ($report.Detections | Where-Object StatusId -eq 5).Allowed) { throw 'Status 5 with the ID still in the allow list stays allowed.' }
 if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object Present).Count -ne 3) { throw 'Present-on-disk check wrong.' }
 if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object { $_.Path -like 'pid:*' }).Count) { throw 'Process resources are not files.' }
 $g = $report.Drives | Where-Object Drive -eq 'G:'
@@ -126,10 +127,12 @@ $script:Case.Detections = @(
     [pscustomobject]@{ ThreatID = 2147909550; ThreatStatusID = 5; InitialDetectionTime = (Get-Date).AddDays(-12); Resources = @('file:_' + $epPlus) })
 $text = Format-AvDiagnostic (Get-AvDiagnostic -Roots $roots)
 if ($text -match 'KIỂM TRA GẤP') { throw 'A historical allow record must not be reported as urgent.' }
+if ($text -match 'ĐANG ĐƯỢC CHO PHÉP' -or $text -notmatch 'Đã cho phép lúc phát hiện \(5\)') { throw 'A historical status 5 must not read as currently allowed.' }
 if ($text -notmatch '\[LƯU Ý\] Từng có lần bấm "Cho phép"' -or $text -notmatch 'ĐÃ TỪNG nhiễm' -or $text -match 'ĐANG có dấu hiệu' -or $text -notmatch '\[ĐÃ XỬ LÝ\]') { throw 'Historical vs current findings not separated.' }
 $script:Case.Existing = @($epPlus)
 $text = Format-AvDiagnostic (Get-AvDiagnostic -Roots $roots)
 if ($text -notmatch 'KIỂM TRA GẤP' -or $text -match '\[ĐÃ XỬ LÝ\]') { throw 'An allowed file still on disk is urgent.' }
+if ($text -notmatch 'ĐÃ CHO PHÉP, TỆP VẪN CÒN') { throw 'An allowed file still on disk is flagged on its line.' }
 $script:Case.Existing = @()
 
 # Progress: stages reach the shared hashtable in order, with a signature counter.
