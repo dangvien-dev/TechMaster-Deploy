@@ -5,6 +5,7 @@
 - Chẩn đoán báo virus nhận dạng thêm Floxif: `symsrv.dll` / `ffff.dll` trong `Common Files\System` (cả Program Files và Program Files (x86)) và `AppInit_DLLs` đang được nạp.
 - Mỗi phát hiện của Defender hiện trạng thái xử lý theo mã Microsoft (đã diệt / cách ly / xoá, **đang được cho phép**, xử lý thất bại); mã không có trong tài liệu được ghi rõ, không đoán nghĩa.
 - Đánh dấu **ĐÃ CHẠY** khi Defender ghi nhận mã độc đã thực thi, **[CÒN TRÊN Ổ]** cho tệp bị phát hiện vẫn còn, và cảnh báo khi một mã mối đe dọa đang được “Cho phép” (Defender bỏ qua mọi tệp cùng mã).
+- Tệp Defender báo **đã diệt** mà còn trên ổ được ghi riêng **[CÒN TRÊN Ổ, ĐÃ DIỆT]**; danh sách mã đang cho phép rỗng không còn lỗi trên PowerShell 5.1.
 - Danh sách phát hiện xếp mới nhất trước và có dòng tóm tắt theo ổ (ổ trong máy / USB / ổ mạng / đã rút) để nhận ra kho cài đặt hoặc USB bị lây. Kết luận sơ bộ có thêm hướng xử lý khi mã độc đã chạy (cài lại Windows, đổi mật khẩu từ máy sạch).
 
 ## 2.2.11.0 — 26/11/2026

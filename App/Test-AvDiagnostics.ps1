@@ -88,7 +88,7 @@ $epPlus = 'D:\1_LamViec\DriverPrinter\Epson\EPPlus_woR_3830_22.exe'
 $adj = 'D:\4_Soft\02_Driver_MayIn_Scan\Reset may in\AdjProg.exe'
 $usb = 'G:\AnhPhucCA\Downloads\ChromeSetup.exe'
 ${env:ProgramFiles(x86)} = 'C:\Program Files (x86)'
-$script:Case.Existing = @($floxDll, $epPlus, $adj)
+$script:Case.Existing = @($floxDll, $epPlus, $adj, $usb)
 $script:Case.AppInit = 'C:\PROGRA~2\COMMON~1\System\symsrv.dll'
 $script:Case.ActionIds = @(2147909550); $script:Case.Actions = @(6)
 $script:Case.Disks = @([pscustomobject]@{ DeviceID = 'C:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'D:'; DriveType = 3 }, [pscustomobject]@{ DeviceID = 'G:'; DriveType = 2 })
@@ -107,11 +107,14 @@ if ($report.Detections[0].StatusId -ne 102 -or $report.Detections[-1].StatusId -
 if ($report.Detections[0].Status -notmatch '102' -or ($report.Detections | Where-Object StatusId -eq 7).Status -notmatch 'Microsoft') { throw 'Status text wrong / undocumented code not labelled.' }
 if (-not ($report.Detections | Where-Object StatusId -eq 7).Executed -or ($report.Detections | Where-Object StatusId -eq 2).Executed) { throw 'DidThreatExecute must be mapped per ThreatID.' }
 if (-not $report.Detections[0].Allowed) { throw 'Allowed ThreatID (action 6) must mark every detection with that ID.' }
-if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object Present).Count -ne 2) { throw 'Present-on-disk check wrong.' }
+if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object Present).Count -ne 3) { throw 'Present-on-disk check wrong.' }
 if (@($report.Detections | ForEach-Object { $_.Files } | Where-Object { $_.Path -like 'pid:*' }).Count) { throw 'Process resources are not files.' }
 $g = $report.Drives | Where-Object Drive -eq 'G:'
 if (-not $g -or -not $g.Removable -or ($report.Drives | Where-Object Drive -eq 'D:').Removable) { throw 'Drive grouping / removable detection wrong.' }
 foreach ($needle in 'ĐÃ CHẠY','\[CÒN TRÊN Ổ\]','Theo ổ:','ổ di động','ĐANG ĐƯỢC CHO PHÉP','\[KIỂM TRA GẤP\]','Floxif\): ') { if ($text -notmatch $needle) { throw "Missing in report: $needle" } }
+if ($text -notmatch [regex]::Escape('[CÒN TRÊN Ổ, ĐÃ DIỆT] ' + $usb) -or $text -notmatch '\[LƯU Ý\] 1 tệp' -or $text -notmatch '\[KIỂM TRA\] 2 tệp') { throw 'Cleaned-but-present files must be labelled separately.' }
+$script:Case.ActionIds = $null; $script:Case.Actions = $null
+$null = Get-AvDiagnostic -Roots $roots
 if ($text.IndexOf('Floxif.EC!MTB | DI') -gt $text.IndexOf('Malgent!pz | M')) { throw 'Report order must be newest first.' }
 
 Write-Host 'PASS: AV diagnostics (6 cases) decode Security Center state, classify signatures, flag Neshta / Floxif / activation tool / ML detections / whole-drive exclusions, map status / executed / allowed / still-on-disk / USB drives, ignore non-binary files, never mutate.'

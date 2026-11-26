@@ -86,7 +86,8 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     try {
         $pref = Get-MpPreference -ErrorAction Stop
         $exclusions = @(@($pref.ExclusionPath) + @($pref.ExclusionProcess) | Where-Object { $_ -and $_ -notmatch '^N/A' })
-        $ids = @($pref.ThreatIDDefaultAction_Ids); $actions = @($pref.ThreatIDDefaultAction_Actions)
+        # @($null).Count is 1 on Windows PowerShell 5.1: drop empty entries before indexing.
+        $ids = @($pref.ThreatIDDefaultAction_Ids | Where-Object { $null -ne $_ }); $actions = @($pref.ThreatIDDefaultAction_Actions | Where-Object { $null -ne $_ })
         for ($i = 0; $i -lt $ids.Count; $i++) { if ($i -lt $actions.Count -and [int]$actions[$i] -eq 6) { $allowedIds[[string]$ids[$i]] = $true } }
     } catch { }
 
@@ -213,9 +214,13 @@ function Get-AvConclusion($report) {
     if ($allowed.Count -or @($report.AllowedIds).Count) {
         $result.Add('[KIỂM TRA GẤP] Có mối đe dọa đang được "Cho phép"' + $(if ($allowed.Count) { ' (' + ($allowed -join ', ') + ')' } else { '' }) + '. Defender sẽ bỏ qua mọi tệp mang cùng mã này. Vào Windows Security → Protection history / Allowed threats → Don''t allow, rồi xoá tệp.')
     }
-    $present = @($report.Detections | ForEach-Object { $_.Files } | Where-Object Present | ForEach-Object Path | Sort-Object -Unique)
+    $present = @($report.Detections | Where-Object { $_.StatusId -ne 2 } | ForEach-Object { $_.Files } | Where-Object Present | ForEach-Object Path | Sort-Object -Unique)
+    $cleaned = @($report.Detections | Where-Object { $_.StatusId -eq 2 } | ForEach-Object { $_.Files } | Where-Object Present | ForEach-Object Path | Where-Object { $_ -notin $present } | Sort-Object -Unique)
     if ($present.Count) {
         $result.Add('[KIỂM TRA] ' + $present.Count + ' tệp từng bị phát hiện VẪN CÒN trên ổ (đánh dấu [CÒN TRÊN Ổ] bên dưới). Xoá và tải lại bộ cài từ trang hãng, không chạy lại.')
+    }
+    if ($cleaned.Count) {
+        $result.Add('[LƯU Ý] ' + $cleaned.Count + ' tệp Defender báo đã diệt nhưng vẫn để lại trên ổ ([CÒN TRÊN Ổ, ĐÃ DIỆT]). Với bộ cài, nên xoá và tải lại từ trang hãng thay vì dùng bản đã diệt.')
     }
     $removable = @($report.Drives | Where-Object Removable | ForEach-Object Drive)
     if ($removable.Count) {
@@ -268,7 +273,7 @@ function Format-AvDiagnostic($report) {
     foreach ($d in $report.Detections) {
         $flags = @(); if ($d.Executed) { $flags += 'ĐÃ CHẠY' }; if ($d.Allowed -and $d.StatusId -ne 5) { $flags += 'MÃ NÀY ĐANG ĐƯỢC CHO PHÉP' }
         & $add ('{0} | {1} | {2}{3}' -f $(if ($d.Time -ne [datetime]::MinValue) { $d.Time.ToString('yyyy-MM-dd HH:mm') } else { '?' }), $d.Threat, $d.Status, $(if ($flags.Count) { ' | ' + ($flags -join ', ') } else { '' }))
-        foreach ($f in $d.Files) { & $add ('    {0}{1}' -f $(if ($f.Present) { '[CÒN TRÊN Ổ] ' } else { '' }), $f.Path) }
+        foreach ($f in $d.Files) { & $add ('    {0}{1}' -f $(if ($f.Present -and $d.StatusId -eq 2) { '[CÒN TRÊN Ổ, ĐÃ DIỆT] ' } elseif ($f.Present) { '[CÒN TRÊN Ổ] ' } else { '' }), $f.Path) }
     }
     if (-not @($report.Detections).Count) { & $add 'Không có. (Nếu máy dùng Kaspersky / AV khác, xem Báo cáo của AV đó.)' }
 

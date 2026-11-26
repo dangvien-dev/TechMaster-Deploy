@@ -8,8 +8,8 @@
     {
       "path": "App/AV.Diagnostics.ps1",
       "mode": "100644",
-      "size": 21981,
-      "sha": "205326418cac67f1e1ca943543d63f63b3ca235f"
+      "size": 22746,
+      "sha": "bc43526513675a1af7fe5244ae63981464868ae0"
     },
     {
       "path": "App/BasicApps.ps1",
@@ -236,8 +236,8 @@
     {
       "path": "App/Test-AvDiagnostics.ps1",
       "mode": "100644",
-      "size": 12564,
-      "sha": "89b8dbdfd7d4d4947eef087fe8f7edaf89108b71"
+      "size": 12902,
+      "sha": "03941b4a694bf8e0a5bf173dc70ae685ee9eda02"
     },
     {
       "path": "App/Test-CustomApps.ps1",
@@ -470,8 +470,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 23862,
-      "sha": "0229aeb8307de78d12b42a47a3e534af01b8db2a"
+      "size": 24052,
+      "sha": "0d8000c152f790aea1c2d44b6f0515a27a48c0d9"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
