@@ -2,7 +2,8 @@
 
 ## 2.2.10.0 — 26/11/2026
 
-- Thêm **Sau khi clone → Chẩn đoán báo virus** cho trường hợp Word, Zalo hoặc ứng dụng khác bị Defender / Kaspersky báo virus và không mở được. Chỉ đọc: giải mã trạng thái AV trong Security Center (bật / tắt, định nghĩa cũ), tên mối đe dọa Defender 30 ngày, nhật ký cảnh báo Kaspersky nếu có, dấu hiệu virus lây file .exe (lệnh mở exefile bị thay, svchost.com / directx.sys trong Windows), chữ ký số Office / Zalo (HashMismatch là tệp bị sửa), phiên bản Office hết hỗ trợ, dấu vết công cụ kích hoạt bên ngoài và ngoại lệ Defender.
+- Đổi tab **Fix Driver** thành **Chẩn đoán & sửa lỗi** để gom công cụ xử lý sự cố dùng trên mọi máy; Fix Driver giữ nguyên, là một mục trong tab. **Sau khi clone** chỉ còn các bước cơ bản cho máy mới clone.
+- Thêm **Chẩn đoán & sửa lỗi → Chẩn đoán báo virus** cho trường hợp Word, Zalo hoặc ứng dụng khác bị Defender / Kaspersky báo virus và không mở được. Chỉ đọc: giải mã trạng thái AV trong Security Center (bật / tắt, định nghĩa cũ), tên mối đe dọa Defender 30 ngày, nhật ký cảnh báo Kaspersky nếu có, dấu hiệu virus lây file .exe (lệnh mở exefile bị thay, svchost.com / directx.sys trong Windows), chữ ký số Office / Zalo (HashMismatch là tệp bị sửa), phiên bản Office hết hỗ trợ, dấu vết công cụ kích hoạt bên ngoài và ngoại lệ Defender.
 - Kết luận sơ bộ phân biệt nhiễm virus lây file, công cụ kích hoạt bị nhận là HackTool và phát hiện heuristic / máy học có thể báo nhầm. Không khôi phục vùng cách ly, không thêm ngoại lệ, không xoá tệp hoặc tác vụ.
 
 ## 2.2.9.0 — 23/11/2026

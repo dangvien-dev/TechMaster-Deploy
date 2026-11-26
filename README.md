@@ -7,12 +7,13 @@ Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** t
 | Tab | Công cụ | Thư mục |
 |---|---|---|
 | **Máy gốc (Sysprep)** | Kiểm tra / sửa lỗi Sysprep, chuẩn bị máy gốc và chạy Sysprep, thư mục `Reinstall` | `FixClone\` |
-| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh dấu số, bàn phím US cho EVKey, chẩn đoán ứng dụng bị báo virus (chỉ đọc) | `FixClone\` |
+| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh dấu số, bàn phím US cho EVKey | `FixClone\` |
 | **Kích hoạt bản quyền** | Kích hoạt Windows / Office (online → portal, QR, nhận Confirmation ID qua LAN), chạy TEST | `KichHoat\` |
 | **Biên bản bản quyền** | Nhập thông tin đơn vị, khách hàng, kỹ thuật viên, chọn logo → xuất biên bản HTML (in / lưu PDF) | `BienBan\` |
 | **Tải / cài Office** | Office Deployment Tool: tải bộ cài về kho (cài offline nhiều máy), cài từ kho, cài trực tiếp | `Office\`, kho ở `KhoOffice\` |
 | **Cài Windows** | Mở trang tải của Microsoft và chạy Windows Setup từ ISO đã tải | ISO do người dùng chọn |
 
+| **Chẩn đoán & sửa lỗi** | Fix Driver; chẩn đoán ứng dụng bị báo virus / không mở được (chỉ đọc) | `FixClone\`, `App\` |
 | **Cài ứng dụng** | Chọn và cài ứng dụng cơ bản qua WinGet | WinGet / App Installer |
 
 ## Cách dùng
@@ -149,7 +150,7 @@ Trên Windows, chạy `powershell.exe -NoProfile -ExecutionPolicy Bypass -File A
 
 ### Fix Driver (dùng chung mọi máy / mainboard)
 
-Vào **Fix Driver → Mở Fix Driver** để quét thiết bị báo lỗi, lấy Hardware ID / link Catalog, cài CAB hoặc thư mục INF đã tải, và cài từ kho USB / NAS tối đa 4 vòng. Không cần profile để dùng các chức năng này; không có driver được đóng gói hoặc tải tự động. Profile JSON chỉ bổ sung khuyến nghị riêng khi khớp model, mẫu đầu là SingPC I5-12450H BIOS 5.32. Xem [thiết kế và hướng dẫn test](FixClone/DriverFix.md), [JSON profile mẫu](FixClone/DriverFix.SingPC.json). Mọi cài / disable / chỉnh nguồn đều cần Admin và ghi log local.
+Vào **Chẩn đoán & sửa lỗi → Mở Fix Driver** để quét thiết bị báo lỗi, lấy Hardware ID / link Catalog, cài CAB hoặc thư mục INF đã tải, và cài từ kho USB / NAS tối đa 4 vòng. Không cần profile để dùng các chức năng này; không có driver được đóng gói hoặc tải tự động. Profile JSON chỉ bổ sung khuyến nghị riêng khi khớp model, mẫu đầu là SingPC I5-12450H BIOS 5.32. Xem [thiết kế và hướng dẫn test](FixClone/DriverFix.md), [JSON profile mẫu](FixClone/DriverFix.SingPC.json). Mọi cài / disable / chỉnh nguồn đều cần Admin và ghi log local.
 
 **Thiếu Paint:** vào **Cài Windows → Paint trên Microsoft Store**, bấm **Get / Cài đặt** trên trang Paint chính thức của Microsoft. App chỉ mở trang Store, không tự cài hoặc báo hoàn tất khi chưa kiểm tra.
 

@@ -170,8 +170,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 30908,
-      "sha": "213a1483b5e3e3d989f4c686e5bbc291ae5bb3b8"
+      "size": 30971,
+      "sha": "9ef520195213abe25f1b375eddd5e246995e5be0"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 17901,
-      "sha": "c8a2d28dd7612faae0ed36f8dc35320b2bd1fd2d"
+      "size": 18176,
+      "sha": "5adc8e8a79c161f14b471cf3a2358c5132ad1db7"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -266,8 +266,8 @@
     {
       "path": "App/Test-Info.ps1",
       "mode": "100644",
-      "size": 4138,
-      "sha": "621b864c60bcbd2313a66e2881ccf7bec0577d7c"
+      "size": 4168,
+      "sha": "0d500a117ffd5a35910084c683f0e5c6ef18a0d4"
     },
     {
       "path": "App/Test-InfoEntryPoints.ps1",
@@ -470,8 +470,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 21781,
-      "sha": "b7ac9d27fcea06b76252f9c28e1ac4614d987bd5"
+      "size": 22053,
+      "sha": "7922837287dd78d84df152f93af1e7dc7a4976cf"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -896,14 +896,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 13239,
-      "sha": "b242e754559a89ef3047e90722a694f583f4f1b5"
+      "size": 13380,
+      "sha": "238cebc458f72569e0aeb18e0f529256fb065b89"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 21835,
-      "sha": "adc38c38c235414dc6a08a4c0361954ba259c215"
+      "size": 21946,
+      "sha": "0585374422ba813c127d672f09c69d02ae9c0474"
     },
     {
       "path": "RELEASING.md",

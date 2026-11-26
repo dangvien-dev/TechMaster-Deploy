@@ -25,7 +25,6 @@
 - Trình duyệt / PDF: chọn ứng dụng đã cài → Chọn làm mặc định → xác nhận Set default trong Cài đặt Windows (PDF chọn .pdf) → quay lại Kiểm tra lại. Với trình duyệt, app kiểm tra cả HTTP và HTTPS. Windows 10 / bản cũ có thể mở trang chung; tìm ứng dụng trong Ứng dụng mặc định. Nếu thiếu app trong danh sách, cài app rồi kiểm tra lại; không tự cài thêm trình duyệt hoặc trình đọc PDF.
 - Reset ID UltraViewer có sao lưu. Chỉ reset khi cần, sau đó mở UltraViewer và Kiểm tra ID mới; thao tác này ngắt kết nối hỗ trợ.
 - Kiểm tra Desktop và phím chụp để giữ một icon Word / Excel dùng chung và chọn Screen Snipping cho Windows + Shift + S.
-- Chẩn đoán báo virus: dùng khi Word, Zalo… bị AV báo virus và không mở được. Đọc phần KẾT LUẬN SƠ BỘ trước: NGHIÊM TRỌNG là dấu hiệu virus lây file .exe → rút mạng, quét offline, cài lại ứng dụng; KHẢ NĂNG CAO là công cụ kích hoạt bên ngoài bị chặn; CÓ THỂ BÁO NHẦM là phát hiện heuristic trên tệp có chữ ký hợp lệ. Kaspersky không ghi đủ tên mối đe dọa vào nhật ký Windows trên mọi bản; mở Báo cáo / Vùng cách ly của Kaspersky để lấy tên chính xác. Công cụ không khôi phục cách ly, không thêm ngoại lệ.
 
 ## Kích hoạt
 - Khi có khách theo dõi, có thể nhập key trực tiếp trong Windows Settings → System → Activation hoặc Word → File → Account.
@@ -84,10 +83,14 @@
 - Khi góp ý / báo lỗi, ghi phiên bản app, phiên bản Windows và bước vừa thao tác; kèm ảnh hoặc nhật ký nếu có.
 - Che key đầy đủ và thông tin riêng tư của khách trước khi gửi ảnh / nhật ký. Không cần gửi mật khẩu máy khách.
 
+## Chẩn đoán & sửa lỗi
+- Dùng khi khách báo sự cố, trên bất kỳ máy nào; không phải bước bắt buộc sau khi clone. Tab gồm Fix Driver (thiết bị thiếu / lỗi driver) và Chẩn đoán báo virus.
+- Chẩn đoán báo virus: dùng khi Word, Zalo… bị AV báo virus và không mở được. Đọc phần KẾT LUẬN SƠ BỘ trước: NGHIÊM TRỌNG là dấu hiệu virus lây file .exe → rút mạng, quét offline, cài lại ứng dụng; KHẢ NĂNG CAO là công cụ kích hoạt bên ngoài bị chặn; CÓ THỂ BÁO NHẦM là phát hiện heuristic trên tệp có chữ ký hợp lệ. Kaspersky không ghi đủ tên mối đe dọa vào nhật ký Windows trên mọi bản; mở Báo cáo / Vùng cách ly của Kaspersky để lấy tên chính xác. Công cụ không khôi phục cách ly, không thêm ngoại lệ.
+
 ## Fix Driver
 - Kết quả quét hiện tổng thiết bị, Code 0, lỗi và trạng thái chưa rõ. Danh sách trống kèm số đã đọc lớn hơn 0 / 0 lỗi nghĩa là Windows chưa báo thiết bị lỗi trong lần quét đó. Bật Hiện tất cả thiết bị để xem danh sách đã đọc và đối chiếu bằng Mở Device Manager. Nếu Windows không trả thiết bị nào, app báo lỗi đọc dữ liệu; mã ? chưa được tính là hoạt động. Module không tìm bản driver mới hơn cho thiết bị đang hoạt động.
 - Dùng chung cho mọi máy / mainboard, không cần profile. Quét, Catalog, cài CAB / INF và kho USB / NAS hoạt động độc lập với profile; chỉ áp gợi ý và tinh chỉnh riêng nếu nhận diện khớp.
-- Mở Fix Driver ở menu bên trái. Quét liệt kê toàn bộ thiết bị có mã lỗi, toàn bộ Hardware ID và InstanceId. Chọn thiết bị rồi mở từng link Catalog hoặc Copy Hardware ID.
+- Mở tab Chẩn đoán & sửa lỗi ở menu bên trái → Mở Fix Driver. Quét liệt kê toàn bộ thiết bị có mã lỗi, toàn bộ Hardware ID và InstanceId. Chọn thiết bị rồi mở từng link Catalog hoặc Copy Hardware ID.
 - Tải CAB bằng trình duyệt từ nguồn chính thức, chọn Chọn CAB và cài. Hoặc giải nén trước và chọn thư mục INF. Xác nhận bằng nút bấm; log ghi đầy đủ kết quả expand / pnputil. Sau cài tự dò phần cứng và đợi 3 giây rồi quét lại; nếu có thiết bị con mới, tiếp tục tải gói phù hợp.
 - Cài từ kho USB / NAS tìm INF chứa Hardware ID khớp, ưu tiên thứ tự và phiên bản trong profile, tối đa 4 vòng. Không đưa driver vào thư mục chương trình để phát hành. Nút dừng chỉ dừng giữa các gói; không ngắt cài đang chạy.
 - Profile SingPC chỉ khớp Manufacturer SingPC, Model I5-12450H, BIOS 5.32. Cài Serial IO trước OED, rồi thiết bị con SST; giữ nhánh SST 10.29.0.x khớp BUS. Không ép hdaudbus lên SST BUS.
