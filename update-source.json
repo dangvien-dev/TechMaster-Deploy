@@ -260,8 +260,8 @@
     {
       "path": "App/Test-AvRepair.ps1",
       "mode": "100644",
-      "size": 9207,
-      "sha": "b0d57a37739557ac20437d5f2db00be22ae01f2f"
+      "size": 9210,
+      "sha": "63bc60a4b9fb538611d15724e478751489e41f99"
     },
     {
       "path": "App/Test-CustomApps.ps1",

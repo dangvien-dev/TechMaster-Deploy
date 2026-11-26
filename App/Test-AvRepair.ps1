@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'AV.Repair.ps1')
 $checks = 0
 function Assert($condition, $message) { if (-not $condition) { throw "FAIL: $message" }; $script:checks++ }
