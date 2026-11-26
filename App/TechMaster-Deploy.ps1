@@ -92,16 +92,35 @@ Bind-Click 'btnUltraReset' {
     $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
     $script:desktopProcess = Start-Process powershell.exe -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand '+$encoded) -WindowStyle Hidden -PassThru
 }
+function Show-DeployDiagnostic([string]$title, [string]$heading, [string]$text, [string]$fileStem) {
+    $script:diagnosticWindow = Import-DeployWindow (Join-Path $PSScriptRoot 'DiagnosticsWindow.xml')
+    $script:diagnosticWindow.Owner = $form
+    $script:diagnosticWindow.Title = $title
+    $script:diagnosticWindow.FindName('Heading').Text = $heading
+    $script:diagnosticWindow.FindName('Details').Text = $text
+    $script:diagnosticFileStem = $fileStem
+    $script:diagnosticWindow.FindName('Copy').Add_Click({ [Windows.Clipboard]::SetText($script:diagnosticWindow.FindName('Details').Text) })
+    $script:diagnosticWindow.FindName('Export').Add_Click({
+        $dialog = New-Object Microsoft.Win32.SaveFileDialog
+        $dialog.Title = 'Lưu kết quả chẩn đoán'
+        $dialog.Filter = 'Tệp văn bản (*.txt)|*.txt'
+        $dialog.InitialDirectory = [Environment]::GetFolderPath('MyDocuments')
+        $dialog.FileName = '{0}_{1}_{2}.txt' -f $script:diagnosticFileStem, $env:COMPUTERNAME, (Get-Date -Format 'yyyyMMdd-HHmm')
+        if (-not $dialog.ShowDialog($script:diagnosticWindow)) { return }
+        try {
+            [IO.File]::WriteAllText($dialog.FileName, $script:diagnosticWindow.FindName('Details').Text, [Text.UTF8Encoding]::new($true))
+            Set-Status ('Đã lưu kết quả: ' + $dialog.FileName)
+            Start-Process explorer.exe ('/select,"{0}"' -f $dialog.FileName)
+        } catch { Show-DeployMessage ('Không lưu được tệp: ' + $_.Exception.Message) 'TechMaster Deploy' 'Error' }
+    })
+    $script:diagnosticWindow.FindName('Close').Add_Click({ $script:diagnosticWindow.Close() })
+    [void]$script:diagnosticWindow.ShowDialog()
+}
 Bind-Click 'btnUltraDiagnostic' {
     Set-Status 'Đang đọc cấu hình UltraViewer và card mạng…'
     Start-UiWork 'param($diagnostics) . $diagnostics; Format-UltraViewerDiagnostic (Get-UltraViewerDiagnostic)' @((Join-Path $DirClone 'UltraViewer.Diagnostics.ps1')) {
         param($result)
-        $script:diagnosticWindow = Import-DeployWindow (Join-Path $PSScriptRoot 'DiagnosticsWindow.xml')
-        $script:diagnosticWindow.Owner = $form
-        $script:diagnosticWindow.FindName('Details').Text = [string]$result[-1]
-        $script:diagnosticWindow.FindName('Copy').Add_Click({ [Windows.Clipboard]::SetText($script:diagnosticWindow.FindName('Details').Text) })
-        $script:diagnosticWindow.FindName('Close').Add_Click({ $script:diagnosticWindow.Close() })
-        [void]$script:diagnosticWindow.ShowDialog()
+        Show-DeployDiagnostic 'Chẩn đoán UltraViewer' 'Chẩn đoán UltraViewer — chỉ đọc' ([string]$result[-1]) 'ChanDoan-UltraViewer'
         Set-Status 'Đã chẩn đoán UltraViewer; so sánh kết quả của hai máy bị trùng ID.'
     }
 }
@@ -109,14 +128,7 @@ Bind-Click 'btnAvDiagnostic' {
     Set-Status 'Đang đọc trạng thái phần mềm diệt virus và chữ ký số Office / Zalo… (có thể mất 1–2 phút)'
     Start-UiWork 'param($diagnostics) . $diagnostics; Format-AvDiagnostic (Get-AvDiagnostic)' @((Join-Path $PSScriptRoot 'AV.Diagnostics.ps1')) {
         param($result)
-        $script:diagnosticWindow = Import-DeployWindow (Join-Path $PSScriptRoot 'DiagnosticsWindow.xml')
-        $script:diagnosticWindow.Owner = $form
-        $script:diagnosticWindow.Title = 'Chẩn đoán ứng dụng bị báo virus'
-        $script:diagnosticWindow.FindName('Heading').Text = 'Ứng dụng bị báo virus — chỉ đọc'
-        $script:diagnosticWindow.FindName('Details').Text = [string]$result[-1]
-        $script:diagnosticWindow.FindName('Copy').Add_Click({ [Windows.Clipboard]::SetText($script:diagnosticWindow.FindName('Details').Text) })
-        $script:diagnosticWindow.FindName('Close').Add_Click({ $script:diagnosticWindow.Close() })
-        [void]$script:diagnosticWindow.ShowDialog()
+        Show-DeployDiagnostic 'Chẩn đoán ứng dụng bị báo virus' 'Ứng dụng bị báo virus — chỉ đọc' ([string]$result[-1]) 'ChanDoan-BaoVirus'
         Set-Status 'Đã chẩn đoán. Xem phần KẾT LUẬN SƠ BỘ; gửi kèm tên mối đe dọa trong Báo cáo của AV nếu chưa rõ.'
     }
 }

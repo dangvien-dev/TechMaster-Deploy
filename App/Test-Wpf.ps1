@@ -181,6 +181,11 @@ Assert ($dialog.Tag -eq $true) 'Confirm button returns explicit consent'
 $dialog=New-DeployConfirmWindow 'Test' 'Thông báo' 'Đóng' -Information
 Assert ($dialog.FindName('Cancel').Visibility -eq 'Collapsed' -and $dialog.FindName('Confirm').IsDefault) 'Information dialog shows one Close button'
 $dialog.Close()
+$diag=Import-DeployWindow (Join-Path $PSScriptRoot 'DiagnosticsWindow.xml')
+$size=New-Object Windows.Size(760,590);$diag.Content.Measure($size);$diag.Content.Arrange((New-Object Windows.Rect($size)));$diag.UpdateLayout()
+$heights=@('Export','Copy','Close'|ForEach-Object{$diag.FindName($_).ActualHeight})
+Assert ($null -ne $diag.FindName('Heading') -and $heights[0] -gt 0 -and $heights[0] -eq $heights[1] -and $heights[1] -eq $heights[2]) "Diagnostic Export / Copy / Close buttons share one height ($($heights -join '/'))"
+$diag.Close()
 $root=Split-Path -Parent $PSScriptRoot
 $office= . (Join-Path $root 'Office/Office-Cleanup.ps1') -Mode Inspect -ValidateOnly
 Assert ($office -is [Windows.Window] -and $office.FindName('Keys').IsReadOnly -and -not $office.FindName('DeleteKeys').IsEnabled) 'Office inventory UI is read-only in Inspect mode'

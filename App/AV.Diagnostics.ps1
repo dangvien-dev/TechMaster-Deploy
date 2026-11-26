@@ -105,7 +105,8 @@ function Get-AvDiagnostic([string[]]$Roots, [int]$MaxFiles = 4000, [int]$Days = 
     $unsignedDll = 0; $scanned = 0; $truncated = $false
     $office = @()
     foreach ($root in $Roots) {
-        foreach ($file in @(Get-ChildItem -LiteralPath $root -Recurse -File -Include *.exe,*.dll -ErrorAction SilentlyContinue)) {
+        # -Include is ignored together with -LiteralPath on Windows PowerShell 5.1; filter the extension here.
+        foreach ($file in @(Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in '.exe','.dll' })) {
             if ($scanned -ge $MaxFiles) { $truncated = $true; break }
             $scanned++
             if ($file.Name -ieq 'WINWORD.EXE') { $office += [pscustomobject]@{ Path = $file.FullName; Edition = (Get-AvOfficeEdition $file.FullName) } }
@@ -164,7 +165,11 @@ function Get-AvConclusion($report) {
     if (@($report.Products).Count -and -not $active.Count) {
         $result.Add('[LƯU Ý] Security Center báo không có AV nào đang bật bảo vệ thời gian thực. Kiểm tra AV có bị tắt / hết hạn không.')
     }
-    if (@($report.Exclusions).Count) {
+    $broad = @($report.Exclusions | Where-Object { $_ -match '^[A-Za-z]:\\?$' -or $_ -match '(?i)^[A-Za-z]:\\(Windows|Users|Program Files( \(x86\))?|ProgramData)\\?$' -or $_ -match '(?i)\\(Temp|AppData)\\?$' })
+    if ($broad.Count) {
+        $result.Add('[KIỂM TRA GẤP] Defender đang bỏ qua cả vùng rộng: ' + ($broad -join ', ') + '. Mọi tệp trong đó không được quét. Nếu không phải bạn chủ động thêm, xoá ngoại lệ này trong Windows Security rồi quét lại toàn bộ.')
+    }
+    elseif (@($report.Exclusions).Count) {
         $result.Add('[KIỂM TRA] Defender có ngoại lệ. Mã độc và công cụ crack hay tự thêm ngoại lệ; đối chiếu danh sách bên dưới.')
     }
     if (-not $result.Count) {

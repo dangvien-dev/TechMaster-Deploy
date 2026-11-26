@@ -15,7 +15,7 @@ function Get-MpPreference { [CmdletBinding()] param($Namespace, $ClassName, $Lis
 function Get-WinEvent { [CmdletBinding()] param([string]$ListLog, [string]$LogName, [int]$MaxEvents) @() }
 function Get-ItemProperty { [CmdletBinding()] param($LiteralPath) if ($LiteralPath -like '*exefile*') { [pscustomobject]@{ '(default)' = $script:Case.ExeCommand } } else { [pscustomobject]@{ '(default)' = '"%1" %*' } } }
 function Test-Path { [CmdletBinding()] param($LiteralPath) $script:Case.Existing -contains $LiteralPath }
-function Get-ChildItem { [CmdletBinding()] param($LiteralPath, [switch]$Recurse, [switch]$File, [switch]$Directory, $Include) $script:Case.Files | Where-Object { $_.Path.StartsWith($LiteralPath + '\') } | ForEach-Object { [pscustomobject]@{ FullName = $_.Path; Name = Split-Path $_.Path -Leaf; Extension = [IO.Path]::GetExtension($_.Path) } } }
+function Get-ChildItem { [CmdletBinding()] param($LiteralPath, [switch]$Recurse, [switch]$File, [switch]$Directory) $script:Case.Files | Where-Object { $_.Path.StartsWith($LiteralPath + '\') } | ForEach-Object { [pscustomobject]@{ FullName = $_.Path; Name = Split-Path $_.Path -Leaf; Extension = [IO.Path]::GetExtension($_.Path) } } }
 function Get-AuthenticodeSignature { [CmdletBinding()] param($LiteralPath) [pscustomobject]@{ Status = ($script:Case.Files | Where-Object Path -eq $LiteralPath).Status } }
 function Get-ScheduledTask { [CmdletBinding()] param($Namespace, $ClassName, $ListLog) $script:Case.Tasks }
 function Get-Service { [CmdletBinding()] param($Namespace, $ClassName, $ListLog) @([pscustomobject]@{ Name = 'Spooler'; DisplayName = 'Print Spooler'; Status = 'Running' }) }
@@ -29,13 +29,14 @@ $roots = @('C:\Program Files\Microsoft Office', 'C:\Users\Admin\AppData\Local\Pr
 $script:Case = @{
     Products = @([pscustomobject]@{ displayName = 'Windows Defender'; productState = 393472 }, [pscustomobject]@{ displayName = 'Kaspersky'; productState = 262144 })
     Threats = @(); Detections = @(); Exclusions = @(); ExeCommand = '"%1" %*'; Existing = @(); Tasks = @()
-    Files = @(@{ Path = $officeWord; Status = 'Valid' }, @{ Path = $zaloExe; Status = 'Valid' }, @{ Path = $zaloDll; Status = 'NotSigned' })
+    Files = @(@{ Path = $officeWord; Status = 'Valid' }, @{ Path = $zaloExe; Status = 'Valid' }, @{ Path = $zaloDll; Status = 'NotSigned' }, @{ Path = 'C:\Users\Admin\AppData\Local\Programs\Zalo\Zalo-26.9.10\resources\index.d.ts'; Status = 'UnknownError' }, @{ Path = 'C:\Users\Admin\AppData\Local\Programs\Zalo\Zalo-26.9.10\resources\package.json'; Status = 'UnknownError' })
 }
 $report = Get-AvDiagnostic -Roots $roots
 $text = Format-AvDiagnostic $report
 if (@($report.Products | Where-Object Enabled).Count -ne 0) { throw 'productState 393472 / 262144 must decode as real-time off.' }
 if ((ConvertFrom-AvProductState 397312).Enabled -ne $true -or (ConvertFrom-AvProductState 397328).UpToDate -ne $false) { throw 'productState decoding is wrong.' }
 if ($report.UnsignedDll -ne 1 -or @($report.UnsignedExe).Count -ne 0 -or @($report.Modified).Count -ne 0) { throw 'Signature classification is wrong.' }
+if ($report.Scanned -ne 3 -or @($report.Untrusted).Count -ne 0) { throw 'Only .exe / .dll files may be scanned (no .ts / .json noise).' }
 if ($report.Office[0].Edition -notmatch '2010') { throw 'Office 2010 not detected.' }
 if ($text -match '\[NGHI' -or $text -match '\[KH') { throw 'Clean machine must not be reported as infected / cracked.' }
 if ($text -notmatch 'Office 2010') { throw 'Missing Office edition.' }
@@ -64,6 +65,10 @@ $report = Get-AvDiagnostic -Roots $roots
 $text = Format-AvDiagnostic $report
 if ($text -notmatch '\[KH' -or $text -match '\[NGHI') { throw 'Activation-tool conclusion wrong.' }
 if (@($report.Activation).Count -lt 2 -or @($report.Exclusions).Count -ne 1) { throw 'Activation traces / exclusions missed.' }
+if ($text -match 'KI.M TRA G') { throw 'A single tool folder exclusion is not a broad exclusion.' }
+$script:Case.Exclusions = @('D:\')
+$text = Format-AvDiagnostic (Get-AvDiagnostic -Roots $roots)
+if ($text -notmatch [regex]::Escape('D:\') -or $text -notmatch '\[KI.M TRA G') { throw 'Whole-drive exclusion must be flagged as urgent.' }
 
 # Case 4: old detections outside the window are ignored; ML-only name is "possible false positive".
 $script:Case.Existing = @(); $script:Case.Tasks = @(); $script:Case.Exclusions = @()
@@ -76,4 +81,4 @@ $text = Format-AvDiagnostic $report
 if (@($report.Detections).Count -ne 1 -or $text -match 'Sality') { throw 'Old detections must be filtered by the time window.' }
 if ($text -notmatch '\[C' -or $text -match '\[NGHI') { throw 'ML detection should be reported as possible false positive.' }
 
-Write-Host 'PASS: AV diagnostics (4 cases) decode Security Center state, classify signatures, flag infector / activation tool / ML detections, never mutate.'
+Write-Host 'PASS: AV diagnostics (5 cases) decode Security Center state, classify signatures, flag infector / activation tool / ML detections / whole-drive exclusions, ignore non-binary files, never mutate.'

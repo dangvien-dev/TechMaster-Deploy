@@ -3,13 +3,13 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.10.0",
+  "version": "2.2.11.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
       "mode": "100644",
-      "size": 15190,
-      "sha": "47872a2e5d0c682b6bc8cc3d8f4b54d5b30677bd"
+      "size": 15858,
+      "sha": "7f80a21a5fde980dba931ee9467834791072dd4f"
     },
     {
       "path": "App/BasicApps.ps1",
@@ -116,8 +116,8 @@
     {
       "path": "App/DiagnosticsWindow.xml",
       "mode": "100644",
-      "size": 1157,
-      "sha": "240bc8e20dd87ad97b5e151fbd7d766f4a1cef7e"
+      "size": 1511,
+      "sha": "746d018c0d1bcdec6def6fb6feb66bcd9b81ee5b"
     },
     {
       "path": "App/Info.UI.ps1",
@@ -218,8 +218,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 21982,
-      "sha": "9f724ede1c0fb7da42c0830cc2f14f4ec8849e76"
+      "size": 22737,
+      "sha": "d4c60616261b5b320b3c06aebddfba3c10e1cf44"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -236,8 +236,8 @@
     {
       "path": "App/Test-AvDiagnostics.ps1",
       "mode": "100644",
-      "size": 7546,
-      "sha": "dcb18662390b74cf40a77e64bd6db8ead807dfc6"
+      "size": 8296,
+      "sha": "4dae58756c95cc7e0e6d9377dbf55eaa9135b9e6"
     },
     {
       "path": "App/Test-CustomApps.ps1",
@@ -356,8 +356,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 20171,
-      "sha": "037938afc9a6765376c19969f0f542808377e0bd"
+      "size": 20708,
+      "sha": "6d507dda412640bcbb6f5e3bc7c1c3765daf6ac8"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -470,8 +470,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 22053,
-      "sha": "7922837287dd78d84df152f93af1e7dc7a4976cf"
+      "size": 22803,
+      "sha": "06236d8bee9af4ead578e7d0f885d7b8ce80de82"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -896,8 +896,8 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 13380,
-      "sha": "238cebc458f72569e0aeb18e0f529256fb065b89"
+      "size": 14033,
+      "sha": "618b7813f8b604536fc8f82993891ec58509777d"
     },
     {
       "path": "README.md",
@@ -915,7 +915,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "9c1fa6af65c751820f7f337e1fd0241deb716c97"
+      "sha": "edf55622a07372f2d1c8b0cefa290b8c4f71ffd1"
     }
   ]
 }

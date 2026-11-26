@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.11.0 — 26/11/2026
+
+- Cửa sổ kết quả chẩn đoán (báo virus, UltraViewer) có nút **Xuất file…** lưu kết quả ra .txt (UTF-8, mặc định trong Documents, tên gồm tên máy và thời điểm) rồi mở thư mục chứa tệp. Ba nút Xuất file / Sao chép / Đóng cùng chiều cao.
+- Chẩn đoán báo virus chỉ quét chữ ký .exe / .dll. Trên Windows PowerShell 5.1, bộ lọc cũ bị bỏ qua nên liệt kê cả .ts / .json / .node của Zalo thành “UnknownError”.
+- Ngoại lệ Defender trùng cả ổ đĩa (ví dụ D:\) hoặc thư mục hệ thống / người dùng / Temp được đưa lên kết luận **KIỂM TRA GẤP**, vì mọi tệp trong vùng đó không được quét.
+
 ## 2.2.10.0 — 26/11/2026
 
 - Đổi tab **Fix Driver** thành **Chẩn đoán & sửa lỗi** để gom công cụ xử lý sự cố dùng trên mọi máy; Fix Driver giữ nguyên, là một mục trong tab. **Sau khi clone** chỉ còn các bước cơ bản cho máy mới clone.
