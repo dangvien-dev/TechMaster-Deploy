@@ -1,5 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.19.0 — 26/11/2026
+
+- Fix Driver: với **máy in / MFP** của hãng có trong bảng VID (Canon, HP, Epson, Brother, Kyocera, Ricoh, Xerox, Lexmark, OKI), thay hai link Catalog theo VID/PID (thường không có kết quả cho máy in) bằng nút **Mở trang driver <hãng>** và hai link: tìm driver theo tên model giới hạn trong trang hãng, và trang hỗ trợ của hãng. Kèm ghi chú: chọn đúng model / Windows, tải bộ cài đầy đủ, chạy khi máy in đang cắm rồi Quét lại.
+- Nhận diện máy in theo class Printer, ID `USBPRINT\` / `WSDPRINT\` / USB class 07 (đọc thêm Compatible ID) hoặc tên model (ví dụ `MF240 Series UFRII LT` Code 28 không có class). Hãng bán cả thiết bị khác (Canon, HP, Epson, Kyocera, Ricoh) chỉ được gợi ý khi có dấu hiệu máy in, nên bàn phím HP, webcam Ricoh hay điện thoại Samsung vẫn dùng link Catalog. Hãng chưa có trong bảng cũng quay về Catalog.
+- Chỉ mở link do chương trình tạo: Catalog, tìm kiếm Google và trang hỗ trợ trong bảng hãng, luôn HTTPS. Báo cáo HTML dùng cùng bộ link. Thêm hãng mới bằng một dòng trong `Get-DriverFixPrinterVendors` (`FixClone/DriverFix.Core.ps1`).
+
 ## 2.2.18.0 — 26/11/2026
 
 - Sửa lỗi báo virus **không còn chọn sẵn “Quét toàn bộ ổ D: / USB”**. Mục này ghi dung lượng đã dùng của ổ và cảnh báo ổ HDD lớn có thể quét hàng giờ, máy chậm / đơ: chỉ chạy khi không dùng máy.

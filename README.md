@@ -150,7 +150,7 @@ Trên Windows, chạy `powershell.exe -NoProfile -ExecutionPolicy Bypass -File A
 
 ### Fix Driver (dùng chung mọi máy / mainboard)
 
-Vào **Chẩn đoán & sửa lỗi → Mở Fix Driver** để quét thiết bị báo lỗi, lấy Hardware ID / link Catalog, cài CAB hoặc thư mục INF đã tải, và cài từ kho USB / NAS tối đa 4 vòng. Không cần profile để dùng các chức năng này; không có driver được đóng gói hoặc tải tự động. Profile JSON chỉ bổ sung khuyến nghị riêng khi khớp model, mẫu đầu là SingPC I5-12450H BIOS 5.32. Xem [thiết kế và hướng dẫn test](FixClone/DriverFix.md), [JSON profile mẫu](FixClone/DriverFix.SingPC.json). Mọi cài / disable / chỉnh nguồn đều cần Admin và ghi log local.
+Vào **Chẩn đoán & sửa lỗi → Mở Fix Driver** để quét thiết bị báo lỗi, lấy Hardware ID / link Catalog (máy in / MFP của hãng trong bảng VID thì mở trang driver của hãng thay cho link Catalog theo VID/PID), cài CAB hoặc thư mục INF đã tải, và cài từ kho USB / NAS tối đa 4 vòng. Không cần profile để dùng các chức năng này; không có driver được đóng gói hoặc tải tự động. Profile JSON chỉ bổ sung khuyến nghị riêng khi khớp model, mẫu đầu là SingPC I5-12450H BIOS 5.32. Xem [thiết kế và hướng dẫn test](FixClone/DriverFix.md), [JSON profile mẫu](FixClone/DriverFix.SingPC.json). Mọi cài / disable / chỉnh nguồn đều cần Admin và ghi log local.
 
 **Thiếu Paint:** vào **Cài Windows → Paint trên Microsoft Store**, bấm **Get / Cài đặt** trên trang Paint chính thức của Microsoft. App chỉ mở trang Store, không tự cài hoặc báo hoàn tất khi chưa kiểm tra.
 

@@ -31,9 +31,41 @@ try{
     Assert ($acpiVen[0].Query -ceq 'INTC1055') 'ACPI VEN/DEV form normalizes to the searchable ACPI token'
     $otherLink=@(Get-DriverFixCatalogLinks @('ROOT\SOMEDEVICE\0000'))
     Assert ($otherLink[0].Query -ceq 'ROOT\SOMEDEVICE') 'Unknown device classes retain the hardware token in generic fallback'
+    Assert ($otherLink[0].Kind -ceq 'Catalog' -and $otherLink[0].Label -ceq $otherLink[0].Query) 'Catalog links carry Kind and a display Label'
+    # Máy in / MFP: Catalog theo VID/PID thường trống → mở trang hãng (ca thực tế Canon MF240 Code 28, không có class).
+    function UsbDevice([string]$Name,[string[]]$Ids,[string]$Class='',[string[]]$Compat=@()){[pscustomobject]@{Name=$Name;InstanceId=($Ids[-1]+'\6&34C0488&0&0000');HardwareIds=$Ids;CompatibleIds=$Compat;ErrorCode=28;PnpClass=$Class;Service=''}}
+    $canon=UsbDevice 'MF240 Series UFRII LT' @('USB\VID_04A9&PID_27D2&REV_0100&MI_00','USB\VID_04A9&PID_27D2&MI_00')
+    Assert ((Get-DriverFixUsbVid $canon) -ceq '04A9') 'USB VID is read from the first USB hardware ID'
+    Assert ((Get-DriverFixPrinterVendor $canon).Name -ceq 'Canon') 'Canon MF240 with no class and VID/PID-only IDs is recognised as a printer by model name'
+    $canonLinks=@(Get-DriverFixDriverLinks $canon)
+    Assert ($canonLinks.Count -eq 2 -and -not @($canonLinks|Where-Object Kind -ne 'Vendor').Count -and -not @($canonLinks|Where-Object Url -match 'catalog\.update').Count) 'Printer devices get maker links instead of VID/PID Catalog links'
+    Assert ($canonLinks[0].Url -match '^https://www\.google\.com/search\?hl=vi&q=Canon%20MF240%20Series%20UFRII%20LT%20driver%20site%3Avn\.canon$' -and $canonLinks[0].Query -ceq 'Canon MF240 Series UFRII LT driver site:vn.canon') 'Maker search is the model name restricted to the maker site, URL encoded'
+    Assert ($canonLinks[1].Url -ceq 'https://vn.canon/vi/support' -and (Test-DriverFixAllowedLink $canonLinks[0].Url) -and (Test-DriverFixAllowedLink $canonLinks[1].Url)) 'Maker links are on the allowed-link list'
+    $hpLaser=UsbDevice 'HP LaserJet Pro M404' @('USB\VID_03F0&PID_0C17')
+    Assert ((Get-DriverFixDriverLinks $hpLaser)[0].Query -ceq 'HP LaserJet Pro M404 driver site:support.hp.com') 'Model already starting with the maker name is not prefixed twice'
+    $hpKeyboard=UsbDevice 'HP USB Keyboard' @('USB\VID_03F0&PID_0024') 'Keyboard'
+    Assert ($null -eq (Get-DriverFixPrinterVendor $hpKeyboard) -and (Get-DriverFixDriverLinks $hpKeyboard)[0].Kind -ceq 'Catalog' -and (Get-DriverFixDriverLinks $hpKeyboard)[0].Query -ceq 'VID_03F0&PID_0024') 'A non-printer with a mixed-product maker VID keeps the Catalog VID/PID links'
+    Assert ($null -eq (Get-DriverFixPrinterVendor (UsbDevice 'Integrated Webcam' @('USB\VID_05CA&PID_0001') 'Camera')) -and $null -eq (Get-DriverFixPrinterVendor (UsbDevice 'SAMSUNG Mobile USB Modem' @('USB\VID_04E8&PID_6860')))) 'Ricoh webcams and Samsung phones are not sent to printer pages'
+    $brother=UsbDevice 'USB Printing Support' @('USB\VID_04F9&PID_0100')
+    $brotherLinks=@(Get-DriverFixDriverLinks $brother)
+    Assert ((Get-DriverFixPrinterVendor $brother).Name -ceq 'Brother' -and $brotherLinks.Count -eq 1 -and $brotherLinks[0].Url -match '^https://support\.brother\.com/') 'Printer-only maker VID is enough; a generic device name gives only the support page, not a useless model search'
+    Assert ((Get-DriverFixPrinterVendor (UsbDevice 'L3150' @('USB\VID_04B8&PID_1127') '' @('USB\Class_07&SubClass_01&Prot_02'))).Name -ceq 'Epson' -and (Get-DriverFixPrinterVendor (UsbDevice 'Unknown device' @('USB\VID_04B8&PID_1127') 'Printer')).Name -ceq 'Epson') 'USB printer class (compatible ID) or Printer PnP class marks a mixed-product maker device as a printer'
+    Assert ($null -eq (Get-DriverFixPrinterVendor (UsbDevice 'Some Printer' @('USB\VID_1234&PID_5678'))) -and (Get-DriverFixDriverLinks (UsbDevice 'Some Printer' @('USB\VID_1234&PID_5678')))[0].Kind -ceq 'Catalog') 'A printer from a maker not in the table falls back to Catalog'
+    $noisy=UsbDevice ("MF240 `"Series`"`r`n  ") @('USB\VID_04A9&PID_27D2')
+    Assert ((Get-DriverFixPrinterModel $noisy) -ceq 'MF240 Series') 'Model name drops quotes, control characters and repeated spaces before it is searched'
+    $converted2=ConvertTo-DriverFixDevice ([pscustomobject]@{Name='L3150';PNPDeviceID='USB\VID_04B8&PID_1127\A';HardwareID=@('USB\VID_04B8&PID_1127');CompatibleID=@('USB\Class_07&SubClass_01&Prot_02');ConfigManagerErrorCode=28})
+    Assert ($converted2.CompatibleIds.Count -eq 1 -and (Get-DriverFixPrinterVendor $converted2).Name -ceq 'Epson') 'Inventory keeps compatible IDs so a USB printer-class device is recognised'
+    $vendors=@(Get-DriverFixPrinterVendors)
+    Assert ($vendors.Count -eq @($vendors|Select-Object -ExpandProperty Vid -Unique).Count -and -not @($vendors|Where-Object {$_.Vid -cnotmatch '^[0-9A-F]{4}$' -or $_.Support -cnotmatch '^https://' -or -not $_.Site -or $_.Name -match '[^\w.-]' -or (([uri]$_.Support).Host -ne $_.Site -and -not ([uri]$_.Support).Host.EndsWith('.'+$_.Site))}).Count) 'Maker table has unique 4-hex VIDs, HTTPS support pages and Site matching the support host'
+    foreach($vendor in $vendors){Assert (Test-DriverFixAllowedLink $vendor.Support) ('Support page of '+$vendor.Name+' is openable')}
+    Assert ((Test-DriverFixAllowedLink 'https://www.catalog.update.microsoft.com/Search.aspx?q=VID_04A9') -and -not (Test-DriverFixAllowedLink 'https://www.catalog.update.microsoft.com/Download.aspx') -and -not (Test-DriverFixAllowedLink 'https://www.google.com/maps')) 'Only the Catalog search and Google search pages are openable on the shared hosts'
+    foreach($bad in 'http://vn.canon/vi/support','https://evil.example/vn.canon','https://vn.canon.evil.example/','https://user:pw@vn.canon/','https://vn.canon:8443/','file:///C:/Windows/System32/cmd.exe','vn.canon','',$null){Assert (-not (Test-DriverFixAllowedLink $bad)) ("Link is refused: $bad")}
+    $printerHtml=ConvertTo-DriverFixDeviceHtml @($canon)
+    Assert ($printerHtml -match 'site%3Avn\.canon' -and $printerHtml -notmatch 'catalog\.update' -and $printerHtml -match 'https://vn\.canon/vi/support') 'HTML report lists maker links for a printer instead of Catalog links'
     Assert ((Get-DriverFixErrorDescription 43) -match 'báo lỗi' -and (Get-DriverFixErrorDescription 22) -match 'disable') 'Error descriptions distinguish stopped from disabled'
     $converted=ConvertTo-DriverFixDevice ([pscustomobject]@{Name='';PNPDeviceID='PCI\TEST';HardwareID=@('ID1','ID2');ConfigManagerErrorCode=28})
     Assert ($converted.InstanceId -eq 'PCI\TEST' -and $converted.HardwareIds.Count -eq 2 -and $converted.Name -eq 'PCI\TEST') 'Inventory preserves all IDs and falls back to instance name'
+    Assert ($converted.CompatibleIds.Count -eq 0) 'A device without CompatibleID reads as an empty compatible list'
     $before=Snapshot @((Device 'parent' @('ACPI\INTC1055')), (Device 'removed' @('PCI\VEN_8086&DEV_0001')))
     $after=Snapshot @((Device 'parent' @('ACPI\INTC1055') 0),(Device 'child' @($audioId)),(Device 'disabled' @('USB\VID_1234&PID_5678') 22))
     $delta=Compare-DriverFixSnapshot $before $after

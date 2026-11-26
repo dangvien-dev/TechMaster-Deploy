@@ -17,12 +17,28 @@ function Select-DriverFixFolder([string]$Title){
     $picker=New-Object Windows.Forms.FolderBrowserDialog;$picker.Description=$Title;$picker.ShowNewFolderButton=$false
     try{if($picker.ShowDialog() -eq 'OK'){return $picker.SelectedPath};return $null}finally{$picker.Dispose()}
 }
+function Update-DriverFixLinks($Device){
+    # Máy in / MFP của hãng trong bảng → nút + link trang hãng; thiết bị khác → link Catalog theo Hardware ID.
+    $links=@();$vendor=$null
+    if($Device){$vendor=Get-DriverFixPrinterVendor $Device;$links=@(Get-DriverFixDriverLinks $Device)}
+    $driverWindow.FindName('CatalogLinks').ItemsSource=$links
+    $button=$driverWindow.FindName('VendorDriver');$hint=$driverWindow.FindName('LinkHint')
+    $primary=@($links|Where-Object Kind -eq 'Vendor')|Select-Object -First 1
+    if($vendor -and $primary){
+        $button.IsEnabled=$true;$button.Tag=[string]$primary.Url;$button.Content='Mở trang driver '+$vendor.Name
+        $hint.Text='Máy in / MFP: Microsoft Catalog thường không có driver khớp theo VID/PID. Mở trang hãng '+$vendor.Name+', chọn đúng model và Windows, tải bộ cài đầy đủ rồi chạy khi máy in đang cắm. Xong bấm Quét lại.'
+        $hint.Visibility='Visible'
+    }else{
+        $button.IsEnabled=$false;$button.Tag=$null;$button.Content='Mở trang driver của hãng'
+        $hint.Text='';$hint.Visibility='Collapsed'
+    }
+}
 function Update-DriverFixSelection {
     $device=$driverWindow.FindName('Devices').SelectedItem
     $driverWindow.FindName('Disable').IsEnabled=$false
-    if(-not $device){$driverWindow.FindName('DeviceDetails').Text='Chọn thiết bị để xem toàn bộ Hardware ID, InstanceId và link Catalog.';$driverWindow.FindName('CatalogLinks').ItemsSource=@();return}
+    if(-not $device){$driverWindow.FindName('DeviceDetails').Text='Chọn thiết bị để xem toàn bộ Hardware ID, InstanceId và link tải driver.';Update-DriverFixLinks $null;return}
     $driverWindow.FindName('DeviceDetails').Text=$device.Name+"`r`nCode "+(Get-DriverFixCodeText $device.ErrorCode)+' · '+$device.Description+"`r`nInstanceId: "+$device.InstanceId+"`r`nHardware ID:`r`n"+($device.HardwareIds -join "`r`n")
-    $driverWindow.FindName('CatalogLinks').ItemsSource=@(Get-DriverFixCatalogLinks $device.HardwareIds)
+    Update-DriverFixLinks $device
     if($script:driverFix.Session.Profile -and -not $script:driverFix.Work){$driverWindow.FindName('Disable').IsEnabled=($device.ErrorCode -gt 0 -and $device.ErrorCode -ne 22 -and [bool](Get-DriverFixDisableRule $device $script:driverFix.Session.Profile))}
 }
 function Update-DriverFixView {
@@ -112,7 +128,11 @@ $driverWindow.FindName('ShowAll').Add_Unchecked({Update-DriverFixView})
 $driverWindow.FindName('DeviceManager').Add_Click({Start-Process -FilePath (Join-Path $env:WINDIR 'System32/mmc.exe') -ArgumentList 'devmgmt.msc' -ErrorAction Stop|Out-Null})
 $driverWindow.FindName('Devices').Add_SelectionChanged({Update-DriverFixSelection})
 $driverWindow.FindName('CatalogLinks').AddHandler([Windows.Documents.Hyperlink]::RequestNavigateEvent,[Windows.Navigation.RequestNavigateEventHandler]{param($sender,$event)
-    if($event.Uri.Scheme -eq 'https' -and $event.Uri.Host -eq 'www.catalog.update.microsoft.com' -and $event.Uri.AbsolutePath -eq '/Search.aspx'){Start-Process -FilePath $event.Uri.AbsoluteUri|Out-Null};$event.Handled=$true
+    if(Test-DriverFixAllowedLink $event.Uri.AbsoluteUri){Start-Process -FilePath $event.Uri.AbsoluteUri|Out-Null};$event.Handled=$true
+})
+$driverWindow.FindName('VendorDriver').Add_Click({
+    $url=[string]$driverWindow.FindName('VendorDriver').Tag
+    if($url -and (Test-DriverFixAllowedLink $url)){try{Start-Process -FilePath $url|Out-Null}catch{Set-DriverFixStatus ('Chưa mở được trình duyệt: '+$_.Exception.Message) 'Error'}}
 })
 $driverWindow.FindName('Scan').Add_Click({if($script:driverFix.Session){Start-DriverFixOperation Scan}else{Start-DriverFixOperation Init}})
 $driverWindow.FindName('Rescan').Add_Click({Start-DriverFixOperation Rescan})
