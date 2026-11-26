@@ -53,7 +53,44 @@ function Get-AvNewDetections([datetime]$since) {
     @(Get-MpThreatDetection -ErrorAction SilentlyContinue | Where-Object { $_.InitialDetectionTime -and [datetime]$_.InitialDetectionTime -ge $since })
 }
 
-function Invoke-AvRepairItem($item, [string]$QuarantineRoot, [string]$BackupRoot) {
+function Get-AvRunningScan {
+    # Defender keeps start/end times per scan type; a start newer than the end means it is still running.
+    try { $status = Get-MpComputerStatus -ErrorAction Stop } catch { return $null }
+    foreach ($kind in @(@('Full', 'Quét toàn bộ'), @('Quick', 'Quét nhanh'))) {
+        $started = $status.($kind[0] + 'ScanStartTime'); $ended = $status.($kind[0] + 'ScanEndTime')
+        if ($started -and (-not $ended -or [datetime]$started -gt [datetime]$ended)) {
+            return [pscustomobject]@{ Name = $kind[1]; Started = [datetime]$started }
+        }
+    }
+    $null
+}
+
+function Test-AvScanBusyError($errorRecord) {
+    $text = [string]$errorRecord.Exception.Message
+    return ($text -match '(?i)already in progress|scan is in progress|đang (được )?quét')
+}
+
+function Start-AvScanWhenFree([scriptblock]$start, [hashtable]$Progress, [string]$title, [int]$WaitSeconds) {
+    # Wait for another Defender scan (a manual full scan, the scheduled scan) instead of failing at once.
+    $deadline = (Get-Date).AddSeconds($WaitSeconds)
+    while ($true) {
+        $running = Get-AvRunningScan
+        if (-not $running) {
+            try { & $start; return $null }
+            catch { if (-not (Test-AvScanBusyError $_)) { throw } }
+        }
+        if ((Get-Date) -ge $deadline) {
+            $who = if ($running) { '{0} của Defender (bắt đầu {1:HH:mm dd/MM})' -f $running.Name, $running.Started } else { 'một lượt quét khác của Defender (quét định kỳ hoặc do người dùng mở)' }
+            return ('Defender vẫn đang chạy ' + $who + ' sau ' + [int]($WaitSeconds / 60) + ' phút chờ. Để lượt đó chạy xong (xem Windows Security → Virus & threat protection), rồi chạy lại mục này.')
+        }
+        if ($Progress) {
+            $Progress.Current = '{0}: chờ {1} chạy xong…' -f $title, $(if ($running) { ('{0} (từ {1:HH:mm})' -f $running.Name.ToLower(), $running.Started) } else { 'lượt quét khác' })
+        }
+        Start-Sleep -Seconds 15
+    }
+}
+
+function Invoke-AvRepairItem($item, [string]$QuarantineRoot, [string]$BackupRoot, [hashtable]$Progress, [int]$ScanWaitSeconds = 900) {
     $title = $item.Title
     try {
         switch ($item.Id) {
@@ -119,13 +156,17 @@ function Invoke-AvRepairItem($item, [string]$QuarantineRoot, [string]$BackupRoot
                 return New-AvRepairResult $title (-not $failed.Count) $msg
             }
             { $_ -in 'QuickScan','FullScan','CustomScan' } {
-                $start = Get-Date
-                if ($item.Id -eq 'CustomScan') {
-                    if (-not (Test-Path -LiteralPath ([string]$item.Data))) { return New-AvRepairResult $title $false ('Ổ ' + $item.Data + ' không có trên máy (đã rút?). Cắm lại rồi chạy.') }
-                    Start-MpScan -ScanType CustomScan -ScanPath ([string]$item.Data) -ErrorAction Stop
-                } else {
-                    Start-MpScan -ScanType $(if ($item.Id -eq 'QuickScan') { 'QuickScan' } else { 'FullScan' }) -ErrorAction Stop
-                }
+                if ($item.Id -eq 'CustomScan' -and -not (Test-Path -LiteralPath ([string]$item.Data))) { return New-AvRepairResult $title $false ('Ổ ' + $item.Data + ' không có trên máy (đã rút?). Cắm lại rồi chạy.') }
+                $type = switch ($item.Id) { 'QuickScan' { 'QuickScan' } 'FullScan' { 'FullScan' } default { 'CustomScan' } }
+                $path = [string]$item.Data
+                $script:avScanStart = Get-Date
+                $busy = Start-AvScanWhenFree {
+                    $script:avScanStart = Get-Date
+                    if ($type -eq 'CustomScan') { Start-MpScan -ScanType CustomScan -ScanPath $path -ErrorAction Stop }
+                    else { Start-MpScan -ScanType $type -ErrorAction Stop }
+                } $Progress $title $ScanWaitSeconds
+                if ($busy) { return New-AvRepairResult $title $false $busy }
+                $start = $script:avScanStart
                 $found = @(Get-AvNewDetections $start)
                 $span = (Get-Date) - $start
                 $took = '{0}:{1:00}' -f [int][Math]::Floor($span.TotalMinutes), $span.Seconds
@@ -153,7 +194,7 @@ function Invoke-AvRepair($items, [hashtable]$Progress, [string]$LogPath, [string
         $item = $ordered[$i]
         if ($Progress) { $Progress.Index = $i + 1; $Progress.Total = $ordered.Count; $Progress.Current = $item.Title; $Progress.Percent = [int](100 * $i / [Math]::Max(1, $ordered.Count)) }
         & $log ('[{0}] BẮT ĐẦU  {1}' -f (Get-Date).ToString('HH:mm:ss'), $item.Title)
-        $result = Invoke-AvRepairItem $item $QuarantineRoot $BackupRoot
+        $result = Invoke-AvRepairItem $item $QuarantineRoot $BackupRoot $Progress
         $results.Add($result)
         & $log ('[{0}] {1}  {2} — {3}' -f $result.Time, $(if ($result.Ok) { 'XONG ' } else { 'LỖI  ' }), $result.Title, $result.Message)
         if ($Progress) { $Progress.Lines.Add(('{0} {1}: {2}' -f $(if ($result.Ok) { '✓' } else { '✗' }), $result.Title, $result.Message)) | Out-Null }

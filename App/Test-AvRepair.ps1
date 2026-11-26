@@ -85,6 +85,29 @@ try {
     Assert ($r.Ok -and $r.Message -match 'Phát hiện mới: 1') 'New detections after a scan are counted'
     $r = Invoke-AvRepairItem ([pscustomobject]@{ Id = 'OfflineScan'; Title = 'Offline' }) $vault $backups
     Assert ($r.Ok -and $script:calls[-1] -eq 'Offline') 'Offline scan is only requested when selected'
+    # Another Defender scan is running (the manual full scan started earlier): wait, then run.
+    $script:polls = 0; $script:sleeps = 0
+    function Get-MpComputerStatus { [CmdletBinding()] param()
+        $script:polls++
+        if ($script:sleeps -lt 2) { [pscustomobject]@{ AntivirusSignatureVersion = $script:sig; FullScanStartTime = (Get-Date).AddMinutes(-80); FullScanEndTime = (Get-Date).AddDays(-3) } }
+        else { [pscustomobject]@{ AntivirusSignatureVersion = $script:sig; FullScanStartTime = (Get-Date).AddMinutes(-80); FullScanEndTime = (Get-Date) } } }
+    function Start-Sleep { [CmdletBinding()] param($Seconds) $script:sleeps++ }
+    $progressBusy = [hashtable]::Synchronized(@{ Lines = [Collections.ArrayList]::Synchronized((New-Object Collections.ArrayList)) })
+    $before = $script:calls.Count
+    $r = Invoke-AvRepairItem ([pscustomobject]@{ Id = 'QuickScan'; Title = 'Quét nhanh' }) $vault $backups $progressBusy 600
+    Assert ($r.Ok -and $script:sleeps -eq 2 -and $script:calls.Count -eq $before + 1) 'A running full scan is waited for, then the quick scan starts'
+    Assert ($progressBusy.Current -match 'chờ quét toàn bộ') 'Progress says which scan is being waited for'
+    $script:sleeps = -1000
+    $r = Invoke-AvRepairItem ([pscustomobject]@{ Id = 'CustomScan'; Title = 'Quét ổ'; Data = $temp }) $vault $backups $null 0
+    Assert (-not $r.Ok -and $r.Message -match 'Quét toàn bộ của Defender \(bắt đầu' -and $r.Message -match 'chạy lại mục này') 'Timeout explains which scan is still running and what to do'
+    function Get-MpComputerStatus { [CmdletBinding()] param() [pscustomobject]@{ AntivirusSignatureVersion = $script:sig } }
+    $script:busyOnce = $true
+    function Start-MpScan { [CmdletBinding()] param($ScanType, $ScanPath) if ($script:busyOnce) { $script:busyOnce = $false; throw 'A scan is already in progress on this device.' }; $script:calls.Add('Scan:' + $ScanType) }
+    $r = Invoke-AvRepairItem ([pscustomobject]@{ Id = 'QuickScan'; Title = 'Quét nhanh' }) $vault $backups $null 600
+    Assert ($r.Ok -and $script:calls[-1] -eq 'Scan:QuickScan') 'A busy error without timestamps (scheduled scan) is retried'
+    function Start-MpScan { [CmdletBinding()] param($ScanType, $ScanPath) throw 'Access denied' }
+    $r = Invoke-AvRepairItem ([pscustomobject]@{ Id = 'QuickScan'; Title = 'Quét nhanh' }) $vault $backups $null 600
+    Assert (-not $r.Ok -and $r.Message -eq 'Access denied') 'Other scan errors are reported immediately, not retried'
     function Update-MpSignature { [CmdletBinding()] param() throw 'Không có mạng' }
     $r = Invoke-AvRepairItem ([pscustomobject]@{ Id = 'UpdateSignatures'; Title = 'Cập nhật' }) $vault $backups
     Assert (-not $r.Ok -and $r.Message -match 'Không có mạng') 'A failing action returns its error instead of stopping the run'

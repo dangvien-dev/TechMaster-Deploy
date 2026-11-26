@@ -1,5 +1,9 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.16.0 — 26/11/2026
+
+- Sửa lỗi báo virus: khi Defender đang có lượt quét khác (quét toàn bộ mở tay, quét định kỳ), mục quét chờ tối đa 15 phút rồi tự chạy, cửa sổ ghi rõ đang chờ lượt nào (ví dụ “chờ quét toàn bộ (từ 08:44) chạy xong…”). Quá thời gian thì báo lượt quét nào còn chạy và hướng dẫn chạy lại, thay cho lỗi tiếng Anh “A scan is already in progress”. Lỗi quét khác vẫn báo ngay.
+
 ## 2.2.15.0 — 26/11/2026
 
 - Mã trạng thái 5 trong lịch sử phát hiện ghi **Đã cho phép lúc phát hiện (5)** thay vì “đang được cho phép”. Cờ **ĐANG ĐƯỢC CHO PHÉP** chỉ hiện khi mã mối đe dọa còn trong danh sách cho phép của Defender; tệp từng được cho phép mà vẫn còn trên ổ có cờ **ĐÃ CHO PHÉP, TỆP VẪN CÒN**. Dòng chi tiết không còn mâu thuẫn với phần kết luận.
