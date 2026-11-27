@@ -36,9 +36,9 @@ try{
     $seen=New-Object Collections.ArrayList
     $r=Copy-DeployNetworkStage $source $target $staging {param($i,$n,$p)[void]$seen.Add($p)}
     $indexSha=Get-DeployNetworkSha256 ([IO.File]::ReadAllBytes((Join-Path $source 'update-source.json')))
-    Assert ($r.Action -ceq 'Install' -and $r.Staged -eq ($program.Count+1) -and $r.IndexSha256 -ceq $indexSha -and $r.ExeSha256 -ceq (Get-DeployNetworkSha256 ([byte[]](1..200))) -and $seen.Count -eq $program.Count -and -not (Test-Path $target)) 'Every file and the launcher are staged; nothing is written to the program folder before elevation'
+    Assert ($r.Action -ceq 'Install' -and $r.Staged -eq ($program.Count+1) -and $r.IndexSha256 -ceq $indexSha -and $r.ExeSha256 -ceq (Get-DeployNetworkSha256 ([byte[]](1..200))) -and $r.IndexName -ceq 'update-source.json' -and $seen.Count -eq ($program.Count+1) -and -not (Test-Path $target)) 'Every file and the launcher are staged; nothing is written to the program folder before elevation'
     Assert ((Test-Path (Join-Path $staging 'App\MainWindow.xml')) -and (Test-Path (Join-Path $staging 'update-source.json')) -and (Test-Path (Join-Path $staging 'TechMaster Deploy.exe'))) 'Staging holds the files, the list and the launcher'
-    $i=Install-DeployNetworkCopy $staging $r.IndexSha256 $r.ExeSha256 $target
+    $i=Install-DeployNetworkCopy $staging $r.IndexName $r.IndexSha256 $r.ExeSha256 $target
     Assert ($i.Written -eq ($program.Count+1) -and $i.Total -eq $program.Count -and $i.ExeChecked -and $i.Version -eq [version]'2.2.24.0' -and -not (Test-Path $staging)) 'The elevated step writes every checked file and removes the staging folder'
     foreach($path in $program+@('update-source.json','TechMaster Deploy.exe')){Assert ([IO.File]::ReadAllBytes((Join-Path $target $path)).Length -eq [IO.File]::ReadAllBytes((Join-Path $source $path)).Length) "$path is installed"}
     Assert (@(Get-ChildItem -LiteralPath $target -Recurse -Filter '*.tm-new').Count -eq 0) 'No temporary file is left behind'
@@ -63,7 +63,7 @@ try{
     $staging=Join-Path $temp 'stage2'
     $r=Copy-DeployNetworkStage $source $target $staging
     Assert ($r.Action -ceq 'UpToDate' -and $r.Staged -eq 0 -and $r.ExeSha256 -and @(Get-ChildItem -LiteralPath $staging -File).Count -eq 1) 'An up-to-date copy stages only the list'
-    $i=Install-DeployNetworkCopy $staging $r.IndexSha256 $r.ExeSha256 $target
+    $i=Install-DeployNetworkCopy $staging $r.IndexName $r.IndexSha256 $r.ExeSha256 $target
     Assert ($i.Written -eq 0 -and $i.ExeChecked) 'Unchanged files and the launcher are re-checked after the lock, nothing rewritten'
 
     # One file changed on this computer: only that file is copied again.
@@ -73,9 +73,9 @@ try{
     $r=Copy-DeployNetworkStage $source $target $staging
     Assert ($r.Action -ceq 'Install' -and $r.Staged -eq 1 -and (Test-Path (Join-Path $staging 'App\MainWindow.xml'))) 'Only the changed file is staged'
     [IO.File]::WriteAllText((Join-Path $staging 'App\MainWindow.xml'),'tampered',$utf8)
-    Throws {Install-DeployNetworkCopy $staging $r.IndexSha256 $r.ExeSha256 $target} 'A staged file changed before elevation is refused' 'bị thay đổi trước khi cài'
+    Throws {Install-DeployNetworkCopy $staging $r.IndexName $r.IndexSha256 $r.ExeSha256 $target} 'A staged file changed before elevation is refused' 'bị thay đổi trước khi cài'
     [IO.File]::WriteAllText((Join-Path $staging 'update-source.json'),'{}',$utf8)
-    Throws {Install-DeployNetworkCopy $staging $r.IndexSha256 $r.ExeSha256 $target} 'A staged list changed before elevation is refused' 'Danh sách tệp đã chép bị thay đổi'
+    Throws {Install-DeployNetworkCopy $staging $r.IndexName $r.IndexSha256 $r.ExeSha256 $target} 'A staged list changed before elevation is refused' 'Danh sách tệp đã chép bị thay đổi'
     Remove-Item -LiteralPath $staging -Recurse -Force
     [IO.File]::WriteAllBytes($local,$saved)
 
@@ -83,10 +83,10 @@ try{
     $staging=Join-Path $temp 'stage4'
     $r=Copy-DeployNetworkStage $source $target $staging
     [IO.File]::WriteAllText((Join-Path $target 'README.md'),'swapped',$utf8)
-    Throws {Install-DeployNetworkCopy $staging $r.IndexSha256 $r.ExeSha256 $target} 'A program file changed between the steps is refused' 'không khớp bản trên máy chia sẻ'
+    Throws {Install-DeployNetworkCopy $staging $r.IndexName $r.IndexSha256 $r.ExeSha256 $target} 'A program file changed between the steps is refused' 'không khớp bản trên máy chia sẻ'
     [IO.File]::WriteAllText((Join-Path $target 'README.md'),"# README.md — nội dung tiếng Việt`n",$utf8)
     [IO.File]::WriteAllBytes((Join-Path $target 'TechMaster Deploy.exe'),[byte[]](5..9))
-    Throws {Install-DeployNetworkCopy $staging $r.IndexSha256 $r.ExeSha256 $target} 'A launcher changed between the steps is refused before it can run' 'TechMaster Deploy.exe trên máy này không khớp'
+    Throws {Install-DeployNetworkCopy $staging $r.IndexName $r.IndexSha256 $r.ExeSha256 $target} 'A launcher changed between the steps is refused before it can run' 'TechMaster Deploy.exe trên máy này không khớp'
     Remove-Item -LiteralPath $staging -Recurse -Force -ErrorAction SilentlyContinue
     [IO.File]::WriteAllBytes((Join-Path $target 'TechMaster Deploy.exe'),[byte[]](1..200))
 
@@ -108,13 +108,44 @@ try{
     Assert ($r.Action -ceq 'KeepNewer' -and $r.LocalVersion -eq [version]'9.0.0.0' -and -not (Test-Path (Join-Path $temp 'stage7'))) 'A newer copy in a locked folder is kept and nothing is staged'
 
     # The elevated command: parses, carries its own functions and escapes quotes in paths.
-    $command=Get-DeployNetworkElevatedCommand "C:\Temp\O'Brien\stage" $indexSha '' 'C:\TechMaster-Deploy'
+    $command=Get-DeployNetworkElevatedCommand "C:\Temp\O'Brien\stage" 'update-package.json' $indexSha '' 'C:\TechMaster-Deploy'
     $text=[Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($command))
     $tokens=$null;$errors=$null;[void][Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
     Assert (@($errors).Count -eq 0) ('The elevated command parses: '+(@($errors) -join '; '))
-    Assert ($text.Contains("'C:\Temp\O''Brien\stage'") -and $text.Contains("'$indexSha'") -and -not $text.Contains('$script:')) 'Paths are quoted and the command does not depend on script variables'
+    Assert ($text.Contains("'C:\Temp\O''Brien\stage' 'update-package.json'") -and $text.Contains("'$indexSha'") -and -not $text.Contains('$script:')) 'Paths are quoted and the command does not depend on script variables'
     foreach($name in $script:DeployNetworkElevated){Assert ($text.Contains('function '+$name+' {')) "The elevated command defines $name"}
     Assert (('-NoLogo -NoProfile -ExecutionPolicy Bypass -EncodedCommand '+$command).Length -lt 30000) "The elevated command fits on a Windows command line ($($command.Length))"
+
+    # An installed copy (ZIP / updater) carries update-package.json, not update-source.json: SHA256 of every
+    # file including the launcher; files kept for the user (preserve) are neither checked nor copied.
+    $pkg=Join-Path $temp 'pkg';$pkgTarget=Join-Path $temp 'pkg-target'
+    foreach($path in $program){Write-Fixture $pkg $path ('# '+$path+" — bản cài`n")}
+    Write-Fixture $pkg 'version.txt' "2.2.25.0`r`n"
+    [IO.File]::WriteAllBytes((Join-Path $pkg 'TechMaster Deploy.exe'),[byte[]](3..90))
+    Write-Fixture $pkg 'FixClone/Reinstall/_DOC-TRUOC.txt' 'người dùng đã sửa'
+    $entries=@(foreach($path in $program+@('TechMaster Deploy.exe')){[ordered]@{path=$path;sha256=(Get-DeployNetworkSha256 ([IO.File]::ReadAllBytes((Join-Path $pkg ($path.Replace('/','\'))))));preserve=$false}})
+    $entries+=[ordered]@{path='FixClone/Reinstall/_DOC-TRUOC.txt';sha256=('A'*64);preserve=$true}
+    [IO.File]::WriteAllText((Join-Path $pkg 'update-package.json'),(([ordered]@{schema=1;product='TechMaster.Deploy';version='2.2.25.0';notes='';source=[ordered]@{repository='dangvien-dev/TechMaster-Deploy';branch='main';commit=('b'*40);dirty=$false};files=$entries}) | ConvertTo-Json -Depth 5),$utf8)
+    Assert ((Get-DeployNetworkIndexFile $pkg).Name -ceq 'update-package.json' -and @(Get-DeployNetworkSourceProblems $pkg).Count -eq 0) 'An installed copy is read from update-package.json; the preserved file the user changed is not checked'
+    $pkgStage=Join-Path $temp 'pkg-stage'
+    $r=Copy-DeployNetworkStage $pkg $pkgTarget $pkgStage
+    Assert ($r.IndexName -ceq 'update-package.json' -and $r.Action -ceq 'Install' -and $r.Staged -eq ($program.Count+1) -and -not $r.ExeSha256 -and (Test-Path (Join-Path $pkgStage 'TechMaster Deploy.exe')) -and -not (Test-Path (Join-Path $pkgStage 'FixClone\Reinstall\_DOC-TRUOC.txt'))) 'The launcher is checked from the package list; preserved files are not copied'
+    $i=Install-DeployNetworkCopy $pkgStage $r.IndexName $r.IndexSha256 $r.ExeSha256 $pkgTarget
+    Assert ($i.ExeChecked -and $i.Written -eq ($program.Count+1) -and $i.Version -eq [version]'2.2.25.0' -and (Test-Path (Join-Path $pkgTarget 'update-package.json')) -and -not (Test-Path (Join-Path $pkgTarget 'update-source.json'))) 'The copy is installed with its update-package.json, so the app updater knows the installed version'
+    $r=Copy-DeployNetworkStage $pkg $pkgTarget (Join-Path $temp 'pkg-stage2')
+    $i=Install-DeployNetworkCopy (Join-Path $temp 'pkg-stage2') $r.IndexName $r.IndexSha256 $r.ExeSha256 $pkgTarget
+    Assert ($r.Action -ceq 'UpToDate' -and $i.Written -eq 0 -and $i.ExeChecked) 'An up-to-date installed copy is re-checked (launcher included) without rewriting'
+    [IO.File]::WriteAllBytes((Join-Path $pkgTarget 'TechMaster Deploy.exe'),[byte[]](7..9))
+    $r=Copy-DeployNetworkStage $pkg $pkgTarget (Join-Path $temp 'pkg-stage3')
+    Assert ($r.Staged -eq 1 -and (Test-Path (Join-Path $temp 'pkg-stage3\TechMaster Deploy.exe'))) 'A changed launcher on this computer is copied again'
+    Remove-Item -LiteralPath (Join-Path $temp 'pkg-stage3') -Recurse -Force
+    [IO.File]::WriteAllText((Join-Path $pkg 'App\MainWindow.xml'),'edited',$utf8)
+    Assert ((@(Get-DeployNetworkSourceProblems $pkg) -join '|') -ceq 'App/MainWindow.xml') 'A changed file in an installed copy is named before sharing'
+    Throws {Copy-DeployNetworkStage $pkg (Join-Path $temp 'pkg-fresh') (Join-Path $temp 'pkg-stage4')} 'A changed file in an installed copy stops the copy' 'không khớp danh sách'
+    Assert ((Get-DeployNetworkRoot $pkg) -ceq $pkg -and -not (Test-Path (Join-Path $pkg 'update-source.json'))) 'An installed copy without update-source.json can be shared (case seen on KY-THUAT)'
+    Remove-Item -LiteralPath (Join-Path $pkg 'update-package.json') -Force
+    Throws {Get-DeployNetworkRoot $pkg} 'A program folder without a file list is not shared' 'thiếu danh sách tệp update-package.json'
+    Throws {Copy-DeployNetworkStage $pkg (Join-Path $temp 'pkg-fresh') (Join-Path $temp 'pkg-stage5')} 'A folder without any file list is refused' 'update-package.json'
 
     # --- Sharing computer (mocked) ---
     $log=Join-Path $temp 'network.jsonl'

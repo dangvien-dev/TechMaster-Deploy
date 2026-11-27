@@ -1,12 +1,14 @@
 ﻿# Client side of "Chạy TechMaster qua mạng" (Network.Launch.ps1, opened from \\MÁY\TechMaster$\App).
-# 1. Without elevation (the share connection belongs to this sign-in): read update-source.json from the
-#    read-only share, copy only the files that differ into a private staging folder, checking size and Git
-#    blob hash of each one.
+# The share carries its own list of program files: update-package.json in an installed copy (SHA256 of
+# every file, launcher included) or update-source.json in a repository checkout (size + Git blob hash).
+# 1. Without elevation (the share connection belongs to this sign-in): copy only the files that differ
+#    into a private staging folder, checking each one against the list.
 # 2. Elevated, as an inline command built here (no script from a folder users can write is run as
 #    administrator): lock C:\TechMaster-Deploy to Administrators / SYSTEM, check the staged list by SHA256,
 #    check every file again while writing it, then open the app.
 # Functions used by the elevated step read no $script: variables: their text is sent as the command.
-$script:DeployNetworkElevated=@('Test-DeployNetworkPath','Get-DeployNetworkBlobHash','Get-DeployNetworkSha256','ConvertFrom-DeployNetworkIndex','Test-DeployNetworkFile','Protect-DeployNetworkFolder','Install-DeployNetworkCopy','Start-DeployNetworkApp')
+$script:DeployNetworkElevated=@('Test-DeployNetworkPath','Get-DeployNetworkBlobHash','Get-DeployNetworkSha256','ConvertFrom-DeployNetworkIndex','Test-DeployNetworkBytes','Test-DeployNetworkFile','Protect-DeployNetworkFolder','Install-DeployNetworkCopy','Start-DeployNetworkApp')
+$script:DeployNetworkIndexNames=@('update-package.json','update-source.json')
 
 function Test-DeployNetworkPath([string]$Path) {
     # Same program-file scope as the updater (Assert-DeployPath); the launcher is copied separately.
@@ -28,21 +30,30 @@ function Get-DeployNetworkSha256([byte[]]$Bytes) {
 function ConvertFrom-DeployNetworkIndex([byte[]]$Bytes) {
     $index=[Text.Encoding]::UTF8.GetString($Bytes).TrimStart([char]0xFEFF) | ConvertFrom-Json
     $version=$null
-    if([string]$index.product -cne 'TechMaster.Deploy' -or -not [version]::TryParse([string]$index.version,[ref]$version) -or -not @($index.files).Count){throw 'Danh sách tệp TechMaster (update-source.json) không hợp lệ.'}
+    if([string]$index.product -cne 'TechMaster.Deploy' -or -not [version]::TryParse([string]$index.version,[ref]$version) -or -not @($index.files).Count){throw 'Danh sách tệp TechMaster (update-package.json / update-source.json) không hợp lệ.'}
+    $package=[bool](@($index.files)[0].PSObject.Properties['sha256'])
     $seen=@{}
     $files=@(foreach($entry in @($index.files)){
         $path=[string]$entry.path
-        if(-not (Test-DeployNetworkPath $path) -or $seen.ContainsKey($path.ToLowerInvariant()) -or [string]$entry.sha -cnotmatch '^[0-9a-f]{40}$' -or [long]$entry.size -lt 0){throw ('Danh sách tệp TechMaster có mục không hợp lệ: '+$path)}
+        # Files an installed copy keeps for the user (preserve) may differ: they are neither checked nor copied.
+        if($package -and $entry.preserve -eq $true){continue}
+        $valid=if($package){((Test-DeployNetworkPath $path) -or $path -ceq 'TechMaster Deploy.exe') -and [string]$entry.sha256 -match '^[0-9a-fA-F]{64}$'}else{(Test-DeployNetworkPath $path) -and [string]$entry.sha -cmatch '^[0-9a-f]{40}$' -and [long]$entry.size -ge 0}
+        if(-not $valid -or $seen.ContainsKey($path.ToLowerInvariant())){throw ('Danh sách tệp TechMaster có mục không hợp lệ: '+$path)}
         $seen[$path.ToLowerInvariant()]=$true
-        [pscustomobject]@{Path=$path;Size=[long]$entry.size;Sha=[string]$entry.sha}
+        if($package){[pscustomobject]@{Path=$path;Size=[long]-1;Sha=([string]$entry.sha256).ToLowerInvariant();Kind='Sha256'}}
+        else{[pscustomobject]@{Path=$path;Size=[long]$entry.size;Sha=[string]$entry.sha;Kind='Blob'}}
     })
-    [pscustomobject]@{Version=$version;Files=$files}
+    [pscustomobject]@{Version=$version;Files=$files;Format=$(if($package){'Package'}else{'Source'})}
+}
+function Test-DeployNetworkBytes([byte[]]$Bytes,$Entry) {
+    if($Entry.Kind -ceq 'Sha256'){return ((Get-DeployNetworkSha256 $Bytes) -ceq $Entry.Sha)}
+    return ($Bytes.Length -eq $Entry.Size -and (Get-DeployNetworkBlobHash $Bytes) -ceq $Entry.Sha)
 }
 # True only when the file on disk is exactly the listed version.
 function Test-DeployNetworkFile([string]$Path,$Entry) {
     if(-not (Test-Path -LiteralPath $Path -PathType Leaf)){return $false}
-    if(([IO.FileInfo]::new($Path)).Length -ne $Entry.Size){return $false}
-    return ((Get-DeployNetworkBlobHash ([IO.File]::ReadAllBytes($Path))) -ceq $Entry.Sha)
+    if($Entry.Kind -cne 'Sha256' -and ([IO.FileInfo]::new($Path)).Length -ne $Entry.Size){return $false}
+    return (Test-DeployNetworkBytes ([IO.File]::ReadAllBytes($Path)) $Entry)
 }
 function Get-DeployNetworkTarget {Join-Path $env:SystemDrive 'TechMaster-Deploy'}
 # A copy is trusted as it is only when the folder is locked (Protect-DeployNetworkFolder): owned by
@@ -67,48 +78,51 @@ function Get-DeployNetworkLocalVersion([string]$Target) {
     try{if((Test-Path -LiteralPath $path -PathType Leaf) -and [version]::TryParse(([IO.File]::ReadAllText($path)).Trim(),[ref]$version)){return $version}}catch{}
     return $null
 }
-# Files of $Root that differ from its own update-source.json; the sharing computer warns before clients fail.
+# The list a program folder carries: update-package.json in an installed copy, update-source.json in a checkout.
+function Get-DeployNetworkIndexFile([string]$Root) {
+    foreach($name in $script:DeployNetworkIndexNames){$path=Join-Path $Root $name;if(Test-Path -LiteralPath $path -PathType Leaf){return [pscustomobject]@{Name=$name;Path=$path}}}
+    return $null
+}
+# Files of $Root that differ from its own list; the sharing computer warns before clients fail.
 function Get-DeployNetworkSourceProblems([string]$Root) {
-    $indexPath=Join-Path $Root 'update-source.json'
-    if(-not (Test-Path -LiteralPath $indexPath -PathType Leaf)){return @('Thiếu update-source.json.')}
-    try{$index=ConvertFrom-DeployNetworkIndex ([IO.File]::ReadAllBytes($indexPath))}catch{return @($_.Exception.GetBaseException().Message)}
+    $file=Get-DeployNetworkIndexFile $Root
+    if(-not $file){return @('Thiếu danh sách tệp update-package.json.')}
+    try{$index=ConvertFrom-DeployNetworkIndex ([IO.File]::ReadAllBytes($file.Path))}catch{return @($_.Exception.GetBaseException().Message)}
     @(foreach($entry in $index.Files){if(-not (Test-DeployNetworkFile (Join-Path $Root ($entry.Path.Replace('/','\'))) $entry)){$entry.Path}})
 }
 function Copy-DeployNetworkStage([string]$Source,[string]$Target,[string]$Staging,[scriptblock]$Progress=$null) {
-    $indexPath=Join-Path $Source 'update-source.json'
-    if(-not (Test-Path -LiteralPath $indexPath -PathType Leaf)){throw 'Không thấy update-source.json trong thư mục chia sẻ. Trên máy chia sẻ, cập nhật TechMaster rồi chia sẻ lại.'}
-    $indexBytes=[IO.File]::ReadAllBytes($indexPath)
+    $file=Get-DeployNetworkIndexFile $Source
+    if(-not $file){throw 'Thư mục chia sẻ không có danh sách tệp TechMaster (update-package.json). Trên máy chia sẻ, cập nhật hoặc giải nén lại TechMaster rồi chia sẻ lại.'}
+    $indexBytes=[IO.File]::ReadAllBytes($file.Path)
     $index=ConvertFrom-DeployNetworkIndex $indexBytes
+    $entries=@($index.Files)
     $local=Get-DeployNetworkLocalVersion $Target
-    $result=[pscustomobject]@{Version=$index.Version;LocalVersion=$local;Action='';Staged=0;Total=$index.Files.Count;IndexSha256=(Get-DeployNetworkSha256 $indexBytes);ExeSha256='';Staging=$Staging}
+    $result=[pscustomobject]@{Version=$index.Version;LocalVersion=$local;Action='';Staged=0;Total=$entries.Count;IndexName=$file.Name;IndexSha256=(Get-DeployNetworkSha256 $indexBytes);ExeSha256='';Staging=$Staging}
     if($local -and $local -gt $index.Version -and (Test-DeployNetworkLocked $Target)){$result.Action='KeepNewer';return $result}
+    # A checkout's list has no launcher: it is checked by SHA256 like the listed files.
+    $exe=Join-Path $Source 'TechMaster Deploy.exe'
+    if(-not @($entries | Where-Object {$_.Path -ceq 'TechMaster Deploy.exe'}).Count -and (Test-Path -LiteralPath $exe -PathType Leaf)){
+        $result.ExeSha256=Get-DeployNetworkSha256 ([IO.File]::ReadAllBytes($exe))
+        $entries+=[pscustomobject]@{Path='TechMaster Deploy.exe';Size=[long]-1;Sha=$result.ExeSha256;Kind='Sha256'}
+    }
     New-Item -ItemType Directory -Path $Staging -Force | Out-Null
     $count=0
-    foreach($entry in $index.Files){
+    foreach($entry in $entries){
         $count++
-        if($Progress){& $Progress $count $index.Files.Count $entry.Path}
+        if($Progress){& $Progress $count $entries.Count $entry.Path}
         $relative=$entry.Path.Replace('/','\')
         $same=$false;try{$same=Test-DeployNetworkFile (Join-Path $Target $relative) $entry}catch{}
         if($same){continue}
         $from=Join-Path $Source $relative
         if(-not (Test-Path -LiteralPath $from -PathType Leaf)){throw ('Thư mục chia sẻ thiếu tệp '+$entry.Path+'. Trên máy chia sẻ, cập nhật lại TechMaster.')}
         $bytes=[IO.File]::ReadAllBytes($from)
-        if($bytes.Length -ne $entry.Size -or (Get-DeployNetworkBlobHash $bytes) -cne $entry.Sha){throw ('Tệp '+$entry.Path+' trên máy chia sẻ không khớp danh sách (đã bị sửa hoặc chép dở). Trên máy chia sẻ, cập nhật lại TechMaster.')}
+        if(-not (Test-DeployNetworkBytes $bytes $entry)){throw ('Tệp '+$entry.Path+' trên máy chia sẻ không khớp danh sách (đã bị sửa hoặc chép dở). Trên máy chia sẻ, cập nhật lại TechMaster.')}
         $to=Join-Path $Staging $relative
         New-Item -ItemType Directory -Path (Split-Path -Parent $to) -Force | Out-Null
         [IO.File]::WriteAllBytes($to,$bytes)
         $result.Staged++
     }
-    # The launcher is built by the updater and not listed: it is checked by SHA256 in the elevated step.
-    $exe=Join-Path $Source 'TechMaster Deploy.exe'
-    if(Test-Path -LiteralPath $exe -PathType Leaf){
-        $bytes=[IO.File]::ReadAllBytes($exe);$sha=Get-DeployNetworkSha256 $bytes
-        $current=Join-Path $Target 'TechMaster Deploy.exe';$same=$false
-        try{$same=(Test-Path -LiteralPath $current -PathType Leaf) -and (Get-DeployNetworkSha256 ([IO.File]::ReadAllBytes($current))) -ceq $sha}catch{}
-        $result.ExeSha256=$sha
-        if(-not $same){[IO.File]::WriteAllBytes((Join-Path $Staging 'TechMaster Deploy.exe'),$bytes);$result.Staged++}
-    }
-    [IO.File]::WriteAllBytes((Join-Path $Staging 'update-source.json'),$indexBytes)
+    [IO.File]::WriteAllBytes((Join-Path $Staging $file.Name),$indexBytes)
     $result.Action=if($result.Staged){'Install'}else{'UpToDate'}
     return $result
 }
@@ -128,8 +142,9 @@ function Protect-DeployNetworkFolder([string]$Path) {
     & $run @($Path,'/setowner','*S-1-5-32-544','/T','/C','/Q')
     if(@(Get-ChildItem -LiteralPath $Path -Force).Count){& $run @((Join-Path $Path '*'),'/reset','/T','/C','/Q')}
 }
-function Install-DeployNetworkCopy([string]$Staging,[string]$IndexSha256,[string]$ExeSha256,[string]$Target) {
-    $indexBytes=[IO.File]::ReadAllBytes((Join-Path $Staging 'update-source.json'))
+function Install-DeployNetworkCopy([string]$Staging,[string]$IndexName,[string]$IndexSha256,[string]$ExeSha256,[string]$Target) {
+    if($IndexName -cnotin 'update-package.json','update-source.json'){throw 'Tên danh sách tệp không hợp lệ.'}
+    $indexBytes=[IO.File]::ReadAllBytes((Join-Path $Staging $IndexName))
     if((Get-DeployNetworkSha256 $indexBytes) -cne $IndexSha256){throw 'Danh sách tệp đã chép bị thay đổi trước khi cài. Chạy lại Chay-Tu-Mang.bat.'}
     $index=ConvertFrom-DeployNetworkIndex $indexBytes
     if(Test-Path -LiteralPath $Target){
@@ -139,15 +154,14 @@ function Install-DeployNetworkCopy([string]$Staging,[string]$IndexSha256,[string
     # Lock first: from here on only administrators can change what is checked and run.
     Protect-DeployNetworkFolder $Target
     $written=0
-    $items=@($index.Files | ForEach-Object {[pscustomobject]@{Path=$_.Path;Size=$_.Size;Sha=$_.Sha;Exe=$false}})
-    if($ExeSha256){$items+=[pscustomobject]@{Path='TechMaster Deploy.exe';Size=-1;Sha=$ExeSha256;Exe=$true}}
+    $items=@($index.Files)
+    if($ExeSha256 -and -not @($items | Where-Object {$_.Path -ceq 'TechMaster Deploy.exe'}).Count){$items+=[pscustomobject]@{Path='TechMaster Deploy.exe';Size=[long]-1;Sha=$ExeSha256;Kind='Sha256'}}
     foreach($entry in $items){
         $relative=$entry.Path.Replace('/','\')
         $to=Join-Path $Target $relative;$staged=Join-Path $Staging $relative
         if(Test-Path -LiteralPath $staged -PathType Leaf){
             $bytes=[IO.File]::ReadAllBytes($staged)
-            $valid=if($entry.Exe){(Get-DeployNetworkSha256 $bytes) -ceq $entry.Sha}else{$bytes.Length -eq $entry.Size -and (Get-DeployNetworkBlobHash $bytes) -ceq $entry.Sha}
-            if(-not $valid){throw ('Tệp đã chép bị thay đổi trước khi cài: '+$entry.Path+'. Chạy lại Chay-Tu-Mang.bat.')}
+            if(-not (Test-DeployNetworkBytes $bytes $entry)){throw ('Tệp đã chép bị thay đổi trước khi cài: '+$entry.Path+'. Chạy lại Chay-Tu-Mang.bat.')}
             New-Item -ItemType Directory -Path (Split-Path -Parent $to) -Force | Out-Null
             $temp=$to+'.tm-new'
             [IO.File]::WriteAllBytes($temp,$bytes)
@@ -155,19 +169,18 @@ function Install-DeployNetworkCopy([string]$Staging,[string]$IndexSha256,[string
             catch{throw ('Không ghi được '+$entry.Path+'. Đóng TechMaster Deploy đang mở trên máy này rồi chạy lại. ('+$_.Exception.GetBaseException().Message+')')}
             finally{[IO.File]::Delete($temp)}
             $written++
-        }elseif($entry.Exe){
-            # An unchanged launcher is checked here, after the lock, before it is run as administrator.
-            $current=$to;$valid=$false
-            try{$valid=(Test-Path -LiteralPath $current -PathType Leaf) -and (Get-DeployNetworkSha256 ([IO.File]::ReadAllBytes($current))) -ceq $entry.Sha}catch{}
-            if(-not $valid){throw 'TechMaster Deploy.exe trên máy này không khớp bản trên máy chia sẻ. Chạy lại Chay-Tu-Mang.bat.'}
+        }elseif(-not (Test-DeployNetworkFile $to $entry)){
+            # Unchanged files and the launcher are checked here, after the lock, before anything runs as administrator.
+            throw ($entry.Path+' trên máy này không khớp bản trên máy chia sẻ. Chạy lại Chay-Tu-Mang.bat.')
         }
-        elseif(-not (Test-DeployNetworkFile $to $entry)){throw ('Tệp '+$entry.Path+' trên máy này không khớp bản trên máy chia sẻ. Chạy lại Chay-Tu-Mang.bat.')}
     }
-    [IO.File]::WriteAllBytes((Join-Path $Target 'update-source.json'),$indexBytes)
+    # The list goes with the program, so the app's updater knows the installed version; a stale list of the other kind is removed.
+    [IO.File]::WriteAllBytes((Join-Path $Target $IndexName),$indexBytes)
+    foreach($other in @('update-package.json','update-source.json' | Where-Object {$_ -cne $IndexName})){Remove-Item -LiteralPath (Join-Path $Target $other) -Force -ErrorAction SilentlyContinue}
     # Lock again so files written now are owned by Administrators like the rest.
     Protect-DeployNetworkFolder $Target
     Remove-Item -LiteralPath $Staging -Recurse -Force -ErrorAction SilentlyContinue
-    [pscustomobject]@{Target=$Target;Written=$written;Total=$index.Files.Count;Version=$index.Version;ExeChecked=[bool]$ExeSha256}
+    [pscustomobject]@{Target=$Target;Written=$written;Total=$index.Files.Count;Version=$index.Version;ExeChecked=[bool]@($items | Where-Object {$_.Path -ceq 'TechMaster Deploy.exe'}).Count}
 }
 # -Script opens App\TechMaster-Deploy.ps1 directly: used when the launcher was not checked against the share.
 function Start-DeployNetworkApp([string]$Target,[switch]$Elevate,[switch]$Script) {
@@ -177,14 +190,14 @@ function Start-DeployNetworkApp([string]$Target,[switch]$Elevate,[switch]$Script
     if($Elevate){Start-Process powershell.exe -Verb RunAs -ArgumentList $arguments -WorkingDirectory $Target | Out-Null}
     else{Start-Process powershell.exe -ArgumentList $arguments -WorkingDirectory $Target | Out-Null}
 }
-function Get-DeployNetworkElevatedCommand([string]$Staging,[string]$IndexSha256,[string]$ExeSha256,[string]$Target) {
+function Get-DeployNetworkElevatedCommand([string]$Staging,[string]$IndexName,[string]$IndexSha256,[string]$ExeSha256,[string]$Target) {
     $quote={param($value)"'"+([string]$value).Replace("'","''")+"'"}
     $lines=@('$ErrorActionPreference=''Stop''')
     foreach($name in $script:DeployNetworkElevated){$lines+=('function '+$name+' {'+(Get-Command $name -CommandType Function).ScriptBlock.ToString()+'}')}
     $lines+=@(
         'try{',
         ('    Write-Host ''Đang kiểm tra và cài TechMaster Deploy vào '+([string]$Target).Replace("'","''")+'…'''),
-        ('    $r=Install-DeployNetworkCopy '+(& $quote $Staging)+' '+(& $quote $IndexSha256)+' '+(& $quote $ExeSha256)+' '+(& $quote $Target)),
+        ('    $r=Install-DeployNetworkCopy '+(& $quote $Staging)+' '+(& $quote $IndexName)+' '+(& $quote $IndexSha256)+' '+(& $quote $ExeSha256)+' '+(& $quote $Target)),
         '    Write-Host (''✓ Phiên bản ''+$r.Version+'': đã kiểm tra ''+$r.Total+'' tệp, cập nhật ''+$r.Written+'' tệp. Đang mở TechMaster Deploy…'') -ForegroundColor Green',
         '    Start-DeployNetworkApp $r.Target -Script:(-not $r.ExeChecked)',
         '    Start-Sleep -Seconds 2',
@@ -208,7 +221,7 @@ function Start-DeployNetworkRun([string]$Source,[string]$Target='') {
             return [pscustomobject]@{Action='KeepNewer';Target=$Target;Version=$copy.LocalVersion}
         }
         Write-Host ('Phiên bản '+$copy.Version+': chép '+$copy.Staged+' tệp mới / thay đổi. Chọn Yes ở hộp quyền quản trị để cài vào '+$Target+'.')
-        $command=Get-DeployNetworkElevatedCommand $staging $copy.IndexSha256 $copy.ExeSha256 $Target
+        $command=Get-DeployNetworkElevatedCommand $staging $copy.IndexName $copy.IndexSha256 $copy.ExeSha256 $Target
         try{$process=Start-Process powershell.exe -Verb RunAs -ArgumentList ('-NoLogo -NoProfile -ExecutionPolicy Bypass -EncodedCommand '+$command) -PassThru}
         catch{throw 'Cần quyền quản trị để cài và mở TechMaster Deploy. Chạy lại Chay-Tu-Mang.bat và chọn Yes.'}
         # Wait for the installer only, not for the app it opens.
