@@ -1,5 +1,13 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.21.0 — 27/11/2026
+
+- **Dọn máy in không kết nối giờ gỡ cả thiết bị**, giống **Remove device** trong Devices and Printers, và giữ nguyên driver. Bản 2.2.20.0 chỉ xoá hàng đợi in nên máy in đã rút vẫn hiện trong Devices and Printers: cửa sổ này liệt kê theo thiết bị (container PnP), mà máy in USB đã rút còn các mục thiết bị ẩn (hàng đợi, USBPRINT, USB). App xoá các mục ẩn cùng container sau khi xoá hàng đợi, con trước cha. Thiết bị đang kết nối (kể cả chỉ một phần), container của chính máy tính và thiết bị máy in khác còn dùng không bao giờ bị xoá.
+- Liệt kê thêm **thiết bị máy in còn sót**: không còn hàng đợi nhưng vẫn hiện trong Devices and Printers (ví dụ sau lần gỡ bằng 2.2.20.0), chọn sẵn để gỡ.
+- Sửa báo **thành công sai**: Windows chỉ *đánh dấu chờ xoá* hàng đợi khi còn lệnh in hoặc cửa sổ Devices and Printers đang mở. App huỷ lệnh in chờ trước khi xoá, chờ Windows xoá thật, và báo riêng “chưa xoá xong”. Tuỳ chọn (bật sẵn) tự khởi động lại dịch vụ Print Spooler để hoàn tất, sau đó mới xoá thiết bị. Hàng đợi đang chờ xoá vẫn hiện trong danh sách để gỡ lại.
+- **Hiện tiến trình ngay trong thẻ**: thanh tiến trình, “Đang gỡ 3/25: tên máy in — bước”, kết quả từng máy (✓ đã gỡ / ! chưa trọn / – bỏ qua / ✗ lỗi). Trước đây trạng thái chỉ hiện ở đầu cửa sổ, bị cuộn khuất nên trông như không có gì xảy ra.
+- Sau khi gỡ, app đọc lại danh sách thiết bị: còn mục ẩn thì báo “gỡ chưa trọn”, không báo thành công.
+
 ## 2.2.20.0 — 27/11/2026
 
 - Thêm **Dọn máy in không kết nối** trong **Thiết lập mặc định** (mở nhanh bằng nút **Dọn máy in không kết nối…** ở thẻ Máy in và ứng dụng mặc định). Danh sách gồm máy in USB / mạng mà Windows đang báo Offline: máy in đã rút cáp, hàng đợi “(Copy n)” cũ, máy in mạng ở nơi khác. Đọc cả trạng thái spooler lẫn cờ Use Printer Offline (`Win32_Printer.WorkOffline`).
