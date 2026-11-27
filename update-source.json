@@ -92,8 +92,8 @@
     {
       "path": "App/Defaults.Core.ps1",
       "mode": "100644",
-      "size": 40023,
-      "sha": "4bdde0e27330b51be98366bc586552d8ee908e2c"
+      "size": 40772,
+      "sha": "416d9bbe23ca9bd2614e3e2f4d63f729acd211ff"
     },
     {
       "path": "App/Defaults.Native.cs",
@@ -272,8 +272,8 @@
     {
       "path": "App/Test-Defaults.ps1",
       "mode": "100644",
-      "size": 27381,
-      "sha": "f7c7559185a1556bedbb0f707bc5d01c6ce4aceb"
+      "size": 28121,
+      "sha": "12ce394818f4506a0dd9f9543c556cbc7d71fab3"
     },
     {
       "path": "App/Test-DefaultsWpf.ps1",
