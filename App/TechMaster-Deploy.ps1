@@ -87,6 +87,7 @@ Bind-Click 'btnCloneHelp' { Show-DeployQuickGuide $Root $form -Section 'Máy g�
 Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' }
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
 Bind-Click 'btnDefaults' {Show-DeployDefaults $form}
+Bind-Click 'btnPrinterCleanup' {Show-DeployDefaults $form 'Cleanup'}
 Bind-Click 'btnKeyboard' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím / EVKey' }
 Bind-Click 'btnUltraReset' {
     $script = Join-Path $DirClone 'UltraViewer-Reset.ps1'

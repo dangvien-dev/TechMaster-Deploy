@@ -9,6 +9,7 @@
     $Window.FindName('Printer').SelectedItem=$pick
     $Window.FindName('ApplyPrinter').IsEnabled=[bool]$pick
     $Window.FindName('PrinterCurrent').Text=if($Snapshot.PrinterError){'Chưa đọc được máy in: '+$Snapshot.PrinterError}elseif(-not @($Snapshot.Printers).Count){'Chưa có máy in được cài trong Windows.'}elseif($Snapshot.DefaultPrinter){'Máy in mặc định hiện tại: '+$Snapshot.DefaultPrinter}else{'Chưa có máy in mặc định.'}
+    Set-DeployOfflinePrintersView $Window $Snapshot
     foreach($kind in 'Browser','Pdf'){
         $control=$Window.FindName($kind);$previous=$control.SelectedItem
         $apps=@($Snapshot.Apps | Where-Object {if($kind -eq 'Browser'){$_.Http -and $_.Https}else{$_.Pdf}})
@@ -25,26 +26,53 @@
     elseif(-not @($Snapshot.Apps).Count){$Window.FindName('PdfCurrent').Text+=' · Chưa tìm thấy ứng dụng đăng ký. Cài ứng dụng rồi kiểm tra lại hoặc mở Ứng dụng mặc định trong Windows.'}
     $state.Snapshot=$Snapshot
 }
-function Start-DeployDefaultsTask($Window,[ValidateSet('Inspect','Printer','Browser','Pdf')][string]$Action) {
+function Set-DeployOfflinePrintersView($Window,$Snapshot) {
+    $state=$Window.Tag;$checked=@{}
+    # Keep the user's ticks across refreshes; queues new to the list start from the recommended choice.
+    foreach($box in @($state.CleanupBoxes)){if($box -and $box.Tag){$checked[[string]$box.Tag.Name]=[bool]$box.IsChecked}}
+    $panel=$Window.FindName('CleanupItems');$panel.Children.Clear();$state.CleanupBoxes=@()
+    $rows=@($Snapshot.OfflinePrinters | Where-Object {$_})
+    foreach($row in $rows){
+        $box=New-Object Windows.Controls.CheckBox
+        $box.Margin='0,4,0,4';$box.VerticalContentAlignment='Top';$box.Tag=$row
+        $box.IsChecked=$(if($checked.ContainsKey([string]$row.Name)){$checked[[string]$row.Name]}else{[bool]$row.Selected})
+        $text=New-Object Windows.Controls.StackPanel
+        $title=New-Object Windows.Controls.TextBlock;$title.Text=[string]$row.Name;$title.FontWeight='SemiBold'
+        $detail=New-Object Windows.Controls.TextBlock;$detail.Text=[string]$row.Detail;$detail.Foreground='#526880';$detail.FontSize=12;$detail.Margin='0,2,0,0'
+        [void]$text.Children.Add($title);[void]$text.Children.Add($detail)
+        $box.Content=$text
+        [void]$panel.Children.Add($box);$state.CleanupBoxes+=$box
+    }
+    $Window.FindName('CleanupCurrent').Text=if($Snapshot.PrinterError){'Chưa đọc được máy in: '+$Snapshot.PrinterError}elseif($Snapshot.OfflineError){'Chưa xác định được máy in không kết nối: '+$Snapshot.OfflineError}elseif(-not $rows.Count){'Không có máy in USB / mạng nào đang báo không kết nối (Offline).'}else{'Windows đang báo '+$rows.Count+' máy in không kết nối. Máy in USB được chọn sẵn; máy in mạng, máy in mặc định và máy in đang chia sẻ cần tự tích nếu muốn gỡ.'}
+    foreach($name in 'RemoveOffline','CleanupAll','CleanupNone'){$Window.FindName($name).IsEnabled=[bool]$rows.Count}
+}
+function Start-DeployDefaultsTask($Window,[ValidateSet('Inspect','Printer','Browser','Pdf','Cleanup')][string]$Action) {
     $state=$Window.Tag;if($state.Job){return}
     $printer=$Window.FindName('Printer').SelectedItem
     $app=if($Action -in 'Browser','Pdf'){$Window.FindName($Action).SelectedItem}else{$null}
     if($Action -eq 'Printer' -and -not $printer){Set-DeployNotice ($Window.FindName('Status')) 'Chọn máy in đã cài đặt trước khi áp dụng.' 'Attention';return}
     if($Action -in 'Browser','Pdf' -and -not $app){Set-DeployNotice ($Window.FindName('Status')) 'Chọn một ứng dụng đã cài và đăng ký trong Windows.' 'Attention';return}
+    $remove=[string[]]@()
+    if($Action -eq 'Cleanup'){
+        $rows=@($state.CleanupBoxes | Where-Object {$_.IsChecked -eq $true} | ForEach-Object {$_.Tag})
+        if(-not $rows.Count){Set-DeployNotice ($Window.FindName('Status')) 'Tích ít nhất một máy in không kết nối trước khi gỡ.' 'Attention';return}
+        if(-not (Confirm-Box (Get-DeployOfflineRemovalPrompt $rows) 'Gỡ máy in không kết nối' 'Gỡ máy in' -Danger -Owner $Window)){return}
+        $remove=[string[]]@($rows | ForEach-Object {[string]$_.Name})
+    }
     $Window.FindName('Choices').IsEnabled=$false
     foreach($name in 'Refresh','DefaultsSettings','Close'){$Window.FindName($name).IsEnabled=$false}
     Set-DeployNotice ($Window.FindName('Status')) 'Đang đọc / áp dụng thiết lập…' 'Working'
     try{
         $state.Action=$Action;$state.RequestedApp=$app
         $state.Job=Start-DeployWork @'
-param($core,$action,$printer,$a4,$makeDefault,$app)
+param($core,$action,$printer,$a4,$makeDefault,$app,$remove)
 $ErrorActionPreference='Stop'
 . $core
 $message='Đã đọc lại thiết lập hiện tại.';$kind='Info';$log=''
 if($action -ne 'Inspect'){
-    $log=Get-DeployWindowsToolsLog 'Defaults'
+    $log=Get-DeployWindowsToolsLog $(if($action -eq 'Cleanup'){'PrinterCleanup'}else{'Defaults'})
     try{
-        $result=if($action -eq 'Printer'){Set-DeployPrinterDefaults $printer $a4 $makeDefault $log}else{Open-DeployDefaultAppSettings $app $action $log}
+        $result=if($action -eq 'Printer'){Set-DeployPrinterDefaults $printer $a4 $makeDefault $log}elseif($action -eq 'Cleanup'){Remove-DeployOfflinePrinters ([string[]]@($remove)) $log}else{Open-DeployDefaultAppSettings $app $action $log}
         $message=$result.Message;$kind=$result.Kind
     }catch{
         $message=$_.Exception.GetBaseException().Message;$kind='Error'
@@ -52,7 +80,7 @@ if($action -ne 'Inspect'){
     }
 }
 [pscustomobject]@{Snapshot=(Get-DeployDefaultsSnapshot);Message=$message;Kind=$kind;Log=$log}
-'@ @((Join-Path $PSScriptRoot 'Defaults.Core.ps1'),$Action,[string]$printer.Name,[bool]$Window.FindName('MakeA4').IsChecked,[bool]$Window.FindName('MakeDefault').IsChecked,$app)
+'@ @((Join-Path $PSScriptRoot 'Defaults.Core.ps1'),$Action,[string]$printer.Name,[bool]$Window.FindName('MakeA4').IsChecked,[bool]$Window.FindName('MakeDefault').IsChecked,$app,$remove)
         $state.Timer.Start()
     }catch{
         $state.Job=$null;$Window.FindName('Choices').IsEnabled=$true
@@ -60,9 +88,9 @@ if($action -ne 'Inspect'){
         Set-DeployNotice ($Window.FindName('Status')) $_.Exception.GetBaseException().Message 'Error'
     }
 }
-function New-DeployDefaultsWindow($Owner=$null) {
+function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
     $window=Import-DeployWindow (Join-Path $PSScriptRoot 'DefaultsWindow.xml')
-    $window.Tag=@{Job=$null;Action='';RequestedApp=$null;Pending=@{};Snapshot=$null;Timer=$null}
+    $window.Tag=@{Job=$null;Action='';RequestedApp=$null;Pending=@{};Snapshot=$null;Timer=$null;CleanupBoxes=@();Focus=$Focus}
     $timer=New-DeployTimer 200 {
         param($sender,$event)
         $view=$sender.Tag;$state=$view.Tag;$job=$state.Job
@@ -71,6 +99,7 @@ function New-DeployDefaultsWindow($Owner=$null) {
         try{
             $r=@(Receive-DeployWork $job)[-1]
             Set-DeployDefaultsView $view $r.Snapshot
+            if($state.Focus -ceq 'Cleanup'){$state.Focus='';$view.UpdateLayout();$view.FindName('CleanupCard').BringIntoView()}
             if($r.Log){$view.FindName('Log').Text='Nhật ký: '+$r.Log}
             if($state.Action -in 'Browser','Pdf' -and $r.Kind -ne 'Error'){$state.Pending[$state.Action]=$state.RequestedApp}
             if($state.Action -eq 'Inspect' -and $state.Pending.Count){
@@ -81,7 +110,7 @@ function New-DeployDefaultsWindow($Owner=$null) {
                     else{$notes+='Chưa xác nhận '+$app.Display+' là mặc định cho '+$(if($kind -eq 'Browser'){'cả HTTP và HTTPS'}else{'.pdf'})+'. Hoàn tất lựa chọn trong Cài đặt rồi kiểm tra lại.';$all=$false}
                 }
                 $r.Message=$notes -join "`n";$r.Kind=if($all){'Success'}else{'Attention'}
-            }elseif($state.Action -eq 'Inspect' -and ($r.Snapshot.PrinterError -or $r.Snapshot.AppError -or @($r.Snapshot.Associations.Values | Where-Object {-not $_.Readable}).Count)){
+            }elseif($state.Action -eq 'Inspect' -and ($r.Snapshot.PrinterError -or $r.Snapshot.OfflineError -or $r.Snapshot.AppError -or @($r.Snapshot.Associations.Values | Where-Object {-not $_.Readable}).Count)){
                 $r.Message='Đã đọc những thiết lập khả dụng; có mục chưa đọc được. Xem trạng thái trong từng phần.';$r.Kind='Attention'
             }
             Set-DeployNotice ($view.FindName('Status')) $r.Message $r.Kind
@@ -93,13 +122,16 @@ function New-DeployDefaultsWindow($Owner=$null) {
     $window.FindName('OpenBrowser').Add_Click({param($sender,$event)Start-DeployDefaultsTask ([Windows.Window]::GetWindow($sender)) 'Browser'})
     $window.FindName('OpenPdf').Add_Click({param($sender,$event)Start-DeployDefaultsTask ([Windows.Window]::GetWindow($sender)) 'Pdf'})
     $window.FindName('Refresh').Add_Click({param($sender,$event)Start-DeployDefaultsTask ([Windows.Window]::GetWindow($sender)) 'Inspect'})
+    $window.FindName('RemoveOffline').Add_Click({param($sender,$event)Start-DeployDefaultsTask ([Windows.Window]::GetWindow($sender)) 'Cleanup'})
+    $window.FindName('CleanupAll').Add_Click({param($sender,$event)foreach($box in @([Windows.Window]::GetWindow($sender).Tag.CleanupBoxes)){$box.IsChecked=$true}})
+    $window.FindName('CleanupNone').Add_Click({param($sender,$event)foreach($box in @([Windows.Window]::GetWindow($sender).Tag.CleanupBoxes)){$box.IsChecked=$false}})
     $window.FindName('DefaultsSettings').Add_Click({Start-Process 'ms-settings:defaultapps' -ErrorAction Stop})
     $window.FindName('PrinterSettings').Add_Click({Start-Process 'ms-settings:printers' -ErrorAction Stop})
     $window.FindName('Close').Add_Click({param($sender,$event)[Windows.Window]::GetWindow($sender).Close()})
-    $window.Add_ContentRendered({param($sender,$event)Start-DeployDefaultsTask $sender 'Inspect'})
+    $window.Add_ContentRendered({param($sender,$event)if($sender.Tag.Focus -ceq 'Cleanup'){$sender.FindName('CleanupCard').BringIntoView()};Start-DeployDefaultsTask $sender 'Inspect'})
     $window.Add_Closing({param($sender,$event)if($sender.Tag.Job){$event.Cancel=$true}})
     $window.Add_Closed({param($sender,$event)$sender.Tag.Timer.Stop();$sender.Tag.Timer.Tag=$null})
     if($Owner -and $Owner.IsVisible){$window.Owner=$Owner;$window.WindowStartupLocation='CenterOwner'}
     return $window
 }
-function Show-DeployDefaults($Owner=$null){$view=New-DeployDefaultsWindow $Owner;[void]$view.ShowDialog()}
+function Show-DeployDefaults($Owner=$null,[string]$Focus=''){$view=New-DeployDefaultsWindow $Owner $Focus;[void]$view.ShowDialog()}

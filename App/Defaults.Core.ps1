@@ -67,13 +67,15 @@ function Get-DeployCurrentAssociation([ValidateSet('http','https','.pdf')][strin
 function Get-DeployDefaultsSnapshot {
     $printerError='';$appError='';$default='';$printers=@();$apps=@();$management=$null
     try{$printers=@(Get-Printer -ErrorAction Stop | Select-Object Name,DriverName,PortName);$default=Get-DeployDefaultPrinter;$management=Get-DeployPrinterManagement}catch{$printerError=$_.Exception.GetBaseException().Message}
+    $offline=@();$offlineError=''
+    if(-not $printerError){try{$offline=@((Get-DeployPrinterOfflineScan).Rows)}catch{$offlineError=$_.Exception.GetBaseException().Message}}
     try{$apps=@(Get-DeployRegisteredDefaultApps)}catch{$appError=$_.Exception.GetBaseException().Message}
     $associations=@{}
     foreach($name in 'http','https','.pdf'){
         try{$associations[$name]=[pscustomobject]@{Readable=$true;ProgId=(Get-DeployCurrentAssociation $name);Error=''}}
         catch{$associations[$name]=[pscustomobject]@{Readable=$false;ProgId='';Error=$_.Exception.GetBaseException().Message}}
     }
-    [pscustomobject]@{User=[Environment]::UserName;Printers=$printers;DefaultPrinter=$default;Management=$management;PrinterError=$printerError;Apps=$apps;AppError=$appError;Associations=$associations}
+    [pscustomobject]@{User=[Environment]::UserName;Printers=$printers;DefaultPrinter=$default;Management=$management;PrinterError=$printerError;OfflinePrinters=$offline;OfflineError=$offlineError;Apps=$apps;AppError=$appError;Associations=$associations}
 }
 function Get-DeployAssociationLabel($Association,$Apps,[string]$Field) {
     if(-not $Association.Readable){return 'Chưa đọc được thiết lập'}
@@ -146,4 +148,118 @@ function Set-DeployPrinterDefaults([string]$Name,[bool]$A4,[bool]$Default,[strin
         }
     }
     [pscustomobject]@{Message=(@($messages)+@($errors) -join "`n");Kind=$(if($errors.Count){if($messages.Count){'Attention'}else{'Error'}}else{'Success'});Log=$LogPath}
+}
+# Offline printer cleanup. Only queues on a USB or network port that Windows reports offline are
+# listed; virtual printers (PDF, XPS, OneNote, Fax, FILE:, PORTPROMPT:, nul:) never are. Removal
+# deletes the spooler queue only: drivers, ports and the other printers stay installed.
+function Get-DeployPrinterPortKind($Queue,$Ports) {
+    $port=[string]$Queue.PortName
+    if($port -match '^USB\d+$'){return 'USB'}
+    if([string]$Queue.Type -eq 'Connection'){return 'Network'}
+    if($port -match '^(IP_|WSD-|https?://|\\\\)' -or $port -match '^\d{1,3}(\.\d{1,3}){3}(_\d+)?$'){return 'Network'}
+    if($port -and $Ports -and $Ports.ContainsKey($port) -and [string]$Ports[$port].PrinterHostAddress){return 'Network'}
+    return ''
+}
+function Test-DeployPrinterOffline($Queue,$Wmi) {
+    if([string]$Queue.PrinterStatus -match 'Offline'){return $true}
+    if(-not $Wmi){return $false}
+    # Windows shows a queue as Offline from the spooler status or from Use Printer Offline (WorkOffline).
+    return [bool]($Wmi.WorkOffline -eq $true -or [int]$Wmi.PrinterStatus -eq 7 -or [int]$Wmi.ExtendedPrinterStatus -eq 7 -or [int]$Wmi.DetectedErrorState -eq 9)
+}
+function Get-DeployOfflinePrinterRows($Queues,$Wmi,$Ports,[string]$DefaultPrinter) {
+    $rows=@()
+    foreach($queue in @($Queues)){
+        if(-not $queue){continue}
+        $name=[string]$queue.Name
+        if(-not $name){continue}
+        $kind=Get-DeployPrinterPortKind $queue $Ports
+        if(-not $kind){continue}
+        $info=$null
+        if($Wmi -and $Wmi.ContainsKey($name)){$info=$Wmi[$name]}
+        if(-not (Test-DeployPrinterOffline $queue $info)){continue}
+        $isDefault=[bool]($DefaultPrinter -and $name -ceq $DefaultPrinter)
+        $shared=[bool]($queue.Shared -eq $true)
+        $jobs=0;[void][int]::TryParse([string]$queue.JobCount,[ref]$jobs)
+        $parts=@($(if($kind -eq 'USB'){'USB'}else{'Mạng'}),('cổng '+[string]$queue.PortName))
+        if([string]$queue.DriverName){$parts+=('driver '+[string]$queue.DriverName)}
+        if($kind -eq 'Network'){$parts+='máy in mạng có thể chỉ đang tắt hoặc khác mạng'}
+        if($isDefault){$parts+='đang là máy in mặc định'}
+        if($shared){$parts+='đang chia sẻ cho máy khác'}
+        if($jobs -gt 0){$parts+=('còn '+$jobs+' lệnh in sẽ bị huỷ')}
+        $rows+=[pscustomobject]@{Name=$name;DriverName=[string]$queue.DriverName;PortName=[string]$queue.PortName;Kind=$kind;IsDefault=$isDefault;Shared=$shared;JobCount=$jobs;Selected=[bool]($kind -eq 'USB' -and -not $isDefault -and -not $shared);Detail=($parts -join ' · ')}
+    }
+    # USB first: unplugged printers and "(Copy n)" duplicates are the usual leftovers.
+    @($rows | Sort-Object -Property @{Expression={if($_.Kind -eq 'USB'){0}else{1}}},@{Expression={$_.Name}})
+}
+function Get-DeployPrinterOfflineScan {
+    $queues=@(Get-Printer -ErrorAction Stop)
+    # A failed CIM / port query only narrows detection; it never adds a queue to the list.
+    $wmi=@{}
+    try{foreach($item in @(Get-CimInstance -ClassName Win32_Printer -OperationTimeoutSec 20 -ErrorAction Stop)){if($item){$wmi[[string]$item.Name]=$item}}}catch{$wmi=@{}}
+    $ports=@{}
+    try{foreach($item in @(Get-PrinterPort -ErrorAction Stop)){if($item){$ports[[string]$item.Name]=$item}}}catch{$ports=@{}}
+    $default='';try{$default=[string](Get-DeployDefaultPrinter)}catch{$default=''}
+    [pscustomobject]@{Queues=$queues;Rows=@(Get-DeployOfflinePrinterRows $queues $wmi $ports $default);DefaultPrinter=$default}
+}
+function Get-DeployOfflineRemovalPrompt($Rows) {
+    $rows=@($Rows | Where-Object {$_})
+    $lines=@($rows | ForEach-Object {'• '+$_.Name+' ('+$(if($_.Kind -eq 'USB'){'USB'}else{'mạng'})+', cổng '+$_.PortName+')'})
+    $message='Gỡ '+$rows.Count+' máy in không kết nối khỏi Windows?'+"`n`n"+($lines -join "`n")
+    $message+="`n`nChỉ xoá hàng đợi máy in. Driver và cổng vẫn giữ trong máy: cắm lại máy in USB hoặc thêm lại máy in mạng khi cần dùng."
+    $warnings=@()
+    if(@($rows | Where-Object {$_.IsDefault}).Count){$warnings+='Có máy in mặc định trong danh sách; Windows sẽ chọn máy in mặc định khác hoặc để trống.'}
+    if(@($rows | Where-Object {$_.Shared}).Count){$warnings+='Có máy in đang chia sẻ; máy khác dùng chung sẽ mất máy in này.'}
+    $jobs=0;foreach($row in $rows){$jobs+=[int]$row.JobCount}
+    if($jobs -gt 0){$warnings+=('Còn '+$jobs+' lệnh in đang chờ sẽ bị huỷ.')}
+    if(@($rows | Where-Object {$_.Kind -eq 'Network'}).Count){$warnings+='Máy in mạng có thể chỉ đang tắt hoặc máy đang ở mạng khác.'}
+    if($warnings.Count){$message+="`n`nLưu ý:`n"+(@($warnings | ForEach-Object {'• '+$_}) -join "`n")}
+    return $message
+}
+function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath) {
+    Assert-DeployPrinterAdmin
+    $requested=@($Names | Where-Object {-not [string]::IsNullOrWhiteSpace($_)} | Select-Object -Unique)
+    if(-not $requested.Count){throw 'Chọn ít nhất một máy in không kết nối để gỡ.'}
+    # Re-read the spooler: a printer reconnected after the list was shown is skipped, never removed.
+    $scan=Get-DeployPrinterOfflineScan
+    Write-DeployWindowsToolsLog $LogPath 'printer-cleanup-request' @{User=[Environment]::UserName;Requested=$requested;Offline=@($scan.Rows | ForEach-Object {$_.Name});DefaultPrinter=$scan.DefaultPrinter}
+    $removed=@();$skipped=@();$failed=@()
+    foreach($name in $requested){
+        $row=@($scan.Rows | Where-Object {$_.Name -ceq $name})
+        $queue=@($scan.Queues | Where-Object {$_.Name -ceq $name})
+        if($row.Count -ne 1 -or $queue.Count -ne 1){
+            $skipped+=$name
+            Write-DeployWindowsToolsLog $LogPath 'printer-cleanup-skipped' @{Printer=$name;Reason=$(if($queue.Count){'not-offline'}else{'missing'})}
+            continue
+        }
+        try{
+            Write-DeployWindowsToolsLog $LogPath 'printer-remove-before' $row[0]
+            # Pass the exact spooler object: names may contain wildcard characters such as [ ].
+            Remove-Printer -InputObject $queue[0] -ErrorAction Stop
+            $removed+=$name
+        }catch{
+            $failure=$_.Exception.GetBaseException().Message
+            $failed+=($name+': '+$failure)
+            Write-DeployWindowsToolsLog $LogPath 'printer-remove-failed' @{Printer=$name;Error=$failure}
+        }
+    }
+    $verifyError=''
+    if($removed.Count){
+        $after=@()
+        try{$after=@(Get-Printer -ErrorAction Stop)}catch{$verifyError=$_.Exception.GetBaseException().Message}
+        if(-not $verifyError){
+            foreach($name in @($removed)){
+                # A queue with jobs can stay as PendingDeletion until the spooler finishes; that still counts as removed.
+                $still=@($after | Where-Object {$_.Name -ceq $name -and [string]$_.PrinterStatus -notmatch 'PendingDeletion'})
+                if($still.Count){$removed=@($removed | Where-Object {$_ -cne $name});$failed+=($name+': Windows vẫn còn hàng đợi sau khi gỡ.')}
+            }
+        }
+        Write-DeployWindowsToolsLog $LogPath 'printer-cleanup-after' @{Removed=$removed;Remaining=@($after | ForEach-Object {[string]$_.Name});VerifyError=$verifyError}
+    }
+    $messages=@()
+    if($removed.Count){$messages+=($(if($verifyError){'Đã gửi lệnh gỡ '}else{'Đã gỡ '})+$removed.Count+' máy in: '+($removed -join ', ')+'. Driver và cổng máy in vẫn được giữ.')}
+    if($skipped.Count){$messages+=('Bỏ qua '+$skipped.Count+' máy in vì đã kết nối lại hoặc không còn trong Windows: '+($skipped -join ', ')+'.')}
+    if($failed.Count){$messages+=('Không gỡ được: '+($failed -join '; '))}
+    if($verifyError){$messages+=('Chưa đọc lại được danh sách máy in để xác nhận: '+$verifyError+' Bấm Kiểm tra lại.')}
+    $kind=if($failed.Count -and -not $removed.Count){'Error'}elseif($failed.Count -or $skipped.Count -or $verifyError){'Attention'}else{'Success'}
+    [pscustomobject]@{Message=($messages -join "`n");Kind=$kind;Log=$LogPath;Removed=$removed;Skipped=$skipped;Failed=$failed}
 }

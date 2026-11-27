@@ -16,6 +16,11 @@
  <TextBlock Text="Đặt máy in mặc định sẽ tắt Windows tự chọn máy in dùng gần nhất. Khổ A4 của hàng đợi có thể áp dụng cho người cùng dùng máy in đó; Word / Excel và tài liệu cũ có thể giữ khổ giấy riêng." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
  <WrapPanel><Button x:Name="ApplyPrinter" Content="Áp dụng máy in" Margin="0,0,8,0"/><Button x:Name="PrinterSettings" Content="Mở cài đặt máy in" Background="#E7EEF8" Foreground="#183655" Margin="0"/></WrapPanel>
  </StackPanel></Border>
+ <Border x:Name="CleanupCard" Style="{StaticResource Card}"><StackPanel><TextBlock Text="Dọn máy in không kết nối" Style="{StaticResource Heading}"/><TextBlock x:Name="CleanupCurrent" Foreground="#526880" Margin="0,0,0,8" Text="Đang tìm máy in Windows báo không kết nối…"/>
+ <StackPanel x:Name="CleanupItems" Margin="0,0,0,8"/>
+ <TextBlock Text="Danh sách gồm máy in USB / mạng mà Windows đang báo Offline: máy in đã rút cáp, hàng đợi “(Copy n)” cũ, máy in mạng ở nơi khác. Máy in ảo (Microsoft Print to PDF, XPS, OneNote, Fax…) không bao giờ có trong danh sách. Máy in USB đang tắt nguồn cũng báo Offline: bật máy rồi bấm Kiểm tra lại trước khi gỡ. Chỉ xoá hàng đợi máy in; driver và cổng giữ nguyên, cắm lại máy in USB để Windows cài lại." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
+ <WrapPanel><Button x:Name="RemoveOffline" Content="Gỡ máy in đã chọn" Background="#B91C1C" IsEnabled="False" Margin="0,0,8,0"/><Button x:Name="CleanupAll" Content="Chọn tất cả" Background="#E7EEF8" Foreground="#183655" IsEnabled="False" Margin="0,0,8,0"/><Button x:Name="CleanupNone" Content="Bỏ chọn" Background="#E7EEF8" Foreground="#183655" IsEnabled="False" Margin="0"/></WrapPanel>
+ </StackPanel></Border>
  <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Trình duyệt web" Style="{StaticResource Heading}"/><TextBlock x:Name="BrowserCurrent" Foreground="#526880" Margin="0,0,0,12"/>
  <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,12"><ComboBox x:Name="Browser" DisplayMemberPath="Display" BorderThickness="0"/></Border>
  <WrapPanel><Button x:Name="OpenBrowser" Content="Chọn làm trình duyệt mặc định…" Margin="0"/></WrapPanel>

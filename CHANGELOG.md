@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.20.0 — 27/11/2026
+
+- Thêm **Dọn máy in không kết nối** trong **Thiết lập mặc định** (mở nhanh bằng nút **Dọn máy in không kết nối…** ở thẻ Máy in và ứng dụng mặc định). Danh sách gồm máy in USB / mạng mà Windows đang báo Offline: máy in đã rút cáp, hàng đợi “(Copy n)” cũ, máy in mạng ở nơi khác. Đọc cả trạng thái spooler lẫn cờ Use Printer Offline (`Win32_Printer.WorkOffline`).
+- Máy in USB được chọn sẵn; máy in mạng, máy in mặc định và máy in đang chia sẻ phải tự tích. Có **Chọn tất cả / Bỏ chọn**; dấu tích được giữ khi bấm Kiểm tra lại.
+- Máy in ảo (Microsoft Print to PDF, XPS, OneNote, Fax, cổng `FILE:` / `PORTPROMPT:` / `nul:`) và máy in trên cổng không nhận diện được không bao giờ có trong danh sách.
+- Trước khi gỡ, app hỏi xác nhận kèm danh sách và cảnh báo (máy in mặc định, đang chia sẻ, còn lệnh in chờ, máy in mạng). Lúc gỡ, app đọc lại spooler: máy in vừa cắm lại / đã biến mất được bỏ qua và báo riêng. Gỡ đúng đối tượng hàng đợi (không dùng tên có ký tự `[ ]`), đọc lại sau khi gỡ, ghi nhật ký `PrinterCleanup-*.jsonl`. Chỉ xoá hàng đợi; driver và cổng giữ nguyên.
+
 ## 2.2.19.0 — 26/11/2026
 
 - Fix Driver: với **máy in / MFP** của hãng có trong bảng VID (Canon, HP, Epson, Brother, Kyocera, Ricoh, Xerox, Lexmark, OKI), thay hai link Catalog theo VID/PID (thường không có kết quả cho máy in) bằng nút **Mở trang driver <hãng>** và hai link: tìm driver theo tên model giới hạn trong trang hãng, và trang hỗ trợ của hãng. Kèm ghi chú: chọn đúng model / Windows, tải bộ cài đầy đủ, chạy khi máy in đang cắm rồi Quét lại.
