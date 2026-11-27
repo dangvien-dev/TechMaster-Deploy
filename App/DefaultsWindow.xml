@@ -27,7 +27,7 @@
  </StackPanel>
  <WrapPanel><Button x:Name="RemoveOffline" Content="Gỡ máy in đã chọn" Background="#B91C1C" IsEnabled="False" Margin="0,0,8,0"/><Button x:Name="CleanupAll" Content="Chọn tất cả" Background="#E7EEF8" Foreground="#183655" IsEnabled="False" Margin="0,0,8,0"/><Button x:Name="CleanupNone" Content="Bỏ chọn" Background="#E7EEF8" Foreground="#183655" IsEnabled="False" Margin="0"/></WrapPanel>
  </StackPanel></Border>
- <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Trình duyệt web" Style="{StaticResource Heading}"/><TextBlock x:Name="BrowserCurrent" Foreground="#526880" Margin="0,0,0,12"/>
+ <Border x:Name="AppsCard" Style="{StaticResource Card}"><StackPanel><TextBlock Text="Trình duyệt web" Style="{StaticResource Heading}"/><TextBlock x:Name="BrowserCurrent" Foreground="#526880" Margin="0,0,0,12"/>
  <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,12"><ComboBox x:Name="Browser" DisplayMemberPath="Display" BorderThickness="0"/></Border>
  <WrapPanel><Button x:Name="OpenBrowser" Content="Chọn làm trình duyệt mặc định…" Margin="0"/></WrapPanel>
  </StackPanel></Border>

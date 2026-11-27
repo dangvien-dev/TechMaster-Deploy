@@ -39,16 +39,39 @@ function Assert-RoundedCornerPixels($frame) {
 }
 $main = . (Join-Path $PSScriptRoot 'TechMaster-Deploy.ps1') -ValidateOnly
 Assert ($main -is [Windows.Window]) 'Main shell is a native WPF Window'
-Assert ($main.FindName('Navigation').Items.Count -eq 9 -and $main.FindName('tabs').Items.Count -eq 9) 'All nine sections are present'
-for ($i = 0; $i -lt 9; $i++) {
-    $main.FindName('Navigation').SelectedIndex = $i
-    Assert ($main.FindName('tabs').SelectedIndex -eq $i) "Navigation $i selects its content"
+$navigation = $main.FindName('Navigation'); $pageTabs = $main.FindName('tabs')
+$pages = @($navigation.Items | Where-Object { [string]$_.Tag }); $groups = @($navigation.Items | Where-Object { -not [string]$_.Tag })
+Assert ($pages.Count -eq 10 -and $groups.Count -eq 4 -and $pageTabs.Items.Count -eq 10) 'Tổng quan plus nine pages in four menu groups'
+Assert ((@($groups | ForEach-Object { [string]$_.Content }) -join '|') -ceq 'CÀI ĐẶT|CẤU HÌNH|TRIỂN KHAI|HỖ TRỢ') 'Menu groups follow the functional order'
+Assert ($pageTabs.SelectedItem.Name -ceq 'tabOverview' -and $navigation.SelectedItem.Tag -ceq 'tabOverview') 'The app opens on Tổng quan'
+Assert (@($groups | Where-Object { $_.IsEnabled -or $_.Focusable }).Count -eq 0) 'Group headings cannot be focused or chosen'
+Assert ((@($pageTabs.Items | ForEach-Object { $_.Name }) -join ',') -ceq (@($pages | ForEach-Object { $_.Tag }) -join ',')) 'Pages are in the same order as the menu'
+foreach ($item in $pages) {
+    $navigation.SelectedItem = $item
+    Assert ($pageTabs.SelectedItem.Name -ceq $item.Tag -and $pageTabs.SelectedItem.Header -ceq $item.Content) "Menu $($item.Content) opens its page"
 }
+$navigation.SelectedItem = $groups[0]
+Assert ($navigation.SelectedItem -eq $pages[-1] -and $pageTabs.SelectedItem.Name -ceq $pages[-1].Tag) 'Selecting a group heading keeps the current page'
+foreach ($name in 'goWindows','goSoftware','goLicense','goCustomize','goPrinter','goLan','goClone','goDiagnostics','goUpdate','goLanFromPrinter') {
+    $go = $main.FindName($name)
+    $go.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    Assert ($pageTabs.SelectedItem.Name -ceq $go.Tag -and $navigation.SelectedItem.Tag -ceq $go.Tag) "$name opens $($go.Tag) and selects its menu item"
+}
+Select-DeployPage 'tabPrinter'
+$main.FindName('headerUpdate').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+Assert ($pageTabs.SelectedItem.Name -ceq 'tabUpdate') 'Header Update button opens the Cập nhật page'
+Assert ($main.FindName('ovWebCommand').Text -ceq $script:DeployWebCommand -and $main.FindName('lanWebCommand').Text -ceq $script:DeployWebCommand -and $script:DeployWebCommand -ceq 'irm https://dangvien-dev.github.io/tm.txt | iex') 'Tổng quan and Mạng LAN show the same web command'
+$overview = [pscustomobject]@{Computer='PC-TEST';Model='Dell Latitude · S/N ABC';Windows='Windows 11 Pro 24H2 · build 26100.2314 · 64-bit';Cpu='Intel Core i5 · 8 nhân / 12 luồng';Ram='16 GB';Disk='C: trống 120 GB / 476 GB · SSD';Address='192.168.1.20 (Ethernet)';WindowsLicense='CHƯA kích hoạt';Office='không đọc được';Header='Máy: PC-TEST'}
+Set-DeployOverviewView $main $overview
+Assert ($main.FindName('ovComputer').Text -ceq 'PC-TEST' -and $main.FindName('ovDisk').Text -ceq $overview.Disk -and $main.FindName('btnOverviewCopy').IsEnabled -and $main.FindName('btnOverviewCopy').Tag -eq $overview) 'Tổng quan shows every field and keeps the snapshot for copying'
+Assert ($main.FindName('ovState').Text -match 'chưa kích hoạt' -and $main.FindName('ovState').Text -match 'Chưa đọc được: Office') 'Tổng quan points out an inactive Windows and names fields it could not read'
+Select-DeployPage 'tabOverview'
 foreach ($scale in 1.0,1.25,1.5) {
     $size = New-Object Windows.Size((1366 / $scale), (768 / $scale))
     $main.Content.Measure($size); $main.Content.Arrange((New-Object Windows.Rect($size))); $main.UpdateLayout()
     Assert ($main.FindName('headerUpdate').ActualHeight -gt 0 -and $main.FindName('headerUpdate').ActualHeight -eq $main.FindName('btnRefresh').ActualHeight) "Aligned header button height at scale $scale"
-    foreach ($button in 'chkAvDeep','btnAvDiagnostic','btnAvRepair','btnAvLastResult','avBar','lblAvProgress','avProgressPanel','btnDefaults','btnPrinterCleanup','btnLanAccounts','btnLanShare','btnLanConnect','btnPaintStore','btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
+    Assert ($main.FindName('goWindows').ActualWidth -gt 150 -and $main.FindName('goDiagnostics').ActualHeight -ge 70 -and $main.FindName('ovWebCommand').ActualWidth -gt 200 -and $main.FindName('ovComputer').ActualWidth -gt 0) "Tổng quan tiles and command are laid out at scale $scale"
+    foreach ($button in 'chkAvDeep','btnAvDiagnostic','btnAvRepair','btnAvLastResult','avBar','lblAvProgress','avProgressPanel','btnDefaults','btnPrinterCleanup','btnDefaultApps','btnLanAccounts','btnLanShare','btnLanConnect','btnNetworkRun','btnLanCopyCommand','btnOverviewNetworkRun','btnOverviewCopyCommand','btnOverviewRefresh','btnOverviewCopy','btnOverviewChanges','btnOverviewGuide','btnPaintStore','btnDriverFix','btnDriverGuide','btnFormat','btnKeyboard','btnExport','bDl','btnWindowsIso','btnBasicAppInstall','checkUpdate','btnManageApps','btnQuickGuide','btnContact','btnResetIdentity','btnSaveIdentity','btnRemoveLogo','btnWindowsSetupKey','btnConfirmRetail','btnConfirmCompany') {
         Assert ($null -ne $main.FindName($button)) "$button exists at scale $scale"
     }
 }
@@ -80,10 +103,10 @@ try {
     Assert ([Math]::Abs($focused-$before) -le 1) 'Focus does not move Update text'
     Assert ([Math]::Abs($focused-$update.ActualHeight/2) -le 1 -and [Math]::Abs($focused-$otherY) -le 1) 'Both header labels remain vertically centered'
     Assert ($label.ActualHeight -le $update.ActualHeight-$update.Padding.Top-$update.Padding.Bottom) 'Update label fits inside fixed button height'
-    $preview.FindName('tabs').SelectedIndex=3;$preview.UpdateLayout()
+    $preview.FindName('tabs').SelectedItem=$preview.FindName('tabLicense');$preview.UpdateLayout()
     $input=$preview.FindName('Company');$input.Text='Nội dung mẫu';$input.SelectAll()
     Assert ($input.SelectedText -ceq 'Nội dung mẫu' -and $input.Parent.Clip -is [Windows.Media.RectangleGeometry]) 'Rounded input retains native text editing and receives a size-aware clip'
-    $preview.FindName('tabs').SelectedIndex=4;$preview.UpdateLayout()
+    $preview.FindName('tabs').SelectedItem=$preview.FindName('tabSoftware');$preview.UpdateLayout()
     $picker=$preview.FindName('cbProduct');[void]$picker.Items.Add('Office A');[void]$picker.Items.Add('Office B');$picker.SelectedIndex=1
     $preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle)
     [void]$picker.Focus();$picker.IsDropDownOpen=$true;$preview.UpdateLayout()
@@ -244,4 +267,4 @@ Assert (-not $script:session.OpenApplication) 'Completion remains visible withou
 $updater.FindName('Primary').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
 Assert ($script:updateCompletionClosed -and $script:session.OpenApplication) 'Completion button closes the updater before requesting application launch'
 $main.Close()
-Write-Host "PASS: $checks native WPF assertions; nine tabs, control binding, layout, Office defaults and updater states."
+Write-Host "PASS: $checks native WPF assertions; Tổng quan and nine grouped pages, control binding, layout, Office defaults and updater states."

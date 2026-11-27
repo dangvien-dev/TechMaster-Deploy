@@ -4,23 +4,26 @@ Bộ công cụ triển khai Windows và Office.
 
 Từ **2.0.0.0**, giao diện chính và cửa sổ cập nhật dùng **WPF** trên Windows PowerShell 5.1 / .NET Framework có sẵn trong Windows 10/11. Mở `TechMaster Deploy.exe`; chọn chức năng bằng thanh điều hướng bên trái. Từ 2.1.0.0, gỡ / dọn Office có bảng tích chọn từng key; các bước xác nhận dùng nút WPF, không yêu cầu gõ từ khoá. Công cụ triển khai vẫn ghi nhật ký chi tiết.
 
-| Tab | Công cụ | Thư mục |
-|---|---|---|
-| **Máy gốc (Sysprep)** | Kiểm tra / sửa lỗi Sysprep, chuẩn bị máy gốc và chạy Sysprep, thư mục `Reinstall` | `FixClone\` |
-| **Sau khi clone** | Xử lý trùng lặp (tên máy, MachineGuid, AnyDesk, TeamViewer…), chỉnh dấu số, bàn phím US cho EVKey | `FixClone\` |
-| **Kích hoạt bản quyền** | Kích hoạt Windows / Office (online → portal, QR, nhận Confirmation ID qua LAN), chạy TEST | `KichHoat\` |
-| **Biên bản bản quyền** | Nhập thông tin đơn vị, khách hàng, kỹ thuật viên, chọn logo → xuất biên bản HTML (in / lưu PDF) | `BienBan\` |
-| **Tải / cài Office** | Office Deployment Tool: tải bộ cài về kho (cài offline nhiều máy), cài từ kho, cài trực tiếp | `Office\`, kho ở `KhoOffice\` |
-| **Cài Windows** | Mở trang tải của Microsoft và chạy Windows Setup từ ISO đã tải | ISO do người dùng chọn |
+Menu chia theo chức năng; app mở ở **Tổng quan**.
 
-| **Chẩn đoán & sửa lỗi** | Fix Driver; chẩn đoán ứng dụng bị báo virus / không mở được và sửa lỗi có chọn lọc (cập nhật / quét Defender, gỡ cho phép / ngoại lệ rộng, tắt AppInit_DLLs, cách ly tệp, quét offline) | `FixClone\`, `App\` |
-| **Cài ứng dụng** | Chọn và cài ứng dụng cơ bản qua WinGet | WinGet / App Installer |
+| Nhóm | Menu | Công cụ | Thư mục |
+|---|---|---|---|
+| | **Tổng quan** | Thông tin máy (Windows / build, CPU, RAM, ổ hệ thống, IP, bản quyền Windows / Office), lối vào nhanh, chạy TechMaster trên máy khác | `App\` |
+| CÀI ĐẶT | **Cài Windows** | Mở trang tải của Microsoft, tạo USB, chạy Windows Setup từ ISO, cài lại Paint, dọn Windows.old | ISO do người dùng chọn |
+| | **Phần mềm** | Office Deployment Tool (tải về kho, cài từ kho / trực tiếp, gỡ Office) và ứng dụng cơ bản qua WinGet | `Office\`, kho ở `KhoOffice\` |
+| | **Bản quyền & biên bản** | Kích hoạt Windows / Office (online → portal, QR, nhận Confirmation ID qua LAN), key dùng tạm; biên bản và xác nhận bàn giao HTML (in / lưu PDF) | `KichHoat\`, `BienBan\` |
+| CẤU HÌNH | **Tuỳ chỉnh Windows** | Định dạng ngày / số, bàn phím US cho EVKey, menu chuột phải, trình duyệt / PDF mặc định | `FixClone\`, `App\` |
+| | **Máy in** | Máy in mặc định, khổ A4, dọn máy in không còn kết nối | `App\` |
+| | **Mạng LAN & chia sẻ** | Tài khoản scan / share / print, chia sẻ thư mục có phân quyền và tường lửa LAN, kết nối lưu mật khẩu một lần, chạy TechMaster qua LAN | `App\` |
+| TRIỂN KHAI | **Clone hàng loạt** | Máy gốc: kiểm tra / sửa lỗi Sysprep, chuẩn bị và chạy Sysprep, `Reinstall`. Sau khi clone: xử lý trùng lặp, UltraViewer trùng ID, Desktop và phím chụp | `FixClone\` |
+| HỖ TRỢ | **Chẩn đoán & sửa lỗi** | Fix Driver; chẩn đoán ứng dụng bị báo virus / không mở được và sửa lỗi có chọn lọc | `FixClone\`, `App\` |
+| | **Cập nhật** | Kiểm tra, cài bản mới, lịch sử và khôi phục | `.updates\` |
 
 ## Cách dùng
 
 1. Chép cả thư mục `TechMaster-Deploy` ra USB, giữ nguyên cấu trúc thư mục con.
 2. Mở **`TechMaster Deploy.exe`** và chấp nhận yêu cầu Administrator. Muốn tạo shortcut Desktop, dùng File Explorer hoặc chạy `App\Tao-Shortcut.bat`.
-3. Thanh trên cùng hiện tên máy và trạng thái bản quyền Windows / Office (bấm **Làm mới** để đọc lại).
+3. Thanh trên cùng và trang **Tổng quan** hiện tên máy, cấu hình và trạng thái bản quyền Windows / Office (bấm **Làm mới** hoặc **Đọc lại** để đọc lại; **Sao chép thông tin** để dán vào phiếu).
 4. Chọn thao tác, xem phạm vi thay đổi rồi bấm xác nhận. Công cụ triển khai có thể mở cửa sổ nhật ký riêng; không cần gõ YES / XOA OFFICE. Tab Biên bản xuất trực tiếp từ giao diện.
 
 Bản chia sẻ mới không kèm cấu hình hoặc logo công ty. Với bộ công cụ đã dùng, bấm **Xoá thông tin đơn vị / logo** trong Biên bản để nhập thông tin đơn vị mới. Gói phát hành không kèm biên bản khách hàng đã xuất.
@@ -49,7 +52,7 @@ Nguồn công khai không cần đăng nhập. Giao diện thường chỉ hiệ
 
 **Nâng cấp bằng giao diện:** đóng app cũ, mở `TechMaster-Update.exe` trong Downloads của repo, chọn file `TechMaster Deploy.exe` đang dùng hoặc nhập thư mục app. Bấm **Tiếp tục → Tải bản cập nhật → Cài đặt bản cập nhật → Đóng và mở ứng dụng**. Cập nhật xong giữ nguyên màn hình kết quả; chỉ mở app sau khi bấm **Đóng và mở ứng dụng**. Nút X chỉ đóng updater. Có nút chọn ZIP nếu cần cập nhật offline. Từ bản 2.0 dùng nút cập nhật trong app; không nhập `y` hoặc `CAP NHAT` nữa. Khi nâng cấp từ bản cũ, cửa sổ updater đang chạy vẫn mang giao diện cũ đến khi đóng; mở lại từ app mới để dùng giao diện / icon mới. Từ 2.1.1, nút Cập nhật trên đầu app gọi lại cửa sổ cập nhật nếu bị khuất hoặc thu nhỏ, và thanh trạng thái chính hiện tiến trình tải.
 
-**UltraViewer trùng ID:** vào **Sau khi clone → Reset ID UltraViewer** để sao lưu rồi reset hai trường UID / PreferID của bản **6.6.133** đã kiểm tra. Thao tác ngắt UltraViewer, nên chạy tại máy hoặc qua remote khác. Có nút kiểm tra và khôi phục. Khi tạo ảnh mới, bật tuỳ chọn chuẩn bị UltraViewer trong cửa sổ trước Sysprep; dịch vụ được giữ tắt trên ảnh gốc và bật lại sau clone để nhận ID riêng một lần. Chẩn đoán UltraViewer vẫn chỉ đọc. Lịch sử reset / xác minh / khôi phục và bản sao lưu được giữ trong `%ProgramData%\TechMaster Deploy\UltraViewer Backups`; mở lại cửa sổ sẽ tìm lại lịch sử đúng máy, gồm biên nhận từ bản cũ. Không cần reset lần nữa chỉ để kiểm tra ID. Nếu cài lại / reset Windows hoặc xoá ProgramData thì lịch sử có thể mất; đây không phải sao lưu bên ngoài ổ Windows.
+**UltraViewer trùng ID:** vào **Clone hàng loạt → Sau khi clone → Đặt lại ID UltraViewer** để sao lưu rồi reset hai trường UID / PreferID của bản **6.6.133** đã kiểm tra. Thao tác ngắt UltraViewer, nên chạy tại máy hoặc qua remote khác. Có nút kiểm tra và khôi phục. Khi tạo ảnh mới, bật tuỳ chọn chuẩn bị UltraViewer trong cửa sổ trước Sysprep; dịch vụ được giữ tắt trên ảnh gốc và bật lại sau clone để nhận ID riêng một lần. Chẩn đoán UltraViewer vẫn chỉ đọc. Lịch sử reset / xác minh / khôi phục và bản sao lưu được giữ trong `%ProgramData%\TechMaster Deploy\UltraViewer Backups`; mở lại cửa sổ sẽ tìm lại lịch sử đúng máy, gồm biên nhận từ bản cũ. Không cần reset lần nữa chỉ để kiểm tra ID. Nếu cài lại / reset Windows hoặc xoá ProgramData thì lịch sử có thể mất; đây không phải sao lưu bên ngoài ổ Windows.
 
 Trước Sysprep có cửa sổ nhắc chọn **Screen Snipping → Always** cho Windows + Shift + S, kiểm tra và sao lưu / dọn icon Word / Excel trùng. Chỉ dọn shortcut cùng đích, giữ các thiết lập Word. Máy đã clone mở chức năng này ở **Sau khi clone → Kiểm tra Desktop và phím chụp**.
 
@@ -79,7 +82,7 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 
 ## Tải / cài Office (Office Deployment Tool)
 
-- Theo dõi giai đoạn, thời gian và dung lượng trong kho ngay trên tab Office. Sau khi chạy xong, nút **Xem nhật ký** mở kết quả. Tải và cài từ tab Office chạy nền. Mọi trạng thái và kết quả hiển thị ngay trên tab.
+- Theo dõi giai đoạn, thời gian và dung lượng trong kho ngay trên trang Phần mềm. Sau khi chạy xong, nút **Xem nhật ký** mở kết quả. Tải và cài Office chạy nền. Mọi trạng thái và kết quả hiển thị ngay trên tab.
 
 - `setup.exe` (ODT) tự tải từ `officecdn.microsoft.com` lần đầu, **kiểm tra chữ ký số Microsoft** trước khi chạy; chữ ký không hợp lệ thì xoá và dừng.
 - Sản phẩm: Home & Business 2024 / 2021 (bán lẻ), Microsoft 365 Apps business / enterprise, LTSC Professional Plus / Standard 2024, Professional Plus 2021 (Volume).
@@ -90,7 +93,7 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 
 ## Gỡ / dọn Office
 
-Trong tab **Kích hoạt**, tại **Kích hoạt Office**, bấm **Key dùng tạm Office…** để kiểm tra / xoá key, tương tự mục key Windows. Phần này không có nút gỡ ứng dụng. Nếu cần gỡ bộ Office, vào **Tải / cài Office → Gỡ Office…**. Bảng hiện loại license, trạng thái và 5 ký tự cuối key; mặc định không chọn key nào:
+Trong **Bản quyền & biên bản**, tại **Kích hoạt Office**, bấm **Key dùng tạm Office…** để kiểm tra / xoá key, tương tự mục key Windows. Phần này không có nút gỡ ứng dụng. Nếu cần gỡ bộ Office, vào **Tải / cài Office → Gỡ Office…**. Bảng hiện loại license, trạng thái và 5 ký tự cuối key; mặc định không chọn key nào:
 
 1. **Kiểm tra**: liệt kê Product ID Click-to-Run và key Office đọc được từ SoftwareLicensingProduct; chỉ hiển thị 5 ký tự cuối.
 2. **Xoá key đã chọn**: tích đúng các key cần xoá rồi bấm nút, kiểm tra danh sách trong hộp xác nhận. Key không chọn được giữ nguyên, gồm Retail bạn cần dùng. Nút chọn key dùng thử chỉ chọn Grace/Trial được nhận diện rõ; không gỡ ứng dụng.
@@ -120,7 +123,7 @@ powershell.exe -NoProfile -File Office\Test-OfficeCleanup.ps1
 
 ## Cài ứng dụng cơ bản
 
-1. Mở tab **Cài ứng dụng**, chọn Chrome, 7-Zip, VLC, SumatraPDF, Foxit PDF Reader, ONLYOFFICE Desktop Editors, LibreOffice, Notepad++, Zalo, WinRAR, UltraViewer hoặc EVKey rồi bấm **Cài ứng dụng đã chọn**.
+1. Mở **Phần mềm**, phần **Ứng dụng**, chọn Chrome, 7-Zip, VLC, SumatraPDF, Foxit PDF Reader, ONLYOFFICE Desktop Editors, LibreOffice, Notepad++, Zalo, WinRAR, UltraViewer hoặc EVKey rồi bấm **Cài ứng dụng đã chọn**.
 2. Giữ TechMaster mở trong lúc WinGet tải và cài lần lượt. Tiến trình đếm số ứng dụng đã xử lý. WinGet bỏ qua phiên bản đã cài và tab hiển thị kết quả cho từng ứng dụng.
 3. UltraViewer dùng bộ cài tiếng Việt **6.6.133** từ link chính thức; kiểm tra chữ ký nhà phát hành và phiên bản trước khi chạy, rồi đọc lại phiên bản sau cài. Bản đã cài / đang chạy được giữ để tránh ngắt hỗ trợ. Các app còn lại dùng WinGet.
 4. WinRAR: sau cài hoặc khi đã có sẵn, app mở WinRAR lần đầu để hoàn tất thiết lập theo tài khoản; thử lại menu chuột phải. WinRAR đang chạy được giữ nguyên.
@@ -154,11 +157,16 @@ Vào **Chẩn đoán & sửa lỗi → Mở Fix Driver** để quét thiết b�
 
 **Thiếu Paint:** vào **Cài Windows → Paint trên Microsoft Store**, bấm **Get / Cài đặt** trên trang Paint chính thức của Microsoft. App chỉ mở trang Store, không tự cài hoặc báo hoàn tất khi chưa kiểm tra.
 
-**Máy in / trình duyệt / PDF mặc định:** vào **Sau khi clone → Thiết lập mặc định**. Chọn máy in đã cài, tích A4 và / hoặc đặt mặc định rồi bấm **Áp dụng máy in**. App kiểm tra quyền Admin, ghi log trong `%LOCALAPPDATA%\TechMaster Deploy\Windows Tools`, đọc lại A4 và máy in mặc định; nếu chỉ một bước thành công thì báo riêng. Mặc định áp dụng cho tài khoản đang chạy app, tắt Windows tự chọn máy in dùng gần nhất. Khổ giấy hàng đợi có thể ảnh hưởng người cùng dùng máy in; khổ giấy riêng của tài liệu Word / Excel không tự đổi.
+**Máy in / trình duyệt / PDF mặc định:** vào **Máy in → Máy in mặc định / A4…** (trình duyệt / PDF: **Tuỳ chỉnh Windows → Trình duyệt / PDF mặc định…**, cùng cửa sổ, mở ngay phần đó). Chọn máy in đã cài, tích A4 và / hoặc đặt mặc định rồi bấm **Áp dụng máy in**. App kiểm tra quyền Admin, ghi log trong `%LOCALAPPDATA%\TechMaster Deploy\Windows Tools`, đọc lại A4 và máy in mặc định; nếu chỉ một bước thành công thì báo riêng. Mặc định áp dụng cho tài khoản đang chạy app, tắt Windows tự chọn máy in dùng gần nhất. Khổ giấy hàng đợi có thể ảnh hưởng người cùng dùng máy in; khổ giấy riêng của tài liệu Word / Excel không tự đổi.
 
 **Dọn máy in không kết nối:** nút **Dọn máy in không kết nối…** cạnh Thiết lập mặc định mở thẳng thẻ dọn máy in. Gỡ giống **Remove device** trong Devices and Printers: xoá hàng đợi in, rồi xoá các mục thiết bị ẩn (đã ngắt kết nối) cùng container; driver giữ nguyên. Danh sách gồm máy in USB / mạng Windows đang báo Offline và thiết bị máy in còn sót không còn hàng đợi; máy in ảo PDF / XPS / OneNote / Fax và thiết bị đang kết nối không bao giờ bị gỡ. App hỏi xác nhận, kiểm tra lại ngay trước khi gỡ, hiện tiến trình từng máy, có thể khởi động lại Print Spooler khi Windows chưa xoá xong, đọc lại kết quả và ghi nhật ký trong `%LOCALAPPDATA%\TechMaster Deploy\Windows Tools`.
 
-**Chia sẻ trong mạng LAN:** **Sau khi clone → Tài khoản chia sẻ LAN…** tạo user `scan` / `share` / `print` (mật khẩu do kỹ thuật viên nhập) chỉ dùng qua mạng: chặn đăng nhập tại máy, Remote Desktop, tác vụ, dịch vụ; ẩn khỏi màn hình đăng nhập; mật khẩu không hết hạn; nhóm Users. **Chia sẻ thư mục…** chọn thư mục, đặt tên, phân quyền Chỉ đọc / Đọc & ghi cho từng tài khoản (quyền chia sẻ + NTFS), mở tường lửa riêng của TechMaster chỉ cho mạng Private / Domain cùng dải mạng, chuyển mạng Public sang Private khi được chọn; không mở cho Everyone / Guest, không cho chia sẻ thư mục hệ thống. **Kết nối thư mục chia sẻ…** chạy trên máy người dùng: thử đăng nhập rồi lưu mật khẩu vào Windows Credential Manager của người đang dùng máy, tạo lối tắt / gán ổ đĩa, để người dùng mở thư mục không phải nhập lại. App không ghi mật khẩu vào file hay nhật ký.
+**Chia sẻ trong mạng LAN:** **Mạng LAN & chia sẻ → Tài khoản chia sẻ LAN…** tạo user `scan` / `share` / `print` (mật khẩu do kỹ thuật viên nhập) chỉ dùng qua mạng: chặn đăng nhập tại máy, Remote Desktop, tác vụ, dịch vụ; ẩn khỏi màn hình đăng nhập; mật khẩu không hết hạn; nhóm Users. **Chia sẻ thư mục…** chọn thư mục, đặt tên, phân quyền Chỉ đọc / Đọc & ghi cho từng tài khoản (quyền chia sẻ + NTFS), mở tường lửa riêng của TechMaster chỉ cho mạng Private / Domain cùng dải mạng, chuyển mạng Public sang Private khi được chọn; không mở cho Everyone / Guest, không cho chia sẻ thư mục hệ thống. **Kết nối thư mục chia sẻ…** chạy trên máy người dùng: thử đăng nhập rồi lưu mật khẩu vào Windows Credential Manager của người đang dùng máy, tạo lối tắt / gán ổ đĩa, để người dùng mở thư mục không phải nhập lại. App không ghi mật khẩu vào file hay nhật ký.
+
+**Chạy TechMaster trên máy khác, không cần USB:**
+
+- *Qua LAN:* trên máy đang có app, **Mạng LAN & chia sẻ → Chia sẻ TechMaster qua LAN…** (hoặc nút cùng tên ở Tổng quan), chọn tài khoản máy kia dùng (tài khoản đang dùng hoặc `share`) rồi **Chia sẻ TechMaster**. Thư mục chương trình được chia sẻ thành `\\TÊN-MÁY\TechMaster$` (ẩn, chỉ đọc, không Everyone / Guest; tường lửa chỉ trong LAN). Trên máy kia mở `\\TÊN-MÁY\TechMaster$\App\Chay-Tu-Mang.bat`: tệp được chép vào thư mục tạm (không cần quyền quản trị, vì kết nối mạng thuộc phiên đăng nhập này) và kiểm tra theo `update-source.json`; bước cài chạy với quyền quản trị bằng lệnh nhúng sẵn, khoá `C:\TechMaster-Deploy` chỉ cho Administrators / SYSTEM sửa, kiểm tra lại từng tệp và `TechMaster Deploy.exe` rồi mở app. Lần sau chỉ chép tệp thay đổi; bản mới hơn trong thư mục đã khoá được mở luôn. Bấm **Ngừng chia sẻ** khi xong.
+- *Qua Internet:* trên máy kia mở PowerShell, dán `irm https://dangvien-dev.github.io/tm.txt | iex` (nút **Sao chép lệnh**). Lệnh xin quyền quản trị, tải gói ZIP đang công bố trên trang (theo `downloads/latest.json`) vào bộ nhớ, kiểm tra SHA256, cài vào `C:\TechMaster-Deploy` đã khoá rồi mở; bản cài sẵn trong thư mục đã khoá thì chỉ mở, cập nhật bằng nút **Cập nhật** trong app.
 
 Chọn trình duyệt / ứng dụng PDF đã đăng ký, bấm nút mở Cài đặt rồi xác nhận **Set default / Đặt mặc định** trong Windows. Quay lại bấm **Kiểm tra lại** để đối chiếu HTTP, HTTPS hoặc .pdf. Bản Windows chưa hỗ trợ mở đúng trang ứng dụng thì chọn ứng dụng trong trang chung. App không ghi UserChoice hash, không ép đổi khi chưa có xác nhận trong Windows. Nếu mở app bằng tài khoản quản trị khác, thiết lập thuộc tài khoản đó.
 

@@ -21,7 +21,10 @@ try{
     Assert ($releases[0].Notes[1] -ceq '<script>literal</script>') 'Markup remains literal text for the WPF Text binding'
     Assert (@(Get-DeployInfoSections ($temp+'.missing')).Count -eq 0) 'Missing documentation has an empty-state result'
     $guide=@(Get-DeployInfoSections (Join-Path $PSScriptRoot 'QuickGuide.md'))
-    foreach($label in 'Máy gốc / Sysprep','Sau khi clone','Kích hoạt','Biên bản bản quyền','Tải / cài Office','Cài Windows','Cài ứng dụng','Chẩn đoán & sửa lỗi','Fix Driver','Cập nhật / khôi phục','Liên hệ / góp ý'){
+    [xml]$mainMarkup=[IO.File]::ReadAllText((Join-Path $PSScriptRoot 'MainWindow.xml'))
+    $menu=@($mainMarkup.SelectNodes('//*[local-name()="ListBoxItem" and @Tag]') | ForEach-Object {$_.GetAttribute('Content')} | Where-Object {$_ -cne 'Cập nhật'})
+    Assert ($menu.Count -eq 9 -and (@($guide | Where-Object {$menu -ccontains $_.Label} | ForEach-Object {$_.Label}) -join '|') -ceq ($menu -join '|')) 'Guide topics follow the menu order'
+    foreach($label in @($menu)+@('Bắt đầu','Chạy TechMaster trên máy khác','Fix Driver','Cập nhật / khôi phục','Liên hệ / góp ý')){
         Assert (@($guide|Where-Object {$_.Label -eq $label -and $_.Notes.Count -gt 0}).Count -eq 1) "Guide covers $label"
     }
     $identityDir=$temp+'.identity';New-Item -ItemType Directory -Path $identityDir|Out-Null

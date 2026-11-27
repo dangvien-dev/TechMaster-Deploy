@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.23.0",
+  "version": "2.2.24.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -12,16 +12,16 @@
       "sha": "705c25617dcccbd62ebed556f6b55899973c8c44"
     },
     {
-      "path": "App/AV.Repair.ps1",
-      "mode": "100644",
-      "size": 17745,
-      "sha": "d823b838e153ca5b80ef194e87c044d03b28a6e5"
-    },
-    {
       "path": "App/AV.Repair.UI.ps1",
       "mode": "100644",
       "size": 8233,
       "sha": "a039e8dc4fab07b804590c0776428e44fe1effc0"
+    },
+    {
+      "path": "App/AV.Repair.ps1",
+      "mode": "100644",
+      "size": 17745,
+      "sha": "d823b838e153ca5b80ef194e87c044d03b28a6e5"
     },
     {
       "path": "App/BasicApps.ps1",
@@ -52,6 +52,12 @@
       "mode": "100644",
       "size": 3464,
       "sha": "9a0705c30e44f88cb3d61e32cbf58fad697e9ca2"
+    },
+    {
+      "path": "App/Chay-Tu-Mang.bat",
+      "mode": "100644",
+      "size": 299,
+      "sha": "f1c279b44524edf6a859066ae067075e17253ec9"
     },
     {
       "path": "App/ConfirmWindow.xml",
@@ -104,14 +110,14 @@
     {
       "path": "App/Defaults.UI.ps1",
       "mode": "100644",
-      "size": 15038,
-      "sha": "40603f6a14c6ed247088d99070ced44f13907d9f"
+      "size": 15339,
+      "sha": "6b061ecc79e09a63cb91b869c325cd41bdac371c"
     },
     {
       "path": "App/DefaultsWindow.xml",
       "mode": "100644",
-      "size": 7688,
-      "sha": "fe684ae8aced206ad0a080680da7e990d64a776b"
+      "size": 7706,
+      "sha": "a92d6f71847c14d479bcb3359bdca824765ec4ef"
     },
     {
       "path": "App/Deploy.Actions.ps1",
@@ -248,8 +254,50 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 32785,
-      "sha": "95dde3991a2e115c7449188af511dec54e7780d1"
+      "size": 46964,
+      "sha": "bdab959dc79b8b4ae9a666bbd4330eae56dd2559"
+    },
+    {
+      "path": "App/Network.Launch.ps1",
+      "mode": "100644",
+      "size": 830,
+      "sha": "514025ef0ef035d45cab1c7188c09fd002c753ab"
+    },
+    {
+      "path": "App/Network.Sync.ps1",
+      "mode": "100644",
+      "size": 16948,
+      "sha": "2d7c7f8a3fd2dd7cb8eda0d028cf487ece713cde"
+    },
+    {
+      "path": "App/NetworkRun.Core.ps1",
+      "mode": "100644",
+      "size": 11647,
+      "sha": "913710cdf8c4918c84f0c87d338e9eef7f52e84c"
+    },
+    {
+      "path": "App/NetworkRun.UI.ps1",
+      "mode": "100644",
+      "size": 9395,
+      "sha": "d76984733c7485b7ea2266ecfbf6165323415569"
+    },
+    {
+      "path": "App/NetworkRunWindow.xml",
+      "mode": "100644",
+      "size": 5486,
+      "sha": "a59f3b83c4010e542366be43eb0ec4eb402db10a"
+    },
+    {
+      "path": "App/Overview.Core.ps1",
+      "mode": "100644",
+      "size": 6838,
+      "sha": "098ceffcad855039a0dcf42d88b8b541cfd7dd89"
+    },
+    {
+      "path": "App/Overview.UI.ps1",
+      "mode": "100644",
+      "size": 1097,
+      "sha": "129eeceb438474a5a70d11fe75baf263057efa4c"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -260,8 +308,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 22569,
-      "sha": "c66c48e9d6877cebc53029b3afdd3acf4a33f8d2"
+      "size": 25770,
+      "sha": "03fec9851c7639066d4251675bf7a69686438290"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -302,8 +350,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 29215,
-      "sha": "0719f19e24dfafb92642e960f389a8ee4fa1e85a"
+      "size": 31096,
+      "sha": "f87e65229a4e00898652cbdf309a2908f2dfe0e8"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -344,8 +392,8 @@
     {
       "path": "App/Test-DefaultsWpf.ps1",
       "mode": "100644",
-      "size": 10839,
-      "sha": "f2280ac234221e769efcd58b90087d62081fb64a"
+      "size": 11437,
+      "sha": "eb523deaef426af83ac18d6f08d40cc9f0888cb5"
     },
     {
       "path": "App/Test-DeployActions.ps1",
@@ -356,8 +404,8 @@
     {
       "path": "App/Test-Info.ps1",
       "mode": "100644",
-      "size": 4168,
-      "sha": "0d500a117ffd5a35910084c683f0e5c6ef18a0d4"
+      "size": 4507,
+      "sha": "e2ec23b0a75fd872bc7d4e39e0d5b0076ae1b424"
     },
     {
       "path": "App/Test-InfoEntryPoints.ps1",
@@ -392,14 +440,26 @@
     {
       "path": "App/Test-LanShareWpf.ps1",
       "mode": "100644",
-      "size": 10585,
-      "sha": "6455b1cf0f60c2a0bdec81a8e63bb1e261251921"
+      "size": 15208,
+      "sha": "dc3ffb81ddfc8bb8a3c7b164010650079b5ccd9d"
     },
     {
       "path": "App/Test-LogoPreview.ps1",
       "mode": "100644",
-      "size": 4756,
-      "sha": "969ed0d647de7b6b23abd129c50091d57d63764a"
+      "size": 4785,
+      "sha": "faedc34fbc5aaa96fd97a6835a67c1470108b5f9"
+    },
+    {
+      "path": "App/Test-NetworkRun.ps1",
+      "mode": "100644",
+      "size": 20087,
+      "sha": "633a525249cce1138cdb10bbea527f2a425efbdc"
+    },
+    {
+      "path": "App/Test-Overview.ps1",
+      "mode": "100644",
+      "size": 3525,
+      "sha": "776d45cefd88c671329f54cb46d08eef8eaac260"
     },
     {
       "path": "App/Test-PdfPrinter.ps1",
@@ -462,22 +522,22 @@
       "sha": "c653707b698a8b885fcbe3a34214c539085071c9"
     },
     {
-      "path": "App/Test-WindowsTools.ps1",
-      "mode": "100644",
-      "size": 8634,
-      "sha": "6e9fb425bf07fce618c4c6fcce657cacdeb25027"
-    },
-    {
       "path": "App/Test-WinRARStartup.ps1",
       "mode": "100644",
       "size": 6242,
       "sha": "c46e1c4458e404eff7188369fdd254d2b2f1ab3b"
     },
     {
+      "path": "App/Test-WindowsTools.ps1",
+      "mode": "100644",
+      "size": 8634,
+      "sha": "6e9fb425bf07fce618c4c6fcce657cacdeb25027"
+    },
+    {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 22281,
-      "sha": "a2a30e59639cc3551aab19c45bd06ca788f4669f"
+      "size": 25786,
+      "sha": "00222d32b656e76be10683563f00d7174eef7df9"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -540,16 +600,16 @@
       "sha": "2aa9718b906aa806ee6836d49c8617ec434450f1"
     },
     {
-      "path": "App/Windows.Tools.ps1",
-      "mode": "100644",
-      "size": 10064,
-      "sha": "90c5883c3c692e863dd69f24e4f51022af74281c"
-    },
-    {
       "path": "App/WinRAR.Startup.ps1",
       "mode": "100644",
       "size": 3614,
       "sha": "93921d801ab07cd4fbc773169b65dc90602f58cb"
+    },
+    {
+      "path": "App/Windows.Tools.ps1",
+      "mode": "100644",
+      "size": 10064,
+      "sha": "90c5883c3c692e863dd69f24e4f51022af74281c"
     },
     {
       "path": "App/Wpf.Runtime.ps1",
@@ -590,8 +650,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 36636,
-      "sha": "d2708c7278b212b7f6c3ad321fff4e26ab9243b6"
+      "size": 39721,
+      "sha": "f8ed9f707d9de51c08517ef51630b7e04fc59980"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -606,22 +666,10 @@
       "sha": "b6f1398a2a090d621adb04529343f013c7acfe98"
     },
     {
-      "path": "FixClone/DriverFix.md",
-      "mode": "100644",
-      "size": 16157,
-      "sha": "0267bdab889a17db8c345daa0c9faf452619b760"
-    },
-    {
       "path": "FixClone/DriverFix.Profiles.ps1",
       "mode": "100644",
       "size": 4415,
       "sha": "1ce24cb09c6618c5bd92ac173a5cb2ccd6567d10"
-    },
-    {
-      "path": "FixClone/DriverFix.ps1",
-      "mode": "100644",
-      "size": 16318,
-      "sha": "c3d95d6a552d542be8c6aaf460dd084f54dfca3f"
     },
     {
       "path": "FixClone/DriverFix.Report.ps1",
@@ -630,22 +678,34 @@
       "sha": "b8728ce4edcf5f41ca72ba608d14c6e9610c748f"
     },
     {
+      "path": "FixClone/DriverFix.md",
+      "mode": "100644",
+      "size": 16157,
+      "sha": "0267bdab889a17db8c345daa0c9faf452619b760"
+    },
+    {
+      "path": "FixClone/DriverFix.ps1",
+      "mode": "100644",
+      "size": 16318,
+      "sha": "c3d95d6a552d542be8c6aaf460dd084f54dfca3f"
+    },
+    {
       "path": "FixClone/DriverFix.xml",
       "mode": "100644",
       "size": 8341,
       "sha": "0321780b127893222477883f6a8f190f565be619"
     },
     {
-      "path": "FixClone/Fix-BanPhim.bat",
-      "mode": "100644",
-      "size": 196,
-      "sha": "66cca63470455a69157aa587f68395c8e2f45796"
-    },
-    {
       "path": "FixClone/Fix-BanPhim.Core.ps1",
       "mode": "100644",
       "size": 5482,
       "sha": "180beca2fe5f68fed01193715ab045a2ce421690"
+    },
+    {
+      "path": "FixClone/Fix-BanPhim.bat",
+      "mode": "100644",
+      "size": 196,
+      "sha": "66cca63470455a69157aa587f68395c8e2f45796"
     },
     {
       "path": "FixClone/Fix-BanPhim.ps1",
@@ -740,8 +800,8 @@
     {
       "path": "FixClone/README.md",
       "mode": "100644",
-      "size": 13002,
-      "sha": "81e4dfa68a782a944d335a13b441d8262371b192"
+      "size": 13033,
+      "sha": "5dd5e32cbf2c5912117a5a11727e2722de7909ad"
     },
     {
       "path": "FixClone/Run-Sysprep.bat",
@@ -852,12 +912,6 @@
       "sha": "68e16d327243a5a4ea3911cc2e5776363a5b1ca1"
     },
     {
-      "path": "FixClone/unattend.xml",
-      "mode": "100644",
-      "size": 5098,
-      "sha": "aface74f9c448b2853cdf46c49afc7962cbe3f3f"
-    },
-    {
       "path": "FixClone/Windows-SetupKey.ps1",
       "mode": "100644",
       "size": 5059,
@@ -880,6 +934,12 @@
       "mode": "100644",
       "size": 3077,
       "sha": "2c625fc939f351d298895eb8ea592ca005aceb35"
+    },
+    {
+      "path": "FixClone/unattend.xml",
+      "mode": "100644",
+      "size": 5098,
+      "sha": "aface74f9c448b2853cdf46c49afc7962cbe3f3f"
     },
     {
       "path": "KichHoat/Activation.Core.ps1",
@@ -1016,14 +1076,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 26105,
-      "sha": "64e5d8afbe7aa308a83c71058031b19bdbfac4c5"
+      "size": 27728,
+      "sha": "4dd75d06e2d7c623ef51a44c1110289f56414364"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 24114,
-      "sha": "9ff93c47faaec15be2084954f049e749ca306531"
+      "size": 26484,
+      "sha": "7895578daf61cb1e8694858de3c78a2f91c07bb7"
     },
     {
       "path": "RELEASING.md",
@@ -1035,7 +1095,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "8884f49e9089e96c374a4996d68990c01393b34c"
+      "sha": "9f979ca92b22f63d9c9954e9dc6bebf00b31df12"
     }
   ]
 }
