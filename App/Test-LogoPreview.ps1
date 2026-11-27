@@ -29,16 +29,19 @@ try{
     $preview.Show();$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()
     $scroll=[Windows.Media.VisualTreeHelper]::GetParent($image)
     while($scroll -and $scroll -isnot [Windows.Controls.ScrollViewer]){$scroll=[Windows.Media.VisualTreeHelper]::GetParent($scroll)}
+    # The logo sits below the activation cards on Bản quyền & biên bản: bring it into the viewport first.
+    $image.BringIntoView();$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()
+    $offset=$scroll.VerticalOffset
     $surface=$preview.Content
     $top=$scroll.TranslatePoint([Windows.Point]::new(0,0),$surface).Y
     $location=$image.TranslatePoint([Windows.Point]::new(0,0),$surface)
     $x=[int]($location.X+$image.ActualWidth/2)
     Assert ((Pixel $surface $x ([int]($location.Y+$image.ActualHeight/2))) -eq '22,115,249,255') 'SVG is actually visible, with its original fill color'
     $header=Pixel $surface $x ([int]($top-20))
-    $scroll.ScrollToVerticalOffset($location.Y-$top+45);$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()
+    $scroll.ScrollToVerticalOffset($offset+$location.Y-$top+45);$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()
     Assert ((Pixel $surface $x ([int]($top-20))) -eq $header) 'A partially scrolled SVG cannot paint over the header'
     Assert ((Pixel $surface $x ([int]($top+10))) -eq '22,115,249,255') 'The portion inside the scrolling viewport remains visible'
-    $scroll.ScrollToVerticalOffset($location.Y+$image.ActualHeight-$top+10);$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()
+    $scroll.ScrollToVerticalOffset($offset+$location.Y+$image.ActualHeight-$top+10);$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()
     Assert ((Pixel $surface $x ([int]($top+10))) -ne '22,115,249,255') 'The logo disappears completely after scrolling beyond the viewport'
     Assert ((Get-DeployLogoPreview (Join-Path $PSScriptRoot 'TechMaster-Icon.svg')) -is [Windows.Media.DrawingImage]) 'Embedded PNG artwork in SVG also uses the native image path'
     $png=Join-Path $temp 'Logo.png';$encoder=[Windows.Media.Imaging.PngBitmapEncoder]::new();$encoder.Frames.Add([Windows.Media.Imaging.BitmapFrame]::Create($preview.Icon))

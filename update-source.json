@@ -446,8 +446,8 @@
     {
       "path": "App/Test-LogoPreview.ps1",
       "mode": "100644",
-      "size": 4785,
-      "sha": "faedc34fbc5aaa96fd97a6835a67c1470108b5f9"
+      "size": 5095,
+      "sha": "bcc4f4bd13db1f4ea1c8852f67843da220636632"
     },
     {
       "path": "App/Test-NetworkRun.ps1",
