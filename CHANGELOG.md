@@ -1,10 +1,14 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.25.0 — 27/11/2026
+
+- Tách cửa sổ Thiết lập mặc định theo nút đã bấm, tránh nhầm chức năng khi gỡ máy in: **Máy in mặc định / A4…** chỉ có phần máy in mặc định và khổ giấy; **Dọn máy in không kết nối…** chỉ có danh sách gỡ máy in (ghi rõ thao tác áp dụng cho cả máy, driver được giữ); **Trình duyệt / PDF mặc định…** chỉ có trình duyệt, PDF và nút Ứng dụng mặc định trong Windows. Mỗi cửa sổ có tiêu đề riêng và chỉ báo “chưa đọc được” cho phần đang hiện.
+
 ## 2.2.24.0 — 27/11/2026
 
 - Menu chia lại theo chức năng, có nhóm: **Tổng quan**; **CÀI ĐẶT** (Cài Windows, Phần mềm, Bản quyền & biên bản); **CẤU HÌNH** (Tuỳ chỉnh Windows, Máy in, Mạng LAN & chia sẻ); **TRIỂN KHAI** (Clone hàng loạt); **HỖ TRỢ** (Chẩn đoán & sửa lỗi, Cập nhật). Office và Cài ứng dụng gộp thành **Phần mềm**; Kích hoạt và Biên bản gộp thành **Bản quyền & biên bản**; Máy gốc / Sysprep và Sau khi clone gộp thành **Clone hàng loạt** (hai phần Trên máy gốc / Sau khi clone). Mọi nút cũ giữ nguyên chức năng.
 - App mở ở trang **Tổng quan** mới: tên máy, hãng / model / số serial, Windows (bản, build, 32 / 64-bit), CPU, RAM, ổ hệ thống (dung lượng trống, SSD / HDD), địa chỉ IP, bản quyền Windows / Office kèm 5 ký tự cuối key. Mỗi mục đọc riêng: mục nào Windows không trả lời được ghi rõ, các mục khác vẫn hiện. Có **Sao chép thông tin**, các ô **Làm nhanh** mở thẳng từng nhóm chức năng, phiên bản và Có gì mới.
-- **Trình duyệt / PDF mặc định…** (Tuỳ chỉnh Windows) và **Máy in mặc định / A4…** (Máy in) mở cùng cửa sổ Thiết lập mặc định, cuộn ngay tới phần tương ứng.
+- **Trình duyệt / PDF mặc định…** (Tuỳ chỉnh Windows) và **Máy in mặc định / A4…** (Máy in) là hai nút riêng (2.2.25.0 tách thành cửa sổ riêng).
 - Thêm **Chạy TechMaster trên máy khác, không cần USB** (Tổng quan và Mạng LAN & chia sẻ):
   - **Qua LAN:** **Chia sẻ TechMaster qua LAN…** chia sẻ thư mục chương trình thành `\\TÊN-MÁY\TechMaster$` (ẩn, **chỉ đọc**) cho một tài khoản (tài khoản đang dùng hoặc `share`), không Everyone / Guest; dùng chung luật tường lửa LAN và lựa chọn chuyển mạng Public → Private. Trên máy kia mở `\\TÊN-MÁY\TechMaster$\App\Chay-Tu-Mang.bat`: tệp được chép vào thư mục tạm và kiểm tra kích thước + Git blob hash theo `update-source.json`; bước cài với quyền quản trị là lệnh nhúng sẵn (không chạy script từ thư mục người dùng ghi được), khoá `C:\TechMaster-Deploy` (chủ sở hữu Administrators, chỉ Administrators / SYSTEM sửa, Users đọc và chạy), kiểm tra lại từng tệp và SHA256 của `TechMaster Deploy.exe` rồi mở app. Lần sau chỉ chép tệp thay đổi. Thư mục máy chia sẻ có tệp khác danh sách thì không chia sẻ; **Ngừng chia sẻ** gỡ cả quyền NTFS đã thêm.
   - **Qua Internet:** lệnh `irm https://dangvien-dev.github.io/tm.txt | iex` (nút **Sao chép lệnh**) xin quyền quản trị, tải gói ZIP đang công bố trên trang vào bộ nhớ, kiểm tra SHA256 theo `downloads/latest.json`, cài vào `C:\TechMaster-Deploy` đã khoá rồi mở.

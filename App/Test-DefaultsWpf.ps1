@@ -14,10 +14,7 @@ Assert $refused 'Removal refuses a connected device (root device node), so only 
 Assert (-not [TechMaster.DefaultsNative]::RemovePhantomDevice('ROOT\TECHMASTER_TEST_ABSENT\0000')) 'A device node that does not exist is reported as already gone'
 $refused=$false;try{[void][TechMaster.DefaultsNative]::RemovePhantomDevice('')}catch{$refused=$true}
 Assert $refused 'An empty device ID (which would locate the root) is rejected'
-Assert ((Get-DeployDefaultsFocusCard 'Cleanup') -ceq 'CleanupCard' -and (Get-DeployDefaultsFocusCard 'Apps') -ceq 'AppsCard' -and (Get-DeployDefaultsFocusCard '') -ceq '' -and (Get-DeployDefaultsFocusCard 'apps') -ceq '') 'Main-window entries open their own card; other values open at the top'
-$focused=New-DeployDefaultsWindow $null 'Apps'
-try{Assert ($focused.Tag.Focus -ceq 'Apps' -and $focused.FindName('AppsCard').FindName('Browser') -and $focused.FindName('CleanupCard')) 'The browser / PDF entry opens the same window focused on its card'}finally{$focused.Close();$focused.Tag.Timer.Stop()}
-$view=New-DeployDefaultsWindow
+$view=New-DeployDefaultsWindow $null 'Cleanup'
 $originalWorker=${function:Start-DeployWork}
 $originalConfirm=${function:Confirm-Box}
 try{
@@ -30,11 +27,32 @@ try{
     Assert ($boxes.Count -eq 3 -and $view.FindName('CleanupItems').Children.Count -eq 3 -and $boxes[0].IsChecked -eq $true -and $boxes[1].IsChecked -eq $false -and $boxes[2].IsChecked -eq $true -and $view.FindName('RemoveOffline').IsEnabled) 'Offline printers and leftover devices are listed; USB and leftovers preselected, network unticked'
     Assert ($view.FindName('CleanupCurrent').Text -match '2 máy in' -and $view.FindName('CleanupCurrent').Text -match '1 thiết bị máy in còn sót') 'Cleanup summary counts offline queues and leftover devices separately'
     Assert ($view.FindName('CleanupRestartSpooler').IsChecked -eq $true -and $view.FindName('CleanupProgress').Visibility -eq 'Collapsed') 'Spooler fallback is on by default and the progress area stays hidden until removal'
+    # Each main-window entry shows only its own part: printer cleanup is never mixed with default apps.
+    $expectedCards=@{Printer=@('PrinterCard');Cleanup=@('CleanupCard');Apps=@('AppsCard','PdfCard','AppsNote')}
+    $titles=@{Printer='Máy in mặc định và khổ A4';Cleanup='Dọn máy in không kết nối';Apps='Trình duyệt và PDF mặc định'}
+    foreach($mode in 'Printer','Cleanup','Apps'){
+        $modeView=if($mode -eq 'Cleanup'){$view}else{New-DeployDefaultsWindow $null $mode}
+        try{
+            if($modeView -ne $view){Set-DeployDefaultsView $modeView $snapshot}
+            $shown=@('PrinterCard','CleanupCard','AppsCard','PdfCard','AppsNote' | Where-Object {$modeView.FindName($_).Visibility -eq 'Visible'})
+            Assert (($shown -join ',') -ceq ($expectedCards[$mode] -join ',') -and $modeView.Title -ceq $titles[$mode] -and $modeView.FindName('Heading').Text -ceq $titles[$mode]) "$mode opens with only its own part and title ($($shown -join ','))"
+            Assert (($modeView.FindName('DefaultsSettings').Visibility -eq 'Visible') -eq ($mode -eq 'Apps')) "$mode shows the Windows default-apps button only for browser / PDF"
+            Assert (($modeView.FindName('Account').Text -match 'cả máy này') -eq ($mode -eq 'Cleanup')) "$mode explains whether it changes this account or the whole computer"
+            foreach($scale in 1.0,1.5){
+                $size=[Windows.Size]::new((1024/$scale),(768/$scale))
+                $modeView.Content.Measure($size);$modeView.Content.Arrange([Windows.Rect]::new($size));$modeView.UpdateLayout()
+                $visible=switch($mode){Printer{@('ApplyPrinter','PrinterSettings')}Cleanup{@('RemoveOffline','CleanupItems','CleanupAll')}Apps{@('OpenBrowser','OpenPdf')}}
+                $hidden=switch($mode){Printer{@('RemoveOffline','OpenBrowser')}Cleanup{@('ApplyPrinter','OpenBrowser','OpenPdf')}Apps{@('ApplyPrinter','RemoveOffline')}}
+                Assert (@($visible | Where-Object {$modeView.FindName($_).ActualHeight -le 0}).Count -eq 0 -and @($hidden | Where-Object {$modeView.FindName($_).ActualHeight -gt 0}).Count -eq 0 -and $modeView.FindName('Refresh').ActualHeight -gt 0) "$mode lays out its own actions and none of the others at $scale"
+            }
+        }finally{if($modeView -ne $view){$modeView.Close();$modeView.Tag.Timer.Stop()}}
+    }
+    Assert ((Test-DeployDefaultsReadProblem 'Cleanup' ([pscustomobject]@{PrinterError='';OfflineError='';OfflineDeviceError='';AppError='no apps';Associations=@{}})) -eq $false -and (Test-DeployDefaultsReadProblem 'Apps' ([pscustomobject]@{PrinterError='';OfflineError='';OfflineDeviceError='';AppError='no apps';Associations=@{}})) -eq $true -and (Test-DeployDefaultsReadProblem 'Printer' ([pscustomobject]@{PrinterError='spooler';AppError='';Associations=@{}})) -eq $true) 'Only problems of the part on screen are reported'
     foreach($scale in 1.0,1.25,1.5){
         $size=[Windows.Size]::new((1024/$scale),(768/$scale))
         $view.Content.Measure($size);$view.Content.Arrange([Windows.Rect]::new($size));$view.UpdateLayout()
         Assert ($view.FindName('Refresh').ActualHeight -gt 0 -and $view.FindName('Close').ActualWidth -gt 0) "Footer actions remain laid out at $scale"
-        Assert ($view.FindName('RemoveOffline').ActualHeight -gt 0 -and $view.FindName('CleanupItems').ActualHeight -gt 0) "Offline printer list and remove action are laid out at $scale"
+        Assert ($view.FindName('RemoveOffline').ActualHeight -gt 0 -and $view.FindName('CleanupItems').ActualHeight -gt 0 -and $view.FindName('ApplyPrinter').ActualHeight -eq 0) "Offline printer list and remove action are laid out at $scale, nothing else"
         Assert ($view.FindName('Printer').Parent.CornerRadius.TopLeft -gt 0 -and $view.FindName('Pdf').Parent.CornerRadius.TopLeft -gt 0) 'Printer/PDF selectors use rounded shared controls'
     }
     function Start-DeployWork([string]$code,[object[]]$arguments){$script:capturedDefaults=@{Code=$code;Args=$arguments};@{Async=[pscustomobject]@{IsCompleted=$false}}}
