@@ -1,0 +1,43 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Tài khoản chia sẻ LAN" Width="820" Height="780" MinWidth="640" MinHeight="460" WindowStartupLocation="CenterOwner" FontFamily="Segoe UI" FontSize="14" Background="#F3F6FB" Foreground="#10223F" UseLayoutRounding="True">
+<Window.Resources>
+ <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+ <Style x:Key="Card" TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="CornerRadius" Value="12"/><Setter Property="BorderBrush" Value="#DFE7F1"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="18"/><Setter Property="Margin" Value="0,0,0,14"/></Style>
+</Window.Resources>
+<Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+<Border Background="#10223F" Padding="24,20"><StackPanel><TextBlock Text="Tài khoản chia sẻ LAN" FontSize="24" FontWeight="SemiBold" Foreground="White"/><TextBlock x:Name="Computer" Foreground="#BED2E9" Margin="0,8,0,0" Text="Tài khoản chỉ dùng qua mạng LAN cho scan, chia sẻ file và máy in."/></StackPanel></Border>
+<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><StackPanel Margin="22,18,22,8">
+ <Border Tag="Notice" Margin="0,0,0,14"><TextBlock x:Name="Status" Text="Đang đọc tài khoản…"/></Border>
+ <StackPanel x:Name="Choices">
+ <Border Style="{StaticResource Card}"><StackPanel>
+  <CheckBox x:Name="UseScan" Margin="0,0,0,6" VerticalContentAlignment="Center"><TextBlock Text="scan — Scan vào thư mục" FontSize="18" FontWeight="SemiBold"/></CheckBox>
+  <TextBlock Text="Máy photocopy / máy scan lưu file vào thư mục chia sẻ trên máy này." Foreground="#526880" Margin="0,0,0,4"/>
+  <TextBlock x:Name="StateScan" Foreground="#526880" FontSize="12" Margin="0,0,0,12" Text="Đang đọc…"/>
+  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+   <StackPanel><TextBlock Text="Mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="PasswordScan" Tag="Scan" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+   <StackPanel Grid.Column="2"><TextBlock Text="Nhập lại mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="ConfirmScan" Tag="Scan" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+  </Grid>
+ </StackPanel></Border>
+ <Border Style="{StaticResource Card}"><StackPanel>
+  <CheckBox x:Name="UseShare" Margin="0,0,0,6" VerticalContentAlignment="Center"><TextBlock Text="share — Chia sẻ file" FontSize="18" FontWeight="SemiBold"/></CheckBox>
+  <TextBlock Text="Máy khác trong mạng LAN mở thư mục chia sẻ trên máy này." Foreground="#526880" Margin="0,0,0,4"/>
+  <TextBlock x:Name="StateShare" Foreground="#526880" FontSize="12" Margin="0,0,0,12" Text="Đang đọc…"/>
+  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+   <StackPanel><TextBlock Text="Mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="PasswordShare" Tag="Share" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+   <StackPanel Grid.Column="2"><TextBlock Text="Nhập lại mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="ConfirmShare" Tag="Share" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+  </Grid>
+ </StackPanel></Border>
+ <Border Style="{StaticResource Card}"><StackPanel>
+  <CheckBox x:Name="UsePrint" Margin="0,0,0,6" VerticalContentAlignment="Center"><TextBlock Text="print — Chia sẻ máy in" FontSize="18" FontWeight="SemiBold"/></CheckBox>
+  <TextBlock Text="Máy khác trong mạng LAN kết nối máy in chia sẻ trên máy này." Foreground="#526880" Margin="0,0,0,4"/>
+  <TextBlock x:Name="StatePrint" Foreground="#526880" FontSize="12" Margin="0,0,0,12" Text="Đang đọc…"/>
+  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+   <StackPanel><TextBlock Text="Mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="PasswordPrint" Tag="Print" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+   <StackPanel Grid.Column="2"><TextBlock Text="Nhập lại mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="ConfirmPrint" Tag="Print" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+  </Grid>
+ </StackPanel></Border>
+ <TextBlock Text="Tài khoản chỉ đăng nhập qua mạng LAN: không đăng nhập tại máy, không Remote Desktop, không chạy tác vụ / dịch vụ, ẩn khỏi màn hình đăng nhập, mật khẩu không hết hạn, thuộc nhóm Users (không phải quản trị). App không tạo thư mục chia sẻ, không đổi quyền chia sẻ hay tường lửa. Tài khoản cùng tên có sẵn mà không do TechMaster tạo sẽ không bị thay đổi." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
+ </StackPanel>
+ <TextBlock x:Name="Log" Foreground="#526880" FontSize="12"/>
+</StackPanel></ScrollViewer>
+<Border Grid.Row="2" Background="White" BorderBrush="#DFE7F1" BorderThickness="0,1,0,0" Padding="22,14"><WrapPanel HorizontalAlignment="Right"><Button x:Name="OpenManager" Content="Quản lý tài khoản Windows" Background="#E7EEF8" Foreground="#183655" Margin="0,0,8,8"/><Button x:Name="Refresh" Content="Kiểm tra lại" Background="#E7EEF8" Foreground="#183655" Margin="0,0,8,8"/><Button x:Name="Apply" Content="Tạo / cập nhật tài khoản đã chọn" Margin="0,0,8,8"/><Button x:Name="Close" Content="Đóng" Background="#E7EEF8" Foreground="#183655" Margin="0,0,0,8"/></WrapPanel></Border>
+</Grid></Window>

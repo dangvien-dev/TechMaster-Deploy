@@ -15,6 +15,8 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'CustomApps.UI.ps1')
 . (Join-Path $PSScriptRoot 'Defaults.Core.ps1')
 . (Join-Path $PSScriptRoot 'Defaults.UI.ps1')
+. (Join-Path $PSScriptRoot 'LanAccounts.Core.ps1')
+. (Join-Path $PSScriptRoot 'LanAccounts.UI.ps1')
 . (Join-Path $PSScriptRoot 'AV.Repair.ps1')
 . (Join-Path $PSScriptRoot 'AV.Repair.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
@@ -88,6 +90,7 @@ Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.b
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
 Bind-Click 'btnDefaults' {Show-DeployDefaults $form}
 Bind-Click 'btnPrinterCleanup' {Show-DeployDefaults $form 'Cleanup'}
+Bind-Click 'btnLanAccounts' {Show-DeployLanAccounts $form}
 Bind-Click 'btnKeyboard' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím / EVKey' }
 Bind-Click 'btnUltraReset' {
     $script = Join-Path $DirClone 'UltraViewer-Reset.ps1'

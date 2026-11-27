@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.22.0 — 27/11/2026
+
+- Thêm **Sau khi clone → Tài khoản chia sẻ LAN**: tạo tài khoản theo chức năng **scan** (máy photocopy / máy scan lưu vào thư mục chia sẻ), **share** (chia sẻ file), **print** (chia sẻ máy in); mật khẩu do kỹ thuật viên nhập hai lần, gõ mật khẩu là tự tích tài khoản đó.
+- Tài khoản chỉ đăng nhập qua mạng LAN: chặn đăng nhập tại máy, Remote Desktop, tác vụ và dịch vụ; ẩn khỏi màn hình đăng nhập; mật khẩu không hết hạn, người dùng không tự đổi; thuộc nhóm Users (xác định theo SID nên đúng với Windows tiếng Việt), không bao giờ là quản trị. Cửa sổ hiện tên đăng nhập dùng trên máy khác / máy photocopy (ví dụ `TÊN-MÁY\scan`).
+- Tài khoản cùng tên có sẵn mà không do TechMaster tạo, hoặc đang thuộc Administrators, không bị thay đổi. Tài khoản TechMaster đã tạo trước đó được đặt mật khẩu mới, bật lại và bổ sung phần còn thiếu.
+- Mỗi thiết lập được đọc lại từ Windows trước khi báo thành công; tài khoản mới tạo mà không khoá được đăng nhập trực tiếp sẽ bị xoá lại. Mật khẩu không ghi vào nhật ký và bị xoá khỏi cửa sổ sau mỗi lần thực hiện. App không tạo thư mục chia sẻ, không đổi quyền chia sẻ hay tường lửa.
+
 ## 2.2.21.0 — 27/11/2026
 
 - **Dọn máy in không kết nối giờ gỡ cả thiết bị**, giống **Remove device** trong Devices and Printers, và giữ nguyên driver. Bản 2.2.20.0 chỉ xoá hàng đợi in nên máy in đã rút vẫn hiện trong Devices and Printers: cửa sổ này liệt kê theo thiết bị (container PnP), mà máy in USB đã rút còn các mục thiết bị ẩn (hàng đợi, USBPRINT, USB). App xoá các mục ẩn cùng container sau khi xoá hàng đợi, con trước cha. Thiết bị đang kết nối (kể cả chỉ một phần), container của chính máy tính và thiết bị máy in khác còn dùng không bao giờ bị xoá.
