@@ -50,6 +50,15 @@ try{
     $fileAcl=[IO.File]::GetAccessControl((Join-Path $target 'App\TechMaster-Deploy.ps1'))
     Assert (@($fileAcl.GetAccessRules($true,$false,[Security.Principal.SecurityIdentifier])).Count -eq 0 -and $fileAcl.GetOwner([Security.Principal.SecurityIdentifier]).Value -eq 'S-1-5-32-544') 'Program files only inherit the locked folder rules'
 
+    # An explicit entry for another account (here Everyone: modify) unlocks the folder; locking removes it.
+    & icacls.exe $target '/grant' '*S-1-1-0:(OI)(CI)M' | Out-Null
+    & icacls.exe (Join-Path $target 'App\MainWindow.xml') '/grant' '*S-1-1-0:M' | Out-Null
+    Assert (-not (Test-DeployNetworkLocked $target)) 'A folder any account can modify is not locked'
+    Protect-DeployNetworkFolder $target
+    $sddl=[IO.DirectoryInfo]::new($target).GetAccessControl().GetSecurityDescriptorSddlForm('Access')
+    $fileRules=@([IO.File]::GetAccessControl((Join-Path $target 'App\MainWindow.xml')).GetAccessRules($true,$false,[Security.Principal.SecurityIdentifier]))
+    Assert ((Test-DeployNetworkLocked $target) -and $sddl -notmatch ';WD\)' -and $fileRules.Count -eq 0) "Locking removes explicit entries of other accounts on the folder and its files ($sddl)"
+
     # Second run: everything already matches.
     $staging=Join-Path $temp 'stage2'
     $r=Copy-DeployNetworkStage $source $target $staging
