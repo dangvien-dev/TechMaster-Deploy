@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.23.0 — 27/11/2026
+
+- Thêm **Chia sẻ thư mục…** (máy chia sẻ): bấm **Chọn thư mục…**, đặt tên chia sẻ (gợi ý tên không dấu), phân quyền **Không / Chỉ đọc / Đọc & ghi** cho từng tài khoản scan / share / print. Quyền áp cho cả quyền chia sẻ lẫn NTFS (thư mục con dùng chung); chỉ đổi phần của ba tài khoản này, quyền khác trên máy giữ nguyên. Thư mục đã chia sẻ được nạp lại tên và quyền hiện tại để sửa.
+- Mật khẩu vẫn bắt buộc: không bao giờ mở cho Everyone / Guest; danh sách trong thư mục chỉ hiện mục người đó có quyền. Không cho chia sẻ thư mục hệ thống (ổ cài Windows, Windows, Program Files, ProgramData, cả thư mục người dùng), ổ USB / mạng; chia sẻ cả ổ dữ liệu thì có cảnh báo.
+- Tường lửa: luật riêng của TechMaster (TCP 139, 445; UDP 137, 138), chỉ mạng Private / Domain và chỉ máy cùng dải mạng; không đổi luật có sẵn của Windows. Mạng đang Public được báo rõ và chỉ chuyển sang Private khi bạn tích. Bật dịch vụ Server nếu đang tắt. Đọc lại chia sẻ, NTFS, tường lửa trước khi báo; kết quả có đường dẫn theo tên máy và IP.
+- Thêm **Kết nối thư mục chia sẻ…** (máy người dùng): nhập `\\TÊN-MÁY\TênChiaSẻ`, tài khoản và mật khẩu **một lần**. App thử đăng nhập trước, đúng mới lưu vào Windows Credential Manager của tài khoản đang dùng máy (mật khẩu cũ chỉ bị thay khi mật khẩu mới đúng), tạo lối tắt trên Desktop và tuỳ chọn gán ổ đĩa (hiện sau khi đăng nhập lại). Người dùng mở là vào, không phải nhập mật khẩu. Có nút xoá mật khẩu đã lưu. Từ chối lưu khi app đang chạy bằng tài khoản quản trị khác với người đang dùng máy.
+
 ## 2.2.22.0 — 27/11/2026
 
 - Thêm **Sau khi clone → Tài khoản chia sẻ LAN**: tạo tài khoản theo chức năng **scan** (máy photocopy / máy scan lưu vào thư mục chia sẻ), **share** (chia sẻ file), **print** (chia sẻ máy in); mật khẩu do kỹ thuật viên nhập hai lần, gõ mật khẩu là tự tích tài khoản đó.

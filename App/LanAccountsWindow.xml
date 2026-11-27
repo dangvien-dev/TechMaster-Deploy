@@ -35,7 +35,7 @@
    <StackPanel Grid.Column="2"><TextBlock Text="Nhập lại mật khẩu" FontSize="12" Foreground="#526880" Margin="0,0,0,4"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="ConfirmPrint" Tag="Print" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
   </Grid>
  </StackPanel></Border>
- <TextBlock Text="Tài khoản chỉ đăng nhập qua mạng LAN: không đăng nhập tại máy, không Remote Desktop, không chạy tác vụ / dịch vụ, ẩn khỏi màn hình đăng nhập, mật khẩu không hết hạn, thuộc nhóm Users (không phải quản trị). App không tạo thư mục chia sẻ, không đổi quyền chia sẻ hay tường lửa. Tài khoản cùng tên có sẵn mà không do TechMaster tạo sẽ không bị thay đổi." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
+ <TextBlock Text="Tài khoản chỉ đăng nhập qua mạng LAN: không đăng nhập tại máy, không Remote Desktop, không chạy tác vụ / dịch vụ, ẩn khỏi màn hình đăng nhập, mật khẩu không hết hạn, thuộc nhóm Users (không phải quản trị). Chia sẻ thư mục, phân quyền và tường lửa: dùng Chia sẻ thư mục… ở cửa sổ chính. Tài khoản cùng tên có sẵn mà không do TechMaster tạo sẽ không bị thay đổi." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
  </StackPanel>
  <TextBlock x:Name="Log" Foreground="#526880" FontSize="12"/>
 </StackPanel></ScrollViewer>

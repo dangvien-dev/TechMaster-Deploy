@@ -1,0 +1,30 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Kết nối thư mục chia sẻ" Width="840" Height="800" MinWidth="640" MinHeight="460" WindowStartupLocation="CenterOwner" FontFamily="Segoe UI" FontSize="14" Background="#F3F6FB" Foreground="#10223F" UseLayoutRounding="True">
+<Window.Resources>
+ <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+ <Style TargetType="ComboBox"><Setter Property="Padding" Value="10,8"/><Setter Property="MinHeight" Value="36"/></Style>
+ <Style x:Key="Card" TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="CornerRadius" Value="12"/><Setter Property="BorderBrush" Value="#DFE7F1"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="18"/><Setter Property="Margin" Value="0,0,0,14"/></Style>
+ <Style x:Key="Heading" TargetType="TextBlock"><Setter Property="FontSize" Value="18"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Margin" Value="0,0,0,10"/></Style>
+ <Style x:Key="Label" TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="#526880"/><Setter Property="Margin" Value="0,0,0,4"/></Style>
+</Window.Resources>
+<Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+<Border Background="#10223F" Padding="24,20"><StackPanel><TextBlock Text="Kết nối thư mục chia sẻ" FontSize="24" FontWeight="SemiBold" Foreground="White"/><TextBlock x:Name="Subtitle" Foreground="#BED2E9" Margin="0,8,0,0" Text="Chạy trên máy người dùng: lưu mật khẩu một lần để mở thư mục chia sẻ không phải nhập lại."/></StackPanel></Border>
+<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><StackPanel Margin="22,18,22,8">
+ <Border Tag="Notice" Margin="0,0,0,14"><TextBlock x:Name="Status" Text="Đang đọc thiết lập…"/></Border>
+ <StackPanel x:Name="Choices">
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Đường dẫn thư mục chia sẻ" Style="{StaticResource Label}"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><TextBox x:Name="UncPath" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border>
+   <TextBlock Text="Ví dụ \\KY-THUAT\KeToan hoặc \\192.168.1.10\Scan (xem trong kết quả Chia sẻ thư mục trên máy chia sẻ)." Style="{StaticResource Label}" Margin="0,4,0,12"/>
+   <Grid Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+    <StackPanel><TextBlock Text="Tài khoản trên máy chia sẻ" Style="{StaticResource Label}"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><TextBox x:Name="Account" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+    <StackPanel Grid.Column="2"><TextBlock Text="Mật khẩu" Style="{StaticResource Label}"/><Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White"><PasswordBox x:Name="Password" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border></StackPanel>
+   </Grid>
+   <CheckBox x:Name="Shortcut" IsChecked="True" Margin="0,0,0,12"><TextBlock Text="Tạo lối tắt trên Desktop"/></CheckBox>
+   <TextBlock Text="Gán ổ đĩa (tuỳ chọn)" Style="{StaticResource Label}"/>
+   <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Width="200" HorizontalAlignment="Left"><ComboBox x:Name="Drive" BorderThickness="0"/></Border>
+  </StackPanel></Border>
+  <TextBlock Text="App thử đăng nhập trước, đúng mới lưu mật khẩu vào Windows Credential Manager của tài khoản Windows đang dùng máy (Windows mã hoá theo tài khoản); app không ghi mật khẩu ra file hay nhật ký. Mật khẩu dùng cho mọi thư mục chia sẻ trên máy đó. Người khác dùng chung máy này với tài khoản Windows khác không dùng được mật khẩu đã lưu." Style="{StaticResource Label}" Margin="0,0,0,12"/>
+  </StackPanel>
+ <TextBlock x:Name="Log" Foreground="#526880" FontSize="12"/>
+</StackPanel></ScrollViewer>
+<Border Grid.Row="2" Background="White" BorderBrush="#DFE7F1" BorderThickness="0,1,0,0" Padding="22,14"><WrapPanel HorizontalAlignment="Right"><Button x:Name="RemoveSaved" Content="Xoá mật khẩu đã lưu" Background="#E7EEF8" Foreground="#183655" Margin="0,0,8,8"/><Button x:Name="Connect" Content="Kiểm tra &amp; lưu" Margin="0,0,8,8"/><Button x:Name="Close" Content="Đóng" Background="#E7EEF8" Foreground="#183655" Margin="0,0,0,8"/></WrapPanel></Border>
+</Grid></Window>
