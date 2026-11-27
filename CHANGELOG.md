@@ -1,8 +1,11 @@
 # Có gì mới trong TechMaster Deploy?
 
-## 2.2.25.0 — 27/11/2026
+## 2.2.26.0 — 27/11/2026
 
 - Sửa **Chia sẻ TechMaster qua LAN** báo “thiếu update-source.json” trên bản cài từ ZIP / cập nhật: bản cài có danh sách `update-package.json` (SHA256 từng tệp, kể cả `TechMaster Deploy.exe`), nay được dùng trước; `update-source.json` chỉ dùng khi chia sẻ từ mã nguồn. Tệp app giữ cho người dùng (preserve) không bị kiểm tra hay chép. Máy kia cài kèm đúng danh sách đó nên nút Cập nhật biết phiên bản đã cài.
+
+## 2.2.25.0 — 27/11/2026
+
 - Tách cửa sổ Thiết lập mặc định theo nút đã bấm, tránh nhầm chức năng khi gỡ máy in: **Máy in mặc định / A4…** chỉ có phần máy in mặc định và khổ giấy; **Dọn máy in không kết nối…** chỉ có danh sách gỡ máy in (ghi rõ thao tác áp dụng cho cả máy, driver được giữ); **Trình duyệt / PDF mặc định…** chỉ có trình duyệt, PDF và nút Ứng dụng mặc định trong Windows. Mỗi cửa sổ có tiêu đề riêng và chỉ báo “chưa đọc được” cho phần đang hiện.
 
 ## 2.2.24.0 — 27/11/2026
