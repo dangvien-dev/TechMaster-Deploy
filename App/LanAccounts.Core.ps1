@@ -162,6 +162,6 @@ function Invoke-DeployLanAccounts($Requests,[string]$LogPath) {
             $lines+=('✗ '+$name+': '+$_.Exception.GetBaseException().Message)
         }
     }
-    if($done){$lines+='Tài khoản chỉ đăng nhập qua mạng LAN: không đăng nhập tại máy / Remote Desktop, ẩn khỏi màn hình đăng nhập, mật khẩu không hết hạn. Thư mục chia sẻ, quyền và tường lửa vẫn cấu hình riêng.'}
+    if($done){$lines+='Tài khoản chỉ đăng nhập qua mạng LAN: không đăng nhập tại máy / Remote Desktop, ẩn khỏi màn hình đăng nhập, mật khẩu không hết hạn. Tiếp theo: Chia sẻ thư mục… để chọn thư mục, cấp quyền cho tài khoản và mở tường lửa trong LAN.'}
     [pscustomobject]@{Message=($lines -join "`n");Kind=$(if($failed){if($done){'Attention'}else{'Error'}}else{'Success'});Log=$LogPath}
 }

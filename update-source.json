@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.22.0",
+  "version": "2.2.23.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -146,8 +146,8 @@
     {
       "path": "App/LanAccounts.Core.ps1",
       "mode": "100644",
-      "size": 12230,
-      "sha": "aa8438a86e40d546cb84826230e3969c38d4c8c6"
+      "size": 12283,
+      "sha": "ab8fd837c5fcd1ca0e755929ecd6f8dd56b73acf"
     },
     {
       "path": "App/LanAccounts.Native.cs",
@@ -164,8 +164,50 @@
     {
       "path": "App/LanAccountsWindow.xml",
       "mode": "100644",
-      "size": 7000,
-      "sha": "469233559ca49c18d7b9dc08fb1fd40daee4ea22"
+      "size": 7018,
+      "sha": "9a87df72fdfc28296f01b9a247e0d852f324b00a"
+    },
+    {
+      "path": "App/LanConnect.Core.ps1",
+      "mode": "100644",
+      "size": 10739,
+      "sha": "f7a8dc03823b877c378b76692769908638183449"
+    },
+    {
+      "path": "App/LanConnect.Native.cs",
+      "mode": "100644",
+      "size": 5655,
+      "sha": "71a82542f850fe299cd5791dd416e69c4193ece7"
+    },
+    {
+      "path": "App/LanConnect.UI.ps1",
+      "mode": "100644",
+      "size": 5292,
+      "sha": "b38fbe09d2bd4c3e524bacf47bebc97a5e536601"
+    },
+    {
+      "path": "App/LanConnectWindow.xml",
+      "mode": "100644",
+      "size": 5034,
+      "sha": "ad82b014ff8e703f7169b27e4b1d934b16d23f5e"
+    },
+    {
+      "path": "App/LanShare.Core.ps1",
+      "mode": "100644",
+      "size": 17784,
+      "sha": "8d52b45584c1be68348734db7e9688139d57717d"
+    },
+    {
+      "path": "App/LanShare.UI.ps1",
+      "mode": "100644",
+      "size": 10304,
+      "sha": "f1e128dd34ccf3e09ae0ec587b02a0cebbdd740d"
+    },
+    {
+      "path": "App/LanShareWindow.xml",
+      "mode": "100644",
+      "size": 7627,
+      "sha": "c7e99a48b53511804cff5a70400d8ed80b1001b1"
     },
     {
       "path": "App/Launcher.cs",
@@ -206,8 +248,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 32542,
-      "sha": "94b90439e80b521643778d2a941d4715b490498f"
+      "size": 32785,
+      "sha": "95dde3991a2e115c7449188af511dec54e7780d1"
     },
     {
       "path": "App/Pdf.Printer.ps1",
@@ -218,8 +260,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 21526,
-      "sha": "be4ded8820eefb24fb04b209c188c7bee4799b68"
+      "size": 22569,
+      "sha": "c66c48e9d6877cebc53029b3afdd3acf4a33f8d2"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -260,8 +302,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 28919,
-      "sha": "dd16a006abec6cfe5f2c3eef0dc4fefe6d059f6b"
+      "size": 29215,
+      "sha": "0719f19e24dfafb92642e960f389a8ee4fa1e85a"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -334,6 +376,24 @@
       "mode": "100644",
       "size": 6431,
       "sha": "a19a48950afbe081213db315277f0ee39d394250"
+    },
+    {
+      "path": "App/Test-LanConnect.ps1",
+      "mode": "100644",
+      "size": 7953,
+      "sha": "7bcb7f574a7704c2ac430fd75d4ac8f3ac06f4e8"
+    },
+    {
+      "path": "App/Test-LanShare.ps1",
+      "mode": "100644",
+      "size": 14075,
+      "sha": "e61b8ec607cfbe3e943aadc31f01f502e85e3a8a"
+    },
+    {
+      "path": "App/Test-LanShareWpf.ps1",
+      "mode": "100644",
+      "size": 10585,
+      "sha": "6455b1cf0f60c2a0bdec81a8e63bb1e261251921"
     },
     {
       "path": "App/Test-LogoPreview.ps1",
@@ -416,8 +476,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 22251,
-      "sha": "e7fdb37ae31eb962c6cd3c74e8e00198791b3ea9"
+      "size": 22281,
+      "sha": "a2a30e59639cc3551aab19c45bd06ca788f4669f"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -530,8 +590,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 34658,
-      "sha": "7d230eeb058dad26c87334038d797de88b58e375"
+      "size": 36636,
+      "sha": "d2708c7278b212b7f6c3ad321fff4e26ab9243b6"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -956,14 +1016,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 24505,
-      "sha": "bc7dafe6c2605b469edece7c8392aaf309854dcc"
+      "size": 26105,
+      "sha": "64e5d8afbe7aa308a83c71058031b19bdbfac4c5"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 23681,
-      "sha": "f231b88b6d6982b56638b20266c82fe59e87e298"
+      "size": 24114,
+      "sha": "9ff93c47faaec15be2084954f049e749ca306531"
     },
     {
       "path": "RELEASING.md",
@@ -975,7 +1035,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "cef1a195567af4dd1a1b208d3bc73f46b9a4e676"
+      "sha": "8884f49e9089e96c374a4996d68990c01393b34c"
     }
   ]
 }
