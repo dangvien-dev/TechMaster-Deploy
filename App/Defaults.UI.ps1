@@ -117,6 +117,8 @@ if($action -ne 'Inspect'){
         if($state.Progress){Set-DeployNotice ($Window.FindName('CleanupStatus')) $_.Exception.GetBaseException().Message 'Error';$state.Progress=$null}
     }
 }
+# Main-window entries open this window on their own card: Cleanup = printers no longer connected, Apps = browser / PDF.
+function Get-DeployDefaultsFocusCard([string]$Focus) {switch -CaseSensitive ($Focus) {'Cleanup' {'CleanupCard'} 'Apps' {'AppsCard'} default {''}}}
 function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
     $window=Import-DeployWindow (Join-Path $PSScriptRoot 'DefaultsWindow.xml')
     $window.Tag=@{Job=$null;Action='';RequestedApp=$null;Pending=@{};Snapshot=$null;Timer=$null;CleanupBoxes=@();Focus=$Focus;Progress=$null;Shown=0}
@@ -136,7 +138,7 @@ function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
                 Set-DeployNotice ($view.FindName('CleanupStatus')) $r.Message $r.Kind
                 $state.Progress=$null
             }
-            if($state.Focus -ceq 'Cleanup'){$state.Focus='';$view.UpdateLayout();$view.FindName('CleanupCard').BringIntoView()}
+            $card=Get-DeployDefaultsFocusCard $state.Focus;if($card){$state.Focus='';$view.UpdateLayout();$view.FindName($card).BringIntoView()}
             if($r.Log){$view.FindName('Log').Text='Nhật ký: '+$r.Log}
             if($state.Action -in 'Browser','Pdf' -and $r.Kind -ne 'Error'){$state.Pending[$state.Action]=$state.RequestedApp}
             if($state.Action -eq 'Inspect' -and $state.Pending.Count){
@@ -168,7 +170,7 @@ function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
     $window.FindName('DefaultsSettings').Add_Click({Start-Process 'ms-settings:defaultapps' -ErrorAction Stop})
     $window.FindName('PrinterSettings').Add_Click({Start-Process 'ms-settings:printers' -ErrorAction Stop})
     $window.FindName('Close').Add_Click({param($sender,$event)[Windows.Window]::GetWindow($sender).Close()})
-    $window.Add_ContentRendered({param($sender,$event)if($sender.Tag.Focus -ceq 'Cleanup'){$sender.FindName('CleanupCard').BringIntoView()};Start-DeployDefaultsTask $sender 'Inspect'})
+    $window.Add_ContentRendered({param($sender,$event)$card=Get-DeployDefaultsFocusCard $sender.Tag.Focus;if($card){$sender.FindName($card).BringIntoView()};Start-DeployDefaultsTask $sender 'Inspect'})
     $window.Add_Closing({param($sender,$event)if($sender.Tag.Job){$event.Cancel=$true}})
     $window.Add_Closed({param($sender,$event)$sender.Tag.Timer.Stop();$sender.Tag.Timer.Tag=$null})
     if($Owner -and $Owner.IsVisible){$window.Owner=$Owner;$window.WindowStartupLocation='CenterOwner'}

@@ -23,7 +23,7 @@ try{
     $source=Get-DeployLogoPreview $svg
     Assert ($source -is [Windows.Media.DrawingImage] -and $source.IsFrozen) 'SVG becomes a frozen native drawing, with no browser child window'
     $preview=Import-DeployWindow (Join-Path $PSScriptRoot 'MainWindow.xml')
-    $preview.Width=1000;$preview.Height=620;$preview.FindName('tabs').SelectedIndex=3
+    $preview.Width=1000;$preview.Height=620;$preview.FindName('tabs').SelectedItem=$preview.FindName('tabLicense')
     $image=$preview.FindName('logoBox');$image.Source=$source
     Assert (-not $preview.FindName('logoWeb')) 'The report no longer contains the airspace WebBrowser host'
     $preview.Show();$preview.Dispatcher.Invoke([Action]{},[Windows.Threading.DispatcherPriority]::ApplicationIdle);$preview.UpdateLayout()

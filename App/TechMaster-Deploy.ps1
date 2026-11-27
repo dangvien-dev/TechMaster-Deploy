@@ -21,6 +21,10 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'LanShare.UI.ps1')
 . (Join-Path $PSScriptRoot 'LanConnect.Core.ps1')
 . (Join-Path $PSScriptRoot 'LanConnect.UI.ps1')
+. (Join-Path $PSScriptRoot 'NetworkRun.Core.ps1')
+. (Join-Path $PSScriptRoot 'NetworkRun.UI.ps1')
+. (Join-Path $PSScriptRoot 'Overview.Core.ps1')
+. (Join-Path $PSScriptRoot 'Overview.UI.ps1')
 . (Join-Path $PSScriptRoot 'AV.Repair.ps1')
 . (Join-Path $PSScriptRoot 'AV.Repair.UI.ps1')
 . (Join-Path $PSScriptRoot 'Report.Identity.ps1')
@@ -39,6 +43,7 @@ foreach ($node in $markup.SelectNodes('//*[@x:Name]', $ns)) {
 }
 $form.Icon = New-Object Windows.Media.Imaging.BitmapImage([uri](Join-Path $PSScriptRoot 'TechMaster.ico'))
 $lblTitle.Text = 'TechMaster Deploy v' + ([IO.File]::ReadAllText((Join-Path $Root 'version.txt'))).Trim()
+$ovVersion.Text = $lblTitle.Text + ' · thư mục ' + $Root
 $cPrimary = '#10223F'; $cMuted = '#526880'; $cDanger = '#B91C1C'
 $script:officeRun = $null; $script:mediaDownload = $null; $script:uiWork = $null
 $script:officeLog = $null; $script:updateClosing = $false
@@ -67,36 +72,65 @@ $uiTimer = New-DeployTimer 200 {
     finally { $btnRefresh.IsEnabled = $true; $btnExport.IsEnabled = $true; $btnConfirmRetail.IsEnabled=$true; $btnConfirmCompany.IsEnabled=$true }
 }
 function Update-MachineInfo {
-    Set-Status 'Đang đọc thông tin bản quyền…'
-    Start-UiWork @'
-param($computer)
-$ErrorActionPreference = 'Stop'
-function Status($id, $missing) {
-    $items = @(Get-CimInstance SoftwareLicensingProduct -Filter ("ApplicationID='$id' AND PartialProductKey IS NOT NULL") -ErrorAction Stop)
-    if (-not $items.Count) { return $missing }
-    if ($items | Where-Object LicenseStatus -ne 1) { return 'CHƯA kích hoạt' }
-    return 'Đã kích hoạt'
+    Set-Status 'Đang đọc thông tin máy và bản quyền…'
+    Set-DeployOverviewBusy $form
+    Start-UiWork 'param($core) $ErrorActionPreference = ''Stop''; . $core; Get-DeployOverviewSnapshot' @((Join-Path $PSScriptRoot 'Overview.Core.ps1')) {
+        param($result)
+        $snapshot = $result[-1]
+        $lblInfo.Text = $snapshot.Header
+        Set-DeployOverviewView $form $snapshot
+        Set-Status 'Đã làm mới thông tin máy.'
+    }
 }
-[pscustomobject]@{ Text = "Máy: $computer    Windows: $(Status '55c92734-d682-4d71-983e-d6ec3f16059f' 'không đọc được')    Office: $(Status '0ff1ce15-a989-479d-af46-f275c6370663' 'không phát hiện')" }
-'@ @($env:COMPUTERNAME) { param($result) $lblInfo.Text = $result[-1].Text; Set-Status 'Đã làm mới thông tin máy.' }
+# Menu items carry the name of their page in Tag; group headings have none and cannot stay selected.
+function Select-DeployPage([string]$Name) {
+    foreach ($item in $Navigation.Items) { if ([string]$item.Tag -ceq $Name) { $Navigation.SelectedItem = $item; return } }
 }
-$Navigation.Add_SelectionChanged({ $tabs.SelectedIndex = $Navigation.SelectedIndex })
-$tabs.SelectedIndex = 0
+function Sync-DeployPage {
+    $item = $Navigation.SelectedItem
+    if (-not $item -or -not [string]$item.Tag) { if ($script:navigationItem) { $Navigation.SelectedItem = $script:navigationItem }; return }
+    $script:navigationItem = $item
+    $tabs.SelectedItem = $form.FindName([string]$item.Tag)
+}
+$script:navigationItem = $null
+$Navigation.Add_SelectionChanged({ Sync-DeployPage })
+Select-DeployPage 'tabOverview'
+Sync-DeployPage
+foreach ($node in $markup.SelectNodes('//*[@x:Name and @Tag]', $ns)) {
+    $name = $node.GetAttribute('Name', 'http://schemas.microsoft.com/winfx/2006/xaml')
+    if ($name -cmatch '^go[A-Z]') { $form.FindName($name).Add_Click({ param($sender, $event) Select-DeployPage ([string]$sender.Tag) }) }
+}
+function Copy-DeployWebCommand {
+    try { [Windows.Clipboard]::SetText($script:DeployWebCommand); Set-Status ('Đã sao chép lệnh: ' + $script:DeployWebCommand + ' — dán vào PowerShell trên máy kia.') 'Success' }
+    catch { Set-Status 'Chưa sao chép được lệnh; thử lại.' 'Error' }
+}
 Bind-Click 'btnRefresh' { Update-MachineInfo; Request-DeployUpdateNotification }
 Bind-Click 'btnQuickGuide' { Show-DeployQuickGuide $Root $form }
 Bind-Click 'btnContact' { Show-DeployQuickGuide $Root $form -Section 'Liên hệ / góp ý' }
-Bind-Click 'headerUpdate' { if($script:updateProcess){Show-DeployUpdater}else{$Navigation.SelectedIndex = 7} }
+Bind-Click 'headerUpdate' { if($script:updateProcess){Show-DeployUpdater}else{Select-DeployPage 'tabUpdate'} }
 Bind-Click 'btnSysprepCheck' { Start-Tool (Join-Path $DirClone 'Fix-SysprepErrors.bat') 'Kiểm tra lỗi Sysprep' }
 Bind-Click 'btnSysprep' { if (Confirm-Box "Chuẩn bị máy gốc và chạy Sysprep?`nCuối quy trình máy sẽ tự tắt; clone ổ trước khi bật lại." 'Sysprep') { Start-Tool (Join-Path $DirClone 'Run-Sysprep.bat') 'Chuẩn bị + Sysprep' } }
 Bind-Click 'btnReinstall' { Open-DeployFolder (Join-Path $DirClone 'Reinstall') }
-Bind-Click 'btnCloneHelp' { Show-DeployQuickGuide $Root $form -Section 'Máy gốc / Sysprep' }
+Bind-Click 'btnCloneHelp' { Show-DeployQuickGuide $Root $form -Section 'Clone hàng loạt' }
 Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' }
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
 Bind-Click 'btnDefaults' {Show-DeployDefaults $form}
 Bind-Click 'btnPrinterCleanup' {Show-DeployDefaults $form 'Cleanup'}
+Bind-Click 'btnDefaultApps' {Show-DeployDefaults $form 'Apps'}
 Bind-Click 'btnLanAccounts' {Show-DeployLanAccounts $form}
 Bind-Click 'btnLanShare' {Show-DeployShare $form}
 Bind-Click 'btnLanConnect' {Show-DeployConnect $form}
+Bind-Click 'btnNetworkRun' {Show-DeployNetworkRun $Root $form}
+Bind-Click 'btnOverviewNetworkRun' {Show-DeployNetworkRun $Root $form}
+Bind-Click 'btnOverviewCopyCommand' {Copy-DeployWebCommand}
+Bind-Click 'btnLanCopyCommand' {Copy-DeployWebCommand}
+Bind-Click 'btnOverviewRefresh' {Update-MachineInfo}
+Bind-Click 'btnOverviewCopy' {
+    try { [Windows.Clipboard]::SetText((Format-DeployOverviewText $btnOverviewCopy.Tag)); Set-Status 'Đã sao chép thông tin máy.' 'Success' }
+    catch { Set-Status 'Chưa sao chép được; thử lại.' 'Error' }
+}
+Bind-Click 'btnOverviewChanges' {Show-DeployChangeLog $Root $form}
+Bind-Click 'btnOverviewGuide' {Show-DeployQuickGuide $Root $form -Section 'Tổng quan'}
 Bind-Click 'btnKeyboard' { Start-Tool (Join-Path $DirClone 'Fix-BanPhim.bat') 'Bàn phím / EVKey' }
 Bind-Click 'btnUltraReset' {
     $script = Join-Path $DirClone 'UltraViewer-Reset.ps1'

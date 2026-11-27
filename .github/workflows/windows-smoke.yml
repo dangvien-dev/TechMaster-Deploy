@@ -49,6 +49,8 @@ jobs:
           & App/Test-LanAccounts.ps1
           & App/Test-LanShare.ps1
           & App/Test-LanConnect.ps1
+          & App/Test-NetworkRun.ps1
+          & App/Test-Overview.ps1
           & App/Test-Info.ps1
           & App/Test-AvDiagnostics.ps1
           & App/Test-AvRepair.ps1

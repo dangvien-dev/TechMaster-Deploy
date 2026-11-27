@@ -14,6 +14,9 @@ Assert $refused 'Removal refuses a connected device (root device node), so only 
 Assert (-not [TechMaster.DefaultsNative]::RemovePhantomDevice('ROOT\TECHMASTER_TEST_ABSENT\0000')) 'A device node that does not exist is reported as already gone'
 $refused=$false;try{[void][TechMaster.DefaultsNative]::RemovePhantomDevice('')}catch{$refused=$true}
 Assert $refused 'An empty device ID (which would locate the root) is rejected'
+Assert ((Get-DeployDefaultsFocusCard 'Cleanup') -ceq 'CleanupCard' -and (Get-DeployDefaultsFocusCard 'Apps') -ceq 'AppsCard' -and (Get-DeployDefaultsFocusCard '') -ceq '' -and (Get-DeployDefaultsFocusCard 'apps') -ceq '') 'Main-window entries open their own card; other values open at the top'
+$focused=New-DeployDefaultsWindow $null 'Apps'
+try{Assert ($focused.Tag.Focus -ceq 'Apps' -and $focused.FindName('AppsCard').FindName('Browser') -and $focused.FindName('CleanupCard')) 'The browser / PDF entry opens the same window focused on its card'}finally{$focused.Close();$focused.Tag.Timer.Stop()}
 $view=New-DeployDefaultsWindow
 $originalWorker=${function:Start-DeployWork}
 $originalConfirm=${function:Confirm-Box}

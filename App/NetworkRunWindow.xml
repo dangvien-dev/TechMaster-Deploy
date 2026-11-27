@@ -1,0 +1,41 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Chạy TechMaster qua mạng LAN" Width="840" Height="800" MinWidth="640" MinHeight="460" WindowStartupLocation="CenterOwner" FontFamily="Segoe UI" FontSize="14" Background="#F3F6FB" Foreground="#10223F" UseLayoutRounding="True">
+<Window.Resources>
+ <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+ <Style TargetType="ComboBox"><Setter Property="Padding" Value="10,8"/><Setter Property="MinHeight" Value="36"/></Style>
+ <Style x:Key="Card" TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="CornerRadius" Value="12"/><Setter Property="BorderBrush" Value="#DFE7F1"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="18"/><Setter Property="Margin" Value="0,0,0,14"/></Style>
+ <Style x:Key="Heading" TargetType="TextBlock"><Setter Property="FontSize" Value="18"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Margin" Value="0,0,0,10"/></Style>
+ <Style x:Key="Label" TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="#526880"/><Setter Property="Margin" Value="0,0,0,4"/></Style>
+</Window.Resources>
+<Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+<Border Background="#10223F" Padding="24,20"><StackPanel><TextBlock Text="Chạy TechMaster qua mạng LAN" FontSize="24" FontWeight="SemiBold" Foreground="White"/><TextBlock x:Name="Subtitle" Foreground="#BED2E9" Margin="0,8,0,0" Text="Chia sẻ thư mục TechMaster (chỉ đọc) để máy khác trong mạng chạy app không cần USB."/></StackPanel></Border>
+<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><StackPanel Margin="22,18,22,8">
+ <Border Tag="Notice" Margin="0,0,0,14"><TextBlock x:Name="Status" Text="Đang đọc thiết lập…"/></Border>
+ <StackPanel x:Name="Choices">
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Thư mục TechMaster trên máy này" Style="{StaticResource Heading}"/>
+   <TextBlock x:Name="RootPath" FontFamily="Consolas" Margin="0,0,0,6"/>
+   <TextBlock x:Name="RootNote" Style="{StaticResource Label}"/>
+  </StackPanel></Border>
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Tài khoản máy kia dùng để mở" Style="{StaticResource Heading}"/>
+   <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,8"><ComboBox x:Name="Account" DisplayMemberPath="Label" BorderThickness="0"/></Border>
+   <TextBlock x:Name="AccountNote" Style="{StaticResource Label}" Text="Chỉ cấp quyền đọc. Tài khoản phải có mật khẩu: máy kia nhập TÊN-MÁY\tài khoản và mật khẩu đó (tài khoản Microsoft: email và mật khẩu Microsoft)."/>
+  </StackPanel></Border>
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Mạng và tường lửa" Style="{StaticResource Heading}"/>
+   <TextBlock x:Name="NetworkState" Foreground="#526880" Margin="0,0,0,12"/>
+   <CheckBox x:Name="Firewall" IsChecked="True" Margin="0,0,0,10"><TextBlock Text="Mở tường lửa cho chia sẻ file trong LAN (chỉ mạng Private / Domain, chỉ máy cùng dải mạng); dùng chung luật của Chia sẻ thư mục."/></CheckBox>
+   <CheckBox x:Name="MakePrivate" IsEnabled="False"><TextBlock Text="Chuyển mạng đang Public sang Private. Chỉ chọn khi đây là mạng nội bộ, không phải Wi-Fi công cộng."/></CheckBox>
+  </StackPanel></Border>
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Trên máy kia" Style="{StaticResource Heading}"/>
+   <TextBlock Text="1. Mở File Explorer, dán đường dẫn dưới đây vào thanh địa chỉ rồi Enter; đăng nhập bằng tài khoản đã chọn.  2. Chọn Run / Chạy nếu Windows hỏi.  3. Chọn Yes ở hộp quyền quản trị: app được chép vào C:\TechMaster-Deploy, kiểm tra từng tệp rồi mở." Style="{StaticResource Label}" Margin="0,0,0,10"/>
+   <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,8"><TextBox x:Name="ClientPath" IsReadOnly="True" FontFamily="Consolas" BorderThickness="0" Padding="10,8" MinHeight="36" VerticalContentAlignment="Center"/></Border>
+   <TextBlock x:Name="ClientNote" Style="{StaticResource Label}" Margin="0,0,0,10"/>
+   <WrapPanel><Button x:Name="CopyPath" Content="Sao chép đường dẫn" Background="#E7EEF8" Foreground="#183655" Margin="0,0,8,0"/></WrapPanel>
+  </StackPanel></Border>
+ </StackPanel>
+ <TextBlock x:Name="Log" Foreground="#526880" FontSize="12"/>
+</StackPanel></ScrollViewer>
+<Border Grid.Row="2" Background="White" BorderBrush="#DFE7F1" BorderThickness="0,1,0,0" Padding="22,14"><WrapPanel HorizontalAlignment="Right"><Button x:Name="StopShare" Content="Ngừng chia sẻ" Background="#E7EEF8" Foreground="#B91C1C" Margin="0,0,8,8"/><Button x:Name="Refresh" Content="Kiểm tra lại" Background="#E7EEF8" Foreground="#183655" Margin="0,0,8,8"/><Button x:Name="Apply" Content="Chia sẻ TechMaster" Margin="0,0,8,8"/><Button x:Name="Close" Content="Đóng" Background="#E7EEF8" Foreground="#183655" Margin="0,0,0,8"/></WrapPanel></Border>
+</Grid></Window>

@@ -141,7 +141,7 @@ Máy clone tự áp dụng định dạng cho `admin` và cập nhật Default p
 
 `Fix-DinhDang.ps1` chỉ ghi `sDecimal`, `sThousand`, `sShortDate` và `sDate`, không gọi Set-Culture hoặc thay LocaleName, không cài hay đổi bàn phím. Chế độ AllNewUsers cũng chỉ ghi bốn giá trị này vào hồ sơ mặc định.
 
-Khi dùng EVKey, mở **Sau khi clone → Bàn phím / EVKey → Chỉ dùng US** để chỉ giữ kiểu nhập US trong các ngôn ngữ hiện có. Công cụ hiển thị user sẽ thay đổi, hỏi xác nhận, lưu sao lưu rồi đọc lại để kiểm tra. Không gỡ gói ngôn ngữ, không đổi thứ tự ngôn ngữ hiển thị hoặc tắt EVKey. Nếu cần, bấm **Khôi phục**. Đăng xuất / đăng nhập lại nếu Windows còn hiện danh sách cũ.
+Khi dùng EVKey, mở **Tuỳ chỉnh Windows → Bàn phím / EVKey → Chỉ dùng US** để chỉ giữ kiểu nhập US trong các ngôn ngữ hiện có. Công cụ hiển thị user sẽ thay đổi, hỏi xác nhận, lưu sao lưu rồi đọc lại để kiểm tra. Không gỡ gói ngôn ngữ, không đổi thứ tự ngôn ngữ hiển thị hoặc tắt EVKey. Nếu cần, bấm **Khôi phục**. Đăng xuất / đăng nhập lại nếu Windows còn hiện danh sách cũ.
 
 Chạy dưới đúng user khách hàng; nếu app được nâng quyền bằng tài khoản khác, mở `Fix-BanPhim.bat` trực tiếp tại user khách hàng. Công cụ từ chối ghi khi tài khoản đang chạy không khớp desktop đăng nhập. Sao lưu nằm trong Local AppData của user đó, không đi kèm bộ cài.
 
@@ -160,6 +160,6 @@ Cửa sổ chuẩn bị Sysprep có hai tuỳ chọn mặc định bật:
 
 Lần đăng nhập đầu sau clone kiểm tra lại key tạm, bỏ định danh mang từ ảnh rồi khôi phục kiểu khởi động dịch vụ. Nếu UltraViewer chưa cấp ID, kết quả là **đang chờ**, không báo thành công. Mở UltraViewer, đợi kết nối rồi vào **Reset ID UltraViewer → Kiểm tra ID mới**; thao tác kiểm tra không xoá lại ID. Marker hoàn tất ngăn reset lại mỗi lần chạy công cụ / khởi động. Muốn tạo ảnh mới từ máy đã clone, chạy lại toàn bộ bước chuẩn bị Sysprep.
 
-Máy clone cũ chưa qua bước chuẩn bị mới sẽ không tự reset UltraViewer hoặc tự xoá key. Dùng **Sau khi clone → Reset ID UltraViewer → Sao lưu và reset** trên từng máy; thao tác ngắt phiên UltraViewer nên phải chạy tại máy hoặc qua remote khác. Chỉ hỗ trợ tự động bản 6.6.133; giữ toàn bộ LastHR_*, MAC và MachineGuid trong thao tác UltraViewer. Công cụ xử lý trùng lặp Windows riêng vẫn có lựa chọn đổi MachineGuid như trước.
+Máy clone cũ chưa qua bước chuẩn bị mới sẽ không tự reset UltraViewer hoặc tự xoá key. Dùng **Clone hàng loạt → Sau khi clone → Reset ID UltraViewer → Sao lưu và reset** trên từng máy; thao tác ngắt phiên UltraViewer nên phải chạy tại máy hoặc qua remote khác. Chỉ hỗ trợ tự động bản 6.6.133; giữ toàn bộ LastHR_*, MAC và MachineGuid trong thao tác UltraViewer. Công cụ xử lý trùng lặp Windows riêng vẫn có lựa chọn đổi MachineGuid như trước.
 
 Sao lưu UltraViewer ở `%ProgramData%\TechMaster Deploy\UltraViewer Backups`, chỉ Administrator / SYSTEM đọc. Có nút chọn identity.json để khôi phục; từ chối khôi phục định danh của máy gốc lên phần cứng máy clone khác. Marker ở `C:\FixClone\UltraViewer-Clone.json`, lựa chọn ở `C:\FixClone\CloneOptions.json`. Giữ các tệp này để kiểm tra / hoàn tác. Công cụ chẩn đoán chỉ đọc và vẫn dùng được.
