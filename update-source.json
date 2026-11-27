@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.25.0",
+  "version": "2.2.26.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -650,8 +650,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 40798,
-      "sha": "9fb72dfa08b8889fc0e5ab274fa11ac254350e8a"
+      "size": 40827,
+      "sha": "edc7081171490c2e67de125cc51f512b5ec7a070"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -1076,8 +1076,8 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 28701,
-      "sha": "18388ca4f900a88669c84acc9a45f708f7717f27"
+      "size": 28696,
+      "sha": "1a33aa01c6c71fe4e0f70cc5d6e469692a59bd8d"
     },
     {
       "path": "README.md",
@@ -1095,7 +1095,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "fe13501d48549e1d19871ae41fdaefb1827e727c"
+      "sha": "e60615ab164d3a15084ed3f551284525afb4328c"
     }
   ]
 }
