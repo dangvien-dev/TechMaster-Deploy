@@ -143,8 +143,10 @@ function Set-DeployFolderShare([string]$Path,[string]$ShareName,$Grants,[bool]$F
     $ShareName=([string]$ShareName).Trim()
     if(-not (Test-DeployShareName $ShareName)){throw 'Tên chia sẻ không hợp lệ: 1–80 ký tự, không chứa \ / [ ] : | < > + = ; , ? * " và không kết thúc bằng $ hoặc dấu chấm.'}
     $computer=[string]$env:COMPUTERNAME
+    # PowerShell names are case-insensitive: read the parameter before reusing the name for the checked list.
+    $requestedGrants=@($Grants | Where-Object {$_})
     $grants=@()
-    foreach($grant in @($Grants | Where-Object {$_})){
+    foreach($grant in $requestedGrants){
         $spec=Get-DeployLanRole $grant.Role
         if($grant.Access -notin 'None','Read','Change'){throw ('Quyền không hợp lệ cho '+$spec.Name)}
         $exists=[bool](Find-DeployLanUser $spec.Name)
