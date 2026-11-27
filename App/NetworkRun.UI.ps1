@@ -3,7 +3,7 @@
     $Window.FindName('Subtitle').Text='Máy '+$State.Computer+': chia sẻ thư mục TechMaster (chỉ đọc) để máy khác trong mạng chạy app không cần USB.'
     $Window.FindName('RootPath').Text=[string]$State.Root
     $Window.FindName('RootNote').Text=if($State.RootError){'✗ '+$State.RootError}
-        elseif(@($State.SourceProblems).Count){'✗ Có tệp khác danh sách update-source.json: '+((@($State.SourceProblems) | Select-Object -First 3) -join ', ')+'. Cập nhật lại app trước khi chia sẻ.'}
+        elseif(@($State.SourceProblems).Count){'✗ Có tệp khác danh sách tệp của app: '+((@($State.SourceProblems) | Select-Object -First 3) -join ', ')+'. Cập nhật lại app trước khi chia sẻ.'}
         elseif($State.Active){'Đang chia sẻ: \\'+$State.Computer+'\TechMaster$ (chỉ đọc) cho '+$State.Account+'.'}
         elseif($State.Share){'Tên TechMaster$ đang chia sẻ '+$State.Share.Path+$(if($State.Share.Ours){'; bấm Chia sẻ TechMaster để chuyển sang thư mục này.'}else{' và không do app tạo.'})}
         else{'Chưa chia sẻ. Chỉ chia sẻ các tệp của app, máy kia không ghi được.'}

@@ -266,20 +266,20 @@
     {
       "path": "App/Network.Sync.ps1",
       "mode": "100644",
-      "size": 17665,
-      "sha": "f8076b3572f79bf0d3ec31b950ead756db8135e1"
+      "size": 18982,
+      "sha": "6a892272b2adc016d2921d05dddd81b059218a60"
     },
     {
       "path": "App/NetworkRun.Core.ps1",
       "mode": "100644",
-      "size": 11647,
-      "sha": "913710cdf8c4918c84f0c87d338e9eef7f52e84c"
+      "size": 11889,
+      "sha": "87d457d6ef24a540062109d8806391d6cdd049fe"
     },
     {
       "path": "App/NetworkRun.UI.ps1",
       "mode": "100644",
-      "size": 9395,
-      "sha": "d76984733c7485b7ea2266ecfbf6165323415569"
+      "size": 9392,
+      "sha": "d024a4a959471d7f1dda62040e61cafe83cdd186"
     },
     {
       "path": "App/NetworkRunWindow.xml",
@@ -308,8 +308,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 25812,
-      "sha": "9d9b7906f7e7ec52d0908484afe74a4c61903eee"
+      "size": 25919,
+      "sha": "d15bbbc5f04ef15e42bb54e92a2328c4d76c9ee9"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -452,8 +452,8 @@
     {
       "path": "App/Test-NetworkRun.ps1",
       "mode": "100644",
-      "size": 21173,
-      "sha": "5e6d750cf62db94bf42542d77a91e0a56326bd0b"
+      "size": 25446,
+      "sha": "035f711008202a64bfc1330787581f2a7fce530b"
     },
     {
       "path": "App/Test-Overview.ps1",
@@ -650,8 +650,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 40301,
-      "sha": "c43d36602ddcab4a2c0ed6ab2eeb8dc2aa0e27f8"
+      "size": 40798,
+      "sha": "9fb72dfa08b8889fc0e5ab274fa11ac254350e8a"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -1076,14 +1076,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 28251,
-      "sha": "36ef0358e095b99650c4b2c7e8603e0c0957d42c"
+      "size": 28701,
+      "sha": "18388ca4f900a88669c84acc9a45f708f7717f27"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 26573,
-      "sha": "63c9444ffb83dbdf0b4b61c02162fd7402dd5389"
+      "size": 26721,
+      "sha": "6bd46dd91a02e1441f12208bc0b551eecf06df6d"
     },
     {
       "path": "RELEASING.md",

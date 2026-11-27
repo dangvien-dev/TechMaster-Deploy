@@ -8,7 +8,7 @@ $script:DeployNetworkShareName='TechMaster$'
 $script:DeployNetworkShareMarker='TechMaster Deploy - chạy qua mạng (chỉ đọc)'
 $script:DeployNetworkLauncher='App\Chay-Tu-Mang.bat'
 $script:DeployWebCommand='irm https://dangvien-dev.github.io/tm.txt | iex'
-$script:DeployNetworkRequired=@('version.txt','update-source.json','App\TechMaster-Deploy.ps1','App\Network.Launch.ps1','App\Network.Sync.ps1','App\Chay-Tu-Mang.bat')
+$script:DeployNetworkRequired=@('version.txt','App\TechMaster-Deploy.ps1','App\Network.Launch.ps1','App\Network.Sync.ps1','App\Chay-Tu-Mang.bat')
 
 function Get-DeployNetworkRoot([string]$Root) {
     $path=([string]$Root).Trim()
@@ -19,6 +19,8 @@ function Get-DeployNetworkRoot([string]$Root) {
     foreach($name in $script:DeployNetworkRequired){
         if(-not (Test-Path -LiteralPath (Join-Path $path $name) -PathType Leaf)){throw ('Thư mục TechMaster thiếu '+$name+'. Cập nhật hoặc giải nén lại app rồi chia sẻ.')}
     }
+    # Installed copies carry update-package.json, a repository checkout update-source.json.
+    if(-not (Get-DeployNetworkIndexFile $path)){throw 'Thư mục TechMaster thiếu danh sách tệp update-package.json. Cập nhật hoặc giải nén lại app rồi chia sẻ.'}
     return $path
 }
 # Accounts the other computer may sign in with: the Windows account using the app and the LAN account share.
@@ -74,7 +76,7 @@ function Set-DeployNetworkRunShare([string]$Root,[string]$Account,[bool]$Firewal
     $choice=@(Get-DeployNetworkAccounts | Where-Object {$_.Account -ieq ([string]$Account).Trim()})[0]
     if(-not $choice){throw 'Chọn tài khoản máy kia dùng để mở thư mục TechMaster.'}
     $problems=@(Get-DeployNetworkSourceProblems $path)
-    if($problems.Count){throw ('Thư mục TechMaster có tệp khác danh sách update-source.json ('+(@($problems | Select-Object -First 3) -join ', ')+'); máy kia sẽ dừng khi chép. Cập nhật lại app trước khi chia sẻ.')}
+    if($problems.Count){throw ('Thư mục TechMaster có tệp khác danh sách tệp ('+(@($problems | Select-Object -First 3) -join ', ')+'); máy kia sẽ dừng khi chép. Cập nhật lại app trước khi chia sẻ.')}
     $existing=Get-DeployNetworkShare
     if($existing -and -not $existing.Ours){throw ('Tên chia sẻ TechMaster$ đang dùng cho '+$existing.Path+' và không do app tạo. Gỡ chia sẻ đó trước.')}
     Write-DeployWindowsToolsLog $LogPath 'network-run-request' @{Path=$path;Account=$choice.Account;Firewall=$Firewall;MakePrivate=$MakePrivate;Existing=$existing}
