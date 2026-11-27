@@ -213,17 +213,20 @@ function Get-DeployPrinterDeviceMap {
         [pscustomobject]@{InstanceId=$id;Class=[string]$node.Class;FriendlyName=[string]$node.FriendlyName;Present=[bool]$node.Present;ContainerId=(ConvertTo-DeployContainerId $node.ContainerId);Parent=[string]$node.Parent;PortName=$port}
     }
 }
-function Get-DeployQueueContainer($Queue,$Devices) {
-    $name=[string]$Queue.Name;$port=[string]$Queue.PortName
+function Get-DeployQueueContainers($Queue,$Devices) {
+    # Both the queue's own node and the USBPRINT node on its port: Windows usually puts them in one
+    # container, but if not, both must go for the printer to leave Devices and Printers.
+    $found=@();$name=[string]$Queue.Name;$port=[string]$Queue.PortName
     $hits=@($Devices | Where-Object {$_.Class -eq 'PrintQueue' -and $_.FriendlyName -ceq $name -and $_.ContainerId})
     if($hits.Count -gt 1){$hits=@($hits | Where-Object {$_.Present})}
-    if($hits.Count -eq 1){return [string]$hits[0].ContainerId}
+    if($hits.Count -eq 1){$found+=[string]$hits[0].ContainerId}
     if($port -match '^USB\d+$'){
         $hits=@($Devices | Where-Object {$_.PortName -and $_.PortName -ieq $port -and $_.ContainerId})
-        if($hits.Count -eq 1){return [string]$hits[0].ContainerId}
+        if($hits.Count -eq 1){$found+=[string]$hits[0].ContainerId}
     }
-    return ''
+    @($found | Select-Object -Unique)
 }
+function Get-DeployQueueContainer($Queue,$Devices) {[string]@(Get-DeployQueueContainers $Queue $Devices)[0]}
 function Get-DeployDeviceDepth($Node,$ById) {
     $depth=0;$parent=[string]$Node.Parent
     while($parent -and $ById.ContainsKey($parent) -and $depth -lt 32){$depth++;$parent=[string]$ById[$parent].Parent}
@@ -360,12 +363,17 @@ function Get-DeployQueueOutcome([string]$Label,$Step) {
     if(-not $Step.Removed){return [pscustomobject]@{State='done';Line=('✓ '+$Label+' — đã xoá hàng đợi; Windows đã tự xoá thiết bị')}}
     [pscustomobject]@{State='done';Line=('✓ '+$Label+' — đã xoá hàng đợi và '+$Step.Removed+' mục thiết bị')}
 }
-function Invoke-DeployPrinterDeviceStep([string]$Label,[string]$ContainerId,$Devices,$Keep,[string]$LogPath,$Progress,[int]$Index) {
-    $plan=Get-DeployContainerRemovalPlan $ContainerId $Devices $Keep.Queues $Keep.Ports
-    if(-not @($plan.Nodes).Count){return [pscustomobject]@{Removed=0;Errors=@();Reason=$plan.Reason;Attempted=$false}}
-    Set-DeployCleanupProgress $Progress $Index $Label 'xoá thiết bị'
-    $result=Remove-DeployDeviceNodes $plan.Nodes $LogPath $Label
-    [pscustomobject]@{Removed=$result.Removed;Errors=$result.Errors;Reason='';Attempted=$true}
+function Invoke-DeployPrinterDeviceStep([string]$Label,[string[]]$ContainerIds,$Devices,$Keep,[string]$LogPath,$Progress,[int]$Index) {
+    $removed=0;$errors=@();$reasons=@();$attempted=@()
+    foreach($container in @($ContainerIds | Where-Object {$_})){
+        $plan=Get-DeployContainerRemovalPlan $container $Devices $Keep.Queues $Keep.Ports
+        if(-not @($plan.Nodes).Count){$reasons+=$plan.Reason;continue}
+        Set-DeployCleanupProgress $Progress $Index $Label 'xoá thiết bị'
+        $result=Remove-DeployDeviceNodes $plan.Nodes $LogPath $Label
+        $removed+=$result.Removed;$errors+=@($result.Errors);$attempted+=$container
+    }
+    $reason=if($attempted.Count){''}elseif($reasons -contains 'connected'){'connected'}elseif($reasons -contains 'shared'){'shared'}else{'no-device'}
+    [pscustomobject]@{Removed=$removed;Errors=$errors;Reason=$reason;Attempted=$attempted}
 }
 function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath,$Progress=$null,[switch]$RestartSpooler) {
     Assert-DeployPrinterAdmin
@@ -406,7 +414,7 @@ function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath,$Progres
                 Write-DeployWindowsToolsLog $LogPath 'device-remove-before' @{Row=$row;Nodes=@($plan.Nodes)}
                 Set-DeployCleanupProgress $Progress $index $label 'xoá thiết bị'
                 $result=Remove-DeployDeviceNodes $plan.Nodes $LogPath $label
-                if($row.ContainerId){$verify[$label]=$row.ContainerId}
+                if($row.ContainerId){$verify[$label]=@($row.ContainerId)}
                 if(@($result.Errors).Count){$partial+=$label;Add-DeployCleanupLine $Progress $lines ('! '+$label+' — chưa xoá được '+@($result.Errors).Count+' mục thiết bị: '+(@($result.Errors) -join '; '))}
                 else{$done+=$label;Add-DeployCleanupLine $Progress $lines ('✓ '+$label+' — đã xoá '+$result.Removed+' mục thiết bị còn sót')}
                 continue
@@ -418,8 +426,8 @@ function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath,$Progres
                 Write-DeployWindowsToolsLog $LogPath 'printer-cleanup-skipped' @{Key=$key;Reason='missing'}
                 continue
             }
-            $container=Get-DeployQueueContainer $queue[0] $devices
-            Write-DeployWindowsToolsLog $LogPath 'printer-remove-before' @{Row=$row;ContainerId=$container}
+            $containers=@(Get-DeployQueueContainers $queue[0] $devices)
+            Write-DeployWindowsToolsLog $LogPath 'printer-remove-before' @{Row=$row;ContainerIds=$containers}
             Set-DeployCleanupProgress $Progress $index $label 'huỷ lệnh in chờ'
             $jobs=Clear-DeployPrinterJobs $queue[0] $LogPath
             Set-DeployCleanupProgress $Progress $index $label 'xoá hàng đợi in'
@@ -427,13 +435,13 @@ function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath,$Progres
             Remove-Printer -InputObject $queue[0] -ErrorAction Stop
             Set-DeployCleanupProgress $Progress $index $label 'chờ Windows xoá hàng đợi'
             if(@(Get-DeployRemainingPrinters @($row.Name) $script:DeployPrinterWaitSeconds).Count){
-                $pending+=[pscustomobject]@{Label=$label;Name=[string]$row.Name;ContainerId=$container}
+                $pending+=[pscustomobject]@{Label=$label;Name=[string]$row.Name;ContainerIds=$containers}
                 Add-DeployCleanupLine $Progress $lines ('… '+$label+' — Windows chưa xoá xong hàng đợi, sẽ kiểm tra lại')
                 Write-DeployWindowsToolsLog $LogPath 'printer-remove-pending' @{Printer=$label;JobsRemoved=$jobs}
                 continue
             }
-            $step=Invoke-DeployPrinterDeviceStep $label $container $devices $keep $LogPath $Progress $index
-            if($step.Attempted){$verify[$label]=$container}
+            $step=Invoke-DeployPrinterDeviceStep $label $containers $devices $keep $LogPath $Progress $index
+            if(@($step.Attempted).Count){$verify[$label]=@($step.Attempted)}
             $outcome=Get-DeployQueueOutcome $label $step
             if($outcome.State -eq 'partial'){$partial+=$label}else{$done+=$label}
             Add-DeployCleanupLine $Progress $lines $outcome.Line
@@ -470,8 +478,8 @@ function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath,$Progres
         if($finished.Count){try{$devices=@(Get-DeployPrinterDeviceMap)}catch{Write-DeployWindowsToolsLog $LogPath 'device-map-failed' $_.Exception.GetBaseException().Message}}
         foreach($entry in $finished){
             try{
-                $step=Invoke-DeployPrinterDeviceStep $entry.Label $entry.ContainerId $devices $keep $LogPath $Progress $requested.Count
-                if($step.Attempted){$verify[$entry.Label]=$entry.ContainerId}
+                $step=Invoke-DeployPrinterDeviceStep $entry.Label @($entry.ContainerIds) $devices $keep $LogPath $Progress $requested.Count
+                if(@($step.Attempted).Count){$verify[$entry.Label]=@($step.Attempted)}
                 $outcome=Get-DeployQueueOutcome $entry.Label $step
                 if($outcome.State -eq 'partial'){$partial+=$entry.Label}else{$done+=$entry.Label}
                 Add-DeployCleanupLine $Progress $lines $outcome.Line
@@ -491,7 +499,8 @@ function Remove-DeployOfflinePrinters([string[]]$Names,[string]$LogPath,$Progres
         try{$after=@(Get-DeployPrinterDeviceMap)}catch{$verifyError=$_.Exception.GetBaseException().Message}
         if($null -ne $after){
             foreach($label in @($verify.Keys)){
-                $left=@($after | Where-Object {$_.ContainerId -eq $verify[$label] -and -not $_.Present})
+                $containers=@($verify[$label])
+                $left=@($after | Where-Object {$containers -contains $_.ContainerId -and -not $_.Present})
                 if($left.Count -and $done -ccontains $label){
                     $done=@($done | Where-Object {$_ -cne $label});$partial+=$label
                     Add-DeployCleanupLine $Progress $lines ('! '+$label+' — Windows vẫn còn '+$left.Count+' mục thiết bị ẩn')

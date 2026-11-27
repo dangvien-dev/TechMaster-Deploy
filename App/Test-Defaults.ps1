@@ -229,6 +229,11 @@ try{
     Assert ($pendingRow.Count -eq 1 -and $pendingRow[0].Detail -match 'chưa xoá xong') 'A pending queue stays listed so it can be removed again'
     $r=Remove-DeployOfflinePrinters @('WSD Printer') $log -RestartSpooler
     Assert ($r.Kind -eq 'Success' -and $script:spoolerRestarts -eq 1 -and @($r.Removed) -ccontains 'WSD Printer' -and @($script:queues | Where-Object {$_.Name -ceq 'WSD Printer'}).Count -eq 0) 'Restarting the Print Spooler finishes a pending deletion and is verified'
+    $script:queues+=New-TestQueue 'Split USB' 'USB021' 'Offline'
+    $script:pnp+=@((New-TestNode 'SWD\PRINTENUM\{S}' 'PrintQueue' 'Split USB' $true 'q21'),(New-TestNode 'USBPRINT\CANON\S' 'Printer' 'Canon LBP2900' $false 'c21' 'USB\VID_04A9\S'),(New-TestNode 'USB\VID_04A9\S' 'USB' 'USB Printing Support' $false 'c21'))
+    $script:portMap['USBPRINT\CANON\S']='USB021'
+    $r=Remove-DeployOfflinePrinters @('Split USB') $log
+    Assert ($r.Kind -eq 'Success' -and $script:removedNodes -ccontains 'USBPRINT\CANON\S' -and $script:removedNodes -ccontains 'USB\VID_04A9\S' -and -not @($script:pnp | Where-Object {$_.ContainerId -in 'q21','c21'}).Count) 'When the queue node and the USBPRINT node sit in different containers, both are cleared'
     $script:queues+=New-TestQueue 'Late USB' 'USB020' 'Offline'
     function Get-DeployPnpDevices {throw 'SetupAPI unavailable'}
     $r=Remove-DeployOfflinePrinters @('Late USB') $log
