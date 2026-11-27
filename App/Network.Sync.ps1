@@ -113,15 +113,20 @@ function Copy-DeployNetworkStage([string]$Source,[string]$Target,[string]$Stagin
     return $result
 }
 function Protect-DeployNetworkFolder([string]$Path) {
-    # Administrators / SYSTEM change the program, Users only read and run it. Owner and explicit entries
-    # are reset too, so an account that created files here earlier cannot change them afterwards.
-    $steps=@(,@($Path,'/setowner','*S-1-5-32-544','/T','/C','/Q'))
-    $steps+=,@($Path,'/inheritance:r','/grant:r','*S-1-5-18:(OI)(CI)F','*S-1-5-32-544:(OI)(CI)F','*S-1-5-32-545:(OI)(CI)RX','/Q')
-    if(@(Get-ChildItem -LiteralPath $Path -Force).Count){$steps+=,@((Join-Path $Path '*'),'/reset','/T','/C','/Q')}
-    foreach($arguments in $steps){
-        $output=& icacls.exe @arguments 2>&1
-        if($LASTEXITCODE -ne 0){throw ('Không khoá được quyền thư mục '+$Path+': '+(($output | Out-String).Trim()))}
+    # Administrators / SYSTEM change the program, Users only read and run it. The folder's whole DACL is
+    # replaced in one step (explicit entries of any other account go too), then owner and child entries
+    # are reset, so an account that created or opened up this folder earlier cannot change it afterwards.
+    $run={param([string[]]$Arguments)$output=& icacls.exe @Arguments 2>&1;if($LASTEXITCODE -ne 0){throw ('Không khoá được quyền thư mục '+$Path+': '+(($output | Out-String).Trim()))}}
+    & $run @($Path,'/setowner','*S-1-5-32-544','/C','/Q')
+    $security=New-Object Security.AccessControl.DirectorySecurity
+    $security.SetAccessRuleProtection($true,$false)
+    $inherit=[Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit'
+    foreach($rule in @(@('S-1-5-18','FullControl'),@('S-1-5-32-544','FullControl'),@('S-1-5-32-545','ReadAndExecute'))){
+        $security.AddAccessRule((New-Object Security.AccessControl.FileSystemAccessRule((New-Object Security.Principal.SecurityIdentifier($rule[0])),([Security.AccessControl.FileSystemRights]$rule[1]),$inherit,([Security.AccessControl.PropagationFlags]::None),([Security.AccessControl.AccessControlType]::Allow))))
     }
+    [IO.Directory]::SetAccessControl($Path,$security)
+    & $run @($Path,'/setowner','*S-1-5-32-544','/T','/C','/Q')
+    if(@(Get-ChildItem -LiteralPath $Path -Force).Count){& $run @((Join-Path $Path '*'),'/reset','/T','/C','/Q')}
 }
 function Install-DeployNetworkCopy([string]$Staging,[string]$IndexSha256,[string]$ExeSha256,[string]$Target) {
     $indexBytes=[IO.File]::ReadAllBytes((Join-Path $Staging 'update-source.json'))
