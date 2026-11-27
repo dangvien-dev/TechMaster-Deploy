@@ -1,6 +1,6 @@
 ﻿function Set-DeployDefaultsView($Window,$Snapshot) {
     $state=$Window.Tag
-    $Window.FindName('Account').Text='Áp dụng cho tài khoản đang chạy app: '+$Snapshot.User+'. Nếu nâng quyền bằng tài khoản khác, thiết lập thuộc tài khoản đó.'
+    $Window.FindName('Account').Text=if($state.Mode -ceq 'Cleanup'){'Gỡ hàng đợi in và thiết bị máy in trên cả máy này (mọi tài khoản); driver được giữ.'}else{'Áp dụng cho tài khoản đang chạy app: '+$Snapshot.User+'. Nếu nâng quyền bằng tài khoản khác, thiết lập thuộc tài khoản đó.'}
     $previous=[string]$Window.FindName('Printer').SelectedItem.Name
     $Window.FindName('Printer').ItemsSource=@($Snapshot.Printers)
     $pick=$Snapshot.Printers | Where-Object Name -CEQ $previous | Select-Object -First 1
@@ -117,11 +117,32 @@ if($action -ne 'Inspect'){
         if($state.Progress){Set-DeployNotice ($Window.FindName('CleanupStatus')) $_.Exception.GetBaseException().Message 'Error';$state.Progress=$null}
     }
 }
-# Main-window entries open this window on their own card: Cleanup = printers no longer connected, Apps = browser / PDF.
-function Get-DeployDefaultsFocusCard([string]$Focus) {switch -CaseSensitive ($Focus) {'Cleanup' {'CleanupCard'} 'Apps' {'AppsCard'} default {''}}}
-function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
+# Each main-window entry opens this window with only its own part, so a printer cleanup is never mixed
+# up with default apps: Printer = default printer / A4, Cleanup = printers no longer connected,
+# Apps = browser and PDF. The other cards are collapsed, not removed (shared view code).
+$script:DeployDefaultsModes=@{
+    Printer=[pscustomobject]@{Title='Máy in mặc định và khổ A4';Cards=@('PrinterCard');Height=600}
+    Cleanup=[pscustomobject]@{Title='Dọn máy in không kết nối';Cards=@('CleanupCard');Height=740}
+    Apps=[pscustomobject]@{Title='Trình duyệt và PDF mặc định';Cards=@('AppsCard','PdfCard','AppsNote');Height=700}
+}
+function Set-DeployDefaultsMode($Window,[ValidateSet('Printer','Cleanup','Apps')][string]$Mode) {
+    $spec=$script:DeployDefaultsModes[$Mode]
+    $Window.Tag.Mode=$Mode;$Window.Title=$spec.Title;$Window.FindName('Heading').Text=$spec.Title;$Window.Height=$spec.Height
+    foreach($name in 'PrinterCard','CleanupCard','AppsCard','PdfCard','AppsNote'){$Window.FindName($name).Visibility=if($spec.Cards -contains $name){'Visible'}else{'Collapsed'}}
+    $Window.FindName('DefaultsSettings').Visibility=if($Mode -ceq 'Apps'){'Visible'}else{'Collapsed'}
+}
+# Only the problems of the part on screen count when reporting what could not be read.
+function Test-DeployDefaultsReadProblem([string]$Mode,$Snapshot) {
+    switch -CaseSensitive ($Mode) {
+        'Cleanup' {[bool]($Snapshot.PrinterError -or $Snapshot.OfflineError -or $Snapshot.OfflineDeviceError)}
+        'Apps' {[bool]($Snapshot.AppError -or @($Snapshot.Associations.Values | Where-Object {-not $_.Readable}).Count)}
+        default {[bool]$Snapshot.PrinterError}
+    }
+}
+function New-DeployDefaultsWindow($Owner=$null,[ValidateSet('Printer','Cleanup','Apps')][string]$Mode='Printer') {
     $window=Import-DeployWindow (Join-Path $PSScriptRoot 'DefaultsWindow.xml')
-    $window.Tag=@{Job=$null;Action='';RequestedApp=$null;Pending=@{};Snapshot=$null;Timer=$null;CleanupBoxes=@();Focus=$Focus;Progress=$null;Shown=0}
+    $window.Tag=@{Job=$null;Action='';RequestedApp=$null;Pending=@{};Snapshot=$null;Timer=$null;CleanupBoxes=@();Mode=$Mode;Progress=$null;Shown=0}
+    Set-DeployDefaultsMode $window $Mode
     $timer=New-DeployTimer 200 {
         param($sender,$event)
         $view=$sender.Tag;$state=$view.Tag;$job=$state.Job
@@ -138,7 +159,6 @@ function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
                 Set-DeployNotice ($view.FindName('CleanupStatus')) $r.Message $r.Kind
                 $state.Progress=$null
             }
-            $card=Get-DeployDefaultsFocusCard $state.Focus;if($card){$state.Focus='';$view.UpdateLayout();$view.FindName($card).BringIntoView()}
             if($r.Log){$view.FindName('Log').Text='Nhật ký: '+$r.Log}
             if($state.Action -in 'Browser','Pdf' -and $r.Kind -ne 'Error'){$state.Pending[$state.Action]=$state.RequestedApp}
             if($state.Action -eq 'Inspect' -and $state.Pending.Count){
@@ -149,8 +169,8 @@ function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
                     else{$notes+='Chưa xác nhận '+$app.Display+' là mặc định cho '+$(if($kind -eq 'Browser'){'cả HTTP và HTTPS'}else{'.pdf'})+'. Hoàn tất lựa chọn trong Cài đặt rồi kiểm tra lại.';$all=$false}
                 }
                 $r.Message=$notes -join "`n";$r.Kind=if($all){'Success'}else{'Attention'}
-            }elseif($state.Action -eq 'Inspect' -and ($r.Snapshot.PrinterError -or $r.Snapshot.OfflineError -or $r.Snapshot.AppError -or @($r.Snapshot.Associations.Values | Where-Object {-not $_.Readable}).Count)){
-                $r.Message='Đã đọc những thiết lập khả dụng; có mục chưa đọc được. Xem trạng thái trong từng phần.';$r.Kind='Attention'
+            }elseif($state.Action -eq 'Inspect' -and (Test-DeployDefaultsReadProblem $state.Mode $r.Snapshot)){
+                $r.Message='Đã đọc những thiết lập khả dụng; có mục chưa đọc được. Xem trạng thái bên dưới.';$r.Kind='Attention'
             }
             Set-DeployNotice ($view.FindName('Status')) $r.Message $r.Kind
         }catch{
@@ -170,10 +190,10 @@ function New-DeployDefaultsWindow($Owner=$null,[string]$Focus='') {
     $window.FindName('DefaultsSettings').Add_Click({Start-Process 'ms-settings:defaultapps' -ErrorAction Stop})
     $window.FindName('PrinterSettings').Add_Click({Start-Process 'ms-settings:printers' -ErrorAction Stop})
     $window.FindName('Close').Add_Click({param($sender,$event)[Windows.Window]::GetWindow($sender).Close()})
-    $window.Add_ContentRendered({param($sender,$event)$card=Get-DeployDefaultsFocusCard $sender.Tag.Focus;if($card){$sender.FindName($card).BringIntoView()};Start-DeployDefaultsTask $sender 'Inspect'})
+    $window.Add_ContentRendered({param($sender,$event)Start-DeployDefaultsTask $sender 'Inspect'})
     $window.Add_Closing({param($sender,$event)if($sender.Tag.Job){$event.Cancel=$true}})
     $window.Add_Closed({param($sender,$event)$sender.Tag.Timer.Stop();$sender.Tag.Timer.Tag=$null})
     if($Owner -and $Owner.IsVisible){$window.Owner=$Owner;$window.WindowStartupLocation='CenterOwner'}
     return $window
 }
-function Show-DeployDefaults($Owner=$null,[string]$Focus=''){$view=New-DeployDefaultsWindow $Owner $Focus;[void]$view.ShowDialog()}
+function Show-DeployDefaults($Owner=$null,[ValidateSet('Printer','Cleanup','Apps')][string]$Mode='Printer'){$view=New-DeployDefaultsWindow $Owner $Mode;[void]$view.ShowDialog()}

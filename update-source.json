@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.24.0",
+  "version": "2.2.25.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -110,14 +110,14 @@
     {
       "path": "App/Defaults.UI.ps1",
       "mode": "100644",
-      "size": 15339,
-      "sha": "6b061ecc79e09a63cb91b869c325cd41bdac371c"
+      "size": 16685,
+      "sha": "32ecd7c50dc8e5f237f5c213bdfb55a84c47aa15"
     },
     {
       "path": "App/DefaultsWindow.xml",
       "mode": "100644",
-      "size": 7706,
-      "sha": "a92d6f71847c14d479bcb3359bdca824765ec4ef"
+      "size": 7779,
+      "sha": "106d45b9e2772d5dd59864f945d55f8f0ef18984"
     },
     {
       "path": "App/Deploy.Actions.ps1",
@@ -308,8 +308,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 25770,
-      "sha": "03fec9851c7639066d4251675bf7a69686438290"
+      "size": 25812,
+      "sha": "9d9b7906f7e7ec52d0908484afe74a4c61903eee"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -350,8 +350,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 31096,
-      "sha": "f87e65229a4e00898652cbdf309a2908f2dfe0e8"
+      "size": 31106,
+      "sha": "71489225510b22e080ac52ea05ad7ac524aa739b"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -392,8 +392,8 @@
     {
       "path": "App/Test-DefaultsWpf.ps1",
       "mode": "100644",
-      "size": 11437,
-      "sha": "eb523deaef426af83ac18d6f08d40cc9f0888cb5"
+      "size": 13804,
+      "sha": "1aeabe0450cdcf4dd891463ed1323181958e1d0a"
     },
     {
       "path": "App/Test-DeployActions.ps1",
@@ -650,8 +650,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 39721,
-      "sha": "f8ed9f707d9de51c08517ef51630b7e04fc59980"
+      "size": 40301,
+      "sha": "c43d36602ddcab4a2c0ed6ab2eeb8dc2aa0e27f8"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -1076,14 +1076,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 27728,
-      "sha": "4dd75d06e2d7c623ef51a44c1110289f56414364"
+      "size": 28251,
+      "sha": "36ef0358e095b99650c4b2c7e8603e0c0957d42c"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 26484,
-      "sha": "7895578daf61cb1e8694858de3c78a2f91c07bb7"
+      "size": 26573,
+      "sha": "63c9444ffb83dbdf0b4b61c02162fd7402dd5389"
     },
     {
       "path": "RELEASING.md",
@@ -1095,7 +1095,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "9f979ca92b22f63d9c9954e9dc6bebf00b31df12"
+      "sha": "fe13501d48549e1d19871ae41fdaefb1827e727c"
     }
   ]
 }

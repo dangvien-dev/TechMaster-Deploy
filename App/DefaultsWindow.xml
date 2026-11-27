@@ -6,11 +6,11 @@
  <Style x:Key="Heading" TargetType="TextBlock"><Setter Property="FontSize" Value="18"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Margin" Value="0,0,0,10"/></Style>
 </Window.Resources>
 <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-<Border Background="#10223F" Padding="24,20"><StackPanel><TextBlock Text="Thiết lập mặc định" FontSize="24" FontWeight="SemiBold" Foreground="White"/><TextBlock x:Name="Account" Foreground="#BED2E9" Margin="0,8,0,0" Text="Đang đọc tài khoản…"/></StackPanel></Border>
+<Border Background="#10223F" Padding="24,20"><StackPanel><TextBlock x:Name="Heading" Text="Thiết lập mặc định" FontSize="24" FontWeight="SemiBold" Foreground="White"/><TextBlock x:Name="Account" Foreground="#BED2E9" Margin="0,8,0,0" Text="Đang đọc tài khoản…"/></StackPanel></Border>
 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><StackPanel Margin="22,18,22,8">
  <Border Tag="Notice" Margin="0,0,0,14"><TextBlock x:Name="Status" Text="Bấm Kiểm tra lại để đọc thiết lập hiện tại."/></Border>
  <StackPanel x:Name="Choices">
- <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Máy in và khổ giấy" Style="{StaticResource Heading}"/><TextBlock x:Name="PrinterCurrent" Foreground="#526880" Margin="0,0,0,12"/>
+ <Border x:Name="PrinterCard" Style="{StaticResource Card}"><StackPanel><TextBlock Text="Máy in và khổ giấy" Style="{StaticResource Heading}"/><TextBlock x:Name="PrinterCurrent" Foreground="#526880" Margin="0,0,0,12"/>
  <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,12"><ComboBox x:Name="Printer" DisplayMemberPath="Name" BorderThickness="0"/></Border>
  <CheckBox x:Name="MakeDefault" Content="Đặt làm máy in mặc định cho tài khoản này" IsChecked="True" Margin="0,0,0,8"/><CheckBox x:Name="MakeA4" Content="Đặt khổ A4 cho hàng đợi máy in đã chọn" IsChecked="True" Margin="0,0,0,12"/>
  <TextBlock Text="Đặt máy in mặc định sẽ tắt Windows tự chọn máy in dùng gần nhất. Khổ A4 của hàng đợi có thể áp dụng cho người cùng dùng máy in đó; Word / Excel và tài liệu cũ có thể giữ khổ giấy riêng." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
@@ -31,11 +31,11 @@
  <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,12"><ComboBox x:Name="Browser" DisplayMemberPath="Display" BorderThickness="0"/></Border>
  <WrapPanel><Button x:Name="OpenBrowser" Content="Chọn làm trình duyệt mặc định…" Margin="0"/></WrapPanel>
  </StackPanel></Border>
- <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Ứng dụng đọc PDF" Style="{StaticResource Heading}"/><TextBlock x:Name="PdfCurrent" Foreground="#526880" Margin="0,0,0,12"/>
+ <Border x:Name="PdfCard" Style="{StaticResource Card}"><StackPanel><TextBlock Text="Ứng dụng đọc PDF" Style="{StaticResource Heading}"/><TextBlock x:Name="PdfCurrent" Foreground="#526880" Margin="0,0,0,12"/>
  <Border Tag="RoundedClip" CornerRadius="8" BorderBrush="#C7D5E5" BorderThickness="1" Background="White" Margin="0,0,0,12"><ComboBox x:Name="Pdf" DisplayMemberPath="Display" BorderThickness="0"/></Border>
  <WrapPanel><Button x:Name="OpenPdf" Content="Chọn làm ứng dụng PDF mặc định…" Margin="0"/></WrapPanel>
  </StackPanel></Border>
- <TextBlock Text="Windows yêu cầu bạn xác nhận ứng dụng mặc định trong Cài đặt: chọn Set default / Đặt mặc định; với PDF chọn .pdf. Sau đó quay lại bấm Kiểm tra lại. Nếu Windows không mở đúng ứng dụng, tìm ứng dụng trong trang Ứng dụng mặc định." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
+ <TextBlock x:Name="AppsNote" Text="Windows yêu cầu bạn xác nhận ứng dụng mặc định trong Cài đặt: chọn Set default / Đặt mặc định; với PDF chọn .pdf. Sau đó quay lại bấm Kiểm tra lại. Nếu Windows không mở đúng ứng dụng, tìm ứng dụng trong trang Ứng dụng mặc định." Foreground="#526880" FontSize="12" Margin="0,0,0,12"/>
  </StackPanel>
  <TextBlock x:Name="Log" Foreground="#526880" FontSize="12"/>
 </StackPanel></ScrollViewer>

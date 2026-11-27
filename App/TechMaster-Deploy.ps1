@@ -114,7 +114,7 @@ Bind-Click 'btnReinstall' { Open-DeployFolder (Join-Path $DirClone 'Reinstall') 
 Bind-Click 'btnCloneHelp' { Show-DeployQuickGuide $Root $form -Section 'Clone hàng loạt' }
 Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.bat') 'Xử lý trùng lặp' }
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
-Bind-Click 'btnDefaults' {Show-DeployDefaults $form}
+Bind-Click 'btnDefaults' {Show-DeployDefaults $form 'Printer'}
 Bind-Click 'btnPrinterCleanup' {Show-DeployDefaults $form 'Cleanup'}
 Bind-Click 'btnDefaultApps' {Show-DeployDefaults $form 'Apps'}
 Bind-Click 'btnLanAccounts' {Show-DeployLanAccounts $form}
