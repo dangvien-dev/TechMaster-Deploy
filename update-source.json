@@ -194,8 +194,8 @@
     {
       "path": "App/LanShare.Core.ps1",
       "mode": "100644",
-      "size": 18033,
-      "sha": "f2f6b7236725c97722bcb8898cfd271620b25198"
+      "size": 18181,
+      "sha": "b31e40aa18d9d8be01f75d7e550d29f56b428489"
     },
     {
       "path": "App/LanShare.UI.ps1",
