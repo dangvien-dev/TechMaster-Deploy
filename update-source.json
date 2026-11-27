@@ -194,8 +194,8 @@
     {
       "path": "App/LanShare.Core.ps1",
       "mode": "100644",
-      "size": 17784,
-      "sha": "8d52b45584c1be68348734db7e9688139d57717d"
+      "size": 18033,
+      "sha": "f2f6b7236725c97722bcb8898cfd271620b25198"
     },
     {
       "path": "App/LanShare.UI.ps1",
@@ -386,8 +386,8 @@
     {
       "path": "App/Test-LanShare.ps1",
       "mode": "100644",
-      "size": 14075,
-      "sha": "e61b8ec607cfbe3e943aadc31f01f502e85e3a8a"
+      "size": 14823,
+      "sha": "ac7634e76ff5f488d24c13d1495de80487987287"
     },
     {
       "path": "App/Test-LanShareWpf.ps1",

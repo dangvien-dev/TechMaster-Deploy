@@ -25,7 +25,8 @@ function Get-DeployShareFolderCheck([string]$Path) {
     $compare=$full.TrimEnd('\')
     if($compare -ieq $system.TrimEnd('\') -or $compare -ieq $windows -or $compare.StartsWith($windows+'\',[StringComparison]::OrdinalIgnoreCase) -or ($blocked -icontains $compare)){throw ('Không chia sẻ thư mục hệ thống: '+$full)}
     # A whole profile (C:\Users\<name>) exposes AppData, browser data and saved passwords.
-    if((Split-Path -Parent $compare) -ieq $usersRoot){throw ('Không chia sẻ cả thư mục người dùng '+$full+'; chọn thư mục con, ví dụ Documents\ChiaSe.')}
+    $parent=if($full -match '^[A-Za-z]:\\$'){''}else{[string][IO.Path]::GetDirectoryName($full)}
+    if($parent -ieq $usersRoot){throw ('Không chia sẻ cả thư mục người dùng '+$full+'; chọn thư mục con, ví dụ Documents\ChiaSe.')}
     $warning=if($full -match '^[A-Za-z]:\\$'){'Đang chia sẻ cả ổ '+$full.Substring(0,2)+'; nên chia sẻ một thư mục riêng.'}else{''}
     [pscustomobject]@{Path=$full;Warning=$warning;DefaultName=(ConvertTo-DeployShareName $full)}
 }
@@ -77,7 +78,7 @@ function Get-DeployFolderAccess([string]$Path,[string]$Account) {
     }
     return $best
 }
-function Get-DeployShareAccessMap([string]$Name,$Accounts) {
+function Get-DeployShareAccessMap([string]$Name,$Accounts,[switch]$Raw) {
     $map=@{}
     foreach($account in @($Accounts)){$map[[string]$account]='None'}
     foreach($entry in @(Get-SmbShareAccess -Name $Name -ErrorAction Stop)){
@@ -85,7 +86,8 @@ function Get-DeployShareAccessMap([string]$Name,$Accounts) {
         foreach($account in @($Accounts)){
             if([string]$entry.AccountName -ine [string]$account){continue}
             $right=[string]$entry.AccessRight
-            $map[[string]$account]=if($right -in 'Full','Change'){'Change'}elseif($right -eq 'Read'){'Read'}else{'None'}
+            # Raw keeps Full apart so an update can lower it; the UI shows Full as read & write.
+            $map[[string]$account]=if($Raw -and $right -in 'Full','Change','Read'){$right}elseif($right -in 'Full','Change'){'Change'}elseif($right -eq 'Read'){'Read'}else{'None'}
         }
     }
     return $map
@@ -167,7 +169,7 @@ function Set-DeployFolderShare([string]$Path,[string]$ShareName,$Grants,[bool]$F
         New-SmbShare @splat | Out-Null
         Write-DeployWindowsToolsLog $LogPath 'share-created' @{Share=$ShareName;Change=$change;Read=$read}
     }else{
-        $current=Get-DeployShareAccessMap $ShareName @($grants | ForEach-Object {$_.Account})
+        $current=Get-DeployShareAccessMap $ShareName @($grants | ForEach-Object {$_.Account}) -Raw
         foreach($grant in $grants){
             if($current[$grant.Account] -eq $grant.Access){continue}
             if($current[$grant.Account] -ne 'None'){Revoke-SmbShareAccess -Name $ShareName -AccountName $grant.Account -Force -ErrorAction Stop | Out-Null}

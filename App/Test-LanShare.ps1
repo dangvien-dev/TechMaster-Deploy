@@ -102,6 +102,11 @@ try{
     Assert ($r.Kind -eq 'Success' -and $r.Message -match 'Đã cập nhật' -and $script:calls -contains "Revoke:$pc\scan" -and $script:calls -contains "Grant:$pc\share:Read" -and -not ($script:calls -contains 'New:KeToan2') -and $script:ntfs["$pc\scan"] -ceq 'None' -and $script:ntfs["$pc\share"] -ceq 'Read') 'Updating replaces the permissions of the selected accounts only'
     Assert (@($script:calls | Where-Object {$_ -like 'Rule:*'}).Count -eq 2) 'Existing firewall rules are reused'
 
+    $script:shareAccess['KeToan']=@(@($script:shareAccess['KeToan'] | Where-Object {$_ -and $_.AccountName -ine "$pc\share"})+[pscustomobject]@{AccountName="$pc\share";AccessControlType='Allow';AccessRight='Full'})
+    $before=$script:calls.Count
+    $r=Set-DeployFolderShare $folderPath 'KeToan' @([pscustomobject]@{Role='Share';Access='Change'}) $true @() $log
+    $made=@($script:calls | Select-Object -Skip $before)
+    Assert ($r.Kind -eq 'Success' -and $made -contains "Revoke:$pc\share" -and $made -contains "Grant:$pc\share:Change" -and -not @($script:shareAccess['KeToan'] | Where-Object {$_.AccountName -ieq "$pc\share" -and $_.AccessRight -eq 'Full'}).Count) 'Full share access set by someone else is lowered to the chosen read & write'
     $script:netProfiles+=[pscustomobject]@{InterfaceIndex=7;InterfaceAlias='Wi-Fi';Name='VanPhong';NetworkCategory='Public'}
     $r=Set-DeployFolderShare $folderPath 'KeToan' @([pscustomobject]@{Role='Share';Access='Change'}) $true @() $log
     Assert ($r.Kind -eq 'Attention' -and $r.Message -match 'VanPhong' -and $r.Message -match 'Public' -and -not ($script:calls -contains 'Private:7')) 'A Public network is reported and never changed without being asked'
