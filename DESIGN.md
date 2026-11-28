@@ -40,3 +40,15 @@
 
 - Tiếng Việt; thuật ngữ kỹ thuật, mã lỗi, tên file, lệnh giữ nguyên tiếng Anh.
 - Trạng thái dùng ký hiệu thống nhất: `✓` đạt, `✗` lỗi cần xử lý, `!` cảnh báo thật, `–` thông tin. Không dùng `!` / khung vàng cho trạng thái bình thường (ví dụ lần đầu chưa nhập mật khẩu).
+
+## Nguyên tắc xử lý lỗi trên máy
+
+Mọi chức năng sửa lỗi / cấu hình máy chọn cách làm theo thứ tự ưu tiên dưới đây. Chỉ xuống bậc sau khi bậc trước không giải quyết được, và phải nói rõ cho người dùng vì sao.
+
+1. **Giữ nguyên bảo mật của Windows.** Ưu tiên cách đúng chuẩn không cần hạ bảo mật: tài khoản có mật khẩu thay cho Guest / không mật khẩu, cài driver có chữ ký bằng quyền Administrator thay cho nới Point and Print, kết nối trực tiếp (ví dụ máy in theo IP) thay cho đường vòng phải mở thêm quyền.
+2. **Rủi ro thấp nhất, phạm vi hẹp nhất.** Nếu buộc phải thay đổi: chỉ đổi trên máy đang xử lý (không đổi máy chủ / máy khác), chỉ đổi đúng thiết lập cần thiết, không đổi thiết lập dùng chung khi có cách riêng lẻ. Ví dụ: chế độ tương thích RPC chỉ đổi cách máy khách kết nối, không tắt `RpcAuthnLevelPrivacyEnabled` trên máy chủ.
+3. **Đảo ngược được.** Sao lưu giá trị cũ trước khi ghi, có nút **Hoàn tác**, ghi nhật ký `*.jsonl`. Không xoá dữ liệu / driver / key khi không cần; thao tác không đảo ngược được phải hỏi xác nhận và nêu hậu quả.
+4. **Kiểm tra trước, sửa sau.** Có bước **Kiểm tra** chỉ đọc; sau khi sửa luôn đọc lại để xác nhận, không báo thành công khi Windows chưa xác nhận.
+5. **Không làm**: tắt bản vá bảo mật, bật Guest / đăng nhập không mật khẩu (`AllowInsecureGuestAuth`, `LimitBlankPasswordUse=0`), tắt tường lửa / Defender / UAC / SMB signing, cài driver không chữ ký, mở chia sẻ cho Everyone. Nếu người dùng tự làm các việc này bên ngoài app, app chỉ báo rủi ro, không tự làm thay.
+
+Mỗi chức năng mới mô tả trong PR / `PROGRESS.md` cách làm đã chọn thuộc bậc nào và vì sao không dùng bậc cao hơn.
