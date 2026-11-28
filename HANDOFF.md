@@ -9,7 +9,10 @@ Tệp này dành cho người / phiên làm việc tiếp theo. Nằm ngoài ph�
 - Bộ công cụ WPF cho kỹ thuật viên: cài Windows / phần mềm, kích hoạt + biên bản, tuỳ chỉnh Windows, máy in, chia sẻ LAN, clone hàng loạt (Sysprep), chẩn đoán / sửa lỗi, cập nhật.
 - 2.2.26.0 đã thử trên máy thật (28/11/2026), đạt: dọn máy in (cửa sổ riêng) trên KY-THUAT; chạy TechMaster qua LAN; lệnh web trên Windows 10 cũ; tài khoản scan / share + chia sẻ thư mục + scan từ máy photocopy + kết nối không nhập lại mật khẩu; cập nhật từ bản cũ.
 - Trang tải (repo `dangvien-dev/dangvien-dev.github.io`) đang công bố ZIP 2.2.26.0; `irm https://dangvien-dev.github.io/tm.txt | iex` cài bản đó.
-- Không có PR mở. Nhánh làm việc gần nhất: `claude/busy-clarke-y0oyw5`.
+- PR đang mở (28/11/2026, do phiên khác tạo, chưa merge):
+  - dangvien-dev/TechMaster-Deploy#4 — Dọn Windows.old: xoá thư mục rỗng bằng `rd` (không `/s`), nhánh `claude/laughing-maxwell-bpzsor`.
+  - dangvien-dev/TechMaster-Deploy#5 — Máy in: thêm theo IP và kết nối máy in chia sẻ không tắt bảo mật in, nhánh `claude/pensive-brown-f6hvog`.
+  - **Cả hai cùng ghi 2.2.27.0.** Merge cái đầu xong, cái sau phải nhập `main`, đổi lên 2.2.28.0 (`version.txt`, mục `CHANGELOG.md` / `PROGRESS.md`) và tạo lại `update-source.json` trước khi merge.
 
 ## 2. Kiến trúc
 
@@ -72,7 +75,7 @@ Tệp này dành cho người / phiên làm việc tiếp theo. Nằm ngoài ph�
 ## 7. Việc còn mở / ý tưởng
 
 - Chưa ký số exe → SmartScreen / Smart App Control có thể chặn (hướng dẫn trên trang tải).
-- Tài khoản `print` mới chỉ được tạo; chưa có tự động chia sẻ máy in qua LAN.
+- Tài khoản `print` mới chỉ được tạo; kết nối máy in chia sẻ / thêm theo IP đang làm ở PR #5 (chưa merge).
 - Chạy qua LAN chỉ chép tệp chương trình; `KhoOffice`, `Reinstall` không có trên máy kia.
 - Mỗi bản mới phải tự đăng lại lên trang tải (bước 5.3–5.4) thì lệnh web mới cài bản đó.
 - Workflow còn cảnh báo Node.js 20 của `actions/checkout@v4`, `actions/upload-artifact@v4` (chưa ảnh hưởng).
