@@ -422,8 +422,8 @@
     {
       "path": "App/Test-DesignRules.ps1",
       "mode": "100644",
-      "size": 5790,
-      "sha": "f2106b9b9bc2f23d149b41512e99c99287abdf5b"
+      "size": 6273,
+      "sha": "38daa7638ab12fa59df66e0bc121f669e566b5a1"
     },
     {
       "path": "App/Test-Info.ps1",

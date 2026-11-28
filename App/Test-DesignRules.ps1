@@ -28,15 +28,16 @@ function Get-DeployInputFrame($field) {
     return $null
 }
 function Get-DeployRowKey($element) {
-    # The Grid cell that holds the element: same Grid and row means the same visual row.
+    # The Grid cell that holds the element: 'grid:row' plus its column. Fields stacked inside one cell are
+    # separate rows and are not compared with each other; one field per cell in different columns is one row.
     $node=$element
     while($node){
         $parent=[Windows.LogicalTreeHelper]::GetParent($node)
-        if($parent -is [Windows.Controls.Grid] -and $parent.ColumnDefinitions.Count -gt 1){return ([Runtime.CompilerServices.RuntimeHelpers]::GetHashCode($parent)).ToString()+':'+[Windows.Controls.Grid]::GetRow($node)}
-        if($parent -isnot [Windows.Controls.StackPanel] -and $parent -isnot [Windows.Controls.Border]){return ''}
+        if($parent -is [Windows.Controls.Grid] -and $parent.ColumnDefinitions.Count -gt 1){return [pscustomobject]@{Row=([Runtime.CompilerServices.RuntimeHelpers]::GetHashCode($parent)).ToString()+':'+[Windows.Controls.Grid]::GetRow($node);Column=[Windows.Controls.Grid]::GetColumn($node)}}
+        if($parent -isnot [Windows.Controls.StackPanel] -and $parent -isnot [Windows.Controls.Border]){return $null}
         $node=$parent
     }
-    return ''
+    return $null
 }
 foreach($file in $files){
     $window=Import-DeployWindow $file.FullName
@@ -61,8 +62,12 @@ foreach($file in $files){
                 $rows=@{}
                 foreach($frame in $shown){
                     $top=$frame.TranslatePoint([Windows.Point]::new(0,0),$window.Content).Y
-                    $key=Get-DeployRowKey $frame
-                    if($key){if(-not $rows.ContainsKey($key)){$rows[$key]=New-Object Collections.ArrayList};[void]$rows[$key].Add([pscustomobject]@{Top=$top;Height=$frame.ActualHeight})}
+                    $cell=Get-DeployRowKey $frame
+                    if($cell){
+                        if(-not $rows.ContainsKey($cell.Row)){$rows[$cell.Row]=@{}}
+                        if(-not $rows[$cell.Row].ContainsKey($cell.Column)){$rows[$cell.Row][$cell.Column]=New-Object Collections.ArrayList}
+                        [void]$rows[$cell.Row][$cell.Column].Add([pscustomobject]@{Top=$top;Height=$frame.ActualHeight})
+                    }
                     $parent=[Windows.LogicalTreeHelper]::GetParent($frame)
                     if($parent -is [Windows.Controls.Grid]){
                         foreach($button in @($parent.Children | Where-Object {$_ -is [Windows.Controls.Button] -and $_.ActualHeight -gt 0 -and [Windows.Controls.Grid]::GetRow($_) -eq [Windows.Controls.Grid]::GetRow($frame)})){
@@ -72,7 +77,7 @@ foreach($file in $files){
                     }
                 }
                 foreach($key in $rows.Keys){
-                    $row=@($rows[$key])
+                    $row=@($rows[$key].Values | Where-Object {$_.Count -eq 1} | ForEach-Object {$_[0]})
                     if($row.Count -lt 2){continue}
                     $tops=@($row | ForEach-Object {$_.Top});$heights=@($row | ForEach-Object {$_.Height})
                     $spread=([double]($tops | Measure-Object -Maximum).Maximum)-([double]($tops | Measure-Object -Minimum).Minimum)
