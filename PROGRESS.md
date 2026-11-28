@@ -3,6 +3,12 @@
 Cập nhật ngày 28/11/2026.
 
 **2.2.27.0:** theo yêu cầu hạn chế tắt bảo mật Windows khi sửa lỗi máy in share (`0x0000011b` / `0x00000709` / `0x00000bcb`): thay vì chỉnh `RpcAuthnLevelPrivacyEnabled` / `RestrictDriverInstallationToAdministrators`, thêm cửa sổ `App/PrinterConnect.*` với hai chế độ. **Theo IP** (máy in có LAN): driver từ thư mục (đọc `[Manufacturer]` / model theo kiến trúc trong INF, `pnputil /add-driver` rồi `Add-PrinterDriver`), cổng `IP_<địa chỉ>` RAW, `Add-Printer`, rồi dùng lại `Set-DeployPrinterDefaults` cho A4 / mặc định. **Chia sẻ**: thử tài khoản trên `\\máy\IPC$` (thêm overload `TestConnection(..., resourceType)` trong `LanConnect.Native.cs`), lưu Credential Manager như Kết nối thư mục chia sẻ, đối chiếu tên driver máy chủ, cài sẵn driver rồi `Add-Printer -ConnectionName`; lỗi đọc mã Win32 từ CIM error data / HRESULT / message. Thiết lập registry duy nhất là `RpcUseNamedPipeProtocol` phía máy khách, có backup JSON và hoàn tác. Kiểm thử: `Test-PrinterConnect.ps1` (mô phỏng cmdlet máy in, pnputil, mạng, registry, Spooler; INF thật trong thư mục tạm) và `Test-PrinterConnectWpf.ps1`. **Chưa chạy trên máy thật**: cần thử thêm máy in theo IP với Toshiba / Ricoh và kết nối máy in share Win 11 24H2 → Win 10, gửi nhật ký `PrinterConnect-*.jsonl` nếu lỗi.
+**Thử trên máy thật 2.2.26.0 (28/11/2026): đạt cả năm mục.**
+1. Dọn máy in không kết nối bằng cửa sổ riêng (Máy in → Dọn máy in không kết nối…) trên KY-THUAT.
+2. Chia sẻ TechMaster qua LAN từ KY-THUAT; máy khác mở `\\KY-THUAT\TechMaster$\App\Chay-Tu-Mang.bat`, app được chép, kiểm tra, cài vào `C:\TechMaster-Deploy` và mở.
+3. Lệnh web `irm https://dangvien-dev.github.io/tm.txt | iex` trên máy Windows 10 cũ.
+4. Tài khoản `scan` / `share`, chia sẻ thư mục, scan từ máy photocopy vào thư mục chia sẻ; máy người dùng dùng Kết nối thư mục chia sẻ, mở thư mục không phải nhập lại mật khẩu.
+5. Máy đang chạy bản cũ bấm Cập nhật lên 2.2.26.0 (menu mới, trang Tổng quan).
 
 **2.2.26.0:** thử Chia sẻ TechMaster qua LAN trên bản ZIP tại `D:\01_CaiWinChuan\TechMaster-Deploy-WPF\TechMaster-Deploy` báo thiếu `update-source.json`: tệp đó chỉ có trong repo (updater không cài nó), bản cài có `update-package.json`. Nay đọc `update-package.json` trước (SHA256, có cả exe, bỏ qua tệp preserve), `update-source.json` dự phòng; `Test-NetworkRun.ps1` thêm trường hợp bản cài.
 
