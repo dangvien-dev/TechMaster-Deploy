@@ -149,6 +149,8 @@ Bản này là công cụ tạm dùng trước. Bản chính thức sẽ nằm t
 
 ## Build launcher từ mã nguồn
 
+Quy ước giao diện (màu, bo góc, chiều cao ô nhập, căn hàng): xem [DESIGN.md](DESIGN.md).
+
 Trên Windows, chạy `powershell.exe -NoProfile -ExecutionPolicy Bypass -File App\Build-Launcher.ps1` trong thư mục dự án. File `TechMaster Deploy.exe` sẽ được tạo cạnh README.
 
 ### Fix Driver (dùng chung mọi máy / mainboard)

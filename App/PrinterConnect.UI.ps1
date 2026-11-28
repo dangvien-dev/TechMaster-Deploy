@@ -43,13 +43,13 @@ function Get-DeployPrinterConnectPayload($Window,[ValidateSet('Diagnose','Apply'
         return $payload
     }
     $target=ConvertFrom-DeployPrinterShare ([string]$Window.FindName('SharePath').Text)
-    $payload=@{Mode='Share';Path=$target.Path}
+    $password=$Window.FindName('Password').SecurePassword
+    $account=([string]$Window.FindName('Account').Text).Trim()
+    if($password.Length -gt 0 -and -not $account){throw 'Nhập tài khoản trên máy chủ in (ví dụ print).'}
+    $password.MakeReadOnly()
+    # Kiểm tra kết nối also tries a typed password (nothing is saved); Kết nối máy in saves it.
+    $payload=@{Mode='Share';Path=$target.Path;Account=$account;Password=$password}
     if($Purpose -eq 'Apply'){
-        $password=$Window.FindName('Password').SecurePassword
-        $account=([string]$Window.FindName('Account').Text).Trim()
-        if($password.Length -gt 0 -and -not $account){throw 'Nhập tài khoản trên máy chủ in (ví dụ print).'}
-        $password.MakeReadOnly()
-        $payload.Account=$account;$payload.Password=$password
         $payload.Driver=$(if($driver){[string]$driver.Name}else{''});$payload.Inf=$(if($driver){[string]$driver.Inf}else{''})
         $payload.Default=[bool]($Window.FindName('ShareDefault').IsChecked -eq $true)
         $payload.TestPage=[bool]($Window.FindName('ShareTestPage').IsChecked -eq $true)
@@ -134,8 +134,8 @@ function New-DeployPrinterConnectWindow($Owner=$null,[ValidateSet('Ip','Share')]
         try{Complete-DeployPrinterConnectTask $window (@(Receive-DeployWork $job)[-1])}
         catch{Set-DeployNotice ($window.FindName('Status')) $_.Exception.GetBaseException().Message 'Error'}
         finally{
-            # The password never stays on screen after an attempt.
-            $window.FindName('Password').Clear()
+            # The password is kept for Kết nối máy in after a check, and cleared once a connection was attempted.
+            if($view.Action -eq 'Apply'){$window.FindName('Password').Clear()}
             Set-DeployPrinterConnectBusy $window $false
         }
     }

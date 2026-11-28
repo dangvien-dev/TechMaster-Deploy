@@ -21,6 +21,7 @@ jobs:
             & App/Test-LanAccountsWpf.ps1
             & App/Test-LanShareWpf.ps1
             & App/Test-PrinterConnectWpf.ps1
+            & App/Test-DesignRules.ps1
             & App/Test-UpdateProbe.ps1
             & App/Test-LogoPreview.ps1
             & FixClone/Test-DriverFixWpf.ps1
