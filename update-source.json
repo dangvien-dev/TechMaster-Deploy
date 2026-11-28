@@ -1,1137 +1,1137 @@
 {
-  "schema": 1,
-  "product": "TechMaster.Deploy",
-  "repository": "dangvien-dev/TechMaster-Deploy",
-  "branch": "main",
-  "version": "2.2.28.0",
-  "files": [
-    {
-      "path": "App/AV.Diagnostics.ps1",
-      "mode": "100644",
-      "size": 27158,
-      "sha": "705c25617dcccbd62ebed556f6b55899973c8c44"
-    },
-    {
-      "path": "App/AV.Repair.UI.ps1",
-      "mode": "100644",
-      "size": 8233,
-      "sha": "a039e8dc4fab07b804590c0776428e44fe1effc0"
-    },
-    {
-      "path": "App/AV.Repair.ps1",
-      "mode": "100644",
-      "size": 17745,
-      "sha": "d823b838e153ca5b80ef194e87c044d03b28a6e5"
-    },
-    {
-      "path": "App/BasicApps.ps1",
-      "mode": "100644",
-      "size": 9195,
-      "sha": "ff547777f4579960c47126ab116ecce475248f90"
-    },
-    {
-      "path": "App/Build-Launcher.ps1",
-      "mode": "100644",
-      "size": 859,
-      "sha": "ccb3dce9be75169290dffce32f20b328e0393a70"
-    },
-    {
-      "path": "App/Build-Release.ps1",
-      "mode": "100644",
-      "size": 3530,
-      "sha": "0d6e147c7109f6492fd1c0c9e6d1f55d3cd33334"
-    },
-    {
-      "path": "App/Build-UpdateIndex.ps1",
-      "mode": "100644",
-      "size": 2323,
-      "sha": "5230256e6764b1a66a8d013aa2fa49bf024b0f11"
-    },
-    {
-      "path": "App/Build-UpgradeHelper.ps1",
-      "mode": "100644",
-      "size": 3464,
-      "sha": "9a0705c30e44f88cb3d61e32cbf58fad697e9ca2"
-    },
-    {
-      "path": "App/Chay-Tu-Mang.bat",
-      "mode": "100644",
-      "size": 299,
-      "sha": "f1c279b44524edf6a859066ae067075e17253ec9"
-    },
-    {
-      "path": "App/ConfirmWindow.xml",
-      "mode": "100644",
-      "size": 2640,
-      "sha": "600e1dd5dbca9e40b92ee06382e89af5f19381f6"
-    },
-    {
-      "path": "App/Console.ps1",
-      "mode": "100644",
-      "size": 1550,
-      "sha": "62e6589b66a3da758bfc395f8b5db2a7b22a4e82"
-    },
-    {
-      "path": "App/ConsoleFont.cs",
-      "mode": "100644",
-      "size": 2311,
-      "sha": "2d0a5755d8adea605cd6b99c885e5b8a3c04684d"
-    },
-    {
-      "path": "App/CustomApps.Core.ps1",
-      "mode": "100644",
-      "size": 4324,
-      "sha": "42aa395e02017e196ad1ec018888f4619b744780"
-    },
-    {
-      "path": "App/CustomApps.UI.ps1",
-      "mode": "100644",
-      "size": 4834,
-      "sha": "fd8e9f3b96c841b8ab4c7d2032d9898b90f94060"
-    },
-    {
-      "path": "App/CustomAppsWindow.xml",
-      "mode": "100644",
-      "size": 4573,
-      "sha": "bf8cc45b7b9ff42fca757c61766911e58bb360be"
-    },
-    {
-      "path": "App/Defaults.Core.ps1",
-      "mode": "100644",
-      "size": 40772,
-      "sha": "416d9bbe23ca9bd2614e3e2f4d63f729acd211ff"
-    },
-    {
-      "path": "App/Defaults.Native.cs",
-      "mode": "100644",
-      "size": 11087,
-      "sha": "632904a5c1700924d9b4361bc62979381adf0139"
-    },
-    {
-      "path": "App/Defaults.UI.ps1",
-      "mode": "100644",
-      "size": 16685,
-      "sha": "32ecd7c50dc8e5f237f5c213bdfb55a84c47aa15"
-    },
-    {
-      "path": "App/DefaultsWindow.xml",
-      "mode": "100644",
-      "size": 7779,
-      "sha": "106d45b9e2772d5dd59864f945d55f8f0ef18984"
-    },
-    {
-      "path": "App/Deploy.Actions.ps1",
-      "mode": "100644",
-      "size": 16127,
-      "sha": "42603b07bb9eec62934f379757ae2874b69daee8"
-    },
-    {
-      "path": "App/DesktopIdentity.cs",
-      "mode": "100644",
-      "size": 1524,
-      "sha": "bb34f93c55a2f04be740191d3f4bc657db4e4642"
-    },
-    {
-      "path": "App/DiagnosticsWindow.xml",
-      "mode": "100644",
-      "size": 1511,
-      "sha": "746d018c0d1bcdec6def6fb6feb66bcd9b81ee5b"
-    },
-    {
-      "path": "App/Info.UI.ps1",
-      "mode": "100644",
-      "size": 4525,
-      "sha": "ba9094d3f3120d6614de49a3656470cc2ebb6882"
-    },
-    {
-      "path": "App/InfoWindow.xml",
-      "mode": "100644",
-      "size": 4496,
-      "sha": "7eb463ae3bd84ad9fbe043e252727ded53ebda72"
-    },
-    {
-      "path": "App/LanAccounts.Core.ps1",
-      "mode": "100644",
-      "size": 12283,
-      "sha": "ab8fd837c5fcd1ca0e755929ecd6f8dd56b73acf"
-    },
-    {
-      "path": "App/LanAccounts.Native.cs",
-      "mode": "100644",
-      "size": 7460,
-      "sha": "c615c628cf7100848f2ec6a88693fc30adeda56d"
-    },
-    {
-      "path": "App/LanAccounts.UI.ps1",
-      "mode": "100644",
-      "size": 7743,
-      "sha": "2c8f5c02801342c71dfd79bdd8fc7360e4b32eb1"
-    },
-    {
-      "path": "App/LanAccountsWindow.xml",
-      "mode": "100644",
-      "size": 7018,
-      "sha": "9a87df72fdfc28296f01b9a247e0d852f324b00a"
-    },
-    {
-      "path": "App/LanConnect.Core.ps1",
-      "mode": "100644",
-      "size": 10739,
-      "sha": "f7a8dc03823b877c378b76692769908638183449"
-    },
-    {
-      "path": "App/LanConnect.Native.cs",
-      "mode": "100644",
-      "size": 7191,
-      "sha": "e99874be1280b8477873a0297ce1bb90d438c685"
-    },
-    {
-      "path": "App/LanConnect.UI.ps1",
-      "mode": "100644",
-      "size": 5292,
-      "sha": "b38fbe09d2bd4c3e524bacf47bebc97a5e536601"
-    },
-    {
-      "path": "App/LanConnectWindow.xml",
-      "mode": "100644",
-      "size": 5034,
-      "sha": "ad82b014ff8e703f7169b27e4b1d934b16d23f5e"
-    },
-    {
-      "path": "App/LanShare.Core.ps1",
-      "mode": "100644",
-      "size": 18181,
-      "sha": "b31e40aa18d9d8be01f75d7e550d29f56b428489"
-    },
-    {
-      "path": "App/LanShare.UI.ps1",
-      "mode": "100644",
-      "size": 10304,
-      "sha": "f1e128dd34ccf3e09ae0ec587b02a0cebbdd740d"
-    },
-    {
-      "path": "App/LanShareWindow.xml",
-      "mode": "100644",
-      "size": 7627,
-      "sha": "c7e99a48b53511804cff5a70400d8ed80b1001b1"
-    },
-    {
-      "path": "App/Launcher.cs",
-      "mode": "100644",
-      "size": 1338,
-      "sha": "0e826645c33d58823b80de6e1b8ba119a47acbf6"
-    },
-    {
-      "path": "App/Launcher.manifest",
-      "mode": "100644",
-      "size": 431,
-      "sha": "eb72a12f188e71c5bfa7e08de2657fada23cfb8b"
-    },
-    {
-      "path": "App/LicenseConfirmation.UI.ps1",
-      "mode": "100644",
-      "size": 3720,
-      "sha": "bc29244298bd1447bfa0f18c2b574e84c005e5ac"
-    },
-    {
-      "path": "App/LicenseConfirmationWindow.xml",
-      "mode": "100644",
-      "size": 8471,
-      "sha": "4855c18599025c9f21f36fca23cdfd121c2c784f"
-    },
-    {
-      "path": "App/Logo.Preview.ps1",
-      "mode": "100644",
-      "size": 646,
-      "sha": "a46a4744830f9c39fa52d4a731c547ae36acdceb"
-    },
-    {
-      "path": "App/LogoPreview.cs",
-      "mode": "100644",
-      "size": 15000,
-      "sha": "28eff875739d326b3590c1789a2756d052d3ae99"
-    },
-    {
-      "path": "App/MainWindow.xml",
-      "mode": "100644",
-      "size": 47752,
-      "sha": "8cba91c2f530ff6b109371ca1e87209266fc82ec"
-    },
-    {
-      "path": "App/Network.Launch.ps1",
-      "mode": "100644",
-      "size": 830,
-      "sha": "514025ef0ef035d45cab1c7188c09fd002c753ab"
-    },
-    {
-      "path": "App/Network.Sync.ps1",
-      "mode": "100644",
-      "size": 18982,
-      "sha": "6a892272b2adc016d2921d05dddd81b059218a60"
-    },
-    {
-      "path": "App/NetworkRun.Core.ps1",
-      "mode": "100644",
-      "size": 11889,
-      "sha": "87d457d6ef24a540062109d8806391d6cdd049fe"
-    },
-    {
-      "path": "App/NetworkRun.UI.ps1",
-      "mode": "100644",
-      "size": 9392,
-      "sha": "d024a4a959471d7f1dda62040e61cafe83cdd186"
-    },
-    {
-      "path": "App/NetworkRunWindow.xml",
-      "mode": "100644",
-      "size": 5486,
-      "sha": "a59f3b83c4010e542366be43eb0ec4eb402db10a"
-    },
-    {
-      "path": "App/Overview.Core.ps1",
-      "mode": "100644",
-      "size": 6838,
-      "sha": "098ceffcad855039a0dcf42d88b8b541cfd7dd89"
-    },
-    {
-      "path": "App/Overview.UI.ps1",
-      "mode": "100644",
-      "size": 1097,
-      "sha": "129eeceb438474a5a70d11fe75baf263057efa4c"
-    },
-    {
-      "path": "App/Pdf.Printer.ps1",
-      "mode": "100644",
-      "size": 2133,
-      "sha": "5665d3db6980c98f9ef283ce242daeb2469510a9"
-    },
-    {
-      "path": "App/PrinterConnect.Core.ps1",
-      "mode": "100644",
-      "size": 46638,
-      "sha": "39ae9ea03d5123f6c50ac054cb40ea345985fe37"
-    },
-    {
-      "path": "App/PrinterConnect.UI.ps1",
-      "mode": "100644",
-      "size": 11570,
-      "sha": "e6227417cbb3333b40c6066da614f3df2826c54d"
-    },
-    {
-      "path": "App/PrinterConnectWindow.xml",
-      "mode": "100644",
-      "size": 9060,
-      "sha": "3f8e0440595e8458954b43d7acc86eb7a2171f3b"
-    },
-    {
-      "path": "App/QuickGuide.md",
-      "mode": "100644",
-      "size": 27600,
-      "sha": "6deeb34ffed10fc65f358bcfcbdf68e5dcccc7e2"
-    },
-    {
-      "path": "App/Repair-Update.ps1",
-      "mode": "100644",
-      "size": 3429,
-      "sha": "8f1b72a59bdba178ada4e69bb1743fc061f89ee8"
-    },
-    {
-      "path": "App/RepairWindow.xml",
-      "mode": "100644",
-      "size": 2956,
-      "sha": "994202c0471c9bec0d67a4be9c93d24f8b4b6a4c"
-    },
-    {
-      "path": "App/Report.Identity.ps1",
-      "mode": "100644",
-      "size": 1129,
-      "sha": "cddabedfddece28bdf47c724b93a567a782bf730"
-    },
-    {
-      "path": "App/Startup.UI.ps1",
-      "mode": "100644",
-      "size": 1850,
-      "sha": "0fee2f2cf1dbfbd0f539c08abbc6e4e80cdb6064"
-    },
-    {
-      "path": "App/Tao-Shortcut.bat",
-      "mode": "100644",
-      "size": 184,
-      "sha": "59c46dfece200a12b1c09ef9a02ab4130c1cc97b"
-    },
-    {
-      "path": "App/Tao-Shortcut.ps1",
-      "mode": "100644",
-      "size": 1912,
-      "sha": "666a147daef95772b432c1979891224183bb9ce2"
-    },
-    {
-      "path": "App/TechMaster-Deploy.ps1",
-      "mode": "100644",
-      "size": 31348,
-      "sha": "f77567b23703be4e977a65b82673284b6ffe0759"
-    },
-    {
-      "path": "App/TechMaster-Icon.svg",
-      "mode": "100644",
-      "size": 216290,
-      "sha": "b18b78258b27e87a9ace505af76766a219433c86"
-    },
-    {
-      "path": "App/TechMaster.ico",
-      "mode": "100644",
-      "size": 146169,
-      "sha": "d6efb567e4b17a0219db5fcfaeaf22f700a471b6"
-    },
-    {
-      "path": "App/Test-AvDiagnostics.ps1",
-      "mode": "100644",
-      "size": 17524,
-      "sha": "2c2ff78bb0cab604cef42031c9cb8cbf4e063a2f"
-    },
-    {
-      "path": "App/Test-AvRepair.ps1",
-      "mode": "100644",
-      "size": 13962,
-      "sha": "11509f21dc8d9eb47ed2c0ba6a81152af5a88a2b"
-    },
-    {
-      "path": "App/Test-CustomApps.ps1",
-      "mode": "100644",
-      "size": 3416,
-      "sha": "2dd33f42c0c110f1246036806847dfaf2cbc3525"
-    },
-    {
-      "path": "App/Test-Defaults.ps1",
-      "mode": "100644",
-      "size": 28121,
-      "sha": "12ce394818f4506a0dd9f9543c556cbc7d71fab3"
-    },
-    {
-      "path": "App/Test-DefaultsWpf.ps1",
-      "mode": "100644",
-      "size": 13804,
-      "sha": "1aeabe0450cdcf4dd891463ed1323181958e1d0a"
-    },
-    {
-      "path": "App/Test-DeployActions.ps1",
-      "mode": "100644",
-      "size": 2962,
-      "sha": "057076a35db6d6c6d69f16d3269d4054f409bbeb"
-    },
-    {
-      "path": "App/Test-DesignRules.ps1",
-      "mode": "100644",
-      "size": 6273,
-      "sha": "38daa7638ab12fa59df66e0bc121f669e566b5a1"
-    },
-    {
-      "path": "App/Test-Info.ps1",
-      "mode": "100644",
-      "size": 4507,
-      "sha": "e2ec23b0a75fd872bc7d4e39e0d5b0076ae1b424"
-    },
-    {
-      "path": "App/Test-InfoEntryPoints.ps1",
-      "mode": "100644",
-      "size": 2625,
-      "sha": "262e8bfb9953adbb77f1fa6f27bb9bfcd55b2744"
-    },
-    {
-      "path": "App/Test-LanAccounts.ps1",
-      "mode": "100644",
-      "size": 10421,
-      "sha": "5ede6c54f84167185a6ee3af84d3d09c9c7087c7"
-    },
-    {
-      "path": "App/Test-LanAccountsWpf.ps1",
-      "mode": "100644",
-      "size": 6431,
-      "sha": "a19a48950afbe081213db315277f0ee39d394250"
-    },
-    {
-      "path": "App/Test-LanConnect.ps1",
-      "mode": "100644",
-      "size": 7953,
-      "sha": "7bcb7f574a7704c2ac430fd75d4ac8f3ac06f4e8"
-    },
-    {
-      "path": "App/Test-LanShare.ps1",
-      "mode": "100644",
-      "size": 14823,
-      "sha": "ac7634e76ff5f488d24c13d1495de80487987287"
-    },
-    {
-      "path": "App/Test-LanShareWpf.ps1",
-      "mode": "100644",
-      "size": 15208,
-      "sha": "dc3ffb81ddfc8bb8a3c7b164010650079b5ccd9d"
-    },
-    {
-      "path": "App/Test-LogoPreview.ps1",
-      "mode": "100644",
-      "size": 5095,
-      "sha": "bcc4f4bd13db1f4ea1c8852f67843da220636632"
-    },
-    {
-      "path": "App/Test-NetworkRun.ps1",
-      "mode": "100644",
-      "size": 25446,
-      "sha": "035f711008202a64bfc1330787581f2a7fce530b"
-    },
-    {
-      "path": "App/Test-Overview.ps1",
-      "mode": "100644",
-      "size": 3525,
-      "sha": "776d45cefd88c671329f54cb46d08eef8eaac260"
-    },
-    {
-      "path": "App/Test-PdfPrinter.ps1",
-      "mode": "100644",
-      "size": 2723,
-      "sha": "b2a41769fd32bd9ddb829af3451b39d9f91cdd18"
-    },
-    {
-      "path": "App/Test-PrinterConnect.ps1",
-      "mode": "100644",
-      "size": 30317,
-      "sha": "859ed14f32ed1332481d190078ee7cc9af44b84c"
-    },
-    {
-      "path": "App/Test-PrinterConnectWpf.ps1",
-      "mode": "100644",
-      "size": 13844,
-      "sha": "9da3879035e247bc87769d5c3c2f1686a31c6523"
-    },
-    {
-      "path": "App/Test-PublicUpdate.ps1",
-      "mode": "100644",
-      "size": 7074,
-      "sha": "8d2ba2e9041eb36bcd09536ba9795b0b91d7edec"
-    },
-    {
-      "path": "App/Test-RepoUpdate.ps1",
-      "mode": "100644",
-      "size": 10352,
-      "sha": "d57003d609d9abbee6bb46a02c61d77c046189f3"
-    },
-    {
-      "path": "App/Test-StartupWait.ps1",
-      "mode": "100644",
-      "size": 2554,
-      "sha": "31324c4a48a763318e2ae2d88b7ab8bec5224d40"
-    },
-    {
-      "path": "App/Test-UltraInstall.ps1",
-      "mode": "100644",
-      "size": 5370,
-      "sha": "738a22d188c10790ab26df514c65aa0950a58d9f"
-    },
-    {
-      "path": "App/Test-Update.ps1",
-      "mode": "100644",
-      "size": 14740,
-      "sha": "1a9b510f1672104ad61f73907dc167e7c29fab35"
-    },
-    {
-      "path": "App/Test-UpdateEngine.ps1",
-      "mode": "100644",
-      "size": 7501,
-      "sha": "a1af43d24a6e471cac84bbb09b0088e88ce63fb8"
-    },
-    {
-      "path": "App/Test-UpdateHandshake.ps1",
-      "mode": "100644",
-      "size": 7010,
-      "sha": "1d5f45d8056b912cc31c87cad2d1a6f2504aa12a"
-    },
-    {
-      "path": "App/Test-UpdateNotification.ps1",
-      "mode": "100644",
-      "size": 3848,
-      "sha": "c04e945c4fa85cb83f7f5c764fddd3bd09d00161"
-    },
-    {
-      "path": "App/Test-UpdateProbe.ps1",
-      "mode": "100644",
-      "size": 2231,
-      "sha": "c653707b698a8b885fcbe3a34214c539085071c9"
-    },
-    {
-      "path": "App/Test-WinRARStartup.ps1",
-      "mode": "100644",
-      "size": 6242,
-      "sha": "c46e1c4458e404eff7188369fdd254d2b2f1ab3b"
-    },
-    {
-      "path": "App/Test-WindowsTools.ps1",
-      "mode": "100644",
-      "size": 9368,
-      "sha": "3151aaeca6e9c084dd17e9860a1b47d04776bdad"
-    },
-    {
-      "path": "App/Test-Wpf.ps1",
-      "mode": "100644",
-      "size": 25819,
-      "sha": "77250890933d525682cab2194fc08196e0a8d562"
-    },
-    {
-      "path": "App/Test-WpfRuntime.ps1",
-      "mode": "100644",
-      "size": 2122,
-      "sha": "5941c059b1f937f1fde5890cb005db092f4794f5"
-    },
-    {
-      "path": "App/UltraViewer.Install.ps1",
-      "mode": "100644",
-      "size": 4932,
-      "sha": "b5f29b44f70429c9e94706b9f5db173a0c5e3d25"
-    },
-    {
-      "path": "App/Update-App.ps1",
-      "mode": "100644",
-      "size": 10921,
-      "sha": "c22823165ceaf6d0e0328506317b36258981f73e"
-    },
-    {
-      "path": "App/Update-UI.ps1",
-      "mode": "100644",
-      "size": 5119,
-      "sha": "98b53778e24dd02c19e7dd4d0549932b2f73518d"
-    },
-    {
-      "path": "App/Update.Core.ps1",
-      "mode": "100644",
-      "size": 35887,
-      "sha": "56d19d6cad303df4e8c827a0c3a25bd272cf162d"
-    },
-    {
-      "path": "App/Update.Engine.ps1",
-      "mode": "100644",
-      "size": 9441,
-      "sha": "090432ba4bb15743d044e0caa7b0a5328e831ca0"
-    },
-    {
-      "path": "App/Update.Notification.Core.ps1",
-      "mode": "100644",
-      "size": 2720,
-      "sha": "34cfd52c3aaf2b005c3e2834d19bbaeb7b044a6f"
-    },
-    {
-      "path": "App/Update.Notification.ps1",
-      "mode": "100644",
-      "size": 301,
-      "sha": "1cddebff083ff58286137b722eaf613c543037d4"
-    },
-    {
-      "path": "App/Update.Notifications.UI.ps1",
-      "mode": "100644",
-      "size": 3961,
-      "sha": "b7cfce51b0acda11156a691e9e7c7e7f2e9d4452"
-    },
-    {
-      "path": "App/UpdaterWindow.xml",
-      "mode": "100644",
-      "size": 5355,
-      "sha": "2aa9718b906aa806ee6836d49c8617ec434450f1"
-    },
-    {
-      "path": "App/WinRAR.Startup.ps1",
-      "mode": "100644",
-      "size": 3614,
-      "sha": "93921d801ab07cd4fbc773169b65dc90602f58cb"
-    },
-    {
-      "path": "App/Windows.Tools.ps1",
-      "mode": "100644",
-      "size": 12029,
-      "sha": "81a2e3958f73df9f7553bfcea41b4894189e87ac"
-    },
-    {
-      "path": "App/Wpf.Runtime.ps1",
-      "mode": "100644",
-      "size": 24510,
-      "sha": "6703ea442f0d8ca6dfa6c6c8fb7e73fe8c84cf5b"
-    },
-    {
-      "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
-      "mode": "100644",
-      "size": 192,
-      "sha": "230746634729473a5ff387ad0961c3afff37ae1c"
-    },
-    {
-      "path": "BienBan/Bien-Ban-Ban-Quyen.ps1",
-      "mode": "100644",
-      "size": 15128,
-      "sha": "868f20a711628ec1bf92d903539d078584a8c2ee"
-    },
-    {
-      "path": "BienBan/LicenseConfirmation.Core.ps1",
-      "mode": "100644",
-      "size": 10296,
-      "sha": "091f208c56a19fac99641d1c34ea4b4d9f8cc973"
-    },
-    {
-      "path": "BienBan/Test-LicenseConfirmation.ps1",
-      "mode": "100644",
-      "size": 6003,
-      "sha": "a7072f6b4aec6537d003dfd16dcef653a9e92e2c"
-    },
-    {
-      "path": "BienBan/Test-Report.ps1",
-      "mode": "100644",
-      "size": 6265,
-      "sha": "f8cf3a5af2540256fd53cdd1474500462fe2f4f3"
-    },
-    {
-      "path": "CHANGELOG.md",
-      "mode": "100644",
-      "size": 41590,
-      "sha": "297b5458d229aa6bff2cc26a1eea11f582d23d38"
-    },
-    {
-      "path": "FixClone/DriverFix.Core.ps1",
-      "mode": "100644",
-      "size": 20048,
-      "sha": "ac03ffc49c9a54e9c2eed13934e336a4008813e5"
-    },
-    {
-      "path": "FixClone/DriverFix.Engine.ps1",
-      "mode": "100644",
-      "size": 19473,
-      "sha": "b6f1398a2a090d621adb04529343f013c7acfe98"
-    },
-    {
-      "path": "FixClone/DriverFix.Profiles.ps1",
-      "mode": "100644",
-      "size": 4415,
-      "sha": "1ce24cb09c6618c5bd92ac173a5cb2ccd6567d10"
-    },
-    {
-      "path": "FixClone/DriverFix.Report.ps1",
-      "mode": "100644",
-      "size": 4966,
-      "sha": "b8728ce4edcf5f41ca72ba608d14c6e9610c748f"
-    },
-    {
-      "path": "FixClone/DriverFix.md",
-      "mode": "100644",
-      "size": 16157,
-      "sha": "0267bdab889a17db8c345daa0c9faf452619b760"
-    },
-    {
-      "path": "FixClone/DriverFix.ps1",
-      "mode": "100644",
-      "size": 16318,
-      "sha": "c3d95d6a552d542be8c6aaf460dd084f54dfca3f"
-    },
-    {
-      "path": "FixClone/DriverFix.xml",
-      "mode": "100644",
-      "size": 8341,
-      "sha": "0321780b127893222477883f6a8f190f565be619"
-    },
-    {
-      "path": "FixClone/Fix-BanPhim.Core.ps1",
-      "mode": "100644",
-      "size": 5482,
-      "sha": "180beca2fe5f68fed01193715ab045a2ce421690"
-    },
-    {
-      "path": "FixClone/Fix-BanPhim.bat",
-      "mode": "100644",
-      "size": 196,
-      "sha": "66cca63470455a69157aa587f68395c8e2f45796"
-    },
-    {
-      "path": "FixClone/Fix-BanPhim.ps1",
-      "mode": "100644",
-      "size": 3026,
-      "sha": "47f1824e254d7a8d2132b1060c59833617d239c0"
-    },
-    {
-      "path": "FixClone/Fix-BanPhim.xml",
-      "mode": "100644",
-      "size": 902,
-      "sha": "ad50b1d3c44a1a02a5f90a4ebcd40be634f4c807"
-    },
-    {
-      "path": "FixClone/Fix-CloneDuplicate.bat",
-      "mode": "100644",
-      "size": 311,
-      "sha": "db9391d6c7267e71675dd5ba7e2b979b7dd9220b"
-    },
-    {
-      "path": "FixClone/Fix-CloneDuplicate.ps1",
-      "mode": "100644",
-      "size": 17485,
-      "sha": "7db16afda901992acd689f0a07ff8d811b47bf9a"
-    },
-    {
-      "path": "FixClone/Fix-DinhDang.bat",
-      "mode": "100644",
-      "size": 262,
-      "sha": "c0d9f6751ec16c01d7fc1f7e56ebd2906ea67d25"
-    },
-    {
-      "path": "FixClone/Fix-DinhDang.ps1",
-      "mode": "100644",
-      "size": 3781,
-      "sha": "1ea382bdab254470a51ec3b2de6a2b49b624e588"
-    },
-    {
-      "path": "FixClone/Fix-SysprepErrors.bat",
-      "mode": "100644",
-      "size": 309,
-      "sha": "4c6505309569cf6ed174b882ff8f0afc6ccfb148"
-    },
-    {
-      "path": "FixClone/Fix-SysprepErrors.ps1",
-      "mode": "100644",
-      "size": 8140,
-      "sha": "149ac41307dcf84f10a8dcda08e8e76af8877790"
-    },
-    {
-      "path": "FixClone/Load-Ui.ps1",
-      "mode": "100644",
-      "size": 345,
-      "sha": "125367653b9fbe8581e6109eba03db18686bed6f"
-    },
-    {
-      "path": "FixClone/Master-Preflight.ps1",
-      "mode": "100644",
-      "size": 6512,
-      "sha": "a24570d9cf4562b76339d2353f13aa85b5a9cb84"
-    },
-    {
-      "path": "FixClone/Master-Preflight.xml",
-      "mode": "100644",
-      "size": 4392,
-      "sha": "a77d5cf6505e743eff0b83e1be66167c75b9c765"
-    },
-    {
-      "path": "FixClone/Master.Deployment.Core.ps1",
-      "mode": "100644",
-      "size": 5277,
-      "sha": "d009a16aa58630558bbb5d7396cf2436e07c19f9"
-    },
-    {
-      "path": "FixClone/Master.Preflight.Core.ps1",
-      "mode": "100644",
-      "size": 5588,
-      "sha": "fe75ab3bacf6847c6623a76db9f34df55c76d7cb"
-    },
-    {
-      "path": "FixClone/New-Unattend.ps1",
-      "mode": "100644",
-      "size": 2001,
-      "sha": "507363f6bcf34373150769a08cb8cf006033c750"
-    },
-    {
-      "path": "FixClone/Prepare-Master.ps1",
-      "mode": "100644",
-      "size": 6809,
-      "sha": "3d8498a02fd000cf81bcc7c9775d69828098842b"
-    },
-    {
-      "path": "FixClone/README.md",
-      "mode": "100644",
-      "size": 13033,
-      "sha": "5dd5e32cbf2c5912117a5a11727e2722de7909ad"
-    },
-    {
-      "path": "FixClone/Run-Sysprep.bat",
-      "mode": "100644",
-      "size": 115,
-      "sha": "ea4d763ea75cd2964e6ba4100d767e6c63ea4e94"
-    },
-    {
-      "path": "FixClone/Run-Sysprep.ps1",
-      "mode": "100644",
-      "size": 3614,
-      "sha": "a1f9fb75a4d5a73cf1ce323205d0ffd7e61ec016"
-    },
-    {
-      "path": "FixClone/Test-BanPhim.ps1",
-      "mode": "100644",
-      "size": 4497,
-      "sha": "ad99f71df92220afb9b1bb0c8959e53436f8d5f2"
-    },
-    {
-      "path": "FixClone/Test-DinhDang.ps1",
-      "mode": "100644",
-      "size": 2251,
-      "sha": "78349f70cbec28c678ac0228daefe786af0e8416"
-    },
-    {
-      "path": "FixClone/Test-DriverFix.ps1",
-      "mode": "100644",
-      "size": 26181,
-      "sha": "4be7a75c8900148675a65074735d793f2d03f4a6"
-    },
-    {
-      "path": "FixClone/Test-DriverFixInventory.ps1",
-      "mode": "100644",
-      "size": 6282,
-      "sha": "d5617c5016a26d2ad290323a04ddc7bd093add46"
-    },
-    {
-      "path": "FixClone/Test-DriverFixWpf.ps1",
-      "mode": "100644",
-      "size": 6071,
-      "sha": "0c73fa01ea949c7c8e7c83a72a13707b92eb1cbc"
-    },
-    {
-      "path": "FixClone/Test-MasterDeployment.ps1",
-      "mode": "100644",
-      "size": 5596,
-      "sha": "dab109dc0b41c2637ea4dd1575935a0dd6545547"
-    },
-    {
-      "path": "FixClone/Test-MasterPreflight.ps1",
-      "mode": "100644",
-      "size": 4850,
-      "sha": "4fdf1183607b5754c2e68a3be04309f640e16cd2"
-    },
-    {
-      "path": "FixClone/Test-UltraViewerDiagnostics.ps1",
-      "mode": "100644",
-      "size": 2412,
-      "sha": "cab0de427f96728b3c682b7b723228cdea41717e"
-    },
-    {
-      "path": "FixClone/Test-UltraViewerLifecycle.ps1",
-      "mode": "100644",
-      "size": 11440,
-      "sha": "ad699c029efe308cbcd23c8bf3058953140025a7"
-    },
-    {
-      "path": "FixClone/Test-Unattend.ps1",
-      "mode": "100644",
-      "size": 3546,
-      "sha": "60ce144c28a394bbb24f3f13265d353ba614610a"
-    },
-    {
-      "path": "FixClone/Test-WindowsLicense.ps1",
-      "mode": "100644",
-      "size": 5855,
-      "sha": "c491cf99cd2f7c20fb8db33f090f3e58890c05e6"
-    },
-    {
-      "path": "FixClone/Test-WordSettings.ps1",
-      "mode": "100644",
-      "size": 3134,
-      "sha": "596c2489a9f8623df2f8a5b889354da7406781c7"
-    },
-    {
-      "path": "FixClone/UltraViewer-Reset.ps1",
-      "mode": "100644",
-      "size": 4966,
-      "sha": "79caeed0a5c0cde2de63b5003dc20043c07db533"
-    },
-    {
-      "path": "FixClone/UltraViewer-Reset.xml",
-      "mode": "100644",
-      "size": 2570,
-      "sha": "fe249b702225e9f6164ea27b2819de087d5b8735"
-    },
-    {
-      "path": "FixClone/UltraViewer.Core.ps1",
-      "mode": "100644",
-      "size": 19096,
-      "sha": "b0b20c3ced0a88ed90796f28d755ab9128218c6b"
-    },
-    {
-      "path": "FixClone/UltraViewer.Diagnostics.ps1",
-      "mode": "100644",
-      "size": 5969,
-      "sha": "68e16d327243a5a4ea3911cc2e5776363a5b1ca1"
-    },
-    {
-      "path": "FixClone/Windows-SetupKey.ps1",
-      "mode": "100644",
-      "size": 5059,
-      "sha": "77226a7f0f03eba999b37085cd8aedbdbd05bdd2"
-    },
-    {
-      "path": "FixClone/Windows-SetupKey.xml",
-      "mode": "100644",
-      "size": 3614,
-      "sha": "0d98bc8ba96f40dc5c05fc64b9b577a5c50ca47d"
-    },
-    {
-      "path": "FixClone/Windows.License.Core.ps1",
-      "mode": "100644",
-      "size": 9513,
-      "sha": "dcf992f761ebf5ee7942ebf8ee4b655d65e4684e"
-    },
-    {
-      "path": "FixClone/Word.Settings.Core.ps1",
-      "mode": "100644",
-      "size": 3077,
-      "sha": "2c625fc939f351d298895eb8ea592ca005aceb35"
-    },
-    {
-      "path": "FixClone/unattend.xml",
-      "mode": "100644",
-      "size": 5098,
-      "sha": "aface74f9c448b2853cdf46c49afc7962cbe3f3f"
-    },
-    {
-      "path": "KichHoat/Activation.Core.ps1",
-      "mode": "100644",
-      "size": 6506,
-      "sha": "39b3f4ff415a74eb68330bcf07e7c8aa1ae4bb41"
-    },
-    {
-      "path": "KichHoat/CID-Phone.html",
-      "mode": "100644",
-      "size": 3308,
-      "sha": "5fa7e63895751861058333250623ae97824c2401"
-    },
-    {
-      "path": "KichHoat/Cid.Phone.Core.ps1",
-      "mode": "100644",
-      "size": 787,
-      "sha": "a7a9a455565fa6e8193e0a2ca4a6431fe0a29e80"
-    },
-    {
-      "path": "KichHoat/Kich-Hoat-Office.bat",
-      "mode": "100644",
-      "size": 322,
-      "sha": "7236a5209da9e2d1a258ce16e4681f1d0ab0c199"
-    },
-    {
-      "path": "KichHoat/Kich-Hoat-TEST.bat",
-      "mode": "100644",
-      "size": 343,
-      "sha": "f161d65f46ab03b34f7b965f1442b3531b09d0af"
-    },
-    {
-      "path": "KichHoat/Kich-Hoat-Windows.bat",
-      "mode": "100644",
-      "size": 324,
-      "sha": "171edd407c00424ecf4213273526dc2e25199e57"
-    },
-    {
-      "path": "KichHoat/Kich-Hoat.ps1",
-      "mode": "100644",
-      "size": 19951,
-      "sha": "9dd03f6687bef356bd8d2c2d81196c57528a9491"
-    },
-    {
-      "path": "KichHoat/QR-Template.html",
-      "mode": "100644",
-      "size": 60109,
-      "sha": "56c9b3491198320f09dd8d21ef43d090de063d45"
-    },
-    {
-      "path": "KichHoat/QrWindow.Core.ps1",
-      "mode": "100644",
-      "size": 4183,
-      "sha": "4ba04309b639ff32081bf697b1637dfe760d9142"
-    },
-    {
-      "path": "KichHoat/QrWindow.cs",
-      "mode": "100644",
-      "size": 3553,
-      "sha": "f50af1196b5e88c46d0081ba33eab25b03b7985e"
-    },
-    {
-      "path": "KichHoat/README.md",
-      "mode": "100644",
-      "size": 7261,
-      "sha": "040f2f4e8f8ca0979720f2701bfe60d8cd06bc48"
-    },
-    {
-      "path": "KichHoat/Test-Activation.ps1",
-      "mode": "100644",
-      "size": 8487,
-      "sha": "0998cae2808c0c434bef9bc7a1bb1896085c7882"
-    },
-    {
-      "path": "KichHoat/Test-CidPhone.ps1",
-      "mode": "100644",
-      "size": 3978,
-      "sha": "f34802a0a29bf3935bd8669d9df81d70353a799c"
-    },
-    {
-      "path": "KichHoat/Test-QrLifecycle.ps1",
-      "mode": "100644",
-      "size": 4364,
-      "sha": "e2498a1cebf027119ee41bfec964db0f2250de19"
-    },
-    {
-      "path": "KichHoat/Test-QrWindow.ps1",
-      "mode": "100644",
-      "size": 4430,
-      "sha": "8d14862cbaf50a5ba0cdacdbf833e75a25a45cb3"
-    },
-    {
-      "path": "Office/Office-Cleanup.Core.ps1",
-      "mode": "100644",
-      "size": 12220,
-      "sha": "7f81b7574489b57c9eb5b93800f82ac4def9c8c8"
-    },
-    {
-      "path": "Office/Office-Cleanup.Engine.ps1",
-      "mode": "100644",
-      "size": 2127,
-      "sha": "c226ed7fae9f887cd18cee8a78024f04326a6541"
-    },
-    {
-      "path": "Office/Office-Cleanup.ps1",
-      "mode": "100644",
-      "size": 6327,
-      "sha": "b5debc4cfc8bf83c31af0eded0f330a3fea024ff"
-    },
-    {
-      "path": "Office/Office-Cleanup.xml",
-      "mode": "100644",
-      "size": 4061,
-      "sha": "5d4cec992b51855f9f5c78eadc1c5e358df4063b"
-    },
-    {
-      "path": "Office/Office-ODT.ps1",
-      "mode": "100644",
-      "size": 11727,
-      "sha": "faac9f4d011a4417b02bc4070bb1b72b146b6c14"
-    },
-    {
-      "path": "Office/Test-OfficeCleanup.ps1",
-      "mode": "100644",
-      "size": 11840,
-      "sha": "c8e6f5134853f54b8083f489eb5cc131f7c2f7d8"
-    },
-    {
-      "path": "Office/Test-OfficeTemporary.ps1",
-      "mode": "100644",
-      "size": 3160,
-      "sha": "721bf4398a0cb9c077b2c9830daa8b81a8ff8327"
-    },
-    {
-      "path": "PROGRESS.md",
-      "mode": "100644",
-      "size": 32296,
-      "sha": "920fb402bb4108ec7731c62a21c527416b409bde"
-    },
-    {
-      "path": "README.md",
-      "mode": "100644",
-      "size": 26972,
-      "sha": "a69639d9e89a51c7cbca54cdef0e342a9a683ad6"
-    },
-    {
-      "path": "RELEASING.md",
-      "mode": "100644",
-      "size": 6489,
-      "sha": "679e2d173a4afc7e0701ce57094593543b30159c"
-    },
-    {
-      "path": "version.txt",
-      "mode": "100644",
-      "size": 9,
-      "sha": "7c015341e74c7044f364fd3e87c42d00eb51ad10"
-    }
-  ]
+    "schema":  1,
+    "product":  "TechMaster.Deploy",
+    "repository":  "dangvien-dev/TechMaster-Deploy",
+    "branch":  "main",
+    "version":  "2.2.28.0",
+    "files":  [
+                  {
+                      "path":  "App/AV.Diagnostics.ps1",
+                      "mode":  "100644",
+                      "size":  27158,
+                      "sha":  "705c25617dcccbd62ebed556f6b55899973c8c44"
+                  },
+                  {
+                      "path":  "App/AV.Repair.ps1",
+                      "mode":  "100644",
+                      "size":  17745,
+                      "sha":  "d823b838e153ca5b80ef194e87c044d03b28a6e5"
+                  },
+                  {
+                      "path":  "App/AV.Repair.UI.ps1",
+                      "mode":  "100644",
+                      "size":  8233,
+                      "sha":  "a039e8dc4fab07b804590c0776428e44fe1effc0"
+                  },
+                  {
+                      "path":  "App/BasicApps.ps1",
+                      "mode":  "100644",
+                      "size":  9195,
+                      "sha":  "ff547777f4579960c47126ab116ecce475248f90"
+                  },
+                  {
+                      "path":  "App/Build-Launcher.ps1",
+                      "mode":  "100644",
+                      "size":  859,
+                      "sha":  "ccb3dce9be75169290dffce32f20b328e0393a70"
+                  },
+                  {
+                      "path":  "App/Build-Release.ps1",
+                      "mode":  "100644",
+                      "size":  3530,
+                      "sha":  "0d6e147c7109f6492fd1c0c9e6d1f55d3cd33334"
+                  },
+                  {
+                      "path":  "App/Build-UpdateIndex.ps1",
+                      "mode":  "100644",
+                      "size":  2323,
+                      "sha":  "5230256e6764b1a66a8d013aa2fa49bf024b0f11"
+                  },
+                  {
+                      "path":  "App/Build-UpgradeHelper.ps1",
+                      "mode":  "100644",
+                      "size":  3464,
+                      "sha":  "9a0705c30e44f88cb3d61e32cbf58fad697e9ca2"
+                  },
+                  {
+                      "path":  "App/Chay-Tu-Mang.bat",
+                      "mode":  "100644",
+                      "size":  299,
+                      "sha":  "f1c279b44524edf6a859066ae067075e17253ec9"
+                  },
+                  {
+                      "path":  "App/ConfirmWindow.xml",
+                      "mode":  "100644",
+                      "size":  2640,
+                      "sha":  "600e1dd5dbca9e40b92ee06382e89af5f19381f6"
+                  },
+                  {
+                      "path":  "App/Console.ps1",
+                      "mode":  "100644",
+                      "size":  1550,
+                      "sha":  "62e6589b66a3da758bfc395f8b5db2a7b22a4e82"
+                  },
+                  {
+                      "path":  "App/ConsoleFont.cs",
+                      "mode":  "100644",
+                      "size":  2311,
+                      "sha":  "2d0a5755d8adea605cd6b99c885e5b8a3c04684d"
+                  },
+                  {
+                      "path":  "App/CustomApps.Core.ps1",
+                      "mode":  "100644",
+                      "size":  4324,
+                      "sha":  "42aa395e02017e196ad1ec018888f4619b744780"
+                  },
+                  {
+                      "path":  "App/CustomApps.UI.ps1",
+                      "mode":  "100644",
+                      "size":  4834,
+                      "sha":  "fd8e9f3b96c841b8ab4c7d2032d9898b90f94060"
+                  },
+                  {
+                      "path":  "App/CustomAppsWindow.xml",
+                      "mode":  "100644",
+                      "size":  4573,
+                      "sha":  "bf8cc45b7b9ff42fca757c61766911e58bb360be"
+                  },
+                  {
+                      "path":  "App/Defaults.Core.ps1",
+                      "mode":  "100644",
+                      "size":  40772,
+                      "sha":  "416d9bbe23ca9bd2614e3e2f4d63f729acd211ff"
+                  },
+                  {
+                      "path":  "App/Defaults.Native.cs",
+                      "mode":  "100644",
+                      "size":  11087,
+                      "sha":  "632904a5c1700924d9b4361bc62979381adf0139"
+                  },
+                  {
+                      "path":  "App/Defaults.UI.ps1",
+                      "mode":  "100644",
+                      "size":  16685,
+                      "sha":  "32ecd7c50dc8e5f237f5c213bdfb55a84c47aa15"
+                  },
+                  {
+                      "path":  "App/DefaultsWindow.xml",
+                      "mode":  "100644",
+                      "size":  7779,
+                      "sha":  "106d45b9e2772d5dd59864f945d55f8f0ef18984"
+                  },
+                  {
+                      "path":  "App/Deploy.Actions.ps1",
+                      "mode":  "100644",
+                      "size":  16127,
+                      "sha":  "42603b07bb9eec62934f379757ae2874b69daee8"
+                  },
+                  {
+                      "path":  "App/DesktopIdentity.cs",
+                      "mode":  "100644",
+                      "size":  1524,
+                      "sha":  "bb34f93c55a2f04be740191d3f4bc657db4e4642"
+                  },
+                  {
+                      "path":  "App/DiagnosticsWindow.xml",
+                      "mode":  "100644",
+                      "size":  1511,
+                      "sha":  "746d018c0d1bcdec6def6fb6feb66bcd9b81ee5b"
+                  },
+                  {
+                      "path":  "App/Info.UI.ps1",
+                      "mode":  "100644",
+                      "size":  4525,
+                      "sha":  "ba9094d3f3120d6614de49a3656470cc2ebb6882"
+                  },
+                  {
+                      "path":  "App/InfoWindow.xml",
+                      "mode":  "100644",
+                      "size":  4496,
+                      "sha":  "7eb463ae3bd84ad9fbe043e252727ded53ebda72"
+                  },
+                  {
+                      "path":  "App/LanAccounts.Core.ps1",
+                      "mode":  "100644",
+                      "size":  12283,
+                      "sha":  "ab8fd837c5fcd1ca0e755929ecd6f8dd56b73acf"
+                  },
+                  {
+                      "path":  "App/LanAccounts.Native.cs",
+                      "mode":  "100644",
+                      "size":  7460,
+                      "sha":  "c615c628cf7100848f2ec6a88693fc30adeda56d"
+                  },
+                  {
+                      "path":  "App/LanAccounts.UI.ps1",
+                      "mode":  "100644",
+                      "size":  7743,
+                      "sha":  "2c8f5c02801342c71dfd79bdd8fc7360e4b32eb1"
+                  },
+                  {
+                      "path":  "App/LanAccountsWindow.xml",
+                      "mode":  "100644",
+                      "size":  7018,
+                      "sha":  "9a87df72fdfc28296f01b9a247e0d852f324b00a"
+                  },
+                  {
+                      "path":  "App/LanConnect.Core.ps1",
+                      "mode":  "100644",
+                      "size":  10739,
+                      "sha":  "f7a8dc03823b877c378b76692769908638183449"
+                  },
+                  {
+                      "path":  "App/LanConnect.Native.cs",
+                      "mode":  "100644",
+                      "size":  7191,
+                      "sha":  "e99874be1280b8477873a0297ce1bb90d438c685"
+                  },
+                  {
+                      "path":  "App/LanConnect.UI.ps1",
+                      "mode":  "100644",
+                      "size":  5292,
+                      "sha":  "b38fbe09d2bd4c3e524bacf47bebc97a5e536601"
+                  },
+                  {
+                      "path":  "App/LanConnectWindow.xml",
+                      "mode":  "100644",
+                      "size":  5034,
+                      "sha":  "ad82b014ff8e703f7169b27e4b1d934b16d23f5e"
+                  },
+                  {
+                      "path":  "App/LanShare.Core.ps1",
+                      "mode":  "100644",
+                      "size":  18181,
+                      "sha":  "b31e40aa18d9d8be01f75d7e550d29f56b428489"
+                  },
+                  {
+                      "path":  "App/LanShare.UI.ps1",
+                      "mode":  "100644",
+                      "size":  10304,
+                      "sha":  "f1e128dd34ccf3e09ae0ec587b02a0cebbdd740d"
+                  },
+                  {
+                      "path":  "App/LanShareWindow.xml",
+                      "mode":  "100644",
+                      "size":  7627,
+                      "sha":  "c7e99a48b53511804cff5a70400d8ed80b1001b1"
+                  },
+                  {
+                      "path":  "App/Launcher.cs",
+                      "mode":  "100644",
+                      "size":  1338,
+                      "sha":  "0e826645c33d58823b80de6e1b8ba119a47acbf6"
+                  },
+                  {
+                      "path":  "App/Launcher.manifest",
+                      "mode":  "100644",
+                      "size":  431,
+                      "sha":  "eb72a12f188e71c5bfa7e08de2657fada23cfb8b"
+                  },
+                  {
+                      "path":  "App/LicenseConfirmation.UI.ps1",
+                      "mode":  "100644",
+                      "size":  3720,
+                      "sha":  "bc29244298bd1447bfa0f18c2b574e84c005e5ac"
+                  },
+                  {
+                      "path":  "App/LicenseConfirmationWindow.xml",
+                      "mode":  "100644",
+                      "size":  8471,
+                      "sha":  "4855c18599025c9f21f36fca23cdfd121c2c784f"
+                  },
+                  {
+                      "path":  "App/Logo.Preview.ps1",
+                      "mode":  "100644",
+                      "size":  646,
+                      "sha":  "a46a4744830f9c39fa52d4a731c547ae36acdceb"
+                  },
+                  {
+                      "path":  "App/LogoPreview.cs",
+                      "mode":  "100644",
+                      "size":  15000,
+                      "sha":  "28eff875739d326b3590c1789a2756d052d3ae99"
+                  },
+                  {
+                      "path":  "App/MainWindow.xml",
+                      "mode":  "100644",
+                      "size":  47752,
+                      "sha":  "8cba91c2f530ff6b109371ca1e87209266fc82ec"
+                  },
+                  {
+                      "path":  "App/Network.Launch.ps1",
+                      "mode":  "100644",
+                      "size":  830,
+                      "sha":  "514025ef0ef035d45cab1c7188c09fd002c753ab"
+                  },
+                  {
+                      "path":  "App/Network.Sync.ps1",
+                      "mode":  "100644",
+                      "size":  18982,
+                      "sha":  "6a892272b2adc016d2921d05dddd81b059218a60"
+                  },
+                  {
+                      "path":  "App/NetworkRun.Core.ps1",
+                      "mode":  "100644",
+                      "size":  11889,
+                      "sha":  "87d457d6ef24a540062109d8806391d6cdd049fe"
+                  },
+                  {
+                      "path":  "App/NetworkRun.UI.ps1",
+                      "mode":  "100644",
+                      "size":  9392,
+                      "sha":  "d024a4a959471d7f1dda62040e61cafe83cdd186"
+                  },
+                  {
+                      "path":  "App/NetworkRunWindow.xml",
+                      "mode":  "100644",
+                      "size":  5486,
+                      "sha":  "a59f3b83c4010e542366be43eb0ec4eb402db10a"
+                  },
+                  {
+                      "path":  "App/Overview.Core.ps1",
+                      "mode":  "100644",
+                      "size":  6838,
+                      "sha":  "098ceffcad855039a0dcf42d88b8b541cfd7dd89"
+                  },
+                  {
+                      "path":  "App/Overview.UI.ps1",
+                      "mode":  "100644",
+                      "size":  1097,
+                      "sha":  "129eeceb438474a5a70d11fe75baf263057efa4c"
+                  },
+                  {
+                      "path":  "App/Pdf.Printer.ps1",
+                      "mode":  "100644",
+                      "size":  2133,
+                      "sha":  "5665d3db6980c98f9ef283ce242daeb2469510a9"
+                  },
+                  {
+                      "path":  "App/PrinterConnect.Core.ps1",
+                      "mode":  "100644",
+                      "size":  46638,
+                      "sha":  "39ae9ea03d5123f6c50ac054cb40ea345985fe37"
+                  },
+                  {
+                      "path":  "App/PrinterConnect.UI.ps1",
+                      "mode":  "100644",
+                      "size":  11570,
+                      "sha":  "e6227417cbb3333b40c6066da614f3df2826c54d"
+                  },
+                  {
+                      "path":  "App/PrinterConnectWindow.xml",
+                      "mode":  "100644",
+                      "size":  9060,
+                      "sha":  "3f8e0440595e8458954b43d7acc86eb7a2171f3b"
+                  },
+                  {
+                      "path":  "App/QuickGuide.md",
+                      "mode":  "100644",
+                      "size":  27600,
+                      "sha":  "6deeb34ffed10fc65f358bcfcbdf68e5dcccc7e2"
+                  },
+                  {
+                      "path":  "App/Repair-Update.ps1",
+                      "mode":  "100644",
+                      "size":  3429,
+                      "sha":  "8f1b72a59bdba178ada4e69bb1743fc061f89ee8"
+                  },
+                  {
+                      "path":  "App/RepairWindow.xml",
+                      "mode":  "100644",
+                      "size":  2956,
+                      "sha":  "994202c0471c9bec0d67a4be9c93d24f8b4b6a4c"
+                  },
+                  {
+                      "path":  "App/Report.Identity.ps1",
+                      "mode":  "100644",
+                      "size":  1129,
+                      "sha":  "cddabedfddece28bdf47c724b93a567a782bf730"
+                  },
+                  {
+                      "path":  "App/Startup.UI.ps1",
+                      "mode":  "100644",
+                      "size":  1850,
+                      "sha":  "0fee2f2cf1dbfbd0f539c08abbc6e4e80cdb6064"
+                  },
+                  {
+                      "path":  "App/Tao-Shortcut.bat",
+                      "mode":  "100644",
+                      "size":  184,
+                      "sha":  "59c46dfece200a12b1c09ef9a02ab4130c1cc97b"
+                  },
+                  {
+                      "path":  "App/Tao-Shortcut.ps1",
+                      "mode":  "100644",
+                      "size":  1912,
+                      "sha":  "666a147daef95772b432c1979891224183bb9ce2"
+                  },
+                  {
+                      "path":  "App/TechMaster.ico",
+                      "mode":  "100644",
+                      "size":  146169,
+                      "sha":  "d6efb567e4b17a0219db5fcfaeaf22f700a471b6"
+                  },
+                  {
+                      "path":  "App/TechMaster-Deploy.ps1",
+                      "mode":  "100644",
+                      "size":  31348,
+                      "sha":  "f77567b23703be4e977a65b82673284b6ffe0759"
+                  },
+                  {
+                      "path":  "App/TechMaster-Icon.svg",
+                      "mode":  "100644",
+                      "size":  216290,
+                      "sha":  "b18b78258b27e87a9ace505af76766a219433c86"
+                  },
+                  {
+                      "path":  "App/Test-AvDiagnostics.ps1",
+                      "mode":  "100644",
+                      "size":  17524,
+                      "sha":  "2c2ff78bb0cab604cef42031c9cb8cbf4e063a2f"
+                  },
+                  {
+                      "path":  "App/Test-AvRepair.ps1",
+                      "mode":  "100644",
+                      "size":  13962,
+                      "sha":  "11509f21dc8d9eb47ed2c0ba6a81152af5a88a2b"
+                  },
+                  {
+                      "path":  "App/Test-CustomApps.ps1",
+                      "mode":  "100644",
+                      "size":  3416,
+                      "sha":  "2dd33f42c0c110f1246036806847dfaf2cbc3525"
+                  },
+                  {
+                      "path":  "App/Test-Defaults.ps1",
+                      "mode":  "100644",
+                      "size":  28121,
+                      "sha":  "12ce394818f4506a0dd9f9543c556cbc7d71fab3"
+                  },
+                  {
+                      "path":  "App/Test-DefaultsWpf.ps1",
+                      "mode":  "100644",
+                      "size":  13804,
+                      "sha":  "1aeabe0450cdcf4dd891463ed1323181958e1d0a"
+                  },
+                  {
+                      "path":  "App/Test-DeployActions.ps1",
+                      "mode":  "100644",
+                      "size":  2962,
+                      "sha":  "057076a35db6d6c6d69f16d3269d4054f409bbeb"
+                  },
+                  {
+                      "path":  "App/Test-DesignRules.ps1",
+                      "mode":  "100644",
+                      "size":  6273,
+                      "sha":  "38daa7638ab12fa59df66e0bc121f669e566b5a1"
+                  },
+                  {
+                      "path":  "App/Test-Info.ps1",
+                      "mode":  "100644",
+                      "size":  4507,
+                      "sha":  "e2ec23b0a75fd872bc7d4e39e0d5b0076ae1b424"
+                  },
+                  {
+                      "path":  "App/Test-InfoEntryPoints.ps1",
+                      "mode":  "100644",
+                      "size":  2625,
+                      "sha":  "262e8bfb9953adbb77f1fa6f27bb9bfcd55b2744"
+                  },
+                  {
+                      "path":  "App/Test-LanAccounts.ps1",
+                      "mode":  "100644",
+                      "size":  10421,
+                      "sha":  "5ede6c54f84167185a6ee3af84d3d09c9c7087c7"
+                  },
+                  {
+                      "path":  "App/Test-LanAccountsWpf.ps1",
+                      "mode":  "100644",
+                      "size":  6431,
+                      "sha":  "a19a48950afbe081213db315277f0ee39d394250"
+                  },
+                  {
+                      "path":  "App/Test-LanConnect.ps1",
+                      "mode":  "100644",
+                      "size":  7953,
+                      "sha":  "7bcb7f574a7704c2ac430fd75d4ac8f3ac06f4e8"
+                  },
+                  {
+                      "path":  "App/Test-LanShare.ps1",
+                      "mode":  "100644",
+                      "size":  14823,
+                      "sha":  "ac7634e76ff5f488d24c13d1495de80487987287"
+                  },
+                  {
+                      "path":  "App/Test-LanShareWpf.ps1",
+                      "mode":  "100644",
+                      "size":  15208,
+                      "sha":  "dc3ffb81ddfc8bb8a3c7b164010650079b5ccd9d"
+                  },
+                  {
+                      "path":  "App/Test-LogoPreview.ps1",
+                      "mode":  "100644",
+                      "size":  5095,
+                      "sha":  "bcc4f4bd13db1f4ea1c8852f67843da220636632"
+                  },
+                  {
+                      "path":  "App/Test-NetworkRun.ps1",
+                      "mode":  "100644",
+                      "size":  25446,
+                      "sha":  "035f711008202a64bfc1330787581f2a7fce530b"
+                  },
+                  {
+                      "path":  "App/Test-Overview.ps1",
+                      "mode":  "100644",
+                      "size":  3525,
+                      "sha":  "776d45cefd88c671329f54cb46d08eef8eaac260"
+                  },
+                  {
+                      "path":  "App/Test-PdfPrinter.ps1",
+                      "mode":  "100644",
+                      "size":  2723,
+                      "sha":  "b2a41769fd32bd9ddb829af3451b39d9f91cdd18"
+                  },
+                  {
+                      "path":  "App/Test-PrinterConnect.ps1",
+                      "mode":  "100644",
+                      "size":  30317,
+                      "sha":  "859ed14f32ed1332481d190078ee7cc9af44b84c"
+                  },
+                  {
+                      "path":  "App/Test-PrinterConnectWpf.ps1",
+                      "mode":  "100644",
+                      "size":  13844,
+                      "sha":  "9da3879035e247bc87769d5c3c2f1686a31c6523"
+                  },
+                  {
+                      "path":  "App/Test-PublicUpdate.ps1",
+                      "mode":  "100644",
+                      "size":  7074,
+                      "sha":  "8d2ba2e9041eb36bcd09536ba9795b0b91d7edec"
+                  },
+                  {
+                      "path":  "App/Test-RepoUpdate.ps1",
+                      "mode":  "100644",
+                      "size":  10352,
+                      "sha":  "d57003d609d9abbee6bb46a02c61d77c046189f3"
+                  },
+                  {
+                      "path":  "App/Test-StartupWait.ps1",
+                      "mode":  "100644",
+                      "size":  2554,
+                      "sha":  "31324c4a48a763318e2ae2d88b7ab8bec5224d40"
+                  },
+                  {
+                      "path":  "App/Test-UltraInstall.ps1",
+                      "mode":  "100644",
+                      "size":  5370,
+                      "sha":  "738a22d188c10790ab26df514c65aa0950a58d9f"
+                  },
+                  {
+                      "path":  "App/Test-Update.ps1",
+                      "mode":  "100644",
+                      "size":  14740,
+                      "sha":  "1a9b510f1672104ad61f73907dc167e7c29fab35"
+                  },
+                  {
+                      "path":  "App/Test-UpdateEngine.ps1",
+                      "mode":  "100644",
+                      "size":  7501,
+                      "sha":  "a1af43d24a6e471cac84bbb09b0088e88ce63fb8"
+                  },
+                  {
+                      "path":  "App/Test-UpdateHandshake.ps1",
+                      "mode":  "100644",
+                      "size":  7010,
+                      "sha":  "1d5f45d8056b912cc31c87cad2d1a6f2504aa12a"
+                  },
+                  {
+                      "path":  "App/Test-UpdateNotification.ps1",
+                      "mode":  "100644",
+                      "size":  3848,
+                      "sha":  "c04e945c4fa85cb83f7f5c764fddd3bd09d00161"
+                  },
+                  {
+                      "path":  "App/Test-UpdateProbe.ps1",
+                      "mode":  "100644",
+                      "size":  2231,
+                      "sha":  "c653707b698a8b885fcbe3a34214c539085071c9"
+                  },
+                  {
+                      "path":  "App/Test-WindowsTools.ps1",
+                      "mode":  "100644",
+                      "size":  9368,
+                      "sha":  "3151aaeca6e9c084dd17e9860a1b47d04776bdad"
+                  },
+                  {
+                      "path":  "App/Test-WinRARStartup.ps1",
+                      "mode":  "100644",
+                      "size":  6242,
+                      "sha":  "c46e1c4458e404eff7188369fdd254d2b2f1ab3b"
+                  },
+                  {
+                      "path":  "App/Test-Wpf.ps1",
+                      "mode":  "100644",
+                      "size":  25819,
+                      "sha":  "77250890933d525682cab2194fc08196e0a8d562"
+                  },
+                  {
+                      "path":  "App/Test-WpfRuntime.ps1",
+                      "mode":  "100644",
+                      "size":  2122,
+                      "sha":  "5941c059b1f937f1fde5890cb005db092f4794f5"
+                  },
+                  {
+                      "path":  "App/UltraViewer.Install.ps1",
+                      "mode":  "100644",
+                      "size":  4932,
+                      "sha":  "b5f29b44f70429c9e94706b9f5db173a0c5e3d25"
+                  },
+                  {
+                      "path":  "App/Update.Core.ps1",
+                      "mode":  "100644",
+                      "size":  35887,
+                      "sha":  "56d19d6cad303df4e8c827a0c3a25bd272cf162d"
+                  },
+                  {
+                      "path":  "App/Update.Engine.ps1",
+                      "mode":  "100644",
+                      "size":  9441,
+                      "sha":  "090432ba4bb15743d044e0caa7b0a5328e831ca0"
+                  },
+                  {
+                      "path":  "App/Update.Notification.Core.ps1",
+                      "mode":  "100644",
+                      "size":  2720,
+                      "sha":  "34cfd52c3aaf2b005c3e2834d19bbaeb7b044a6f"
+                  },
+                  {
+                      "path":  "App/Update.Notification.ps1",
+                      "mode":  "100644",
+                      "size":  301,
+                      "sha":  "1cddebff083ff58286137b722eaf613c543037d4"
+                  },
+                  {
+                      "path":  "App/Update.Notifications.UI.ps1",
+                      "mode":  "100644",
+                      "size":  3961,
+                      "sha":  "b7cfce51b0acda11156a691e9e7c7e7f2e9d4452"
+                  },
+                  {
+                      "path":  "App/Update-App.ps1",
+                      "mode":  "100644",
+                      "size":  10921,
+                      "sha":  "c22823165ceaf6d0e0328506317b36258981f73e"
+                  },
+                  {
+                      "path":  "App/UpdaterWindow.xml",
+                      "mode":  "100644",
+                      "size":  5355,
+                      "sha":  "2aa9718b906aa806ee6836d49c8617ec434450f1"
+                  },
+                  {
+                      "path":  "App/Update-UI.ps1",
+                      "mode":  "100644",
+                      "size":  5119,
+                      "sha":  "98b53778e24dd02c19e7dd4d0549932b2f73518d"
+                  },
+                  {
+                      "path":  "App/Windows.Tools.ps1",
+                      "mode":  "100644",
+                      "size":  12029,
+                      "sha":  "81a2e3958f73df9f7553bfcea41b4894189e87ac"
+                  },
+                  {
+                      "path":  "App/WinRAR.Startup.ps1",
+                      "mode":  "100644",
+                      "size":  3614,
+                      "sha":  "93921d801ab07cd4fbc773169b65dc90602f58cb"
+                  },
+                  {
+                      "path":  "App/Wpf.Runtime.ps1",
+                      "mode":  "100644",
+                      "size":  24510,
+                      "sha":  "6703ea442f0d8ca6dfa6c6c8fb7e73fe8c84cf5b"
+                  },
+                  {
+                      "path":  "BienBan/Bien-Ban-Ban-Quyen.bat",
+                      "mode":  "100644",
+                      "size":  192,
+                      "sha":  "230746634729473a5ff387ad0961c3afff37ae1c"
+                  },
+                  {
+                      "path":  "BienBan/Bien-Ban-Ban-Quyen.ps1",
+                      "mode":  "100644",
+                      "size":  15128,
+                      "sha":  "868f20a711628ec1bf92d903539d078584a8c2ee"
+                  },
+                  {
+                      "path":  "BienBan/LicenseConfirmation.Core.ps1",
+                      "mode":  "100644",
+                      "size":  10296,
+                      "sha":  "091f208c56a19fac99641d1c34ea4b4d9f8cc973"
+                  },
+                  {
+                      "path":  "BienBan/Test-LicenseConfirmation.ps1",
+                      "mode":  "100644",
+                      "size":  6003,
+                      "sha":  "a7072f6b4aec6537d003dfd16dcef653a9e92e2c"
+                  },
+                  {
+                      "path":  "BienBan/Test-Report.ps1",
+                      "mode":  "100644",
+                      "size":  6265,
+                      "sha":  "f8cf3a5af2540256fd53cdd1474500462fe2f4f3"
+                  },
+                  {
+                      "path":  "CHANGELOG.md",
+                      "mode":  "100644",
+                      "size":  45203,
+                      "sha":  "4ad6797147e9cebf0c581b6c1c1a02b25b71f560"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.Core.ps1",
+                      "mode":  "100644",
+                      "size":  20048,
+                      "sha":  "ac03ffc49c9a54e9c2eed13934e336a4008813e5"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.Engine.ps1",
+                      "mode":  "100644",
+                      "size":  19473,
+                      "sha":  "b6f1398a2a090d621adb04529343f013c7acfe98"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.md",
+                      "mode":  "100644",
+                      "size":  16157,
+                      "sha":  "0267bdab889a17db8c345daa0c9faf452619b760"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.Profiles.ps1",
+                      "mode":  "100644",
+                      "size":  4415,
+                      "sha":  "1ce24cb09c6618c5bd92ac173a5cb2ccd6567d10"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.ps1",
+                      "mode":  "100644",
+                      "size":  16318,
+                      "sha":  "c3d95d6a552d542be8c6aaf460dd084f54dfca3f"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.Report.ps1",
+                      "mode":  "100644",
+                      "size":  4966,
+                      "sha":  "b8728ce4edcf5f41ca72ba608d14c6e9610c748f"
+                  },
+                  {
+                      "path":  "FixClone/DriverFix.xml",
+                      "mode":  "100644",
+                      "size":  8341,
+                      "sha":  "0321780b127893222477883f6a8f190f565be619"
+                  },
+                  {
+                      "path":  "FixClone/Fix-BanPhim.bat",
+                      "mode":  "100644",
+                      "size":  196,
+                      "sha":  "66cca63470455a69157aa587f68395c8e2f45796"
+                  },
+                  {
+                      "path":  "FixClone/Fix-BanPhim.Core.ps1",
+                      "mode":  "100644",
+                      "size":  5482,
+                      "sha":  "180beca2fe5f68fed01193715ab045a2ce421690"
+                  },
+                  {
+                      "path":  "FixClone/Fix-BanPhim.ps1",
+                      "mode":  "100644",
+                      "size":  3026,
+                      "sha":  "47f1824e254d7a8d2132b1060c59833617d239c0"
+                  },
+                  {
+                      "path":  "FixClone/Fix-BanPhim.xml",
+                      "mode":  "100644",
+                      "size":  902,
+                      "sha":  "ad50b1d3c44a1a02a5f90a4ebcd40be634f4c807"
+                  },
+                  {
+                      "path":  "FixClone/Fix-CloneDuplicate.bat",
+                      "mode":  "100644",
+                      "size":  311,
+                      "sha":  "db9391d6c7267e71675dd5ba7e2b979b7dd9220b"
+                  },
+                  {
+                      "path":  "FixClone/Fix-CloneDuplicate.ps1",
+                      "mode":  "100644",
+                      "size":  17485,
+                      "sha":  "7db16afda901992acd689f0a07ff8d811b47bf9a"
+                  },
+                  {
+                      "path":  "FixClone/Fix-DinhDang.bat",
+                      "mode":  "100644",
+                      "size":  262,
+                      "sha":  "c0d9f6751ec16c01d7fc1f7e56ebd2906ea67d25"
+                  },
+                  {
+                      "path":  "FixClone/Fix-DinhDang.ps1",
+                      "mode":  "100644",
+                      "size":  3781,
+                      "sha":  "1ea382bdab254470a51ec3b2de6a2b49b624e588"
+                  },
+                  {
+                      "path":  "FixClone/Fix-SysprepErrors.bat",
+                      "mode":  "100644",
+                      "size":  309,
+                      "sha":  "4c6505309569cf6ed174b882ff8f0afc6ccfb148"
+                  },
+                  {
+                      "path":  "FixClone/Fix-SysprepErrors.ps1",
+                      "mode":  "100644",
+                      "size":  8140,
+                      "sha":  "149ac41307dcf84f10a8dcda08e8e76af8877790"
+                  },
+                  {
+                      "path":  "FixClone/Load-Ui.ps1",
+                      "mode":  "100644",
+                      "size":  345,
+                      "sha":  "125367653b9fbe8581e6109eba03db18686bed6f"
+                  },
+                  {
+                      "path":  "FixClone/Master.Deployment.Core.ps1",
+                      "mode":  "100644",
+                      "size":  5277,
+                      "sha":  "d009a16aa58630558bbb5d7396cf2436e07c19f9"
+                  },
+                  {
+                      "path":  "FixClone/Master.Preflight.Core.ps1",
+                      "mode":  "100644",
+                      "size":  5588,
+                      "sha":  "fe75ab3bacf6847c6623a76db9f34df55c76d7cb"
+                  },
+                  {
+                      "path":  "FixClone/Master-Preflight.ps1",
+                      "mode":  "100644",
+                      "size":  6512,
+                      "sha":  "a24570d9cf4562b76339d2353f13aa85b5a9cb84"
+                  },
+                  {
+                      "path":  "FixClone/Master-Preflight.xml",
+                      "mode":  "100644",
+                      "size":  4392,
+                      "sha":  "a77d5cf6505e743eff0b83e1be66167c75b9c765"
+                  },
+                  {
+                      "path":  "FixClone/New-Unattend.ps1",
+                      "mode":  "100644",
+                      "size":  2001,
+                      "sha":  "507363f6bcf34373150769a08cb8cf006033c750"
+                  },
+                  {
+                      "path":  "FixClone/Prepare-Master.ps1",
+                      "mode":  "100644",
+                      "size":  6809,
+                      "sha":  "3d8498a02fd000cf81bcc7c9775d69828098842b"
+                  },
+                  {
+                      "path":  "FixClone/README.md",
+                      "mode":  "100644",
+                      "size":  13033,
+                      "sha":  "5dd5e32cbf2c5912117a5a11727e2722de7909ad"
+                  },
+                  {
+                      "path":  "FixClone/Run-Sysprep.bat",
+                      "mode":  "100644",
+                      "size":  115,
+                      "sha":  "ea4d763ea75cd2964e6ba4100d767e6c63ea4e94"
+                  },
+                  {
+                      "path":  "FixClone/Run-Sysprep.ps1",
+                      "mode":  "100644",
+                      "size":  3614,
+                      "sha":  "a1f9fb75a4d5a73cf1ce323205d0ffd7e61ec016"
+                  },
+                  {
+                      "path":  "FixClone/Test-BanPhim.ps1",
+                      "mode":  "100644",
+                      "size":  4497,
+                      "sha":  "ad99f71df92220afb9b1bb0c8959e53436f8d5f2"
+                  },
+                  {
+                      "path":  "FixClone/Test-DinhDang.ps1",
+                      "mode":  "100644",
+                      "size":  2251,
+                      "sha":  "78349f70cbec28c678ac0228daefe786af0e8416"
+                  },
+                  {
+                      "path":  "FixClone/Test-DriverFix.ps1",
+                      "mode":  "100644",
+                      "size":  26181,
+                      "sha":  "4be7a75c8900148675a65074735d793f2d03f4a6"
+                  },
+                  {
+                      "path":  "FixClone/Test-DriverFixInventory.ps1",
+                      "mode":  "100644",
+                      "size":  6282,
+                      "sha":  "d5617c5016a26d2ad290323a04ddc7bd093add46"
+                  },
+                  {
+                      "path":  "FixClone/Test-DriverFixWpf.ps1",
+                      "mode":  "100644",
+                      "size":  6071,
+                      "sha":  "0c73fa01ea949c7c8e7c83a72a13707b92eb1cbc"
+                  },
+                  {
+                      "path":  "FixClone/Test-MasterDeployment.ps1",
+                      "mode":  "100644",
+                      "size":  5596,
+                      "sha":  "dab109dc0b41c2637ea4dd1575935a0dd6545547"
+                  },
+                  {
+                      "path":  "FixClone/Test-MasterPreflight.ps1",
+                      "mode":  "100644",
+                      "size":  4850,
+                      "sha":  "4fdf1183607b5754c2e68a3be04309f640e16cd2"
+                  },
+                  {
+                      "path":  "FixClone/Test-UltraViewerDiagnostics.ps1",
+                      "mode":  "100644",
+                      "size":  2412,
+                      "sha":  "cab0de427f96728b3c682b7b723228cdea41717e"
+                  },
+                  {
+                      "path":  "FixClone/Test-UltraViewerLifecycle.ps1",
+                      "mode":  "100644",
+                      "size":  11440,
+                      "sha":  "ad699c029efe308cbcd23c8bf3058953140025a7"
+                  },
+                  {
+                      "path":  "FixClone/Test-Unattend.ps1",
+                      "mode":  "100644",
+                      "size":  3546,
+                      "sha":  "60ce144c28a394bbb24f3f13265d353ba614610a"
+                  },
+                  {
+                      "path":  "FixClone/Test-WindowsLicense.ps1",
+                      "mode":  "100644",
+                      "size":  5855,
+                      "sha":  "c491cf99cd2f7c20fb8db33f090f3e58890c05e6"
+                  },
+                  {
+                      "path":  "FixClone/Test-WordSettings.ps1",
+                      "mode":  "100644",
+                      "size":  3134,
+                      "sha":  "596c2489a9f8623df2f8a5b889354da7406781c7"
+                  },
+                  {
+                      "path":  "FixClone/UltraViewer.Core.ps1",
+                      "mode":  "100644",
+                      "size":  19096,
+                      "sha":  "b0b20c3ced0a88ed90796f28d755ab9128218c6b"
+                  },
+                  {
+                      "path":  "FixClone/UltraViewer.Diagnostics.ps1",
+                      "mode":  "100644",
+                      "size":  5969,
+                      "sha":  "68e16d327243a5a4ea3911cc2e5776363a5b1ca1"
+                  },
+                  {
+                      "path":  "FixClone/UltraViewer-Reset.ps1",
+                      "mode":  "100644",
+                      "size":  4966,
+                      "sha":  "79caeed0a5c0cde2de63b5003dc20043c07db533"
+                  },
+                  {
+                      "path":  "FixClone/UltraViewer-Reset.xml",
+                      "mode":  "100644",
+                      "size":  2570,
+                      "sha":  "fe249b702225e9f6164ea27b2819de087d5b8735"
+                  },
+                  {
+                      "path":  "FixClone/unattend.xml",
+                      "mode":  "100644",
+                      "size":  5098,
+                      "sha":  "aface74f9c448b2853cdf46c49afc7962cbe3f3f"
+                  },
+                  {
+                      "path":  "FixClone/Windows.License.Core.ps1",
+                      "mode":  "100644",
+                      "size":  9513,
+                      "sha":  "dcf992f761ebf5ee7942ebf8ee4b655d65e4684e"
+                  },
+                  {
+                      "path":  "FixClone/Windows-SetupKey.ps1",
+                      "mode":  "100644",
+                      "size":  5059,
+                      "sha":  "77226a7f0f03eba999b37085cd8aedbdbd05bdd2"
+                  },
+                  {
+                      "path":  "FixClone/Windows-SetupKey.xml",
+                      "mode":  "100644",
+                      "size":  3614,
+                      "sha":  "0d98bc8ba96f40dc5c05fc64b9b577a5c50ca47d"
+                  },
+                  {
+                      "path":  "FixClone/Word.Settings.Core.ps1",
+                      "mode":  "100644",
+                      "size":  3077,
+                      "sha":  "2c625fc939f351d298895eb8ea592ca005aceb35"
+                  },
+                  {
+                      "path":  "KichHoat/Activation.Core.ps1",
+                      "mode":  "100644",
+                      "size":  6506,
+                      "sha":  "39b3f4ff415a74eb68330bcf07e7c8aa1ae4bb41"
+                  },
+                  {
+                      "path":  "KichHoat/Cid.Phone.Core.ps1",
+                      "mode":  "100644",
+                      "size":  787,
+                      "sha":  "a7a9a455565fa6e8193e0a2ca4a6431fe0a29e80"
+                  },
+                  {
+                      "path":  "KichHoat/CID-Phone.html",
+                      "mode":  "100644",
+                      "size":  3308,
+                      "sha":  "5fa7e63895751861058333250623ae97824c2401"
+                  },
+                  {
+                      "path":  "KichHoat/Kich-Hoat.ps1",
+                      "mode":  "100644",
+                      "size":  19951,
+                      "sha":  "9dd03f6687bef356bd8d2c2d81196c57528a9491"
+                  },
+                  {
+                      "path":  "KichHoat/Kich-Hoat-Office.bat",
+                      "mode":  "100644",
+                      "size":  322,
+                      "sha":  "7236a5209da9e2d1a258ce16e4681f1d0ab0c199"
+                  },
+                  {
+                      "path":  "KichHoat/Kich-Hoat-TEST.bat",
+                      "mode":  "100644",
+                      "size":  343,
+                      "sha":  "f161d65f46ab03b34f7b965f1442b3531b09d0af"
+                  },
+                  {
+                      "path":  "KichHoat/Kich-Hoat-Windows.bat",
+                      "mode":  "100644",
+                      "size":  324,
+                      "sha":  "171edd407c00424ecf4213273526dc2e25199e57"
+                  },
+                  {
+                      "path":  "KichHoat/QR-Template.html",
+                      "mode":  "100644",
+                      "size":  60109,
+                      "sha":  "56c9b3491198320f09dd8d21ef43d090de063d45"
+                  },
+                  {
+                      "path":  "KichHoat/QrWindow.Core.ps1",
+                      "mode":  "100644",
+                      "size":  4183,
+                      "sha":  "4ba04309b639ff32081bf697b1637dfe760d9142"
+                  },
+                  {
+                      "path":  "KichHoat/QrWindow.cs",
+                      "mode":  "100644",
+                      "size":  3553,
+                      "sha":  "f50af1196b5e88c46d0081ba33eab25b03b7985e"
+                  },
+                  {
+                      "path":  "KichHoat/README.md",
+                      "mode":  "100644",
+                      "size":  7261,
+                      "sha":  "040f2f4e8f8ca0979720f2701bfe60d8cd06bc48"
+                  },
+                  {
+                      "path":  "KichHoat/Test-Activation.ps1",
+                      "mode":  "100644",
+                      "size":  8487,
+                      "sha":  "0998cae2808c0c434bef9bc7a1bb1896085c7882"
+                  },
+                  {
+                      "path":  "KichHoat/Test-CidPhone.ps1",
+                      "mode":  "100644",
+                      "size":  3978,
+                      "sha":  "f34802a0a29bf3935bd8669d9df81d70353a799c"
+                  },
+                  {
+                      "path":  "KichHoat/Test-QrLifecycle.ps1",
+                      "mode":  "100644",
+                      "size":  4364,
+                      "sha":  "e2498a1cebf027119ee41bfec964db0f2250de19"
+                  },
+                  {
+                      "path":  "KichHoat/Test-QrWindow.ps1",
+                      "mode":  "100644",
+                      "size":  4430,
+                      "sha":  "8d14862cbaf50a5ba0cdacdbf833e75a25a45cb3"
+                  },
+                  {
+                      "path":  "Office/Office-Cleanup.Core.ps1",
+                      "mode":  "100644",
+                      "size":  12220,
+                      "sha":  "7f81b7574489b57c9eb5b93800f82ac4def9c8c8"
+                  },
+                  {
+                      "path":  "Office/Office-Cleanup.Engine.ps1",
+                      "mode":  "100644",
+                      "size":  2127,
+                      "sha":  "c226ed7fae9f887cd18cee8a78024f04326a6541"
+                  },
+                  {
+                      "path":  "Office/Office-Cleanup.ps1",
+                      "mode":  "100644",
+                      "size":  6327,
+                      "sha":  "b5debc4cfc8bf83c31af0eded0f330a3fea024ff"
+                  },
+                  {
+                      "path":  "Office/Office-Cleanup.xml",
+                      "mode":  "100644",
+                      "size":  4061,
+                      "sha":  "5d4cec992b51855f9f5c78eadc1c5e358df4063b"
+                  },
+                  {
+                      "path":  "Office/Office-ODT.ps1",
+                      "mode":  "100644",
+                      "size":  11727,
+                      "sha":  "faac9f4d011a4417b02bc4070bb1b72b146b6c14"
+                  },
+                  {
+                      "path":  "Office/Test-OfficeCleanup.ps1",
+                      "mode":  "100644",
+                      "size":  11840,
+                      "sha":  "c8e6f5134853f54b8083f489eb5cc131f7c2f7d8"
+                  },
+                  {
+                      "path":  "Office/Test-OfficeTemporary.ps1",
+                      "mode":  "100644",
+                      "size":  3160,
+                      "sha":  "721bf4398a0cb9c077b2c9830daa8b81a8ff8327"
+                  },
+                  {
+                      "path":  "PROGRESS.md",
+                      "mode":  "100644",
+                      "size":  32946,
+                      "sha":  "90243bcb3372096a19f87c973bfc6df802c6c840"
+                  },
+                  {
+                      "path":  "README.md",
+                      "mode":  "100644",
+                      "size":  27189,
+                      "sha":  "849fe0f6049a06ff9d629d1581e3a2b000345916"
+                  },
+                  {
+                      "path":  "RELEASING.md",
+                      "mode":  "100644",
+                      "size":  6489,
+                      "sha":  "679e2d173a4afc7e0701ce57094593543b30159c"
+                  },
+                  {
+                      "path":  "version.txt",
+                      "mode":  "100644",
+                      "size":  9,
+                      "sha":  "7c015341e74c7044f364fd3e87c42d00eb51ad10"
+                  }
+              ]
 }
