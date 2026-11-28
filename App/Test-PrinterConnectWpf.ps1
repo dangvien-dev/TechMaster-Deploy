@@ -18,8 +18,15 @@ Assert ($null -eq [TechMaster.LanConnectNative]::SavedUser('127.0.0.1')) 'The ac
 $watch=[Diagnostics.Stopwatch]::StartNew()
 Assert (-not (Test-DeployTcpPort '127.0.0.1' 1 800) -and $watch.ElapsedMilliseconds -lt 5000) 'A closed port is reported quickly'
 $windowsInf=@(Get-ChildItem -LiteralPath (Join-Path $env:WINDIR 'INF') -Filter 'prn*.inf' -ErrorAction SilentlyContinue | Select-Object -First 40)
-$found=@($windowsInf | ForEach-Object {@(Get-DeployPrinterInfModels ([IO.File]::ReadAllText($_.FullName)))} | Where-Object {$_.Model})
-if($windowsInf.Count){Assert ($found.Count -gt 0) "Printer models are read from INF files shipped with Windows ($($windowsInf.Count) files)"}
+$found=@($windowsInf | ForEach-Object {@(Get-DeployPrinterInfModels (Read-DeployInfText $_.FullName))} | Where-Object {$_.Model})
+if($windowsInf.Count -and -not $found.Count){
+    # Shows what the parser saw so a format it misses can be fixed from the CI log.
+    $sample=$windowsInf[0];$head=[IO.File]::ReadAllBytes($sample.FullName) | Select-Object -First 4 | ForEach-Object {$_.ToString('x2')}
+    $text=Read-DeployInfText $sample.FullName
+    $lines=@($text -split '\r?\n' | Where-Object {$_ -match '^\s*\[|^\s*(Class|ClassGuid)\s*=|^\s*[^;\[]+=\s*[^,]+,\s*NT'} | Select-Object -First 12)
+    Write-Host ('INF sample '+$sample.Name+' bytes '+($head -join ' ')+"`n"+($lines -join "`n"))
+}
+if($windowsInf.Count){Assert ($found.Count -gt 0) "Printer models are read from INF files shipped with Windows ($($windowsInf.Count) files: $(@($windowsInf | ForEach-Object {$_.Name}) -join ', '))"}
 $originalWorker=${function:Start-DeployWork};$originalConfirm=${function:Confirm-Box}
 $windows=@()
 try{

@@ -308,8 +308,8 @@
     {
       "path": "App/PrinterConnect.Core.ps1",
       "mode": "100644",
-      "size": 42363,
-      "sha": "490ea880547b6495f3c085087167179294652aaa"
+      "size": 43195,
+      "sha": "9d2d9537fbc3a5567ce6abfcdb8b7b6844ca2def"
     },
     {
       "path": "App/PrinterConnect.UI.ps1",
@@ -494,8 +494,8 @@
     {
       "path": "App/Test-PrinterConnectWpf.ps1",
       "mode": "100644",
-      "size": 12158,
-      "sha": "b978fbde5476a8240a9276f5069f06f6a7347974"
+      "size": 12772,
+      "sha": "13e9985b69e95cb6e3713309682fc8d63ea4d563"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",

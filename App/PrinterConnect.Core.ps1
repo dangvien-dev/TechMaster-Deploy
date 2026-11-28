@@ -230,6 +230,15 @@ function Resolve-DeployInfString([string]$Value,$Strings) {
     if($text.Length -ge 2 -and $text.StartsWith('"') -and $text.EndsWith('"')){$text=$text.Substring(1,$text.Length-2)}
     return $text.Replace('""','"').Trim()
 }
+# INF files are ANSI or UTF-16 (often with, sometimes without a byte-order mark); UTF-8 needs a BOM.
+function Read-DeployInfText([string]$Path) {
+    [byte[]]$bytes=[IO.File]::ReadAllBytes($Path)
+    if($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF){return [Text.Encoding]::UTF8.GetString($bytes,3,$bytes.Length-3)}
+    if($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE){return [Text.Encoding]::Unicode.GetString($bytes,2,$bytes.Length-2)}
+    if($bytes.Length -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF){return [Text.Encoding]::BigEndianUnicode.GetString($bytes,2,$bytes.Length-2)}
+    if($bytes.Length -ge 4 -and $bytes[1] -eq 0 -and $bytes[3] -eq 0){return [Text.Encoding]::Unicode.GetString($bytes)}
+    return [Text.Encoding]::Default.GetString($bytes)
+}
 # Printer models an INF installs for this processor: the names Add-PrinterDriver / a print server use.
 function Get-DeployPrinterInfModels([string]$Text,[string]$Architecture='') {
     if(-not $Architecture){$Architecture=Get-DeployPrinterArchitecture}
@@ -298,7 +307,7 @@ function Get-DeployPrinterDriverPackages([string]$Folder,[string]$Architecture='
             $count++
             if($count -gt $MaxFiles){throw ('Thư mục có hơn '+$MaxFiles+' file .inf. Chọn thư mục driver của đúng model máy in.')}
             $models=@()
-            try{$models=@(Get-DeployPrinterInfModels ([IO.File]::ReadAllText($item.FullName)) $Architecture)}catch{continue}
+            try{$models=@(Get-DeployPrinterInfModels ((Read-DeployInfText $item.FullName)) $Architecture)}catch{continue}
             foreach($model in $models){[void]$packages.Add([pscustomobject]@{Model=$model.Model;Manufacturer=$model.Manufacturer;Inf=$item.FullName})}
         }
     }
@@ -311,7 +320,7 @@ function Install-DeployPrinterDriver([string]$Model,[string]$InfPath,[string]$Lo
     }
     if(-not $InfPath){throw ('Máy này chưa có driver '+$Model+'. Bấm Chọn thư mục driver… và chọn bộ driver đã giải nén của hãng.')}
     if(-not (Test-Path -LiteralPath $InfPath -PathType Leaf)){throw ('Không còn file driver: '+$InfPath+'. Chọn lại thư mục driver.')}
-    $models=@(Get-DeployPrinterInfModels ([IO.File]::ReadAllText($InfPath)))
+    $models=@(Get-DeployPrinterInfModels ((Read-DeployInfText $InfPath)))
     if(@($models | ForEach-Object {$_.Model}) -cnotcontains $Model){throw ('File '+[IO.Path]::GetFileName($InfPath)+' không có model '+$Model+' cho Windows của máy này. Chọn đúng bộ driver.')}
     Write-DeployWindowsToolsLog $LogPath 'driver-add-request' @{Model=$Model;Inf=$InfPath;Hash=(Get-FileHash -LiteralPath $InfPath -Algorithm SHA256).Hash}
     $result=Invoke-DeployPnputil @('/add-driver',$InfPath)
