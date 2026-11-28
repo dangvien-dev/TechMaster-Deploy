@@ -47,66 +47,52 @@ jobs:
         shell: powershell
         run: |
           try {
-          & App/Test-Update.ps1
-          & App/Test-RepoUpdate.ps1
-          & App/Test-PublicUpdate.ps1
-          & App/Test-UpdateHandshake.ps1
-          & App/Test-WpfRuntime.ps1
-          & App/Test-DeployActions.ps1
-          & App/Test-UltraInstall.ps1
-          & App/Test-WinRARStartup.ps1
-          & App/Test-PdfPrinter.ps1
-          & App/Test-WindowsTools.ps1
-          & App/Test-Defaults.ps1
-          & App/Test-LanAccounts.ps1
-          & App/Test-LanShare.ps1
-          & App/Test-LanConnect.ps1
-          & App/Test-PrinterConnect.ps1
-          & App/Test-NetworkRun.ps1
-          & App/Test-Overview.ps1
-          & App/Test-Info.ps1
-          & App/Test-AvDiagnostics.ps1
-          & App/Test-AvRepair.ps1
-          & App/Test-CustomApps.ps1
-          & App/Test-UpdateNotification.ps1
-          & FixClone/Test-UltraViewerDiagnostics.ps1
-          & FixClone/Test-MasterPreflight.ps1
-          & FixClone/Test-UltraViewerLifecycle.ps1
-          & FixClone/Test-MasterDeployment.ps1
-          & FixClone/Test-WindowsLicense.ps1
-          & FixClone/Test-DriverFix.ps1
-          & FixClone/Test-DriverFixInventory.ps1
-          & FixClone/Test-WordSettings.ps1
-          & FixClone/Test-DinhDang.ps1
-          & FixClone/Test-BanPhim.ps1
-          & FixClone/Test-Unattend.ps1
-          & Office/Test-OfficeCleanup.ps1
-          & Office/Test-OfficeTemporary.ps1
-          & BienBan/Test-Report.ps1
-          & BienBan/Test-LicenseConfirmation.ps1
-          & KichHoat/Test-Activation.ps1
-          & KichHoat/Test-QrLifecycle.ps1
-          & KichHoat/Test-QrWindow.ps1
-          & KichHoat/Test-CidPhone.ps1
-          & App/Test-UpdateEngine.ps1
-          & App/Test-StartupWait.ps1
-          if ($env:GITHUB_EVENT_NAME -eq 'push' -and $env:GITHUB_REF -eq 'refs/heads/main') {
-            & App/Build-UpdateIndex.ps1
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add update-source.json
-            if (-not (git diff --staged --quiet)) {
-              git commit -m "chore: update update-source.json [skip ci]"
-              git fetch origin main
-              git rebase origin/main
-              & App/Build-UpdateIndex.ps1
-              git add update-source.json
-              git commit --amend --no-edit
-              git push origin HEAD:main
+            & App/Test-Update.ps1
+            & App/Test-RepoUpdate.ps1
+            & App/Test-PublicUpdate.ps1
+            & App/Test-UpdateHandshake.ps1
+            & App/Test-WpfRuntime.ps1
+            & App/Test-DeployActions.ps1
+            & App/Test-UltraInstall.ps1
+            & App/Test-WinRARStartup.ps1
+            & App/Test-PdfPrinter.ps1
+            & App/Test-WindowsTools.ps1
+            & App/Test-Defaults.ps1
+            & App/Test-LanAccounts.ps1
+            & App/Test-LanShare.ps1
+            & App/Test-LanConnect.ps1
+            & App/Test-PrinterConnect.ps1
+            & App/Test-NetworkRun.ps1
+            & App/Test-Overview.ps1
+            & App/Test-Info.ps1
+            & App/Test-AvDiagnostics.ps1
+            & App/Test-AvRepair.ps1
+            & App/Test-CustomApps.ps1
+            & App/Test-UpdateNotification.ps1
+            & FixClone/Test-UltraViewerDiagnostics.ps1
+            & FixClone/Test-MasterPreflight.ps1
+            & FixClone/Test-UltraViewerLifecycle.ps1
+            & FixClone/Test-MasterDeployment.ps1
+            & FixClone/Test-WindowsLicense.ps1
+            & FixClone/Test-DriverFix.ps1
+            & FixClone/Test-DriverFixInventory.ps1
+            & FixClone/Test-WordSettings.ps1
+            & FixClone/Test-DinhDang.ps1
+            & FixClone/Test-BanPhim.ps1
+            & FixClone/Test-Unattend.ps1
+            & Office/Test-OfficeCleanup.ps1
+            & Office/Test-OfficeTemporary.ps1
+            & BienBan/Test-Report.ps1
+            & BienBan/Test-LicenseConfirmation.ps1
+            & KichHoat/Test-Activation.ps1
+            & KichHoat/Test-QrLifecycle.ps1
+            & KichHoat/Test-QrWindow.ps1
+            & KichHoat/Test-CidPhone.ps1
+            & App/Test-UpdateEngine.ps1
+            & App/Test-StartupWait.ps1
+            if ($env:GITHUB_EVENT_NAME -ne 'push' -or $env:GITHUB_REF -ne 'refs/heads/main') {
+              & App/Build-UpdateIndex.ps1 -Check
             }
-          } else {
-            & App/Build-UpdateIndex.ps1 -Check
-          }
           } catch {
             $detail = ($_.Exception.ToString() + "`n" + $_.ScriptStackTrace)
             $detail | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
@@ -127,3 +113,25 @@ jobs:
             artifacts/*.exe
             artifacts/*.zip
             artifacts/*.sha256
+
+  sync-index:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: wpf
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Cập nhật và đồng bộ update-source.json
+        shell: powershell
+        run: |
+          git pull --rebase origin main
+          & App/Build-UpdateIndex.ps1
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update-source.json
+          if (-not (git diff --staged --quiet)) {
+            git commit -m "chore: update update-source.json [skip ci]"
+            git push origin main
+          }
