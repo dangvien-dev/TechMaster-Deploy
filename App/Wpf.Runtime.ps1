@@ -67,6 +67,74 @@ function Initialize-DeployRoundedButtons([Windows.Window]$window) {
         $window.Resources[$key] = $replacement
     }
 }
+# Design rules (DESIGN.md): every CheckBox has a rounded box; single-line inputs in rounded frames share one
+# height, and a button on the same row as an input takes that height too.
+$script:DeployInputHeight=40
+function Initialize-DeployCheckBoxes([Windows.Window]$window) {
+    $rounded=[Windows.Markup.XamlReader]::Parse(@'
+<Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="CheckBox">
+ <Setter Property="Cursor" Value="Hand"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/><Setter Property="VerticalContentAlignment" Value="Center"/>
+ <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="CheckBox">
+  <Grid Background="Transparent"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+   <Grid Width="20" Height="20" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+    <Border x:Name="Box" Background="White" BorderBrush="#94A8C0" BorderThickness="1.5" CornerRadius="5"/>
+    <Path x:Name="Mark" Data="M5,10.5 L8.5,14 L15,6.5" Stroke="White" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Visibility="Collapsed"/>
+    <Border x:Name="Dash" Width="10" Height="2.5" CornerRadius="1" Background="White" Visibility="Collapsed"/>
+    <Border x:Name="FocusOutline" BorderBrush="Transparent" BorderThickness="2" CornerRadius="7" Margin="-3" IsHitTestVisible="False"/>
+   </Grid>
+   <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+  </Grid>
+  <ControlTemplate.Triggers>
+   <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="#214674"/></Trigger>
+   <Trigger Property="IsChecked" Value="True"><Setter TargetName="Box" Property="Background" Value="#214674"/><Setter TargetName="Box" Property="BorderBrush" Value="#214674"/><Setter TargetName="Mark" Property="Visibility" Value="Visible"/></Trigger>
+   <Trigger Property="IsChecked" Value="{x:Null}"><Setter TargetName="Box" Property="Background" Value="#214674"/><Setter TargetName="Box" Property="BorderBrush" Value="#214674"/><Setter TargetName="Dash" Property="Visibility" Value="Visible"/></Trigger>
+   <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="FocusOutline" Property="BorderBrush" Value="#38BDF8"/></Trigger>
+   <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger>
+  </ControlTemplate.Triggers>
+ </ControlTemplate></Setter.Value></Setter>
+</Style>
+'@)
+    $template=@($rounded.Setters | Where-Object Property -eq ([Windows.Controls.Control]::TemplateProperty))[0].Value
+    $existing=if($window.Resources.Contains([Windows.Controls.CheckBox])){$window.Resources[[Windows.Controls.CheckBox]]}else{$null}
+    if(-not $existing){$window.Resources[[Windows.Controls.CheckBox]]=$rounded;return}
+    # A window's own CheckBox style keeps its margins; only the box template is added.
+    $replacement=[Windows.Style]::new([Windows.Controls.CheckBox],$existing)
+    $replacement.Setters.Add([Windows.Setter]::new([Windows.Controls.Control]::TemplateProperty,$template))
+    $replacement.Setters.Add([Windows.Setter]::new([Windows.FrameworkElement]::FocusVisualStyleProperty,$null))
+    $replacement.Setters.Add([Windows.Setter]::new([Windows.Controls.Control]::CursorProperty,[Windows.Input.Cursors]::Hand))
+    $window.Resources[[Windows.Controls.CheckBox]]=$replacement
+}
+function Test-DeploySingleLineInput($control) {
+    if($control -is [Windows.Controls.PasswordBox] -or $control -is [Windows.Controls.ComboBox]){return $true}
+    return ($control -is [Windows.Controls.TextBox] -and -not $control.AcceptsReturn -and [double]::IsNaN($control.Height) -and $control.TextWrapping -ne 'Wrap')
+}
+function Initialize-DeployInputRows([Windows.Window]$window) {
+    $frames=New-Object Collections.ArrayList
+    $pending=New-Object Collections.Queue;$pending.Enqueue($window)
+    while($pending.Count){
+        $element=$pending.Dequeue()
+        if($element -is [Windows.Controls.Border] -and $element.Tag -ceq 'RoundedClip' -and [double]::IsNaN($element.Height) -and (Test-DeploySingleLineInput $element.Child)){[void]$frames.Add($element);continue}
+        foreach($child in [Windows.LogicalTreeHelper]::GetChildren($element)){if($child -is [Windows.DependencyObject]){$pending.Enqueue($child)}}
+    }
+    foreach($frame in $frames){
+        $frame.Height=$script:DeployInputHeight
+        $input=$frame.Child
+        $input.MinHeight=0;$input.Height=[double]::NaN;$input.VerticalAlignment='Stretch';$input.VerticalContentAlignment='Center'
+        if($input -isnot [Windows.Controls.ComboBox]){$input.Padding=[Windows.Thickness]::new(10,0,10,0)}
+        # A button beside the input (same Grid row, or the next cell of a row panel) matches its height.
+        $row=[Windows.LogicalTreeHelper]::GetParent($frame)
+        if($row -is [Windows.Controls.Grid]){
+            $index=[Windows.Controls.Grid]::GetRow($frame)
+            foreach($sibling in @($row.Children)){
+                if($sibling -isnot [Windows.Controls.Button] -or [Windows.Controls.Grid]::GetRow($sibling) -ne $index){continue}
+                $sibling.Height=$script:DeployInputHeight;$sibling.MinHeight=0;$sibling.VerticalAlignment='Center'
+                $sibling.Padding=[Windows.Thickness]::new($sibling.Padding.Left,0,$sibling.Padding.Right,0)
+                $sibling.Margin=[Windows.Thickness]::new($sibling.Margin.Left,0,$sibling.Margin.Right,0)
+                $frame.VerticalAlignment='Center'
+            }
+        }
+    }
+}
 function Initialize-DeployTables([Windows.Window]$window) {
     # Visual settings only. Preserve each window's editability and column bindings.
     $theme = [Windows.Markup.XamlReader]::Parse(@'
@@ -154,7 +222,9 @@ function Import-DeployWindow([string]$path) {
     $reader = [Xml.XmlReader]::Create($path, [Xml.XmlReaderSettings]@{ DtdProcessing = 'Prohibit'; XmlResolver = $null })
     try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Dispose() }
     Initialize-DeployRoundedButtons $window
+    Initialize-DeployCheckBoxes $window
     Initialize-DeployTables $window
+    Initialize-DeployInputRows $window
     $stream = [IO.File]::OpenRead((Join-Path $PSScriptRoot 'TechMaster.ico'))
     try {
         $icon = New-Object Windows.Media.Imaging.BitmapImage

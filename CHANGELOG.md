@@ -4,6 +4,7 @@
 
 - **Kết nối máy in chia sẻ → Kiểm tra kết nối** dùng luôn mật khẩu đang gõ: thử đăng nhập máy chủ in (không lưu), đọc tên driver máy chủ dùng và so với driver trên máy này, báo sai mật khẩu / tài khoản bị khoá / không có máy in chia sẻ đúng tên. Lần kiểm tra đầu chưa gõ mật khẩu không còn hiện cảnh báo vàng khi mạng ổn; dấu **!** / **✗** chỉ còn cho vấn đề thật. Mật khẩu giữ lại sau Kiểm tra để bấm Kết nối máy in luôn; xoá sau khi kết nối.
 - Lỗi **0x000003eb** khi kết nối (gặp trên máy Windows 10 thật): giải thích theo driver — máy này chưa có driver máy chủ dùng thì hướng dẫn chọn thư mục driver đúng model, hoặc thêm theo IP nếu máy in có cổng LAN; đã có driver thì hướng dẫn khởi động lại Print Spooler. Khi kết nối lỗi, các bước đã đạt (đăng nhập, driver máy chủ) vẫn hiện phía trên dòng lỗi.
+- Giao diện thống nhất trên mọi cửa sổ: **CheckBox bo góc** (tích màu xanh của app thay ô vuông mặc định của Windows); **ô nhập một dòng cùng cao 40** (TextBox, ô mật khẩu, danh sách chọn), ô cùng hàng thẳng mép, nút đứng cạnh ô nhập (ví dụ **Chọn thư mục driver…**) cùng chiều cao với ô. Quy ước ghi trong `DESIGN.md` và được CI kiểm trên toàn bộ cửa sổ (`App/Test-DesignRules.ps1`).
 
 ## 2.2.27.0 — 28/11/2026
 

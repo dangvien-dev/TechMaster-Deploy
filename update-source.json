@@ -420,6 +420,12 @@
       "sha": "057076a35db6d6c6d69f16d3269d4054f409bbeb"
     },
     {
+      "path": "App/Test-DesignRules.ps1",
+      "mode": "100644",
+      "size": 5790,
+      "sha": "e96735cee94df87a227f6ed168d01e30473343bf"
+    },
+    {
       "path": "App/Test-Info.ps1",
       "mode": "100644",
       "size": 4507,
@@ -644,8 +650,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 18730,
-      "sha": "6b7fe715d257ebe3b698800b4fcba0801c443e0d"
+      "size": 24510,
+      "sha": "920dd5dfc6994a7f3be30fd854543c2a8e1f081b"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -680,8 +686,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 43992,
-      "sha": "ad4f617178acd7c2bed89c83d661aaf59bee03a7"
+      "size": 44468,
+      "sha": "a4f14d07d814297a108455588792ed7fe0b85afa"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -1106,14 +1112,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 31913,
-      "sha": "e5ae62ff90743f9a1c8d39ceec168918c643790e"
+      "size": 32296,
+      "sha": "920fb402bb4108ec7731c62a21c527416b409bde"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 26868,
-      "sha": "ed03211ac9108a6de8bba8ccd9a70e2da0a75d57"
+      "size": 26972,
+      "sha": "a69639d9e89a51c7cbca54cdef0e342a9a683ad6"
     },
     {
       "path": "RELEASING.md",
