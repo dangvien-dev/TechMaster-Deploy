@@ -1,5 +1,9 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.27.0 — 28/11/2026
+
+- **Dọn Windows.old** xử lý trường hợp thư mục còn nhưng rỗng (Explorer báo “This folder is empty”): Disk Cleanup không liệt kê mục *Previous Windows installation(s)* cho thư mục rỗng nên trước đây app chỉ báo “Windows.old vẫn còn”. Nay app kiểm tra cả tệp ẩn/hệ thống; nếu thật sự rỗng thì hỏi xác nhận rồi xoá bằng `rd` không kèm `/s` với quyền quản trị — lệnh này tự từ chối nếu thư mục có tệp, nên không thể mất dữ liệu. Không đọc được nội dung thì vẫn coi là có tệp và mở Disk Cleanup như cũ. Sau khi Disk Cleanup đóng mà chỉ còn lại vỏ thư mục rỗng, app cũng xoá nốt.
+
 ## 2.2.26.0 — 27/11/2026
 
 - Sửa **Chia sẻ TechMaster qua LAN** báo “thiếu update-source.json” trên bản cài từ ZIP / cập nhật: bản cài có danh sách `update-package.json` (SHA256 từng tệp, kể cả `TechMaster Deploy.exe`), nay được dùng trước; `update-source.json` chỉ dùng khi chia sẻ từ mã nguồn. Tệp app giữ cho người dùng (preserve) không bị kiểm tra hay chép. Máy kia cài kèm đúng danh sách đó nên nút Cập nhật biết phiên bản đã cài.
