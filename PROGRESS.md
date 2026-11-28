@@ -1,6 +1,13 @@
 # Tiến độ TechMaster Deploy
 
-Cập nhật ngày 27/11/2026.
+Cập nhật ngày 28/11/2026.
+
+**Thử trên máy thật 2.2.26.0 (28/11/2026): đạt cả năm mục.**
+1. Dọn máy in không kết nối bằng cửa sổ riêng (Máy in → Dọn máy in không kết nối…) trên KY-THUAT.
+2. Chia sẻ TechMaster qua LAN từ KY-THUAT; máy khác mở `\\KY-THUAT\TechMaster$\App\Chay-Tu-Mang.bat`, app được chép, kiểm tra, cài vào `C:\TechMaster-Deploy` và mở.
+3. Lệnh web `irm https://dangvien-dev.github.io/tm.txt | iex` trên máy Windows 10 cũ.
+4. Tài khoản `scan` / `share`, chia sẻ thư mục, scan từ máy photocopy vào thư mục chia sẻ; máy người dùng dùng Kết nối thư mục chia sẻ, mở thư mục không phải nhập lại mật khẩu.
+5. Máy đang chạy bản cũ bấm Cập nhật lên 2.2.26.0 (menu mới, trang Tổng quan).
 
 **2.2.26.0:** thử Chia sẻ TechMaster qua LAN trên bản ZIP tại `D:\01_CaiWinChuan\TechMaster-Deploy-WPF\TechMaster-Deploy` báo thiếu `update-source.json`: tệp đó chỉ có trong repo (updater không cài nó), bản cài có `update-package.json`. Nay đọc `update-package.json` trước (SHA256, có cả exe, bỏ qua tệp preserve), `update-source.json` dự phòng; `Test-NetworkRun.ps1` thêm trường hợp bản cài.
 
