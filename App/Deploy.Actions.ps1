@@ -205,7 +205,11 @@ function Complete-MediaCreationTool($download) {
 function Open-WindowsOldCleanup {
     if($script:uiWork){Set-Status 'Chờ thao tác hiện tại hoàn tất.';return}
     if(-not (Test-Path -LiteralPath (Join-Path ($env:SystemDrive+'\') 'Windows.old') -PathType Container)){Set-Status 'Không tìm thấy Windows.old trên ổ cài Windows.';return}
-    if(-not (Confirm-Box 'Mở Disk Cleanup để dọn Windows.old? Kiểm tra dữ liệu cần giữ trong Windows.old trước. Xoá bản cài trước sẽ mất lựa chọn quay lại. Trong công cụ chỉ chọn Previous Windows installation(s), kiểm tra các mục khác như Downloads trước khi xác nhận.' 'Dọn Windows.old' -ConfirmText 'Mở Disk Cleanup' -Danger -Owner $form)){return}
+    . (Join-Path $PSScriptRoot 'Windows.Tools.ps1')
+    $empty=(Get-DeployDirectoryEntryState (Join-Path ($env:SystemDrive+'\') 'Windows.old')) -eq 'Empty'
+    if($empty){
+        if(-not (Confirm-Box 'Windows.old đang rỗng (không có tệp nào, kể cả tệp ẩn) nên Disk Cleanup sẽ không liệt kê. Xoá thư mục rỗng này? Windows sẽ hỏi quyền quản trị; lệnh chỉ xoá được thư mục rỗng.' 'Xoá Windows.old rỗng' -ConfirmText 'Xoá thư mục rỗng' -Owner $form)){return}
+    }elseif(-not (Confirm-Box 'Mở Disk Cleanup để dọn Windows.old? Kiểm tra dữ liệu cần giữ trong Windows.old trước. Xoá bản cài trước sẽ mất lựa chọn quay lại. Trong công cụ chỉ chọn Previous Windows installation(s), kiểm tra các mục khác như Downloads trước khi xác nhận.' 'Dọn Windows.old' -ConfirmText 'Mở Disk Cleanup' -Danger -Owner $form)){return}
     Start-UiWork @'
 param($core)
 . $core
@@ -215,7 +219,7 @@ try{Invoke-DeployWindowsOldCleanup $log}catch{Write-DeployWindowsToolsLog $log '
         param($result)
         $r=$result[-1];Set-Status ($r.Message+' Nhật ký: '+$r.Log) $(if($r.Remaining){'Attention'}elseif($r.Missing){'Info'}else{'Success'})
     }
-    Set-Status 'Trong Disk Cleanup: chọn Dọn tệp hệ thống → Bản cài đặt Windows trước đây. Đóng công cụ để app kiểm tra lại.' 'Working'
+    Set-Status $(if($empty){'Đang xoá Windows.old rỗng; xác nhận quyền quản trị nếu Windows hỏi.'}else{'Trong Disk Cleanup: chọn Dọn tệp hệ thống → Bản cài đặt Windows trước đây. Đóng công cụ để app kiểm tra lại.'}) 'Working'
 }
 function Set-ExplorerMenuChoice([ValidateSet('Legacy','Default')][string]$Mode) {
     if($script:uiWork){Set-Status 'Chờ thao tác hiện tại hoàn tất.';return}

@@ -69,7 +69,7 @@ Nếu máy vẫn hiện ô vuông, mở menu thanh tiêu đề PowerShell → **
 1. Mở tab **Cài Windows**, bấm **Trang tải Microsoft** ở dòng Windows 11 hoặc Windows 10 để mở trang tải chính thức trong trình duyệt.
 2. Sau khi tải ISO, bấm **Chọn ISO…**. Ứng dụng gắn ISO, kiểm tra chữ ký Microsoft của `setup.exe` và mở Windows Setup. Các lựa chọn giữ dữ liệu và bước xác nhận cài đặt nằm trong Windows Setup.
 3. Để cài mới từ USB, bấm **Tạo USB Windows 11** hoặc **Tạo USB Windows 10**. TechMaster tải và kiểm tra chữ ký của Media Creation Tool, sau đó mở công cụ để bạn chọn USB trống từ 8 GB. Dữ liệu trên USB được chọn sẽ bị xóa.
-4. Sau khi cài trực tiếp và kiểm tra dữ liệu, mở lại app, bấm **Dọn Windows.old**. Trong **Disk Cleanup**, chọn **Dọn tệp hệ thống → Bản cài đặt Windows trước đây**, kiểm tra các mục khác rồi xác nhận xoá. Xóa Windows.old sẽ bỏ khả năng quay lại bản Windows cũ.
+4. Sau khi cài trực tiếp và kiểm tra dữ liệu, mở lại app, bấm **Dọn Windows.old**. Trong **Disk Cleanup**, chọn **Dọn tệp hệ thống → Bản cài đặt Windows trước đây**, kiểm tra các mục khác rồi xác nhận xoá. Xóa Windows.old sẽ bỏ khả năng quay lại bản Windows cũ. Nếu Windows.old đã rỗng (kể cả tệp ẩn), Disk Cleanup không liệt kê mục này; app sẽ đề nghị xoá thẳng thư mục rỗng bằng `rd` (không có `/s`, nên không thể xoá dữ liệu).
 
 ## Biên bản bản quyền
 

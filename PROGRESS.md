@@ -13,6 +13,8 @@ Cập nhật ngày 28/11/2026.
 4. Tài khoản `scan` / `share`, chia sẻ thư mục, scan từ máy photocopy vào thư mục chia sẻ; máy người dùng dùng Kết nối thư mục chia sẻ, mở thư mục không phải nhập lại mật khẩu.
 5. Máy đang chạy bản cũ bấm Cập nhật lên 2.2.26.0 (menu mới, trang Tổng quan).
 
+**2.2.27.0 (chưa thử trên máy thật):** thử Dọn Windows.old trên máy KY-THUAT, `C:\Windows.old` còn nhưng rỗng; Disk Cleanup không liệt kê *Previous Windows installation(s)* nên app chỉ báo “vẫn còn”. Nay `Get-DeployDirectoryEntryState` kiểm tra cả tệp ẩn; rỗng thì xác nhận rồi chạy `cmd /d /c rd "C:\Windows.old"` (không `/s`, RunAs). `Unknown` (không đọc được) vẫn đi Disk Cleanup. `Test-WindowsTools.ps1` thêm hai trường hợp Empty / Unknown. Cần thử: bấm Dọn Windows.old trên máy đang có thư mục rỗng → UAC → thư mục biến mất, trạng thái Success.
+
 **2.2.26.0:** thử Chia sẻ TechMaster qua LAN trên bản ZIP tại `D:\01_CaiWinChuan\TechMaster-Deploy-WPF\TechMaster-Deploy` báo thiếu `update-source.json`: tệp đó chỉ có trong repo (updater không cài nó), bản cài có `update-package.json`. Nay đọc `update-package.json` trước (SHA256, có cả exe, bỏ qua tệp preserve), `update-source.json` dự phòng; `Test-NetworkRun.ps1` thêm trường hợp bản cài.
 
 **2.2.25.0:** thử gỡ máy in trên 2.2.24.0, người dùng thấy cửa sổ gỡ máy in vẫn chứa cả trình duyệt / PDF: “chung vào 1 trang như này dễ hiểu nhầm chức năng”. Cửa sổ Thiết lập mặc định nay mở theo chế độ của nút đã bấm (Printer / Cleanup / Apps), chỉ hiện thẻ của chế độ đó, tiêu đề riêng; phần gỡ máy in ghi rõ áp dụng cho cả máy. `Test-DefaultsWpf.ps1` kiểm tra từng chế độ chỉ bố trí nút của mình.

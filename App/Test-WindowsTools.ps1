@@ -64,7 +64,7 @@ try{
     function Invoke-CimMethod {param($InputObject,$MethodName,$ErrorAction)[pscustomobject]@{ReturnValue=0;Sid=$InputObject.Owner}}
     function Stop-Process {param($Id,$ErrorAction)$script:stopped+=$Id}
     function Start-Sleep {param($Seconds)}
-    function Start-Process {param($FilePath,$ArgumentList,$Verb,[switch]$Wait,[switch]$PassThru,$ErrorAction)$script:started++;$script:launch=@{File=$FilePath;Args=$ArgumentList;Verb=$Verb};$p=[pscustomobject]@{ExitCode=0};$p|Add-Member ScriptMethod Dispose {};return $p}
+    function Start-Process {param($FilePath,$ArgumentList,$Verb,$WindowStyle,[switch]$Wait,[switch]$PassThru,$ErrorAction)$script:started++;$script:launch=@{File=$FilePath;Args=$ArgumentList;Verb=$Verb};$p=[pscustomobject]@{ExitCode=0};$p|Add-Member ScriptMethod Dispose {};return $p}
     Restart-DeployCurrentExplorer $log
     Assert ($script:stopped.Count -eq 1 -and $script:stopped[0] -eq 101 -and $script:started -eq 0) 'Explorer restart targets only the confirmed current owner and reuses the restarted shell'
     $script:cimCalls=0
@@ -81,6 +81,12 @@ try{
         Assert ($r.Missing -and $script:started -eq 0) 'No Windows.old means no cleaner launch'
         $script:oldExists=$true;$r=Invoke-DeployWindowsOldCleanup $log
         Assert ($r.Remaining -and $script:launch.Verb -eq 'RunAs' -and $script:launch.File -like '*cleanmgr.exe' -and $script:launch.Args -eq '/d C:') 'Only the native cleaner is elevated for the Windows system drive'
+        Assert (-not $r.Empty) 'A Windows.old with content goes to Disk Cleanup, never to direct removal'
+        function Get-DeployDirectoryEntryState([string]$Path){$script:entryState}
+        $script:entryState='Empty';$r=Invoke-DeployWindowsOldCleanup $log
+        Assert ($r.Empty -and $script:launch.Verb -eq 'RunAs' -and $script:launch.File -like '*cmd.exe' -and $script:launch.Args -eq '/d /c rd "C:\Windows.old"') 'An empty Windows.old is removed with non-recursive rd instead of an empty Disk Cleanup'
+        $script:entryState='Unknown';$r=Invoke-DeployWindowsOldCleanup $log
+        Assert (-not $r.Empty -and $script:launch.File -like '*cleanmgr.exe') 'An unreadable Windows.old is never treated as empty'
         $script:reparse=$true;$before=$script:started
         Throws {Invoke-DeployWindowsOldCleanup $log} 'A linked Windows.old directory is rejected'
         Assert ($script:started -eq $before) 'Reparse rejection launches no cleanup process'

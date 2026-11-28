@@ -122,8 +122,8 @@
     {
       "path": "App/Deploy.Actions.ps1",
       "mode": "100644",
-      "size": 15496,
-      "sha": "fa0ff8961d7dbf225145a9f9b5bc987aef73d2d7"
+      "size": 16127,
+      "sha": "42603b07bb9eec62934f379757ae2874b69daee8"
     },
     {
       "path": "App/DesktopIdentity.cs",
@@ -566,8 +566,8 @@
     {
       "path": "App/Test-WindowsTools.ps1",
       "mode": "100644",
-      "size": 8634,
-      "sha": "6e9fb425bf07fce618c4c6fcce657cacdeb25027"
+      "size": 9368,
+      "sha": "3151aaeca6e9c084dd17e9860a1b47d04776bdad"
     },
     {
       "path": "App/Test-Wpf.ps1",
@@ -644,8 +644,8 @@
     {
       "path": "App/Windows.Tools.ps1",
       "mode": "100644",
-      "size": 10064,
-      "sha": "90c5883c3c692e863dd69f24e4f51022af74281c"
+      "size": 12029,
+      "sha": "81a2e3958f73df9f7553bfcea41b4894189e87ac"
     },
     {
       "path": "App/Wpf.Runtime.ps1",
@@ -686,8 +686,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 44468,
-      "sha": "a4f14d07d814297a108455588792ed7fe0b85afa"
+      "size": 41590,
+      "sha": "297b5458d229aa6bff2cc26a1eea11f582d23d38"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",

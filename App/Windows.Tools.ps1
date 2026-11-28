@@ -102,6 +102,24 @@ function Restart-DeployCurrentExplorer([string]$LogPath) {
     if(-not $running.Count){Start-Process -FilePath (Join-Path $env:WINDIR 'explorer.exe') -ErrorAction Stop|Out-Null}
     Write-DeployWindowsToolsLog $LogPath 'restart-requested' 'Only the current user and session were targeted.'
 }
+function Get-DeployDirectoryEntryState([string]$Path) {
+    # Includes hidden/system entries that Explorer hides by default.
+    try{
+        $items=[IO.Directory]::EnumerateFileSystemEntries($Path).GetEnumerator()
+        try{if($items.MoveNext()){'HasItems'}else{'Empty'}}finally{$items.Dispose()}
+    }catch{'Unknown'}
+}
+function Remove-DeployEmptyWindowsOld([string]$Drive,[string]$Path,[string]$LogPath) {
+    # rd without /s refuses a non-empty directory, so data can never be removed here.
+    $cmd=Join-Path $env:WINDIR 'System32/cmd.exe'
+    $arguments='/d /c rd "'+$Drive+'\Windows.old"'
+    Write-DeployWindowsToolsLog $LogPath 'remove-empty-windows-old' @{Path=$cmd;Arguments=$arguments}
+    $process=Start-Process -FilePath $cmd -ArgumentList $arguments -Verb RunAs -WindowStyle Hidden -Wait -PassThru -ErrorAction Stop
+    try{$exit=$process.ExitCode}finally{$process.Dispose()}
+    $remaining=Test-Path -LiteralPath $Path -PathType Container
+    Write-DeployWindowsToolsLog $LogPath 'remove-empty-closed' @{ExitCode=$exit;Remaining=$remaining}
+    [pscustomobject]@{Remaining=$remaining;Missing=$false;Empty=$true;Message=$(if($remaining){'Windows.old rỗng nhưng chưa xoá được (có thể vừa có tệp mới hoặc bị chặn quyền). Không có dữ liệu bị xoá.'}else{'Đã xoá thư mục Windows.old rỗng (không chứa tệp nào, kể cả tệp ẩn).'});Log=$LogPath}
+}
 function Invoke-DeployWindowsOldCleanup([string]$LogPath) {
     $drive=$env:SystemDrive
     if($drive -notmatch '^[A-Za-z]:$'){throw 'Không xác định được ổ cài Windows.'}
@@ -110,6 +128,10 @@ function Invoke-DeployWindowsOldCleanup([string]$LogPath) {
     if(-not (Test-Path -LiteralPath $path -PathType Container)){return [pscustomobject]@{Remaining=$false;Missing=$true;Message=('Không còn thư mục '+$path+'.');Log=$LogPath}}
     $folder=Get-Item -LiteralPath $path -Force -ErrorAction Stop
     if($folder.Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Windows.old đang là liên kết thư mục; chưa thực hiện dọn.'}
+    $state=Get-DeployDirectoryEntryState $path
+    Write-DeployWindowsToolsLog $LogPath 'entry-state' @{State=$state}
+    # Disk Cleanup does not list an empty Windows.old, so remove the empty shell directly.
+    if($state -eq 'Empty'){return (Remove-DeployEmptyWindowsOld $drive $path $LogPath)}
     $exe=Join-Path $env:WINDIR 'System32/cleanmgr.exe'
     if(-not (Test-Path -LiteralPath $exe -PathType Leaf)){throw 'Bản Windows này không có Disk Cleanup. Dùng Cài đặt → Lưu trữ → Tệp tạm thời.'}
     Write-DeployWindowsToolsLog $LogPath 'launch-cleanmgr' @{Path=$exe;Arguments=('/d '+$drive)}
@@ -117,5 +139,7 @@ function Invoke-DeployWindowsOldCleanup([string]$LogPath) {
     try{$exit=$process.ExitCode}finally{$process.Dispose()}
     $remaining=Test-Path -LiteralPath $path -PathType Container
     Write-DeployWindowsToolsLog $LogPath 'cleanmgr-closed' @{ExitCode=$exit;Remaining=$remaining}
-    [pscustomobject]@{Remaining=$remaining;Missing=$false;Message=$(if($remaining){'Windows.old vẫn còn. Trong Disk Cleanup chọn Clean up system files / Dọn tệp hệ thống → Previous Windows installation(s). Nếu Windows không liệt kê mục này, công cụ chưa nhận diện thư mục là bản cài trước.'}else{'Đã kiểm tra: Windows.old không còn trên ổ cài Windows.'});Log=$LogPath}
+    # Disk Cleanup can leave an empty Windows.old behind after removing its content.
+    if($remaining -and (Get-DeployDirectoryEntryState $path) -eq 'Empty'){return (Remove-DeployEmptyWindowsOld $drive $path $LogPath)}
+    [pscustomobject]@{Remaining=$remaining;Missing=$false;Empty=$false;Message=$(if($remaining){'Windows.old vẫn còn và còn chứa tệp. Trong Disk Cleanup chọn Clean up system files / Dọn tệp hệ thống → Previous Windows installation(s). Nếu Windows không liệt kê mục này, công cụ chưa nhận diện thư mục là bản cài trước.'}else{'Đã kiểm tra: Windows.old không còn trên ổ cài Windows.'});Log=$LogPath}
 }
