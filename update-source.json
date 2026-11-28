@@ -423,7 +423,7 @@
       "path": "App/Test-DesignRules.ps1",
       "mode": "100644",
       "size": 5790,
-      "sha": "e96735cee94df87a227f6ed168d01e30473343bf"
+      "sha": "f2106b9b9bc2f23d149b41512e99c99287abdf5b"
     },
     {
       "path": "App/Test-Info.ps1",
@@ -651,7 +651,7 @@
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
       "size": 24510,
-      "sha": "920dd5dfc6994a7f3be30fd854543c2a8e1f081b"
+      "sha": "6703ea442f0d8ca6dfa6c6c8fb7e73fe8c84cf5b"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",

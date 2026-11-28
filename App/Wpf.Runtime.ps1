@@ -118,9 +118,9 @@ function Initialize-DeployInputRows([Windows.Window]$window) {
     }
     foreach($frame in $frames){
         $frame.Height=$script:DeployInputHeight
-        $input=$frame.Child
-        $input.MinHeight=0;$input.Height=[double]::NaN;$input.VerticalAlignment='Stretch';$input.VerticalContentAlignment='Center'
-        if($input -isnot [Windows.Controls.ComboBox]){$input.Padding=[Windows.Thickness]::new(10,0,10,0)}
+        $field=$frame.Child
+        $field.MinHeight=0;$field.Height=[double]::NaN;$field.VerticalAlignment='Stretch';$field.VerticalContentAlignment='Center'
+        if($field -isnot [Windows.Controls.ComboBox]){$field.Padding=[Windows.Thickness]::new(10,0,10,0)}
         # A button beside the input (same Grid row, or the next cell of a row panel) matches its height.
         $row=[Windows.LogicalTreeHelper]::GetParent($frame)
         if($row -is [Windows.Controls.Grid]){

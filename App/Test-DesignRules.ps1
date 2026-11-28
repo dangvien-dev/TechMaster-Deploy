@@ -19,8 +19,8 @@ function Get-DeployLogicalItems($start) {
         foreach($child in [Windows.LogicalTreeHelper]::GetChildren($item)){if($child -is [Windows.DependencyObject]){$queue.Enqueue($child)}}
     }
 }
-function Get-DeployInputFrame($input) {
-    $node=$input
+function Get-DeployInputFrame($field) {
+    $node=$field
     for($i=0;$i -lt 5 -and $node;$i++){
         $node=[Windows.LogicalTreeHelper]::GetParent($node)
         if($node -is [Windows.Controls.Border] -and $node.Tag -ceq 'RoundedClip'){return $node}
