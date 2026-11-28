@@ -69,6 +69,15 @@ function Test-DeployServerLogon([string]$Server,[string]$User,[Security.SecureSt
     Initialize-DeployConnectNative
     [int][TechMaster.LanConnectNative]::TestConnection(('\\'+$Server+'\IPC$'),$User,$Password,0)
 }
+# Opens \\server\IPC$ with the account (nothing saved) so the next call to the server runs as that account.
+function Open-DeployServerSession([string]$Server,[string]$User,[Security.SecureString]$Password) {
+    Initialize-DeployConnectNative
+    [int][TechMaster.LanConnectNative]::OpenConnection(('\\'+$Server+'\IPC$'),$User,$Password)
+}
+function Close-DeployServerSession([string]$Server) {
+    Initialize-DeployConnectNative
+    [void][TechMaster.LanConnectNative]::CloseConnection(('\\'+$Server+'\IPC$'))
+}
 function Get-DeploySpoolerState {try{[string](Get-Service -Name Spooler -ErrorAction Stop).Status}catch{''}}
 function Restart-DeployPrintSpooler {Restart-Service -Name Spooler -Force -ErrorAction Stop}
 function Get-DeployPrinterArchitecture {
@@ -181,6 +190,9 @@ function Get-DeployPrinterErrorText([int]$Code,$Context=$null) {
     $label=Format-DeployPrinterCode $Code
     $modern=$Context -and [int]$Context.Build -ge 22621
     $rpcOff=$Context -and -not $Context.RpcNamedPipes
+    $remoteName=if($Context -and $Context.RemoteDriver){' ('+$Context.RemoteDriver+')'}else{''}
+    $driverHint=' Bấm Chọn thư mục driver…, chọn bộ driver của hãng có đúng model máy chủ đang dùng'+$remoteName+' để app cài bằng quyền Administrator, rồi kết nối lại.'
+    $ipHint=' Nếu máy in có cổng LAN (photocopy), dùng Thêm máy in theo IP: không cần lấy driver qua máy chủ.'
     switch($Code){
         283 {
             $text='Máy chủ in yêu cầu mã hoá kết nối in (bản vá bảo mật PrintNightmare) nhưng kết nối từ máy này không đạt ('+$label+'). Cập nhật Windows trên cả hai máy rồi thử lại.'
@@ -193,9 +205,14 @@ function Get-DeployPrinterErrorText([int]$Code,$Context=$null) {
             if($modern -and $rpcOff){$text+=' Máy này là Windows 11 22H2 trở lên, lỗi này hay gặp khi máy chủ không nhận RPC qua TCP: thử Chế độ tương thích RPC ở dưới.'}
             return $text
         }
-        3019 {return ('Máy này cần driver của máy in trước khi kết nối ('+$label+'). Chọn thư mục driver đúng model (cùng tên driver trên máy chủ) để app cài bằng quyền Administrator, rồi kết nối lại.')}
-        3020 {return ('Driver trên máy chủ chưa có bản cho Windows 64-bit / kiến trúc của máy này ('+$label+'). Chọn thư mục driver đúng model để cài trên máy này.')}
-        1797 {return ('Driver máy in không xác định được ('+$label+'). Chọn thư mục driver đúng model rồi thử lại.')}
+        3019 {return ('Máy này cần driver của máy in trước khi kết nối ('+$label+').'+$driverHint)}
+        1003 {
+            if($Context -and $Context.RemoteDriver -and -not $Context.LocalDriver){return ('Windows không hoàn tất kết nối ('+$label+'); thường do không cài được driver '+$Context.RemoteDriver+' từ máy chủ.'+$driverHint+$ipHint)}
+            if($Context -and $Context.LocalDriver){return ('Windows không hoàn tất kết nối ('+$label+') dù máy này đã có driver '+$Context.RemoteDriver+'. Khởi động lại Print Spooler trên cả hai máy (hoặc khởi động lại máy chủ in) rồi thử lại; nếu vẫn lỗi, gửi nhật ký.'+$ipHint)}
+            return ('Windows không hoàn tất kết nối ('+$label+'). Thường do driver: chọn thư mục driver đúng model như máy chủ rồi kết nối lại.'+$ipHint)
+        }
+        3020 {return ('Driver trên máy chủ chưa có bản cho Windows 64-bit / kiến trúc của máy này ('+$label+').'+$driverHint)}
+        1797 {return ('Driver máy in không xác định được ('+$label+').'+$driverHint)}
         126 {return ('Driver trên máy này không nạp được ('+$label+'): thường do driver 32/64-bit không khớp hoặc cài dở. Cài lại driver từ thư mục của hãng.')}
         1722 {return ('Máy chủ in không trả lời ('+$label+'). Kiểm tra máy chủ đang bật, dịch vụ Print Spooler đang chạy và tường lửa cho phép File and Printer Sharing trong mạng Private.')}
         1726 {return ('Kết nối RPC tới máy chủ in bị ngắt ('+$label+'). Khởi động lại Print Spooler trên máy chủ rồi thử lại.')}
@@ -406,7 +423,7 @@ function Get-DeployIpPrinterDiagnosis([string]$Address,$Port) {
     if($spooler -ne 'Running'){$checks+=New-DeployPrinterCheck Fail ('Dịch vụ Print Spooler trên máy này đang '+$(if($spooler){$spooler}else{'không đọc được'})+'.')}
     $checks
 }
-function Get-DeploySharePrinterDiagnosis([string]$Path) {
+function Get-DeploySharePrinterDiagnosis([string]$Path,[string]$Account='',[Security.SecureString]$Password=$null) {
     $checks=@()
     $target=ConvertFrom-DeployPrinterShare $Path
     $server=$target.Server
@@ -417,14 +434,28 @@ function Get-DeploySharePrinterDiagnosis([string]$Path) {
     $rpc=Test-DeployTcpPort $server 135
     $checks+=if($rpc){New-DeployPrinterCheck Ok 'Cổng 135 (RPC) mở.'}else{New-DeployPrinterCheck Warn 'Cổng 135 (RPC) đóng: Windows 11 22H2+ kết nối máy chủ in qua RPC over TCP sẽ lỗi (thường 0x00000709 / 0x000006ba). Mở tường lửa trên máy chủ, hoặc dùng Chế độ tương thích RPC.'}
     $saved='';try{$saved=[string](Get-DeployShareCredentialUser $server)}catch{}
-    $checks+=if($saved){New-DeployPrinterCheck Ok ('Đã lưu mật khẩu cho '+$server+' (tài khoản '+$saved+').')}else{New-DeployPrinterCheck Warn ('Chưa lưu mật khẩu cho '+$server+': nhập tài khoản có mật khẩu (ví dụ print) để app kiểm tra và lưu. App không dùng Guest / tài khoản không mật khẩu.')}
-    $remote=''
-    if($smb){try{$remote=[string](Get-DeployRemotePrinterDriver $server $target.Share)}catch{}}
+    $user=([string]$Account).Trim();$session=$false;$loggedOn=[bool]$saved
+    if($Password -and $Password.Length -gt 0){
+        # Typed password: log on for this check only; nothing is saved until Kết nối máy in.
+        if(-not $smb){$checks+=New-DeployPrinterCheck Info 'Chưa thử mật khẩu vì không vào được cổng 445.'}
+        else{
+            $code=[int](Open-DeployServerSession $server $user $Password)
+            if($code -eq 0){$session=$true;$loggedOn=$true;$checks+=New-DeployPrinterCheck Ok ('Đăng nhập '+$server+' bằng '+$user+' thành công (chưa lưu; bấm Kết nối máy in để lưu).')}
+            else{$checks+=New-DeployPrinterCheck Fail (Get-DeployShareLogonError $code)}
+        }
+    }elseif($saved){$checks+=New-DeployPrinterCheck Ok ('Đã lưu mật khẩu cho '+$server+' (tài khoản '+$saved+').')}
+    else{$checks+=New-DeployPrinterCheck Info ('Nhập mật khẩu tài khoản trên máy chủ (ví dụ print) rồi bấm Kiểm tra kết nối để thử đăng nhập và đọc driver máy chủ; app không lưu ở bước kiểm tra, không dùng Guest.')}
+    $remote='';$remoteError=''
+    try{
+        if($smb -and $loggedOn){try{$remote=[string](Get-DeployRemotePrinterDriver $server $target.Share)}catch{$remoteError=$_.Exception.GetBaseException().Message}}
+    }finally{if($session){try{Close-DeployServerSession $server}catch{}}}
+    if($loggedOn -and $remoteError){$checks+=New-DeployPrinterCheck Warn ('Đăng nhập được nhưng chưa đọc được máy in trên '+$server+': '+$remoteError)}
+    elseif($loggedOn -and -not $remote){$checks+=New-DeployPrinterCheck Warn ('Máy chủ '+$server+' không có máy in chia sẻ tên '+$target.Share+'. Kiểm tra tên chia sẻ (Printer properties → Sharing).')}
     if($remote){
         $local=@();try{$local=@(Get-DeployInstalledPrinterDrivers)}catch{}
         $checks+=New-DeployPrinterCheck Ok ('Máy chủ dùng driver: '+$remote+'.')
-        $checks+=if($local -ccontains $remote){New-DeployPrinterCheck Ok 'Máy này đã có driver cùng tên: kết nối không cần tải driver.'}else{New-DeployPrinterCheck Warn ('Máy này chưa có driver '+$remote+'. App chạy quyền Administrator có thể lấy driver từ máy chủ; nếu lỗi 0x00000bcb, chọn thư mục driver cùng tên.')}
-    }else{$checks+=New-DeployPrinterCheck Info 'Chưa đọc được tên driver trên máy chủ (cần tài khoản đã lưu hoặc máy chủ chặn RPC).'}
+        $checks+=if($local -ccontains $remote){New-DeployPrinterCheck Ok 'Máy này đã có driver cùng tên: kết nối không cần tải driver.'}else{New-DeployPrinterCheck Warn ('Máy này chưa có driver '+$remote+'. Windows sẽ thử lấy driver từ máy chủ; nếu lỗi (0x00000bcb / 0x000003eb), bấm Chọn thư mục driver… và chọn bộ driver có đúng model này.')}
+    }
     $view=Get-DeployPrinterRpcView
     $checks+=New-DeployPrinterCheck $(if($view.Build -ge 22621 -and -not $view.Enabled -and -not $rpc){'Warn'}else{'Info'}) ('Cách kết nối máy chủ in: '+$view.Text)
     try{if(@(Get-Printer -ErrorAction Stop | Where-Object {[string]$_.Name -ieq $target.Path}).Count){$checks+=New-DeployPrinterCheck Info ('Tài khoản này đã kết nối '+$target.Path+'.')}}catch{}
@@ -487,10 +518,10 @@ function Add-DeployIpPrinter([string]$Address,$Port,[string]$Name,[string]$Drive
     $lines+=@($problems | ForEach-Object {'✗ '+$_})
     [pscustomobject]@{Message=($lines -join "`n");Kind=$(if($problems.Count){'Attention'}else{'Success'});Log=$LogPath}
 }
-function Get-DeployPrinterContext {
+function Get-DeployPrinterContext([string]$RemoteDriver='',[bool]$LocalDriver=$false) {
     $view=$null;try{$view=Get-DeployPrinterRpcView}catch{}
-    if(-not $view){return [pscustomobject]@{Build=0;RpcNamedPipes=$false}}
-    [pscustomobject]@{Build=$view.Build;RpcNamedPipes=$view.Enabled}
+    if(-not $view){return [pscustomobject]@{Build=0;RpcNamedPipes=$false;RemoteDriver=$RemoteDriver;LocalDriver=$LocalDriver}}
+    [pscustomobject]@{Build=$view.Build;RpcNamedPipes=$view.Enabled;RemoteDriver=$RemoteDriver;LocalDriver=$LocalDriver}
 }
 function Connect-DeploySharedPrinter([string]$Path,[string]$Account,[Security.SecureString]$Password,[string]$Driver,[string]$InfPath,[bool]$Default,[bool]$TestPage,[string]$LogPath) {
     if(-not (Test-DeployPrinterAdmin)){throw 'Mở TechMaster Deploy bằng quyền Administrator để cài driver và kết nối máy in.'}
@@ -513,12 +544,15 @@ function Connect-DeploySharedPrinter([string]$Path,[string]$Account,[Security.Se
         if(-not $saved){throw ('Chưa có mật khẩu đã lưu cho '+$target.Server+'. Nhập tài khoản có mật khẩu trên máy chủ (ví dụ print, tạo ở Mạng LAN & chia sẻ → Tài khoản chia sẻ LAN). App không kết nối kiểu Guest / không mật khẩu.')}
         $lines+=('✓ Dùng mật khẩu đã lưu cho '+$target.Server+' (tài khoản '+$saved+').')
     }
-    $remote='';try{$remote=[string](Get-DeployRemotePrinterDriver $target.Server $target.Share)}catch{Write-DeployWindowsToolsLog $LogPath 'remote-driver-failed' $_.Exception.GetBaseException().Message}
+    $remote='';try{$remote=[string](Get-DeployRemotePrinterDriver $target.Server $target.Share);Write-DeployWindowsToolsLog $LogPath 'remote-driver' @{Driver=$remote}}catch{Write-DeployWindowsToolsLog $LogPath 'remote-driver-failed' $_.Exception.GetBaseException().Message}
+    if($remote){$lines+=('✓ Máy chủ dùng driver '+$remote+'.')}else{$lines+='– Chưa đọc được tên driver trên máy chủ.'}
     $model=([string]$Driver).Trim()
     if($remote -and $model -and $model -cne $remote){throw ('Máy chủ dùng driver '+$remote+', khác driver đã chọn ('+$model+'). Kết nối máy in share cần đúng tên driver như máy chủ: chọn Tự động hoặc model '+$remote+'.')}
     if(-not $model){$model=$remote}
+    $hasLocal=$false
     if($model){
         if($InfPath -or @(Get-DeployInstalledPrinterDrivers) -ccontains $model){
+            $hasLocal=$true
             $driverResult=Install-DeployPrinterDriver $model $InfPath $LogPath
             $lines+=('✓ '+$driverResult.Message)
         }else{$lines+=('– Máy này chưa có driver '+$model+'; Windows lấy driver từ máy chủ bằng quyền Administrator của app.')}
@@ -529,8 +563,9 @@ function Connect-DeploySharedPrinter([string]$Path,[string]$Account,[Security.Se
         try{Add-Printer -ConnectionName $target.Path -ErrorAction Stop}
         catch{
             $code=Get-DeployPrinterErrorCode $_
-            Write-DeployWindowsToolsLog $LogPath 'connect-failed' @{Path=$target.Path;Code=$code;Error=$_.Exception.GetBaseException().Message}
-            throw (Get-DeployPrinterErrorText $code (Get-DeployPrinterContext))
+            Write-DeployWindowsToolsLog $LogPath 'connect-failed' @{Path=$target.Path;Code=$code;Error=$_.Exception.GetBaseException().Message;RemoteDriver=$remote;LocalDriver=$hasLocal}
+            # Keep what already worked (password, driver) on screen above the failure.
+            throw ((@($lines)+@('✗ '+(Get-DeployPrinterErrorText $code (Get-DeployPrinterContext $remote $hasLocal)))) -join "`n")
         }
         if(@(Get-Printer -ErrorAction Stop | Where-Object {[string]$_.Name -ieq $target.Path}).Count -ne 1){throw 'Windows chưa xác nhận đã kết nối máy in.'}
         Write-DeployWindowsToolsLog $LogPath 'connected' @{Path=$target.Path}
@@ -559,7 +594,7 @@ function Invoke-DeployPrinterConnectAction([ValidateSet('Inspect','Scan','Diagno
             return [pscustomobject]@{Message=$message;Kind=$(if($packages.Count){'Success'}else{'Attention'});Packages=$packages;Log=$LogPath}
         }
         'Diagnose' {
-            $checks=if($Payload.Mode -eq 'Ip'){Get-DeployIpPrinterDiagnosis $Payload.Address $Payload.Port}else{Get-DeploySharePrinterDiagnosis $Payload.Path}
+            $checks=if($Payload.Mode -eq 'Ip'){Get-DeployIpPrinterDiagnosis $Payload.Address $Payload.Port}else{Get-DeploySharePrinterDiagnosis $Payload.Path ([string]$Payload.Account) $Payload.Password}
             Write-DeployWindowsToolsLog $LogPath 'diagnosis' @{Mode=$Payload.Mode;Checks=@($checks)}
             $view=Format-DeployPrinterDiagnosis $checks
             return [pscustomobject]@{Message=$view.Message;Kind=$view.Kind;Log=$LogPath}

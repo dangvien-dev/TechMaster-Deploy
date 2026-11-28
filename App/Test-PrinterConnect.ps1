@@ -106,7 +106,10 @@ ESTUDIO="TOSHIBA e-STUDIO2010AC PCL6"
     function Test-DeployServerLogon([string]$Server,[string]$User,[Security.SecureString]$Password){[void]$script:calls.Add('logon:'+$Server+':'+$User);Assert ($Password -is [Security.SecureString]) 'The logon test receives the password only as SecureString';$script:logon}
     function Save-DeployShareCredential([string]$Server,[string]$User,[Security.SecureString]$Password){[void]$script:calls.Add('save:'+$Server+':'+$User);$script:creds[$Server]=$User}
     function Get-DeployShareCredentialUser([string]$Server){if($script:creds.ContainsKey($Server)){$script:creds[$Server]}else{$null}}
-    function Get-DeployRemotePrinterDriver([string]$Server,[string]$Share){$script:remoteDriver}
+    function Get-DeployRemotePrinterDriver([string]$Server,[string]$Share){if($script:trackRemote){[void]$script:calls.Add('remote:'+$Server)};if($script:remoteFail){throw $script:remoteFail};$script:remoteDriver}
+    $script:sessionCode=0;$script:remoteFail='';$script:trackRemote=$false
+    function Open-DeployServerSession([string]$Server,[string]$User,[Security.SecureString]$Password){[void]$script:calls.Add('open:'+$Server+':'+$User);Assert ($Password -is [Security.SecureString]) 'The check receives the password only as SecureString';$script:sessionCode}
+    function Close-DeployServerSession([string]$Server){[void]$script:calls.Add('close:'+$Server)}
     function Get-DeployWindowsToolsIdentity {[pscustomobject]@{Build=$script:build;Ubr=1;Sid='S-1-5-21-1';User='TEST\user';Session=1}}
     function Get-DeployPrinterRpcSetting {$script:rpc}
     function Set-DeployPrinterRpcSetting($State){[void]$script:calls.Add('rpc:'+$State.Present+':'+$State.Value);$script:rpc=[pscustomobject]@{Present=[bool]$State.Present;Value=$(if($State.Present){[int]$State.Value}else{$null});Kind=$(if($State.Present){'DWord'}else{''})}}
@@ -168,6 +171,15 @@ ESTUDIO="TOSHIBA e-STUDIO2010AC PCL6"
     Throws {Connect-DeploySharedPrinter '\\KE-TOAN\Canon2900' 'print' $password '' '' $false $false $log} '0x00000709 on Windows 11 22H2+ is explained with the RPC mode' 'Chế độ tương thích RPC'
     $script:connectFailure=[Exception]::new('Operation could not be completed (error 0x0000011b).')
     Throws {Connect-DeploySharedPrinter '\\KE-TOAN\Canon2900' 'print' $password '' '' $false $false $log} '0x0000011b is explained without disabling protections' 'Không tắt RpcAuthnLevelPrivacyEnabled'
+    # 0x000003eb (1003): seen on a real Windows 10 client when the driver could not come from the server.
+    $script:drivers.Remove('Canon LBP2900; Series')
+    $script:connectFailure=[Exception]::new('Add-Printer failed',[ComponentModel.Win32Exception]::new(1003))
+    $text='';try{Connect-DeploySharedPrinter '\\KE-TOAN\Canon2900' 'print' $password '' '' $false $false $log}catch{$text=$_.Exception.GetBaseException().Message}
+    Assert ($text -match '✓ Đăng nhập KE-TOAN' -and $text -match '✓ Máy chủ dùng driver Canon LBP2900; Series' -and $text -match '✗ Windows không hoàn tất kết nối \(0x000003eb\)' -and $text -match 'không cài được driver Canon LBP2900; Series' -and $text -match 'Chọn thư mục driver' -and $text -match 'Thêm máy in theo IP') "0x000003eb keeps the steps that worked and points to the server driver, a driver folder or adding by IP ($text)"
+    [void]$script:drivers.Add('Canon LBP2900; Series')
+    $text='';try{Connect-DeploySharedPrinter '\\KE-TOAN\Canon2900' 'print' $password '' '' $false $false $log}catch{$text=$_.Exception.GetBaseException().Message}
+    Assert ($text -match 'dù máy này đã có driver Canon LBP2900; Series' -and $text -match 'Print Spooler') '0x000003eb with the driver already installed points to the spoolers instead'
+    Assert ((Get-DeployPrinterErrorText 1003) -match '0x000003eb' -and (Get-DeployPrinterErrorText 1003) -match 'thư mục driver') '0x000003eb without context still explains the driver cause'
     $script:connectFailure=$null
     Assert (-not ([IO.File]::ReadAllText($log).Contains($secret))) 'The password never reaches the log'
 
@@ -213,12 +225,39 @@ ESTUDIO="TOSHIBA e-STUDIO2010AC PCL6"
     $script:tcp=@{};$script:ping=$false
     $d=Format-DeployPrinterDiagnosis (Get-DeployIpPrinterDiagnosis '192.168.1.80' 9100)
     Assert ($d.Kind -eq 'Error' -and $d.Message -match '✗ Chưa kết nối được cổng 9100' -and $d.Message -match '– Máy in 192.168.1.80 không trả lời ping') 'A closed print port is a failure; no ping is only information'
-    $script:tcp=@{'KE-TOAN:445'=$true};$script:ping=$true;$script:creds.Clear();$script:drivers.Remove('Canon LBP2900; Series')
+    $script:trackRemote=$true
+    $script:tcp=@{'KE-TOAN:445'=$true;'KE-TOAN:135'=$true};$script:ping=$true;$script:creds.Clear();$script:drivers.Remove('Canon LBP2900; Series');$before=$script:calls.Count
     $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900')
-    Assert ($d.Kind -eq 'Attention' -and $d.Message -match '! Cổng 135' -and $d.Message -match '! Chưa lưu mật khẩu' -and $d.Message -match 'Guest' -and $d.Message -match '! Máy này chưa có driver Canon LBP2900' -and $d.Message -match '! Cách kết nối máy chủ in') 'Share diagnosis flags closed RPC, missing password and driver, and points to the RPC mode'
-    $script:tcp=@{}
+    Assert ($d.Kind -eq 'Success' -and $d.Message -match '– Nhập mật khẩu' -and $d.Message -match 'không dùng Guest' -and $d.Message -notmatch '!' -and (Since $before).Count -eq 0) 'A first check without a password is not a warning when the network is fine, and the server is not queried'
+    $empty=New-Object Security.SecureString
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900' 'print' $password)
+    $steps=@(Since $before)
+    Assert ($d.Message -match '✓ Đăng nhập KE-TOAN bằng print thành công \(chưa lưu' -and $d.Message -match '✓ Máy chủ dùng driver: Canon LBP2900; Series' -and $d.Message -match '! Máy này chưa có driver Canon LBP2900; Series' -and $d.Message -match '0x000003eb') 'A typed password is tried and the server driver is compared with this computer'
+    Assert (($steps -join '|') -ceq 'open:KE-TOAN:print|remote:KE-TOAN|close:KE-TOAN' -and $script:creds.Count -eq 0) "The check opens a session, reads the driver, closes the session and saves nothing ($($steps -join '|'))"
+    $script:sessionCode=1326;$before=$script:calls.Count
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900' 'print' $password)
+    Assert ($d.Kind -eq 'Error' -and $d.Message -match '✗ Sai tài khoản hoặc mật khẩu' -and @(Since $before | Where-Object {$_ -like 'remote:*' -or $_ -like 'close:*'}).Count -eq 0) 'A wrong typed password is a failure; the server is not queried further'
+    $script:sessionCode=0;$script:remoteDriver=''
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900' 'print' $password)
+    Assert ($d.Kind -eq 'Attention' -and $d.Message -match '! Máy chủ KE-TOAN không có máy in chia sẻ tên Canon2900') 'A share name the server does not have is reported'
+    $script:remoteFail='The RPC server is unavailable';$before=$script:calls.Count
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900' 'print' $password)
+    Assert ($d.Message -match '! Đăng nhập được nhưng chưa đọc được máy in trên KE-TOAN: The RPC server is unavailable' -and @(Since $before | Where-Object {$_ -like 'close:*'}).Count -eq 1) 'A failed read still closes the session'
+    $script:remoteFail='';$script:remoteDriver='Canon LBP2900; Series';[void]$script:drivers.Add('Canon LBP2900; Series')
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900' 'print' $empty)
+    Assert ($d.Kind -eq 'Success' -and $d.Message -match '– Nhập mật khẩu') 'An empty password box is treated as no password'
+    $script:creds['KE-TOAN']='print';$before=$script:calls.Count
     $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900')
-    Assert ($d.Kind -eq 'Error' -and $d.Message -match '✗ Không vào được cổng 445' -and $d.Message -match 'Chưa đọc được tên driver') 'An unreachable server is a failure and its driver is not queried'
+    Assert ($d.Kind -eq 'Success' -and $d.Message -match '✓ Đã lưu mật khẩu' -and $d.Message -match '✓ Máy này đã có driver cùng tên' -and @(Since $before | Where-Object {$_ -like 'open:*'}).Count -eq 0) 'A saved password is used without opening a session'
+    $script:tcp=@{'KE-TOAN:445'=$true};$script:creds.Clear()
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900')
+    Assert ($d.Kind -eq 'Attention' -and $d.Message -match '! Cổng 135' -and $d.Message -match '! Cách kết nối máy chủ in') 'Closed RPC on Windows 11 22H2+ points to the RPC mode'
+    $script:tcp=@{};$before=$script:calls.Count
+    $d=Format-DeployPrinterDiagnosis (Get-DeploySharePrinterDiagnosis '\\KE-TOAN\Canon2900' 'print' $password)
+    Assert ($d.Kind -eq 'Error' -and $d.Message -match '✗ Không vào được cổng 445' -and $d.Message -match 'Chưa thử mật khẩu' -and (Since $before).Count -eq 0) 'An unreachable server is a failure; no logon or driver query is tried'
+    $script:tcp=@{'KE-TOAN:445'=$true;'KE-TOAN:135'=$true}
+    $r=Invoke-DeployPrinterConnectAction 'Diagnose' @{Mode='Share';Path='\\KE-TOAN\Canon2900';Account='print';Password=$password} $log
+    Assert ($r.Kind -eq 'Success' -and $r.Message -match 'Đăng nhập KE-TOAN bằng print') 'The worker passes the typed account and password to the share check'
     $r=Invoke-DeployPrinterConnectAction 'Diagnose' @{Mode='Ip';Address='192.168.1.80';Port=9100} $log
     Assert ($r.Kind -eq 'Error' -and $r.Log -eq $log) 'The worker routes diagnosis by mode'
     $r=Invoke-DeployPrinterConnectAction 'Scan' @{Folder=$kho} $log

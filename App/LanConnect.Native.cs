@@ -71,6 +71,21 @@ namespace TechMaster {
                 return result;
             } finally {Marshal.ZeroFreeGlobalAllocUnicode(secret);}
         }
+        // Keeps the connection open (nothing saved) so a following call to the server, such as reading its
+        // printers, runs with this account. Returns the Win32 error code; close it with CloseConnection.
+        public static int OpenConnection(string unc, string userName, SecureString password) {
+            if(String.IsNullOrWhiteSpace(unc) || !unc.StartsWith(@"\\")) throw new ArgumentException("UNC path required.");
+            if(password==null || password.Length==0) throw new ArgumentException("Password required.");
+            var resource=new NETRESOURCE();
+            resource.Type=RESOURCETYPE_ANY;
+            resource.RemoteName=unc;
+            IntPtr secret=Marshal.SecureStringToGlobalAllocUnicode(password);
+            try {return WNetAddConnection2W(ref resource, secret, userName, 0);}
+            finally {Marshal.ZeroFreeGlobalAllocUnicode(secret);}
+        }
+        public static int CloseConnection(string unc) {
+            return WNetCancelConnection2W(unc, 0, true);
+        }
         // Same as cmdkey /add:<server> /user:<user>, without putting the password on a command line.
         public static void SavePassword(string server, string userName, SecureString password) {
             if(String.IsNullOrWhiteSpace(server) || String.IsNullOrWhiteSpace(userName)) throw new ArgumentException("Server and user required.");

@@ -14,6 +14,10 @@ $code=[TechMaster.LanConnectNative]::TestConnection('\\127.0.0.1\IPC$','techmast
 Assert ($code -is [int]) "The account test on \\server\IPC$ runs through the any-resource overload (Win32 code $code)"
 $refused=$false;try{[void][TechMaster.LanConnectNative]::TestConnection('\\127.0.0.1\IPC$','x',$bogus,2)}catch{$refused=$true}
 Assert $refused 'Only the any / disk resource types are accepted'
+$open=[TechMaster.LanConnectNative]::OpenConnection('\\127.0.0.1\IPC$','techmaster-no-user',$bogus)
+try{Assert ($open -is [int]) "The check session on \\server\IPC$ opens through native code (Win32 code $open)"}
+finally{$close=[TechMaster.LanConnectNative]::CloseConnection('\\127.0.0.1\IPC$')}
+Assert ($close -is [int]) 'Closing the check session returns a Win32 code'
 Assert ($null -eq [TechMaster.LanConnectNative]::SavedUser('127.0.0.1')) 'The account test saves no password'
 $watch=[Diagnostics.Stopwatch]::StartNew()
 Assert (-not (Test-DeployTcpPort '127.0.0.1' 1 800) -and $watch.ElapsedMilliseconds -lt 5000) 'A closed port is reported quickly'
@@ -102,6 +106,13 @@ try{
     Click $share 'Apply'
     Assert ($null -eq $script:captured -and $share.FindName('Status').Text -match 'không có thư mục con') 'A wrong printer path is refused in the window'
     $share.FindName('SharePath').Text='//KE-TOAN/Canon2900';$share.FindName('Password').Password='Print@2026';$share.FindName('ShareDefault').IsChecked=$true
+    Click $share 'Diagnose'
+    $payload=$script:captured.Args[2]
+    Assert ($script:captured.Args[1] -ceq 'Diagnose' -and $payload.Path -ceq '\\KE-TOAN\Canon2900' -and $payload.Account -ceq 'print' -and $payload.Password -is [Security.SecureString] -and $payload.Password.Length -eq 10) 'Kiểm tra kết nối sends the typed account and password (as SecureString) so the logon can be tried'
+    Reset-Job $share
+    $share.Tag.Action='Diagnose'
+    Complete-DeployPrinterConnectTask $share ([pscustomobject]@{Message='✓ Đăng nhập';Kind='Success';Log=''})
+    Assert ($share.FindName('Password').Password -ceq 'Print@2026') 'The password stays after a check so Kết nối máy in can use it'
     Click $share 'Apply'
     $payload=$script:captured.Args[2]
     Assert ($payload.Mode -ceq 'Share' -and $payload.Path -ceq '\\KE-TOAN\Canon2900' -and $payload.Account -ceq 'print' -and $payload.Password -is [Security.SecureString] -and $payload.Password.Length -eq 10 -and $payload.Driver -ceq '' -and $payload.Default -and -not $payload.TestPage) 'Connect sends the path, print account, password as SecureString and the automatic driver'

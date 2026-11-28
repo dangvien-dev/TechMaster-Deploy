@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.27.0",
+  "version": "2.2.28.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/LanConnect.Native.cs",
       "mode": "100644",
-      "size": 6171,
-      "sha": "945b1b1ea1e4498b2c35b6754bea9b7507798849"
+      "size": 7191,
+      "sha": "e99874be1280b8477873a0297ce1bb90d438c685"
     },
     {
       "path": "App/LanConnect.UI.ps1",
@@ -308,14 +308,14 @@
     {
       "path": "App/PrinterConnect.Core.ps1",
       "mode": "100644",
-      "size": 43197,
-      "sha": "afa494165dc0c79f358b1922f52d18ce213c4286"
+      "size": 46638,
+      "sha": "39ae9ea03d5123f6c50ac054cb40ea345985fe37"
     },
     {
       "path": "App/PrinterConnect.UI.ps1",
       "mode": "100644",
-      "size": 11423,
-      "sha": "2755d34e8ccb9152560eab8c39ad08c3892f5149"
+      "size": 11570,
+      "sha": "e6227417cbb3333b40c6066da614f3df2826c54d"
     },
     {
       "path": "App/PrinterConnectWindow.xml",
@@ -326,8 +326,8 @@
     {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 27381,
-      "sha": "42bd88596beea13917d319fca7098c66f4da0e66"
+      "size": 27600,
+      "sha": "6deeb34ffed10fc65f358bcfcbdf68e5dcccc7e2"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -488,14 +488,14 @@
     {
       "path": "App/Test-PrinterConnect.ps1",
       "mode": "100644",
-      "size": 24674,
-      "sha": "6450ed76616f92dbe1e0bf73293b5834a2aa442e"
+      "size": 30317,
+      "sha": "859ed14f32ed1332481d190078ee7cc9af44b84c"
     },
     {
       "path": "App/Test-PrinterConnectWpf.ps1",
       "mode": "100644",
-      "size": 12772,
-      "sha": "13e9985b69e95cb6e3713309682fc8d63ea4d563"
+      "size": 13844,
+      "sha": "9da3879035e247bc87769d5c3c2f1686a31c6523"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",
@@ -680,8 +680,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 42933,
-      "sha": "81125b96b9fe8f6c601517f1e9b76e71e485af21"
+      "size": 43992,
+      "sha": "ad4f617178acd7c2bed89c83d661aaf59bee03a7"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -1106,8 +1106,8 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 30931,
-      "sha": "e48f087b9aa90b8e0ef925240938dcbbedf56ab0"
+      "size": 31913,
+      "sha": "e5ae62ff90743f9a1c8d39ceec168918c643790e"
     },
     {
       "path": "README.md",
@@ -1125,7 +1125,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "65b0048028fef3db1841cf69dee61e23e7709d2d"
+      "sha": "7c015341e74c7044f364fd3e87c42d00eb51ad10"
     }
   ]
 }
