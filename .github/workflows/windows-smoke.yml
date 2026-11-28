@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+      with:
+          fetch-depth: 0
       - name: Native WPF layout and wiring
         shell: powershell
         run: |
@@ -95,11 +97,12 @@ jobs:
             git add update-source.json
             if (-not (git diff --staged --quiet)) {
               git commit -m "chore: update update-source.json [skip ci]"
-              git pull --rebase origin main
+              git fetch origin main
+              git rebase origin/main
               & App/Build-UpdateIndex.ps1
               git add update-source.json
               git commit --amend --no-edit
-              git push origin main
+              git push origin HEAD:main
             }
           } else {
             & App/Build-UpdateIndex.ps1 -Check
