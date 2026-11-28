@@ -264,7 +264,7 @@ function Get-DeployPrinterInfModels([string]$Text,[string]$Architecture='') {
             if($pair.Count -eq 2){$strings[$pair[0].Trim().ToLowerInvariant()]=(Resolve-DeployInfString $pair[1] @{})}
         }
     }
-    $decorations=@('','nt','nt'+$Architecture)
+    $decorations=@('','nt',('nt'+$Architecture))
     $models=New-Object Collections.ArrayList;$seen=@{}
     foreach($line in $sections['manufacturer']){
         $pair=$line.Split('=',2)

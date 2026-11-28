@@ -308,8 +308,8 @@
     {
       "path": "App/PrinterConnect.Core.ps1",
       "mode": "100644",
-      "size": 43195,
-      "sha": "9d2d9537fbc3a5567ce6abfcdb8b7b6844ca2def"
+      "size": 43197,
+      "sha": "afa494165dc0c79f358b1922f52d18ce213c4286"
     },
     {
       "path": "App/PrinterConnect.UI.ps1",
