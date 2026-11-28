@@ -1,5 +1,12 @@
 # Có gì mới trong TechMaster Deploy?
 
+## 2.2.27.0 — 28/11/2026
+
+- Thêm **Thêm máy in theo IP…** (Máy in) cho máy in / photocopy có cổng LAN: nhập IP, chọn driver đã cài hoặc **Chọn thư mục driver…** (kho USB / NAS đã giải nén) — app đọc model trong file `.inf` đúng kiến trúc máy, cài bằng `pnputil` + `Add-PrinterDriver` (chỉ driver có chữ ký), tạo cổng **Standard TCP/IP** RAW 9100 (không bật SNMP), thêm hàng đợi, tuỳ chọn đặt A4 / mặc định / in trang thử. In thẳng tới máy in nên không gặp lỗi `0x0000011b` / `0x00000709` / `0x00000bcb` của máy in chia sẻ. Chạy lại không tạo trùng; cổng / tên đang dùng cho máy in khác thì báo, không ghi đè.
+- Thêm **Kết nối máy in chia sẻ…** cho máy in USB chia sẻ từ máy khác, theo hướng **không tắt bảo mật in của Windows**: kết nối bằng tài khoản có mật khẩu trên máy chủ in (mặc định `print`), thử đăng nhập trước rồi mới lưu vào Credential Manager; không dùng Guest / tài khoản không mật khẩu. App đọc tên driver máy chủ dùng, cài sẵn driver cùng tên từ thư mục driver bằng quyền Administrator (tránh `0x00000bcb`) rồi kết nối; kết nối lỗi thì đọc mã Win32 và giải thích theo từng lỗi (`0x0000011b`, `0x00000709`, `0x00000bcb`, `0x000006ba`, sai mật khẩu…).
+- **Kiểm tra kết nối** (chỉ đọc): ping, cổng in 9100 / trang cấu hình máy in, cổng 445 và 135 của máy chủ in, mật khẩu đã lưu, driver của máy chủ và trên máy này, cách kết nối RPC, dịch vụ Print Spooler.
+- **Chế độ tương thích RPC** (Windows 11 22H2+, khi vẫn lỗi `0x00000709` / `0x0000011b` với máy chủ Windows 10 / bản cũ): chỉ đổi máy này sang RPC qua named pipes (`RpcUseNamedPipeProtocol = 1`, vẫn xác thực và mã hoá), có sao lưu và **Hoàn tác**, khởi động lại Print Spooler. App không ghi `RpcAuthnLevelPrivacyEnabled = 0`, `RestrictDriverInstallationToAdministrators = 0` hay bật Guest.
+
 ## 2.2.26.0 — 27/11/2026
 
 - Sửa **Chia sẻ TechMaster qua LAN** báo “thiếu update-source.json” trên bản cài từ ZIP / cập nhật: bản cài có danh sách `update-package.json` (SHA256 từng tệp, kể cả `TechMaster Deploy.exe`), nay được dùng trước; `update-source.json` chỉ dùng khi chia sẻ từ mã nguồn. Tệp app giữ cho người dùng (preserve) không bị kiểm tra hay chép. Máy kia cài kèm đúng danh sách đó nên nút Cập nhật biết phiên bản đã cài.

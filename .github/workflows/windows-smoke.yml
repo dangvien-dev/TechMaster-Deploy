@@ -20,6 +20,7 @@ jobs:
             & App/Test-DefaultsWpf.ps1
             & App/Test-LanAccountsWpf.ps1
             & App/Test-LanShareWpf.ps1
+            & App/Test-PrinterConnectWpf.ps1
             & App/Test-UpdateProbe.ps1
             & App/Test-LogoPreview.ps1
             & FixClone/Test-DriverFixWpf.ps1
@@ -49,6 +50,7 @@ jobs:
           & App/Test-LanAccounts.ps1
           & App/Test-LanShare.ps1
           & App/Test-LanConnect.ps1
+          & App/Test-PrinterConnect.ps1
           & App/Test-NetworkRun.ps1
           & App/Test-Overview.ps1
           & App/Test-Info.ps1

@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.26.0",
+  "version": "2.2.27.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/LanConnect.Native.cs",
       "mode": "100644",
-      "size": 5655,
-      "sha": "71a82542f850fe299cd5791dd416e69c4193ece7"
+      "size": 6171,
+      "sha": "945b1b1ea1e4498b2c35b6754bea9b7507798849"
     },
     {
       "path": "App/LanConnect.UI.ps1",
@@ -254,8 +254,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 46964,
-      "sha": "bdab959dc79b8b4ae9a666bbd4330eae56dd2559"
+      "size": 47752,
+      "sha": "8cba91c2f530ff6b109371ca1e87209266fc82ec"
     },
     {
       "path": "App/Network.Launch.ps1",
@@ -306,10 +306,28 @@
       "sha": "5665d3db6980c98f9ef283ce242daeb2469510a9"
     },
     {
+      "path": "App/PrinterConnect.Core.ps1",
+      "mode": "100644",
+      "size": 42363,
+      "sha": "490ea880547b6495f3c085087167179294652aaa"
+    },
+    {
+      "path": "App/PrinterConnect.UI.ps1",
+      "mode": "100644",
+      "size": 11423,
+      "sha": "2755d34e8ccb9152560eab8c39ad08c3892f5149"
+    },
+    {
+      "path": "App/PrinterConnectWindow.xml",
+      "mode": "100644",
+      "size": 9060,
+      "sha": "3f8e0440595e8458954b43d7acc86eb7a2171f3b"
+    },
+    {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 25919,
-      "sha": "d15bbbc5f04ef15e42bb54e92a2328c4d76c9ee9"
+      "size": 27381,
+      "sha": "42bd88596beea13917d319fca7098c66f4da0e66"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -350,8 +368,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 31106,
-      "sha": "71489225510b22e080ac52ea05ad7ac524aa739b"
+      "size": 31348,
+      "sha": "f77567b23703be4e977a65b82673284b6ffe0759"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -468,6 +486,18 @@
       "sha": "b2a41769fd32bd9ddb829af3451b39d9f91cdd18"
     },
     {
+      "path": "App/Test-PrinterConnect.ps1",
+      "mode": "100644",
+      "size": 24674,
+      "sha": "6450ed76616f92dbe1e0bf73293b5834a2aa442e"
+    },
+    {
+      "path": "App/Test-PrinterConnectWpf.ps1",
+      "mode": "100644",
+      "size": 12158,
+      "sha": "b978fbde5476a8240a9276f5069f06f6a7347974"
+    },
+    {
       "path": "App/Test-PublicUpdate.ps1",
       "mode": "100644",
       "size": 7074,
@@ -536,8 +566,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 25786,
-      "sha": "00222d32b656e76be10683563f00d7174eef7df9"
+      "size": 25819,
+      "sha": "77250890933d525682cab2194fc08196e0a8d562"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -650,8 +680,8 @@
     {
       "path": "CHANGELOG.md",
       "mode": "100644",
-      "size": 40827,
-      "sha": "edc7081171490c2e67de125cc51f512b5ec7a070"
+      "size": 42933,
+      "sha": "81125b96b9fe8f6c601517f1e9b76e71e485af21"
     },
     {
       "path": "FixClone/DriverFix.Core.ps1",
@@ -1076,14 +1106,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 28696,
-      "sha": "1a33aa01c6c71fe4e0f70cc5d6e469692a59bd8d"
+      "size": 30130,
+      "sha": "60281652b86e2fb1f7ada6cf539b25b41d84b9b4"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 26721,
-      "sha": "6bd46dd91a02e1441f12208bc0b551eecf06df6d"
+      "size": 26868,
+      "sha": "ed03211ac9108a6de8bba8ccd9a70e2da0a75d57"
     },
     {
       "path": "RELEASING.md",
@@ -1095,7 +1125,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "e60615ab164d3a15084ed3f551284525afb4328c"
+      "sha": "65b0048028fef3db1841cf69dee61e23e7709d2d"
     }
   ]
 }

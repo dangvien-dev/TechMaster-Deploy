@@ -13,7 +13,7 @@ Menu chia theo chức năng; app mở ở **Tổng quan**.
 | | **Phần mềm** | Office Deployment Tool (tải về kho, cài từ kho / trực tiếp, gỡ Office) và ứng dụng cơ bản qua WinGet | `Office\`, kho ở `KhoOffice\` |
 | | **Bản quyền & biên bản** | Kích hoạt Windows / Office (online → portal, QR, nhận Confirmation ID qua LAN), key dùng tạm; biên bản và xác nhận bàn giao HTML (in / lưu PDF) | `KichHoat\`, `BienBan\` |
 | CẤU HÌNH | **Tuỳ chỉnh Windows** | Định dạng ngày / số, bàn phím US cho EVKey, menu chuột phải, trình duyệt / PDF mặc định | `FixClone\`, `App\` |
-| | **Máy in** | Máy in mặc định, khổ A4, dọn máy in không còn kết nối | `App\` |
+| | **Máy in** | Thêm máy in theo IP (TCP/IP, driver từ kho), kết nối máy in chia sẻ bằng tài khoản có mật khẩu (không tắt bảo mật in), máy in mặc định, khổ A4, dọn máy in không còn kết nối | `App\` |
 | | **Mạng LAN & chia sẻ** | Tài khoản scan / share / print, chia sẻ thư mục có phân quyền và tường lửa LAN, kết nối lưu mật khẩu một lần, chạy TechMaster qua LAN | `App\` |
 | TRIỂN KHAI | **Clone hàng loạt** | Máy gốc: kiểm tra / sửa lỗi Sysprep, chuẩn bị và chạy Sysprep, `Reinstall`. Sau khi clone: xử lý trùng lặp, UltraViewer trùng ID, Desktop và phím chụp | `FixClone\` |
 | HỖ TRỢ | **Chẩn đoán & sửa lỗi** | Fix Driver; chẩn đoán ứng dụng bị báo virus / không mở được và sửa lỗi có chọn lọc | `FixClone\`, `App\` |
