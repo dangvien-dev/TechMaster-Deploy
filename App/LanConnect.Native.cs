@@ -34,6 +34,7 @@ namespace TechMaster {
         private const int CRED_TYPE_DOMAIN_PASSWORD=2;
         private const int CRED_PERSIST_LOCAL_MACHINE=2;
         private const int ERROR_NOT_FOUND=1168;
+        private const int RESOURCETYPE_ANY=0;
         private const int RESOURCETYPE_DISK=1;
         [DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -53,10 +54,15 @@ namespace TechMaster {
 
         // Connects with the given account without saving anything, then disconnects. Returns the Win32 error code (0 = success).
         public static int TestConnection(string unc, string userName, SecureString password) {
+            return TestConnection(unc, userName, password, RESOURCETYPE_DISK);
+        }
+        // resourceType 0 (RESOURCETYPE_ANY) with \\server\IPC$ checks the account on a computer that only shares printers.
+        public static int TestConnection(string unc, string userName, SecureString password, int resourceType) {
             if(String.IsNullOrWhiteSpace(unc) || !unc.StartsWith(@"\\")) throw new ArgumentException("UNC path required.");
             if(password==null || password.Length==0) throw new ArgumentException("Password required.");
+            if(resourceType!=RESOURCETYPE_ANY && resourceType!=RESOURCETYPE_DISK) throw new ArgumentException("Resource type must be any or disk.");
             var resource=new NETRESOURCE();
-            resource.Type=RESOURCETYPE_DISK;
+            resource.Type=resourceType;
             resource.RemoteName=unc;
             IntPtr secret=Marshal.SecureStringToGlobalAllocUnicode(password);
             try {
@@ -64,6 +70,21 @@ namespace TechMaster {
                 if(result==0) WNetCancelConnection2W(unc, 0, true);
                 return result;
             } finally {Marshal.ZeroFreeGlobalAllocUnicode(secret);}
+        }
+        // Keeps the connection open (nothing saved) so a following call to the server, such as reading its
+        // printers, runs with this account. Returns the Win32 error code; close it with CloseConnection.
+        public static int OpenConnection(string unc, string userName, SecureString password) {
+            if(String.IsNullOrWhiteSpace(unc) || !unc.StartsWith(@"\\")) throw new ArgumentException("UNC path required.");
+            if(password==null || password.Length==0) throw new ArgumentException("Password required.");
+            var resource=new NETRESOURCE();
+            resource.Type=RESOURCETYPE_ANY;
+            resource.RemoteName=unc;
+            IntPtr secret=Marshal.SecureStringToGlobalAllocUnicode(password);
+            try {return WNetAddConnection2W(ref resource, secret, userName, 0);}
+            finally {Marshal.ZeroFreeGlobalAllocUnicode(secret);}
+        }
+        public static int CloseConnection(string unc) {
+            return WNetCancelConnection2W(unc, 0, true);
         }
         // Same as cmdkey /add:<server> /user:<user>, without putting the password on a command line.
         public static void SavePassword(string server, string userName, SecureString password) {

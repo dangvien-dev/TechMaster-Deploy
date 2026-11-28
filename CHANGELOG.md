@@ -1,8 +1,19 @@
 # Có gì mới trong TechMaster Deploy?
 
-## 2.2.27.0 — 28/11/2026
+
+## 2.2.28.0 — 28/11/2026
 
 - **Dọn Windows.old** xử lý trường hợp thư mục còn nhưng rỗng (Explorer báo “This folder is empty”): Disk Cleanup không liệt kê mục *Previous Windows installation(s)* cho thư mục rỗng nên trước đây app chỉ báo “Windows.old vẫn còn”. Nay app kiểm tra cả tệp ẩn/hệ thống; nếu thật sự rỗng thì hỏi xác nhận rồi xoá bằng `rd` không kèm `/s` với quyền quản trị — lệnh này tự từ chối nếu thư mục có tệp, nên không thể mất dữ liệu. Không đọc được nội dung thì vẫn coi là có tệp và mở Disk Cleanup như cũ. Sau khi Disk Cleanup đóng mà chỉ còn lại vỏ thư mục rỗng, app cũng xoá nốt.
+- **Kết nối máy in chia sẻ → Kiểm tra kết nối** dùng luôn mật khẩu đang gõ: thử đăng nhập máy chủ in (không lưu), đọc tên driver máy chủ dùng và so với driver trên máy này, báo sai mật khẩu / tài khoản bị khoá / không có máy in chia sẻ đúng tên. Lần kiểm tra đầu chưa gõ mật khẩu không còn hiện cảnh báo vàng khi mạng ổn; dấu **!** / **✗** chỉ còn cho vấn đề thật. Mật khẩu giữ lại sau Kiểm tra để bấm Kết nối máy in luôn; xoá sau khi kết nối.
+- Lỗi **0x000003eb** khi kết nối (gặp trên máy Windows 10 thật): giải thích theo driver — máy này chưa có driver máy chủ dùng thì hướng dẫn chọn thư mục driver đúng model, hoặc thêm theo IP nếu máy in có cổng LAN; đã có driver thì hướng dẫn khởi động lại Print Spooler. Khi kết nối lỗi, các bước đã đạt (đăng nhập, driver máy chủ) vẫn hiện phía trên dòng lỗi.
+- Giao diện thống nhất trên mọi cửa sổ: **CheckBox bo góc** (tích màu xanh của app thay ô vuông mặc định của Windows); **ô nhập một dòng cùng cao 40** (TextBox, ô mật khẩu, danh sách chọn), ô cùng hàng thẳng mép, nút đứng cạnh ô nhập (ví dụ **Chọn thư mục driver…**) cùng chiều cao với ô. Quy ước ghi trong `DESIGN.md` và được CI kiểm trên toàn bộ cửa sổ (`App/Test-DesignRules.ps1`).
+
+## 2.2.27.0 — 28/11/2026
+
+- Thêm **Thêm máy in theo IP…** (Máy in) cho máy in / photocopy có cổng LAN: nhập IP, chọn driver đã cài hoặc **Chọn thư mục driver…** (kho USB / NAS đã giải nén) — app đọc model trong file `.inf` đúng kiến trúc máy, cài bằng `pnputil` + `Add-PrinterDriver` (chỉ driver có chữ ký), tạo cổng **Standard TCP/IP** RAW 9100 (không bật SNMP), thêm hàng đợi, tuỳ chọn đặt A4 / mặc định / in trang thử. In thẳng tới máy in nên không gặp lỗi `0x0000011b` / `0x00000709` / `0x00000bcb` của máy in chia sẻ. Chạy lại không tạo trùng; cổng / tên đang dùng cho máy in khác thì báo, không ghi đè.
+- Thêm **Kết nối máy in chia sẻ…** cho máy in USB chia sẻ từ máy khác, theo hướng **không tắt bảo mật in của Windows**: kết nối bằng tài khoản có mật khẩu trên máy chủ in (mặc định `print`), thử đăng nhập trước rồi mới lưu vào Credential Manager; không dùng Guest / tài khoản không mật khẩu. App đọc tên driver máy chủ dùng, cài sẵn driver cùng tên từ thư mục driver bằng quyền Administrator (tránh `0x00000bcb`) rồi kết nối; kết nối lỗi thì đọc mã Win32 và giải thích theo từng lỗi (`0x0000011b`, `0x00000709`, `0x00000bcb`, `0x000006ba`, sai mật khẩu…).
+- **Kiểm tra kết nối** (chỉ đọc): ping, cổng in 9100 / trang cấu hình máy in, cổng 445 và 135 của máy chủ in, mật khẩu đã lưu, driver của máy chủ và trên máy này, cách kết nối RPC, dịch vụ Print Spooler.
+- **Chế độ tương thích RPC** (Windows 11 22H2+, khi vẫn lỗi `0x00000709` / `0x0000011b` với máy chủ Windows 10 / bản cũ): chỉ đổi máy này sang RPC qua named pipes (`RpcUseNamedPipeProtocol = 1`, vẫn xác thực và mã hoá), có sao lưu và **Hoàn tác**, khởi động lại Print Spooler. App không ghi `RpcAuthnLevelPrivacyEnabled = 0`, `RestrictDriverInstallationToAdministrators = 0` hay bật Guest.
 
 ## 2.2.26.0 — 27/11/2026
 

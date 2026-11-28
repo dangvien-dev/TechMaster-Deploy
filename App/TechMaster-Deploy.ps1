@@ -21,6 +21,8 @@ $DirBB = Join-Path $Root 'BienBan'; $DirOffice = Join-Path $Root 'Office'; $KhoO
 . (Join-Path $PSScriptRoot 'LanShare.UI.ps1')
 . (Join-Path $PSScriptRoot 'LanConnect.Core.ps1')
 . (Join-Path $PSScriptRoot 'LanConnect.UI.ps1')
+. (Join-Path $PSScriptRoot 'PrinterConnect.Core.ps1')
+. (Join-Path $PSScriptRoot 'PrinterConnect.UI.ps1')
 . (Join-Path $PSScriptRoot 'NetworkRun.Core.ps1')
 . (Join-Path $PSScriptRoot 'NetworkRun.UI.ps1')
 . (Join-Path $PSScriptRoot 'Overview.Core.ps1')
@@ -116,6 +118,8 @@ Bind-Click 'btnCloneFix' { Start-Tool (Join-Path $DirClone 'Fix-CloneDuplicate.b
 Bind-Click 'btnFormat' { Start-Tool (Join-Path $DirClone 'Fix-DinhDang.bat') 'Chỉnh ngày / số' }
 Bind-Click 'btnDefaults' {Show-DeployDefaults $form 'Printer'}
 Bind-Click 'btnPrinterCleanup' {Show-DeployDefaults $form 'Cleanup'}
+Bind-Click 'btnPrinterIp' {Show-DeployPrinterConnect $form 'Ip'}
+Bind-Click 'btnPrinterShare' {Show-DeployPrinterConnect $form 'Share'}
 Bind-Click 'btnDefaultApps' {Show-DeployDefaults $form 'Apps'}
 Bind-Click 'btnLanAccounts' {Show-DeployLanAccounts $form}
 Bind-Click 'btnLanShare' {Show-DeployShare $form}

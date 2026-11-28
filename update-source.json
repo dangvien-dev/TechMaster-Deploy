@@ -3,7 +3,7 @@
   "product": "TechMaster.Deploy",
   "repository": "dangvien-dev/TechMaster-Deploy",
   "branch": "main",
-  "version": "2.2.27.0",
+  "version": "2.2.28.0",
   "files": [
     {
       "path": "App/AV.Diagnostics.ps1",
@@ -182,8 +182,8 @@
     {
       "path": "App/LanConnect.Native.cs",
       "mode": "100644",
-      "size": 5655,
-      "sha": "71a82542f850fe299cd5791dd416e69c4193ece7"
+      "size": 7191,
+      "sha": "e99874be1280b8477873a0297ce1bb90d438c685"
     },
     {
       "path": "App/LanConnect.UI.ps1",
@@ -254,8 +254,8 @@
     {
       "path": "App/MainWindow.xml",
       "mode": "100644",
-      "size": 46964,
-      "sha": "bdab959dc79b8b4ae9a666bbd4330eae56dd2559"
+      "size": 47752,
+      "sha": "8cba91c2f530ff6b109371ca1e87209266fc82ec"
     },
     {
       "path": "App/Network.Launch.ps1",
@@ -306,10 +306,28 @@
       "sha": "5665d3db6980c98f9ef283ce242daeb2469510a9"
     },
     {
+      "path": "App/PrinterConnect.Core.ps1",
+      "mode": "100644",
+      "size": 46638,
+      "sha": "39ae9ea03d5123f6c50ac054cb40ea345985fe37"
+    },
+    {
+      "path": "App/PrinterConnect.UI.ps1",
+      "mode": "100644",
+      "size": 11570,
+      "sha": "e6227417cbb3333b40c6066da614f3df2826c54d"
+    },
+    {
+      "path": "App/PrinterConnectWindow.xml",
+      "mode": "100644",
+      "size": 9060,
+      "sha": "3f8e0440595e8458954b43d7acc86eb7a2171f3b"
+    },
+    {
       "path": "App/QuickGuide.md",
       "mode": "100644",
-      "size": 25919,
-      "sha": "d15bbbc5f04ef15e42bb54e92a2328c4d76c9ee9"
+      "size": 27600,
+      "sha": "6deeb34ffed10fc65f358bcfcbdf68e5dcccc7e2"
     },
     {
       "path": "App/Repair-Update.ps1",
@@ -350,8 +368,8 @@
     {
       "path": "App/TechMaster-Deploy.ps1",
       "mode": "100644",
-      "size": 31106,
-      "sha": "71489225510b22e080ac52ea05ad7ac524aa739b"
+      "size": 31348,
+      "sha": "f77567b23703be4e977a65b82673284b6ffe0759"
     },
     {
       "path": "App/TechMaster-Icon.svg",
@@ -400,6 +418,12 @@
       "mode": "100644",
       "size": 2962,
       "sha": "057076a35db6d6c6d69f16d3269d4054f409bbeb"
+    },
+    {
+      "path": "App/Test-DesignRules.ps1",
+      "mode": "100644",
+      "size": 6273,
+      "sha": "38daa7638ab12fa59df66e0bc121f669e566b5a1"
     },
     {
       "path": "App/Test-Info.ps1",
@@ -466,6 +490,18 @@
       "mode": "100644",
       "size": 2723,
       "sha": "b2a41769fd32bd9ddb829af3451b39d9f91cdd18"
+    },
+    {
+      "path": "App/Test-PrinterConnect.ps1",
+      "mode": "100644",
+      "size": 30317,
+      "sha": "859ed14f32ed1332481d190078ee7cc9af44b84c"
+    },
+    {
+      "path": "App/Test-PrinterConnectWpf.ps1",
+      "mode": "100644",
+      "size": 13844,
+      "sha": "9da3879035e247bc87769d5c3c2f1686a31c6523"
     },
     {
       "path": "App/Test-PublicUpdate.ps1",
@@ -536,8 +572,8 @@
     {
       "path": "App/Test-Wpf.ps1",
       "mode": "100644",
-      "size": 25786,
-      "sha": "00222d32b656e76be10683563f00d7174eef7df9"
+      "size": 25819,
+      "sha": "77250890933d525682cab2194fc08196e0a8d562"
     },
     {
       "path": "App/Test-WpfRuntime.ps1",
@@ -614,8 +650,8 @@
     {
       "path": "App/Wpf.Runtime.ps1",
       "mode": "100644",
-      "size": 18730,
-      "sha": "6b7fe715d257ebe3b698800b4fcba0801c443e0d"
+      "size": 24510,
+      "sha": "6703ea442f0d8ca6dfa6c6c8fb7e73fe8c84cf5b"
     },
     {
       "path": "BienBan/Bien-Ban-Ban-Quyen.bat",
@@ -1076,14 +1112,14 @@
     {
       "path": "PROGRESS.md",
       "mode": "100644",
-      "size": 30147,
-      "sha": "9eee5fb6d521fd4d2a09a48d83ddd04732cb5037"
+      "size": 32296,
+      "sha": "920fb402bb4108ec7731c62a21c527416b409bde"
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 26938,
-      "sha": "a5d35f4cdc59443eac3be9b7eec474af5ceb5b98"
+      "size": 26972,
+      "sha": "a69639d9e89a51c7cbca54cdef0e342a9a683ad6"
     },
     {
       "path": "RELEASING.md",
@@ -1095,7 +1131,7 @@
       "path": "version.txt",
       "mode": "100644",
       "size": 9,
-      "sha": "65b0048028fef3db1841cf69dee61e23e7709d2d"
+      "sha": "7c015341e74c7044f364fd3e87c42d00eb51ad10"
     }
   ]
 }
